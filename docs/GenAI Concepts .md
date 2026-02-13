@@ -1,4 +1,4 @@
-# Generative AI Concepts
+# Generative AI MasterMind
 
 *A plain-language guide for Novice to Creator*
 
@@ -105,8 +105,6 @@ Generative AI = **Maker** (creates something new)
 ![17709850983044](assets/17709850983044.jpg)
 
 
----
-
 ### Stage 1: Training
 
 **What:** AI reads billions of webpages/books and learns patterns, not facts.
@@ -118,7 +116,6 @@ Sees: "Capital of France is Paris" / "Capital of Japan is Tokyo"
 Learns: "Capital of [country] is [city]" pattern
 ```
 
----
 
 ### Stage 2: Parameters
 
@@ -131,7 +128,6 @@ Learns: "Capital of [country] is [city]" pattern
 | GPT-2 | 1.5B |
 | GPT-4 | ~1.8T |
 
----
 
 ### Stage 3: Tokens
 
@@ -145,7 +141,6 @@ Learns: "Capital of [country] is [city]" pattern
 
 **Why it matters:** Context window, API cost, and speed all measured in tokens.
 
----
 
 ### Stage 4: Attention
 
@@ -160,7 +155,6 @@ Learns: "Capital of [country] is [city]" pattern
 
 *This is the "T" in GPT — Transformer — the breakthrough that lets AI see all words at once.*
 
----
 
 ### Stage 5: Prediction
 
@@ -174,18 +168,11 @@ Learns: "Capital of [country] is [city]" pattern
    → Picks "Python" → Repeats for next word
 ```
 
----
 
 ### Temperature (Creativity Dial)
 
-```
-0.0 ════════════════════════════ 2.0
- │              │                  │
-Safe         Balanced          Creative
-(code/facts)  (chat)          (poetry)
-```
+![](assets/17710154896318.jpg)
 
----
 
 ### Common Myths
 
@@ -195,7 +182,6 @@ Safe         Balanced          Creative
 | "AI has a fact database" | Knowledge = compressed patterns |
 | "AI remembers our chat" | Re-reads entire history each time |
 
----
 
 ### Cheat Sheet
 
@@ -210,7 +196,6 @@ Safe         Balanced          Creative
 
 **Key takeaway:** GenAI doesn't think — it asks "What word probably comes next?" thousands of times. That's the whole trick.
 
----
 
 ### Putting It All Together: A Complete Example
 
@@ -244,7 +229,6 @@ Here's what actually happens when you send a prompt to GenAI:
 | **Purpose** | General-purpose base to build on |
 | **Who builds** | Big tech companies |
 
----
 
 ### 2. Proprietary Models (Closed Source)
 
@@ -261,7 +245,6 @@ Here's what actually happens when you send a prompt to GenAI:
 **Pros:** Often highest performance, managed infrastructure
 **Cons:** No customization, vendor lock-in, data privacy concerns
 
----
 
 ### 3. Open Source Models
 
@@ -279,7 +262,6 @@ Here's what actually happens when you send a prompt to GenAI:
 **Pros:** Free, customizable, data stays private, no API costs
 **Cons:** Need infrastructure, often slightly lower performance
 
----
 
 ### Where Products Fit: The Application Layer
 
@@ -298,7 +280,6 @@ These companies don't build foundational models — they build products ON TOP o
 
 *Uber doesn't manufacture engines — they build a service using cars with existing engines. Same with Perplexity using GPT-4.*
 
----
 
 ### Quick Comparison
 
@@ -310,13 +291,12 @@ These companies don't build foundational models — they build products ON TOP o
 | **Data privacy** | Sent to provider | Stays with you | Sent to provider |
 | **Best for** | Quick start, best performance | Privacy, cost control, customization | Non-technical users |
 
----
 
 ### Visual: Who Builds What
 
 ![](assets/17710126482393.jpg)
 
----
+
 
 ### Cheat Sheet
 
@@ -1299,7 +1279,6 @@ Return ONLY this JSON:
 
 ![](assets/17710128731761.jpg)
 
----
 
 ### Architecture 1: Basic LLM Chat
 
@@ -1318,7 +1297,6 @@ Return ONLY this JSON:
 - "Explain machine learning to a 10-year-old"
 - "Draft a thank-you email"
 
----
 
 ### Architecture 2: RAG (Retrieval-Augmented Generation)
 
@@ -1342,7 +1320,6 @@ Return ONLY this JSON:
 
 **The key thing to remember is...** RAG = AI that checks YOUR documents before answering, reducing hallucinations and giving sourced answers.
 
----
 
 ### Architecture 3: AI Workflow (Orchestrated Pipelines)
 
@@ -1381,7 +1358,6 @@ Timer (daily) → Get company names(AI)
 
 **The key thing to remember is...** Workflows are for *predictable* multi-step processes where you know exactly what needs to happen in what order.
 
----
 
 ### Architecture 4: AI Agent
 
@@ -1413,7 +1389,6 @@ Timer (daily) → Get company names(AI)
 
 **The key thing to remember is...** Agents are for tasks where you know the *goal* but not the exact steps. You give them tools and let them figure it out.
 
----
 
 ### Architecture 5: Agentic AI (Multi-Agent Systems)
 
@@ -1443,15 +1418,15 @@ Timer (daily) → Get company names(AI)
 
 ---
 
-# 12. Choosing the Right Architecture
+### Choosing the Right Architecture
 
 Use this **decision tree** to pick the simplest architecture that solves your problem — don't use a construction crew when you need a handyman.
 
-### The Decision Flowchart
+#### The Decision Flowchart
 
 ![](assets/17710147774432.jpg)
 
-### Quick Reference Table
+#### Quick Reference Table
 
 | If Your Task Is... | Use This | Example |
 |--------------------|----------|---------|
@@ -1465,7 +1440,7 @@ Use this **decision tree** to pick the simplest architecture that solves your pr
 
 ---
 
-## 12. AI Tools Directory
+# 12. AI Tools Directory
 
 A curated list of popular AI tools across different categories — from conversational AI to creative content generation.
 
@@ -1510,7 +1485,7 @@ A curated list of popular AI tools across different categories — from conversa
 
 ---
 
-## Quick Cheat Sheet
+# 13. Quick Cheat Sheet
 
 | Concept | One-Liner |
 |---------|-----------|
