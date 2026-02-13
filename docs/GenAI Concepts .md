@@ -216,45 +216,7 @@ Safe         Balanced          Creative
 
 Here's what actually happens when you send a prompt to GenAI:
 
-```
-YOUR PROMPT: "Explain gravity to a 5-year-old"
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│ STEP 1: TOKENIZE                                                │
-│ ["Explain", " gravity", " to", " a", " 5", "-year", "-old"]    │
-└─────────────────────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│ STEP 2: EMBED (convert to numbers)                              │
-│ [0.023, -0.847, 0.512...] [0.156, 0.923, -0.441...] ...        │
-└─────────────────────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│ STEP 3: ATTENTION (which tokens matter most?)                   │
-│ "Explain" ←──────── HIGH CONNECTION ────────► "5-year-old"      │
-│ (task)                                        (audience)        │
-└─────────────────────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│ STEP 4: PREDICT NEXT TOKEN                                      │
-│ Most likely: "Imagine" (0.23) → Selected!                       │
-└─────────────────────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│ STEP 5: REPEAT (loop back to step 4)                            │
-│ "Imagine" → "you" → "have" → "a" → "ball" → "..."              │
-└─────────────────────────────────────────────────────────────────┘
-                    │
-                    ▼
-FINAL OUTPUT: "Imagine you have a ball. When you drop it,
-it falls down, right? That's gravity! It's like the Earth
-is a giant magnet that pulls everything toward it..."
-```
+![](assets/17709859729957.jpg)
 
 ---
 
@@ -264,29 +226,8 @@ is a giant magnet that pulls everything toward it..."
 
 ### The Three Categories
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     MODEL LANDSCAPE                             │
-│                                                                 │
-│  FOUNDATIONAL MODELS (The Engines)                              │
-│  ┌─────────────────────┐    ┌─────────────────────┐             │
-│  │    PROPRIETARY      │    │     OPEN SOURCE     │             │
-│  │    (Secret recipe)  │    │   (Public recipe)   │             │
-│  │                     │    │                     │             │
-│  │  • GPT-4 (OpenAI)   │    │  • Llama 3 (Meta)   │             │
-│  │  • Claude (Anthro)  │    │  • Mistral          │             │
-│  │  • Gemini (Google)  │    │  • Falcon           │             │
-│  └─────────────────────┘    └─────────────────────┘             │
-│                     │                │                          │
-│                     └───────┬────────┘                          │
-│                             ▼                                   │
-│              APPLICATION LAYER (The Cars)                       │
-│         ┌──────────────────────────────────┐                    │
-│         │  Perplexity, Gamma, Jasper,      │                    │
-│         │  Copy.ai, Notion AI, etc.        │                    │
-│         └──────────────────────────────────┘                    │
-└─────────────────────────────────────────────────────────────────┘
-```
+
+![](assets/17710121346880.jpg)
 
 ---
 
@@ -344,25 +285,8 @@ is a giant magnet that pulls everything toward it..."
 
 These companies don't build foundational models — they build products ON TOP of them:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    APPLICATION LAYER                        │
-│                                                             │
-│  Product        │  What It Does       │  Models Used        │
-│  ───────────────┼─────────────────────┼──────────────────── │
-│  Perplexity     │  AI search engine   │  GPT-4, Claude,     │
-│                 │                     │  own fine-tuned     │
-│  ───────────────┼─────────────────────┼──────────────────── │
-│  Gamma          │  AI presentations   │  GPT-4, Claude      │
-│  ───────────────┼─────────────────────┼──────────────────── │
-│  Jasper         │  Marketing copy     │  GPT-4, Claude,     │
-│                 │                     │  own fine-tuned     │
-│  ───────────────┼─────────────────────┼──────────────────── │
-│  Notion AI      │  Workspace AI       │  GPT-4, Claude      │
-│  ───────────────┼─────────────────────┼──────────────────── │
-│  GitHub Copilot │  Code assistant     │  GPT-4 + Codex      │
-└─────────────────────────────────────────────────────────────┘
-```
+![](assets/17710123543956.jpg)
+
 
 **Analogy:**
 
@@ -390,26 +314,7 @@ These companies don't build foundational models — they build products ON TOP o
 
 ### Visual: Who Builds What
 
-```
-YOU (End User)
-    │
-    ▼
-┌─────────────────────────────────┐
-│  APPLICATIONS                   │  ← Perplexity, Gamma, Jasper
-│  (User-friendly products)       │     (Don't build models)
-└───────────────┬─────────────────┘
-                │ uses
-                ▼
-┌─────────────────────────────────┐
-│  FOUNDATIONAL MODELS            │
-│  ┌─────────────┬──────────────┐ │
-│  │ Proprietary │ Open Source  │ │
-│  │ GPT-4       │ Llama 3      │ │  ← The actual AI "brains"
-│  │ Claude      │ Mistral      │ │
-│  │ Gemini      │ Falcon       │ │
-│  └─────────────┴──────────────┘ │
-└─────────────────────────────────┘
-```
+![](assets/17710126482393.jpg)
 
 ---
 
@@ -1392,17 +1297,7 @@ Return ONLY this JSON:
 
 ### The Spectrum
 
-```
-Simple ◄─────────────────────────────────────────────────────► Complex
-
- Basic LLM │     RAG     │   Workflow   │    Agent    │   Agentic
-   Chat    │             │              │             │
-           │             │              │             │
- "Just ask │ + Your own  │ + Multiple   │ + Uses      │ + Multiple
-  a        │   documents │   steps in   │   tools &   │   AI experts
-  question"│             │   sequence   │   decides   │   working
-           │             │              │   next step │   together
-```
+![](assets/17710128731761.jpg)
 
 ---
 
@@ -1412,19 +1307,7 @@ Simple ◄───────────────────────�
 
 **It's like:** A walking encyclopedia you can have a conversation with. Great for general knowledge, but it hasn't read your company's documents or today's news.
 
-```
-    You                    AI                    Output
-     │                      │                      │
-     │  "Explain quantum    │                      │
-     │   physics simply"    │                      │
-     │─────────────────────►│                      │
-     │                      │  [Uses training      │
-     │                      │   knowledge only]    │
-     │                      │─────────────────────►│
-     │                      │                      │ "Imagine you have
-     │                      │                      │  a coin that's both
-     │                      │                      │  heads AND tails..."
-```
+![](assets/17710131023208.jpg)
 
 **Best for:** Brainstorming, drafting content, explaining concepts, quick questions where general knowledge is enough.
 
@@ -1443,24 +1326,7 @@ Simple ◄───────────────────────�
 
 **It's like:** A librarian who searches the right books first, then answers your question using what they found. They quote real sources instead of guessing.
 
-```
-    You                   Your Documents              AI                  Output
-     │                         │                      │                      │
-     │  "What's our return     │                      │                      │
-     │   policy?"              │                      │                      │
-     │─────────────────────────┼─────────────────────►│                      │
-     │                         │                      │                      │
-     │                         │◄─── [Search] ────────│                      │
-     │                         │                      │                      │
-     │                         │─── "Policy.pdf:      │                      │
-     │                         │     30-day returns   │                      │
-     │                         │     for unused..."───►│                      │
-     │                         │                      │                      │
-     │                         │                      │─────────────────────►│
-     │                         │                      │                      │ "Based on your
-     │                         │                      │                      │  policy, customers
-     │                         │                      │                      │  have 30 days..."
-```
+![](assets/17710135833748.jpg)
 
 **Best for:** Q&A over company documents, customer support with accurate answers, research across large document collections.
 
@@ -1484,23 +1350,8 @@ Simple ◄───────────────────────�
 
 **It's like:** A car assembly line. Step 1 adds the frame, Step 2 adds the engine, Step 3 paints it. Each step has one job, in a specific order, every time.
 
-```
-  Trigger     Step 1         Step 2         Step 3        Output
-     │          │              │              │              │
-     │  Email   │              │              │              │
-     │  arrives │              │              │              │
-     │─────────►│ Extract      │              │              │
-     │          │ key info     │              │              │
-     │          │─────────────►│ Categorize   │              │
-     │          │    [AI]      │ as urgent/   │              │
-     │          │              │ normal       │              │
-     │          │              │─────────────►│ Draft        │
-     │          │              │    [AI]      │ response     │
-     │          │              │              │─────────────►│
-     │          │              │              │    [AI]      │ "Here's your
-     │          │              │              │              │  auto-reply"
-```
-
+![](assets/17710137494101.jpg)
+****
 **Best for:** Repeatable processes, document processing, content pipelines where you know exactly what steps are needed.
 
 **Key characteristics:**
@@ -1538,28 +1389,7 @@ Timer (daily) → Get company names(AI)
 
 **It's like:** Giving someone a goal ("research and book me a flight to Tokyo") instead of step-by-step instructions. They decide: Should I check prices first? Search multiple airlines? What dates work best? They use tools (websites, calendars) and adapt as they go.
 
-```
-                    ┌───────────────────────────────────┐
-                    │           AGENT LOOP              │
-                    │                                   │
-                    │   ┌─────────┐    ┌────────────┐   │
-    You ───────────►│   │   AI    │◄──►│   Tools    │   │
-    "Research       │   │ (Brain) │    │ - Search   │   │
-     competitors    │   │         │    │ - Read     │   │
-     in our space"  │   │         │    │ - Calculate│   │
-                    │   └────┬────┘    └────────────┘   │
-                    │        │                          │
-                    │        ▼                          │
-                    │   ┌─────────┐                     │
-                    │   │ Done?   │──► Continue/Stop    │
-                    │   └─────────┘                     │
-                    └───────────────┬───────────────────┘
-                                    │
-                                    ▼
-                              "Here's my research
-                               report with 5
-                               competitors..."
-```
+![](assets/17710139944848.jpg)
 
 **Best for:** Research tasks, problems where you don't know the exact steps in advance, tasks requiring multiple tool uses.
 
@@ -1591,26 +1421,7 @@ Timer (daily) → Get company names(AI)
 
 **It's like:** A film production crew. You have a director (orchestrator), writer (content agent), cinematographer (visual agent), and editor (review agent). Each is an expert in their role, they pass work to each other, and together they create something none could alone.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    MULTI-AGENT SYSTEM                           │
-│                                                                 │
-│    ┌────────────┐        ┌────────────┐        ┌────────────┐   │
-│    │ Researcher │───────►│   Writer   │───────►│  Reviewer  │   │
-│    │   Agent    │        │   Agent    │        │   Agent    │   │
-│    │            │        │            │        │            │   │
-│    │ "Find the  │        │ "Write it  │        │ "Check for │   │
-│    │  facts"    │        │  up"       │        │  errors"   │   │
-│    └────────────┘        └────────────┘        └─────┬──────┘   │
-│          ▲                                          │           │
-│          │                                          │           │
-│          └──────────── Needs revision? ─────────────┘           │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-                         Final polished output
-```
+![](assets/17710142678773.jpg)
 
 **Common team patterns:**
 
@@ -1624,14 +1435,9 @@ Timer (daily) → Get company names(AI)
 **Best for:** Complex projects requiring multiple expertise areas, tasks benefiting from review/critique cycles, situations where quality matters more than speed.
 
 **Example: Product Launch Team**
-```
-Strategist Agent         Copywriter Agent         Reviewer Agent
-"What's the market       "Write the campaign      "Find weaknesses,
-position and key         based on strategy"       suggest improvements"
-messages?"                       │                        │
-        │                        │                        │
-        └────────────────────────┴───────── Loop until quality bar met
-```
+
+![](assets/17710144706347.jpg)
+
 
 **The key thing to remember is...** Multi-agent systems are for complex work that benefits from specialized roles and built-in review cycles — like having an AI team instead of one AI assistant.
 
@@ -1643,64 +1449,7 @@ Use this **decision tree** to pick the simplest architecture that solves your pr
 
 ### The Decision Flowchart
 
-```
-                         START
-                           │
-                           ▼
-              ┌────────────────────────┐
-              │ Do you need your own   │
-              │ documents/data?        │
-              └───────────┬────────────┘
-                    │           │
-                   No          Yes
-                    │           │
-                    ▼           ▼
-            ┌───────────┐   ┌───────────┐
-            │ Basic LLM │   │ Continue  │
-            │ (ChatGPT) │   │    ↓      │
-            └───────────┘   └─────┬─────┘
-                                  │
-                                  ▼
-              ┌────────────────────────┐
-              │ Is it a single Q&A,   │
-              │ or multiple steps?     │
-              └───────────┬────────────┘
-                    │           │
-                 Single     Multiple
-                    │           │
-                    ▼           ▼
-            ┌───────────┐   ┌───────────┐
-            │    RAG    │   │ Continue  │
-            │           │   │    ↓      │
-            └───────────┘   └─────┬─────┘
-                                  │
-                                  ▼
-              ┌────────────────────────┐
-              │ Do you know all the   │
-              │ steps in advance?      │
-              └───────────┬────────────┘
-                    │           │
-                   Yes          No
-                    │           │
-                    ▼           ▼
-            ┌───────────┐   ┌───────────┐
-            │ Workflow  │   │   Agent   │
-            └───────────┘   └─────┬─────┘
-                                  │
-                                  ▼
-              ┌────────────────────────┐
-              │ Need multiple experts │
-              │ or review cycles?      │
-              └───────────┬────────────┘
-                    │           │
-                   No          Yes
-                    │           │
-                    ▼           ▼
-            ┌───────────┐   ┌───────────┐
-            │  Single   │   │  Agentic  │
-            │  Agent    │   │  (Multi)  │
-            └───────────┘   └───────────┘
-```
+![](assets/17710147774432.jpg)
 
 ### Quick Reference Table
 
