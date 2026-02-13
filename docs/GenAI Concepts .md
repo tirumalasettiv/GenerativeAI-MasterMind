@@ -1,12 +1,12 @@
 # Generative AI Concepts
 
-*A plain-language guide for anyone — no computer science degree required*
+*A plain-language guide for Novice to Creator*
 
 ---
 
 ## 1. What is Generative AI?
 
-**Definition:** Generative AI is software that creates new content (text, images, code) by predicting what should come next based on patterns it learned from millions of examples.
+**Definition:** Generative AI is software that creates new content (text, images, code, audio and video) by predicting what should come next based on patterns it learned from millions of examples.
 
 ### Analogies
 
@@ -24,13 +24,13 @@
 
 3. **GitHub Copilot writing code** — You start typing a function name and it predicts the entire code block because it's seen similar patterns in millions of code repositories.
 
-### How It's Different from "Regular" AI
+4. **ElevenLabs generating audio** — You start typing “record a podcast intro in a confident British accent saying...” and it predicts and generates the full natural voiceover because it's seen patterns in millions of hours of speech data.
 
-**Quick answer:** Regular AI finds or chooses from what exists. Generative AI creates something new.
-
-*(For a comprehensive breakdown of Regular AI vs. Generative AI with examples and analogies, see Section 2 below.)*
+5. **Runway ML generating video** — You start typing “animate a robot walking through a cyberpunk city” and it predicts and generates the full smooth video clip because it's seen patterns in millions of video frames and motion sequences.
 
 **The key thing to remember is...** GenAI doesn't "think" or "know" things — it predicts what text/images should come next based on patterns. It's incredibly useful, but it's pattern-matching, not reasoning.
+
+![17709841881983](assets/17709841881983.jpg)
 
 ---
 
@@ -64,33 +64,8 @@
 | Driving | Tesla decides: brake or accelerate | — (not a generation task) |
 
 ### Simple Diagram
+![17709839838357](assets/17709839838357.jpg)
 
-```
-         REGULAR AI                         GENERATIVE AI
-
-     "What should I watch?"              "Write me a movie script"
-              │                                    │
-              ▼                                    ▼
-     ┌─────────────────┐                 ┌─────────────────┐
-     │   Analyze your  │                 │  Predict what   │
-     │   history &     │                 │  words/pixels   │
-     │   preferences   │                 │  should come    │
-     │                 │                 │  next           │
-     └────────┬────────┘                 └────────┬────────┘
-              │                                    │
-              ▼                                    ▼
-     ┌─────────────────┐                 ┌─────────────────┐
-     │  Pick from      │                 │  Create new     │
-     │  existing       │                 │  content that   │
-     │  movies         │                 │  never existed  │
-     └────────┬────────┘                 └────────┬────────┘
-              │                                    │
-              ▼                                    ▼
-     "Try 'Inception' —                  "FADE IN: A detective
-      users like you                      wakes up in a city
-      loved it"                           where time runs
-                                          backwards..."
-```
 
 ### Types of Regular AI (Non-Generative)
 
@@ -115,6 +90,8 @@
 Regular AI = **Picker** (chooses from what exists)
 Generative AI = **Maker** (creates something new)
 
+![17709845503996](assets/17709845503996.jpg)
+
 *Both are AI. Generative AI is just a specific type that focuses on creation rather than selection.*
 
 ---
@@ -125,10 +102,8 @@ Generative AI = **Maker** (creates something new)
 
 ### The 5 Stages
 
-```
-Training → Parameters → Tokens → Attention → Prediction
-(Learn)    (Store)      (Break)   (Focus)     (Generate)
-```
+![17709850983044](assets/17709850983044.jpg)
+
 
 ---
 
@@ -607,6 +582,9 @@ Iteration 3:   "Make the opening more exciting"
 
 **The key thing to remember is...** Don't settle for the first output. These techniques turn good results into great results.
 
+
+
+
 ---
 
 ## 9. Advanced Prompting: Meta-Prompting & COSTAR
@@ -688,7 +666,727 @@ output high-quality."
 
 ---
 
-## 10. The Five AI Architectures
+
+## 10. Advanced Prompt Engineering Techniques (Deep Dive)
+
+This section provides a comprehensive exploration of 12 prompt engineering techniques with practical examples, use cases, and when to apply each one.
+
+### 1. Zero-Shot Prompting
+
+**When to Use:**
+- Simple, well-defined tasks
+- LLM has strong prior knowledge of the domain
+- No examples available yet
+- Quick prototyping or testing
+
+**When NOT to Use:**
+- Complex formatting requirements
+- Domain-specific jargon or style
+- Tasks requiring specific output structure
+- Ambiguous instructions where examples would clarify
+
+**Structure:**
+```
+[Clear instruction] + [Task details] + [Output format]
+```
+
+**Bad Example:**
+```
+Write something about Python error handling.
+```
+*Problem: Vague scope, no format, no specific angle*
+
+**Good Example:**
+```
+Explain Python's try-except-finally block in 3 sentences.
+Include one code snippet showing proper exception handling.
+Target audience: intermediate developers.
+```
+*Why: Specific scope, format, length, and audience defined*
+
+---
+
+### 2. Few-Shot Prompting
+
+**When to Use:**
+- Specific formatting needed (JSON, tables, templates)
+- Style matching required
+- Classification tasks
+- Pattern recognition needed
+- Domain-specific transformations
+
+**When NOT to Use:**
+- LLM already understands the format
+- Examples are inconsistent or conflicting
+- Task is self-explanatory
+- Limited context window (examples consume tokens)
+
+**Structure:**
+```
+[Task description]
+
+Example 1:
+Input: [example input]
+Output: [example output]
+
+Example 2:
+Input: [example input]
+Output: [example output]
+
+Now apply to:
+Input: [actual input]
+Output:
+```
+
+**Bad Example:**
+```
+Convert to JSON:
+Name: John, Age: 30
+Name: Sarah, Age: 25
+
+Convert: Name: Mike, Age: 40
+```
+*Problem: Inconsistent formatting, no field definitions*
+
+**Good Example:**
+```
+Extract structured data from user messages:
+
+Example 1:
+Input: "I need a flight to NYC on Dec 15th"
+Output: {"type": "flight", "destination": "NYC", "date": "2024-12-15"}
+
+Example 2:
+Input: "Book hotel in Paris for 3 nights starting Jan 5"
+Output: {"type": "hotel", "location": "Paris", "duration": "3 nights", "start_date": "2025-01-05"}
+
+Extract from: "Reserve rental car in Miami from Feb 10-12"
+Output:
+```
+*Why: Consistent structure, clear field mapping, diverse examples*
+
+---
+
+### 3. Chain-of-Thought (CoT)
+
+**When to Use:**
+- Multi-step reasoning required
+- Mathematical or logical problems
+- Complex decision-making
+- Debugging or analysis tasks
+- Need to verify reasoning path
+
+**When NOT to Use:**
+- Simple retrieval or lookup tasks
+- When only final answer matters (tokens are precious)
+- Real-time/low-latency requirements
+- Creative writing (can make it mechanical)
+
+**Structure:**
+```
+[Task] + "Think step-by-step" OR "Show your reasoning before answering"
+```
+
+**Bad Example:**
+```
+Calculate the ROI of our marketing campaign. Think step-by-step.
+```
+*Problem: Missing data, unclear what steps to show*
+
+**Good Example:**
+```
+Calculate marketing ROI with this data:
+- Campaign cost: $10,000
+- Revenue generated: $45,000
+- Attribution: 60% direct, 40% assisted
+
+Think step-by-step:
+1. Calculate attributed revenue
+2. Subtract campaign cost
+3. Compute ROI percentage
+4. Explain if this meets our 3x ROI target
+```
+*Why: Data provided, specific steps outlined, clear success criteria*
+
+---
+
+### 4. ReAct (Reasoning + Acting)
+
+**When to Use:**
+- Multi-tool workflows (search → analyze → generate)
+- Agent-based systems
+- Tasks requiring external information
+- Dynamic decision-making (if X then Y)
+- N8N workflows with branching logic
+
+**When NOT to Use:**
+- Single-step tasks
+- No external tools available
+- Linear workflows (use prompt chaining instead)
+- When reasoning overhead isn't needed
+
+**Structure:**
+```
+Task: [goal]
+Available tools: [list]
+
+For each step:
+Thought: [reasoning]
+Action: [tool_name(parameters)]
+Observation: [result]
+... (repeat until)
+Answer: [final response]
+```
+
+**Bad Example:**
+```
+Search for Python tutorials and summarize them.
+Tools: web_search
+```
+*Problem: No reasoning structure, unclear iteration*
+
+**Good Example:**
+```
+Find the latest Python 3.12 async features and create a code example.
+
+Available tools: web_search(query), web_fetch(url)
+
+Thought: I need recent documentation about Python 3.12 async features
+Action: web_search("Python 3.12 async new features")
+Observation: [results show TaskGroups and asyncio improvements]
+
+Thought: Need official documentation for accuracy
+Action: web_fetch("https://docs.python.org/3.12/whatsnew/3.12.html")
+Observation: [full docs retrieved]
+
+Thought: Now I can create accurate example
+Answer: [code example with TaskGroups]
+```
+*Why: Clear thought → action → observation loop, explicit reasoning*
+
+---
+
+### 5. Role-Based Prompting
+
+**When to Use:**
+- Domain expertise needed (legal, medical, technical)
+- Specific perspective required
+- Tone/style customization
+- Technical documentation
+- Code review or architecture decisions
+
+**When NOT to Use:**
+- Generic tasks where role doesn't add value
+- Over-specification that constrains creativity
+- When expertise might introduce bias
+
+**Structure:**
+```
+You are a [specific role with expertise].
+Your task is [goal].
+Approach this as [persona] would, focusing on [domain aspects].
+```
+
+**Bad Example:**
+```
+You are an expert. Write Python code for data processing.
+```
+*Problem: Vague expertise, no specific domain knowledge leveraged*
+
+**Good Example:**
+```
+You are a senior data engineer specializing in real-time ETL pipelines using Python, Apache Kafka, and AWS.
+
+Review this data ingestion code for:
+- Scalability issues (target: 10K events/sec)
+- Error handling in streaming contexts
+- Memory leaks in long-running processes
+- Best practices for backpressure handling
+
+[code here]
+```
+*Why: Specific expertise, measurable criteria, domain context*
+
+---
+
+### 6. Prompt Chaining
+
+**When to Use:**
+- Complex workflows (RAG pipelines)
+- Quality > speed
+- Each step needs different specialization
+- Intermediate outputs need validation
+- N8N automation sequences
+
+**When NOT to Use:**
+- Simple single-step tasks
+- Real-time requirements
+- Limited API calls budget
+- When outputs don't build on each other
+
+**Structure:**
+```
+Prompt 1: [specialized task A] → Output A
+Prompt 2: Use Output A to [specialized task B] → Output B
+Prompt 3: Use Output B to [final task] → Final Output
+```
+
+**Bad Example:**
+```
+Chain:
+1. Summarize this article
+2. Make it better
+3. Add hashtags
+```
+*Problem: Vague objectives, no clear specialization per step*
+
+**Good Example:**
+```
+CHAIN 1 - Query Rewriting:
+User query: "python async stuff"
+Rewrite as 3 specific search queries optimized for technical documentation.
+Output: {{search_queries}}
+
+CHAIN 2 - Retrieval Ranking:
+Retrieved docs: {{retrieved_chunks}}
+Rank by relevance to: {{search_queries}}
+Return top 5 with confidence scores.
+Output: {{ranked_docs}}
+
+CHAIN 3 - Synthesis:
+Context: {{ranked_docs}}
+Original query: "python async stuff"
+Generate answer with:
+- Code examples
+- Citations (doc IDs)
+- Confidence score (0-1)
+Output format: JSON
+```
+*Why: Each step has clear input/output, specialization, structured flow*
+
+---
+
+### 7. Constraint-Based Prompting
+
+**When to Use:**
+- Need to prevent specific behaviors
+- Format compliance (legal, regulatory)
+- Brand guidelines enforcement
+- API response requirements
+- Content moderation
+
+**When NOT to Use:**
+- Over-constraining kills creativity
+- Constraints conflict with each other
+- Simple tasks where flexibility is fine
+
+**Structure:**
+```
+[Task]
+
+MUST include: [requirements]
+MUST NOT include: [prohibitions]
+Format: [structure]
+Length: [bounds]
+```
+
+**Bad Example:**
+```
+Write a blog post. Keep it professional.
+```
+*Problem: "Professional" is subjective, no measurable constraints*
+
+**Good Example:**
+```
+Write a product description for enterprise RAG platform.
+
+MUST include:
+- One quantified benefit (e.g., "40% faster retrieval")
+- One integration mention (Pinecone, Weaviate, or ChromaDB)
+- Use case example from finance OR healthcare
+
+MUST NOT include:
+- Marketing fluff ("revolutionary", "game-changing")
+- Unverified claims
+- Technical jargon not explained
+- More than 150 words
+
+Format: 3 paragraphs with subheadings
+Tone: Technical but accessible
+```
+*Why: Specific inclusions/exclusions, measurable limits, clear structure*
+
+---
+
+### 8. Self-Consistency Sampling
+
+**When to Use:**
+- High-stakes decisions (medical, legal, financial)
+- Ambiguous problems with multiple valid approaches
+- Need confidence estimation
+- Quality > cost
+
+**When NOT to Use:**
+- Deterministic tasks (formatting, data extraction)
+- Budget constraints (requires multiple API calls)
+- Real-time systems
+- Tasks with single correct answer
+
+**Structure:**
+```
+Generate N different reasoning paths for:
+[problem]
+
+Compare answers and:
+1. Identify consensus answer
+2. Note divergent reasoning
+3. Provide confidence score based on agreement
+```
+
+**Bad Example:**
+```
+Give me 3 answers to: What's the capital of France?
+```
+*Problem: Deterministic question, no value in multiple samples*
+
+**Good Example:**
+```
+A startup has $500K funding and two options:
+Option A: Hire 5 engineers ($400K/year) + minimal marketing
+Option B: Hire 2 engineers ($160K/year) + $200K marketing + freelancers
+
+Generate 3 independent analyses considering:
+- 18-month runway
+- B2B SaaS product (0 revenue currently)
+- Technical complexity requires strong team
+
+For each analysis:
+1. Compute runway for each option
+2. Assess risk factors
+3. Recommend option
+
+Then: Compare recommendations and explain consensus or disagreement.
+```
+*Why: Ambiguous problem, multiple valid approaches, genuine uncertainty*
+
+---
+
+### 9. Meta-Prompting (Prompt Generation)
+
+**When to Use:**
+- Building prompt templates for non-technical users
+- Creating N8N workflow prompt libraries
+- A/B testing prompt variations
+- Teaching prompt engineering
+
+**When NOT to Use:**
+- Direct task execution (just do the task instead)
+- Over-engineering simple prompts
+- When you already have proven prompts
+
+**Structure:**
+```
+Generate a prompt for [use case] that:
+- Handles [input type]
+- Produces [output format]
+- Includes [specific constraints]
+- Uses [technique name] technique
+
+Provide 3 variations: basic, intermediate, advanced.
+```
+
+**Bad Example:**
+```
+Make me a prompt for summarizing.
+```
+*Problem: No specifications, no use case context*
+
+**Good Example:**
+```
+Generate a prompt template for N8N workflow that:
+
+Use case: Summarize customer support tickets
+Input: {{ticket_text}} (variable length, 50-500 words)
+Output: JSON with keys: {summary, sentiment, priority, suggested_action}
+
+Requirements:
+- Use few-shot learning with 2 examples
+- Include constraint: summary max 50 words
+- Add instruction for extracting action items
+- Specify priority scale: low/medium/high/urgent
+
+Provide:
+1. The complete prompt template
+2. Example with sample ticket
+3. Expected output for the example
+```
+*Why: Complete specifications, structured deliverable, actionable template*
+
+---
+
+### 10. Negative Prompting
+
+**When to Use:**
+- Preventing known unwanted patterns
+- Removing verbose AI behaviors (apologies, disclaimers)
+- Content filtering
+- Style refinement
+
+**When NOT to Use:**
+- Over-constraining creative tasks
+- When positive instructions are clearer
+- Adding too many negatives (confusing)
+
+**Structure:**
+```
+[Task]
+
+DO NOT:
+- [behavior 1]
+- [behavior 2]
+- [behavior 3]
+```
+
+**Bad Example:**
+```
+Write code. Don't make mistakes.
+```
+*Problem: "Mistakes" is too vague*
+
+**Good Example:**
+```
+Generate Python function for API rate limiting.
+
+DO NOT:
+- Include apologies or explanatory preamble
+- Use time.sleep() (use asyncio instead)
+- Add print statements (use logging module)
+- Write comments explaining obvious code
+- Include error handling for network issues (caller handles this)
+
+DO:
+- Use decorator pattern
+- Include type hints
+- Return remaining quota in response
+```
+*Why: Specific behaviors prevented, balanced with positive instructions*
+
+---
+
+### 11. Output Structuring
+
+**When to Use:**
+- API integrations (N8N, Zapier)
+- Data parsing requirements
+- Multi-field extraction
+- Downstream processing in pipelines
+
+**When NOT to Use:**
+- Human-only consumption (prose is fine)
+- Format complexity exceeds task value
+- LLM struggles with strict JSON (use XML instead)
+
+**Structure:**
+```
+[Task]
+
+Return ONLY valid JSON with this exact structure:
+{
+  "field1": "type",
+  "field2": ["array", "of", "items"],
+  "nested": {
+    "field3": "value"
+  }
+}
+
+No markdown code blocks, no explanations, pure JSON only.
+```
+
+**Bad Example:**
+```
+Extract info from this email and give me JSON:
+[email content]
+```
+*Problem: No schema defined, "info" is ambiguous*
+
+**Good Example:**
+```
+Extract meeting details from email:
+
+[email: "Let's meet Tuesday at 2pm at Coffee Shop on Main St to discuss Q4 budget"]
+
+Return ONLY this JSON structure (no markdown, no explanations):
+{
+  "meeting_date": "YYYY-MM-DD or null if not specific",
+  "meeting_time": "HH:MM or null",
+  "location": "string or null",
+  "attendees": ["array of names mentioned"],
+  "topics": ["array of discussion topics"],
+  "action_items": ["array or empty"],
+  "confidence": 0.0-1.0
+}
+
+If any field cannot be determined, use null. Always include confidence score.
+```
+*Why: Exact schema, data types, null handling, parsing rules clear*
+
+---
+
+### 12. Iterative Refinement Prompting
+
+**When to Use:**
+- Complex deliverables (reports, documentation)
+- Collaborative AI workflows
+- Learning user preferences
+- Quality improvement cycles
+
+**When NOT to Use:**
+- Simple one-shot tasks
+- Stateless API calls (no conversation memory)
+- Time-sensitive requests
+
+**Structure:**
+```
+Iteration 1: Generate [draft]
+Iteration 2: Critique your output for [criteria]
+Iteration 3: Revise based on critique
+```
+
+**Bad Example:**
+```
+Write an article. Then make it better.
+```
+*Problem: "Better" undefined, no critique criteria*
+
+**Good Example:**
+```
+Task: Create RAG system architecture diagram description
+
+Iteration 1: Write technical description of components
+Iteration 2: Self-critique against these criteria:
+- Are all data flows explained?
+- Is latency at each stage mentioned?
+- Are error handling paths covered?
+- Would a senior engineer spot gaps?
+
+Iteration 3: Revise description addressing each critique point
+
+Iteration 4: Add one-paragraph "Scaling Considerations" section
+```
+*Why: Specific improvement criteria, staged refinement, measurable progress*
+
+---
+
+### Quick Reference Matrix
+
+| Technique | Complexity | Token Cost | Best For | Avoid For |
+|-----------|-----------|------------|----------|-----------|
+| Zero-Shot | Low | Low | Simple tasks | Complex formatting |
+| Few-Shot | Medium | Medium | Pattern matching | Self-explanatory tasks |
+| CoT | Medium | High | Multi-step reasoning | Simple lookups |
+| ReAct | High | High | Agent workflows | Linear tasks |
+| Role-Based | Low | Low | Domain expertise | Generic tasks |
+| Chaining | High | High | RAG pipelines | Single-step tasks |
+| Constraints | Low | Low | Compliance | Creative tasks |
+| Self-Consistency | High | Very High | High-stakes decisions | Deterministic tasks |
+| Meta-Prompting | Medium | Medium | Template building | Direct execution |
+| Negative | Low | Low | Behavior prevention | Positive alternatives exist |
+| Output Structuring | Medium | Low | API integration | Human-only reading |
+| Iterative | High | High | Quality refinement | One-shot needs |
+
+---
+
+### Combining Techniques (Advanced)
+
+**RAG Pipeline Example:**
+```
+1. Few-Shot + Output Structuring: Query rewriting
+2. Constraint-Based: Filter retrieval results
+3. CoT: Rank documents by relevance
+4. Role-Based + Negative: Generate answer (expert tone, no disclaimers)
+5. Output Structuring: Format as JSON with citations
+```
+
+This combination creates a production-ready RAG response in a structured, repeatable way.
+
+---
+
+### Practice Exercise
+
+**Build a RAG pipeline prompt that:**
+1. Rewrites user query for better retrieval
+2. Ranks retrieved chunks by relevance
+3. Synthesizes answer with citations
+4. Returns JSON with confidence score
+
+**Solution Framework:**
+
+```
+# Step 1: Query Rewriting (Few-Shot + Output Structuring)
+Original query: {{user_query}}
+
+Rewrite into 3 optimized search queries:
+Example: "python async" → ["python asyncio library", "async await python syntax", "python asynchronous programming tutorial"]
+
+Output: ["query1", "query2", "query3"]
+
+# Step 2: Ranking (CoT + Role-Based)
+You are a search relevance engineer.
+
+Retrieved chunks: {{chunks}}
+Queries: {{rewritten_queries}}
+
+Think step-by-step:
+1. Score each chunk against each query (0-1)
+2. Calculate weighted average
+3. Rank top 5 chunks
+
+Output JSON: [{"chunk_id": "x", "score": 0.95, "reason": "..."}, ...]
+
+# Step 3: Synthesis (Constraint-Based + Negative)
+Context: {{top_chunks}}
+Original query: {{user_query}}
+
+Generate answer:
+MUST include: Code examples, citations [1], [2]
+MUST NOT: Apologize, use disclaimers, exceed 200 words
+
+# Step 4: Final Output (Output Structuring)
+Return ONLY this JSON:
+{
+  "answer": "string",
+  "citations": [{"id": 1, "chunk_id": "x", "relevance": 0.95}],
+  "confidence": 0.85,
+  "suggested_followups": ["question1", "question2"]
+}
+```
+
+---
+
+### Key Takeaways
+
+1. **Match technique to task complexity** - Don't over-engineer simple prompts
+2. **Token costs matter** - CoT and chaining are expensive; use strategically
+3. **Examples beat instructions** - Few-shot works when explanations fail
+4. **Structure enables automation** - JSON output is essential for N8N workflows
+5. **Combine techniques** - Real systems need 3-5 techniques working together
+6. **Test iteratively** - Start simple, add complexity based on failures
+7. **Document patterns** - Save successful prompts as templates
+
+---
+
+### Additional Resources
+
+- **Anthropic Prompt Engineering Guide**: https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview
+- **N8N AI Documentation**: For workflow integration patterns
+- **LangChain Prompts**: Template library for inspiration
+
+---
+
+*Prompt Engineering Techniques Guide - Version 1.0 - January 2026*
+
+
+## 11. The Five AI Architectures
 
 **There are 5 different ways** to build AI solutions, ranging from simple chat to fully autonomous AI teams — choosing the right one depends on your task complexity.
 
@@ -939,7 +1637,7 @@ messages?"                       │                        │
 
 ---
 
-## 11. Choosing the Right Architecture
+# 12. Choosing the Right Architecture
 
 Use this **decision tree** to pick the simplest architecture that solves your problem — don't use a construction crew when you need a handyman.
 
@@ -1082,3 +1780,5 @@ A curated list of popular AI tools across different categories — from conversa
 ---
 
 *Remember: AI is a powerful tool, not magic. You're the pilot — AI is the autopilot. Know when to take the controls.*
+
+---
