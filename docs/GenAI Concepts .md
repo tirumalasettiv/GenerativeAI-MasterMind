@@ -1,10 +1,12 @@
 # Generative AI MasterMind
 
-*A plain-language guide for Novice to Creator*
+*A beginner Guide*
 
 ---
 
-## 1. What is Generative AI?
+# 1: FUNDAMENTALS OF GENERATIVE AI
+
+## 1.1 What is Generative AI?
 
 **Definition:** Generative AI is software that creates new content (text, images, code, audio and video) by predicting what should come next based on patterns it learned from millions of examples.
 
@@ -24,17 +26,16 @@
 
 3. **GitHub Copilot writing code** — You start typing a function name and it predicts the entire code block because it's seen similar patterns in millions of code repositories.
 
-4. **ElevenLabs generating audio** — You start typing “record a podcast intro in a confident British accent saying...” and it predicts and generates the full natural voiceover because it's seen patterns in millions of hours of speech data.
+4. **ElevenLabs generating audio** — You start typing "record a podcast intro in a confident American accent saying..." and it predicts and generates the full natural voiceover because it's seen patterns in millions of hours of speech data.
 
-5. **Runway ML generating video** — You start typing “animate a robot walking through a cyberpunk city” and it predicts and generates the full smooth video clip because it's seen patterns in millions of video frames and motion sequences.
+5. **Runway ML generating video** — You start typing "animate a robot walking through a cyberpunk city" and it predicts and generates the full smooth video clip because it's seen patterns in millions of video frames and motion sequences.
 
 **The key thing to remember is...** GenAI doesn't "think" or "know" things — it predicts what text/images should come next based on patterns. It's incredibly useful, but it's pattern-matching, not reasoning.
 
 ![17709841881983](assets/17709841881983.jpg)
 
----
 
-## 2. Regular AI vs. Generative AI
+## 1.2 Regular AI vs. Generative AI
 
 **One-sentence difference:** Regular AI finds, sorts, or decides — Generative AI creates something new.
 
@@ -51,6 +52,7 @@
 **Regular AI is like a librarian.** You ask a question, they search the shelves, and hand you a book that already exists. They're great at finding, organizing, and recommending — but they don't write new books.
 
 **Generative AI is like an author.** You give them a topic, and they write a brand new book that never existed before. It might be inspired by books they've read, but the output is original.
+
 
 ### Examples Side-by-Side
 
@@ -90,19 +92,18 @@
 Regular AI = **Picker** (chooses from what exists)
 Generative AI = **Maker** (creates something new)
 
-![17709845503996](assets/17709845503996.jpg)
+
 
 *Both are AI. Generative AI is just a specific type that focuses on creation rather than selection.*
 
----
 
-## 3. Inside the Black Box: How Generative AI Works (Concise)
+## 1.3 Inside the Black Box: How Generative AI Works (Concise)
 
 **One-liner:** GenAI predicts the most likely next word, over and over, based on patterns learned from billions of examples.
 
 ### The 5 Stages
 
-![17709850983044](assets/17709850983044.jpg)
+![17709850983045](assets/17709850983045.jpg)
 
 
 ### Stage 1: Training
@@ -112,7 +113,8 @@ Generative AI = **Maker** (creates something new)
 **Analogy:** A student who reads every library book but memorizes how sentences flow, not specific facts.
 
 ```
-Sees: "Capital of France is Paris" / "Capital of Japan is Tokyo"
+Sees: "Capital of France is Paris"
+      "Capital of Japan is Tokyo"
 Learns: "Capital of [country] is [city]" pattern
 ```
 
@@ -136,7 +138,8 @@ Learns: "Capital of [country] is [city]" pattern
 **Analogy:** Lego bricks — smaller pieces AI can mix and match.
 
 ```
-"Explain photosynthesis" → ["Explain", " photo", "synth", "esis"]
+"Explain photosynthesis" →
+   ["Explain", " photo", "synth", "esis"]
 ```
 
 **Why it matters:** Context window, API cost, and speed all measured in tokens.
@@ -183,29 +186,14 @@ Learns: "Capital of [country] is [city]" pattern
 | "AI remembers our chat" | Re-reads entire history each time |
 
 
-### Cheat Sheet
-
-| Component | One-liner |
-|-----------|-----------|
-| **Training** | Learn patterns from data |
-| **Parameters** | Store patterns as numbers |
-| **Tokens** | Break text into chunks |
-| **Attention** | Decide what's relevant |
-| **Prediction** | Guess next token, repeat |
-| **Temperature** | Safe ↔ Creative dial |
-
-**Key takeaway:** GenAI doesn't think — it asks "What word probably comes next?" thousands of times. That's the whole trick.
-
-
 ### Putting It All Together: A Complete Example
 
 Here's what actually happens when you send a prompt to GenAI:
 
 ![](assets/17709859729957.jpg)
 
----
 
-## 4. Types of AI Models: Foundational, Proprietary, Open Source
+## 1.4 Types of AI Models: Foundational, Proprietary, Open Source
 
 **One-liner:** Foundational models are the "engines" — proprietary means the company keeps the engine secret, open source means anyone can see and modify it. Products like Perplexity and Gamma are "cars" built using these engines.
 
@@ -214,7 +202,6 @@ Here's what actually happens when you send a prompt to GenAI:
 
 ![](assets/17710121346880.jpg)
 
----
 
 ### 1. Foundational Models
 
@@ -275,7 +262,7 @@ These companies don't build foundational models — they build products ON TOP o
 | Layer | Car Analogy | AI Example |
 |-------|-------------|------------|
 | Foundational Model | Engine (Toyota, Ford) | GPT-4, Llama, Claude |
-| Application | Car brand (Uber, Lyft) | Perplexity, Gamma |
+| Application | Car service (Uber, Lyft) | Perplexity, Gamma |
 | End User | Passenger | You |
 
 *Uber doesn't manufacture engines — they build a service using cars with existing engines. Same with Perplexity using GPT-4.*
@@ -297,23 +284,7 @@ These companies don't build foundational models — they build products ON TOP o
 ![](assets/17710126482393.jpg)
 
 
-
-### Cheat Sheet
-
-| Term | One-liner |
-|------|-----------|
-| **Foundational** | The base AI "engine" trained on massive data |
-| **Proprietary** | Secret recipe — access via API only |
-| **Open Source** | Public recipe — download and modify freely |
-| **Application** | Products built ON TOP of foundational models |
-| **Perplexity** | Search app using GPT-4/Claude underneath |
-| **Gamma** | Presentation app using GPT-4/Claude underneath |
-
-**Key takeaway:** Foundational models are the engines (GPT-4, Llama). Proprietary = secret engine, Open source = public engine. Apps like Perplexity and Gamma are cars built using those engines — they add a nice interface but don't build the AI themselves.
-
----
-
-## 5. The Three Critical Limitations
+## 1.5 The Three Critical Limitations
 
 **GenAI has three major weaknesses:** it can make things up (hallucinations), its knowledge has a cutoff date, and it can only "remember" a limited conversation.
 
@@ -337,15 +308,14 @@ These companies don't build foundational models — they build products ON TOP o
 **It's like talking to someone with short-term memory loss.** GenAI can only "remember" a certain amount of your conversation. Share a 100-page document? It might forget the beginning by the time it reaches the end.
 
 ```
-Conversation Start ←————————————————→ Context Limit
-   [Remembers this clearly]              [Starts forgetting]
+Conversation Start ←——--------→ Context Limit
+[Remembers this clearly]   [Starts forgetting]
 ```
 
 **The key thing to remember is...** Always verify important facts, check if information might be outdated, and break long documents into smaller chunks.
 
----
 
-## 6. VERIFY Framework (Using AI Responsibly)
+## 1.6 VERIFY Framework (Using AI Responsibly)
 
 **One-sentence definition:** VERIFY is a 6-step checklist to make sure you're using AI safely and getting accurate results.
 
@@ -368,115 +338,11 @@ Conversation Start ←————————————————→ Contex
 
 ---
 
-## 7. CRAFT Prompting Framework
+# 2: PROMPT ENGINEERING
 
-**One-sentence definition:** CRAFT is a 5-part recipe for writing prompts that get much better AI results — like giving GPS not just a destination but also your preferred route, arrival time, and what to avoid.
-
-### The Framework
-
-```
-C - Context    → "Here's the background situation..."
-R - Role       → "Act as a [expert type]..."
-A - Ask        → "Please do this specific task..."
-F - Format     → "Present it as a [table/list/email]..."
-T - Tone       → "Use a [professional/casual] voice..."
-```
-
-### Analogy
-
-**It's like ordering at a restaurant vs. telling the chef exactly what you want.**
-
-| Vague Order (Bad Prompt) | CRAFT Order (Good Prompt) |
-|--------------------------|---------------------------|
-| "Give me food" | **C:** "I'm gluten-free and allergic to nuts" |
-| | **R:** "You're a nutritionist-chef" |
-| | **A:** "Make me a protein-rich dinner" |
-| | **F:** "Main dish + 2 sides" |
-| | **T:** "Comfort food style" |
-
-### Example Transformation
-
-**Bad prompt:** "Write about our product"
-
-**CRAFT prompt:**
-- **C:** "We're launching a project management app for freelancers next month"
-- **R:** "Act as a B2B SaaS copywriter"
-- **A:** "Write 3 email subject lines for our launch announcement"
-- **F:** "Format as numbered list with 5-7 word subjects"
-- **T:** "Professional but friendly, avoid corporate jargon"
-
-**The key thing to remember is...** More specific instructions = more useful outputs. Spend 2 minutes on your prompt to save 20 minutes on revisions.
-
----
-
-## 8. Four Prompting Techniques
-
-**One-sentence definition:** These are four power-ups you can add to any prompt to dramatically improve the results.
-
-### Technique 1: Few-Shot Prompting
-
-**It's like teaching by example.** Instead of just explaining what you want, you *show* the AI 2-3 examples of good outputs, then ask for more like those.
-
-```
-"Here are examples of good customer responses:
-
-Example 1: 'Thanks for reaching out! I'll look into this today.'
-Example 2: 'Great question! Here's what I found...'
-
-Now write 5 more responses in this style for billing questions."
-```
-
-### Technique 2: Iterative Refinement
-
-**It's like sculpting clay.** Start with a rough draft, then keep shaping it with follow-up requests: "Make it shorter," "Add more humor," "Focus on section 2."
-
-```
-First prompt:  "Write a product description"
-Iteration 1:   "Make it half the length"
-Iteration 2:   "Add a customer testimonial"
-Iteration 3:   "Make the opening more exciting"
-```
-
-### Technique 3: Output Formatting
-
-**It's like asking for the same story in different containers.** Same information, but structured as a table, bullet points, JSON, email, or whatever format you need.
-
-```
-"Present this information as:
-- A 3-column table (Feature | Benefit | Priority)
-- A bullet-point summary
-- A customer-facing FAQ"
-```
-
-### Technique 4: Self-Critique
-
-**It's like asking AI to be its own editor.** Ask the AI to review its own work and fix the problems it finds.
-
-```
-"Review your response above. Identify 3 weaknesses or gaps, then rewrite it addressing those issues."
-```
-
-### Quick Reference
-
-| Technique | When to Use | Magic Words |
-|-----------|-------------|-------------|
-| Few-shot | Need consistent style | "Here are examples... now create more like these" |
-| Iterative | First draft isn't right | "Make it [shorter/longer/friendlier]" |
-| Formatting | Need specific structure | "Present as a [table/list/email]" |
-| Self-critique | Want higher quality | "Review and identify 3 weaknesses, then fix them" |
-
-**The key thing to remember is...** Don't settle for the first output. These techniques turn good results into great results.
-
-
-
-
----
-
-## 9. Advanced Prompting: Meta-Prompting & COSTAR
+## 2.1 Meta & COSTAR Prompting Frameworks
 
 **One-sentence definition:** Instead of writing prompts yourself, use advanced frameworks like meta-prompting (asking AI to write the prompt) or COSTAR (structured 6-part prompts) for world-class results.
-
----
 
 ### Meta Prompting
 
@@ -485,7 +351,7 @@ Iteration 3:   "Make the opening more exciting"
 **How it works:**
 
 ```
-"I want to [practice a technical interview for a Senior Python Developer role at Google].
+"I want write to [ Product Requirements Documents (PRD) for an account payable automation solution].
 
 Act as an expert Prompt Engineer. Please write the best possible prompt that I can use
 to get a world-class response from you.
@@ -496,7 +362,6 @@ output high-quality."
 
 **When to use:** When you're unsure how to structure a complex request, or when you want the AI to help you craft the perfect prompt before executing the task.
 
----
 
 ### COSTAR Framework
 
@@ -511,7 +376,6 @@ output high-quality."
 - **A** - Audience (Who is reading this?)
 - **R** - Response (Format of the output)
 
----
 
 ### Example: Writing a Rejection Email
 
@@ -537,7 +401,6 @@ output high-quality."
 
 **Why the COSTAR version wins:** The AI knows why the candidate was rejected (Context), specific advice to give (Objective), and that it shouldn't sound like a robot (Tone/Style).
 
----
 
 ### When to Use Meta-Prompt vs COSTAR Framework
 
@@ -546,13 +409,11 @@ output high-quality."
 **Scenario A: I need a specific deliverable** (e.g., A JSON object, a SQL query, or a cold email)
 → **Use COSTAR** — You know what you want, you just need to structure the request clearly.
 
-**Scenario B: I'm not sure how to structure my request**
+**Scenario B: I'm not sure how to structure my request or ask**
 → **Use Meta-Prompting** — Let the AI help you design the perfect prompt first, then execute it.
 
----
 
-
-## 10. Advanced Prompt Engineering Techniques (Deep Dive)
+## 2.2 Most Commonly Used Prompt Engineering Techniques
 
 This section provides a comprehensive exploration of 12 prompt engineering techniques with practical examples, use cases, and when to apply each one.
 
@@ -589,7 +450,6 @@ Target audience: intermediate developers.
 ```
 *Why: Specific scope, format, length, and audience defined*
 
----
 
 ### 2. Few-Shot Prompting
 
@@ -650,7 +510,6 @@ Output:
 ```
 *Why: Consistent structure, clear field mapping, diverse examples*
 
----
 
 ### 3. Chain-of-Thought (CoT)
 
@@ -693,7 +552,6 @@ Think step-by-step:
 ```
 *Why: Data provided, specific steps outlined, clear success criteria*
 
----
 
 ### 4. ReAct (Reasoning + Acting)
 
@@ -749,7 +607,6 @@ Answer: [code example with TaskGroups]
 ```
 *Why: Clear thought → action → observation loop, explicit reasoning*
 
----
 
 ### 5. Role-Based Prompting
 
@@ -792,7 +649,6 @@ Review this data ingestion code for:
 ```
 *Why: Specific expertise, measurable criteria, domain context*
 
----
 
 ### 6. Prompt Chaining
 
@@ -849,7 +705,6 @@ Output format: JSON
 ```
 *Why: Each step has clear input/output, specialization, structured flow*
 
----
 
 ### 7. Constraint-Based Prompting
 
@@ -901,7 +756,6 @@ Tone: Technical but accessible
 ```
 *Why: Specific inclusions/exclusions, measurable limits, clear structure*
 
----
 
 ### 8. Self-Consistency Sampling
 
@@ -954,7 +808,6 @@ Then: Compare recommendations and explain consensus or disagreement.
 ```
 *Why: Ambiguous problem, multiple valid approaches, genuine uncertainty*
 
----
 
 ### 9. Meta-Prompting (Prompt Generation)
 
@@ -1007,7 +860,6 @@ Provide:
 ```
 *Why: Complete specifications, structured deliverable, actionable template*
 
----
 
 ### 10. Negative Prompting
 
@@ -1056,7 +908,6 @@ DO:
 ```
 *Why: Specific behaviors prevented, balanced with positive instructions*
 
----
 
 ### 11. Output Structuring
 
@@ -1115,7 +966,6 @@ If any field cannot be determined, use null. Always include confidence score.
 ```
 *Why: Exact schema, data types, null handling, parsing rules clear*
 
----
 
 ### 12. Iterative Refinement Prompting
 
@@ -1160,26 +1010,6 @@ Iteration 4: Add one-paragraph "Scaling Considerations" section
 ```
 *Why: Specific improvement criteria, staged refinement, measurable progress*
 
----
-
-### Quick Reference Matrix
-
-| Technique | Complexity | Token Cost | Best For | Avoid For |
-|-----------|-----------|------------|----------|-----------|
-| Zero-Shot | Low | Low | Simple tasks | Complex formatting |
-| Few-Shot | Medium | Medium | Pattern matching | Self-explanatory tasks |
-| CoT | Medium | High | Multi-step reasoning | Simple lookups |
-| ReAct | High | High | Agent workflows | Linear tasks |
-| Role-Based | Low | Low | Domain expertise | Generic tasks |
-| Chaining | High | High | RAG pipelines | Single-step tasks |
-| Constraints | Low | Low | Compliance | Creative tasks |
-| Self-Consistency | High | Very High | High-stakes decisions | Deterministic tasks |
-| Meta-Prompting | Medium | Medium | Template building | Direct execution |
-| Negative | Low | Low | Behavior prevention | Positive alternatives exist |
-| Output Structuring | Medium | Low | API integration | Human-only reading |
-| Iterative | High | High | Quality refinement | One-shot needs |
-
----
 
 ### Combining Techniques (Advanced)
 
@@ -1194,7 +1024,6 @@ Iteration 4: Add one-paragraph "Scaling Considerations" section
 
 This combination creates a production-ready RAG response in a structured, repeatable way.
 
----
 
 ### Practice Exercise
 
@@ -1246,7 +1075,6 @@ Return ONLY this JSON:
 }
 ```
 
----
 
 ### Key Takeaways
 
@@ -1258,7 +1086,6 @@ Return ONLY this JSON:
 6. **Test iteratively** - Start simple, add complexity based on failures
 7. **Document patterns** - Save successful prompts as templates
 
----
 
 ### Additional Resources
 
@@ -1266,12 +1093,27 @@ Return ONLY this JSON:
 - **N8N AI Documentation**: For workflow integration patterns
 - **LangChain Prompts**: Template library for inspiration
 
----
+
 
 *Prompt Engineering Techniques Guide - Version 1.0 - January 2026*
 
+---
 
-## 11. The Five AI Architectures
+# 3: CONTEXT ENGINEERING
+
+*[Content to be added - This section will cover RAG systems, context windows, chunking strategies, embeddings, vector databases, and context optimization techniques]*
+
+---
+
+# 4: MODEL CONTEXT PROTOCOL (MCP)
+
+*[Content to be added - This section will cover MCP fundamentals, implementation patterns, use cases, and integration strategies]*
+
+---
+
+# 5: THE FIVE AI ARCHITECTURES
+
+## 5.1 The Five AI Architectures
 
 **There are 5 different ways** to build AI solutions, ranging from simple chat to fully autonomous AI teams — choosing the right one depends on your task complexity.
 
@@ -1328,7 +1170,7 @@ Return ONLY this JSON:
 **It's like:** A car assembly line. Step 1 adds the frame, Step 2 adds the engine, Step 3 paints it. Each step has one job, in a specific order, every time.
 
 ![](assets/17710137494101.jpg)
-****
+
 **Best for:** Repeatable processes, document processing, content pipelines where you know exactly what steps are needed.
 
 **Key characteristics:**
@@ -1344,14 +1186,14 @@ Return ONLY this JSON:
 
 **Weekly competitor monitor:**
 ```
-Timer (weekly) → Fetch competitor website → Extract changes (AI) → 
+Timer (weekly) → Fetch competitor website → Extract changes (AI) →
 Compare to last week (AI) → Format report → Send to Slack
 ```
 
 **Cold Outreach:**
 ```
-Timer (daily) → Get company names(AI) 
-                 → Send Email Outreach emails (AI) 
+Timer (daily) → Get company names(AI)
+                 → Send Email Outreach emails (AI)
 ```
 
 **Tools:** N8N, Make, Zapier, Power Automate
@@ -1416,7 +1258,7 @@ Timer (daily) → Get company names(AI)
 
 **The key thing to remember is...** Multi-agent systems are for complex work that benefits from specialized roles and built-in review cycles — like having an AI team instead of one AI assistant.
 
----
+
 
 ### Choosing the Right Architecture
 
@@ -1426,7 +1268,196 @@ Use this **decision tree** to pick the simplest architecture that solves your pr
 
 ![](assets/17710147774432.jpg)
 
-#### Quick Reference Table
+---
+
+# APPENDIX
+
+## A. AI Tools Directory
+
+A comprehensive, curated list of the most popular and useful AI tools organized by category.
+
+### 1. Conversational AI & Chat Assistants
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **ChatGPT** | OpenAI's conversational assistant that can chat, code, write, summarize, and brainstorm across domains. Industry-leading Large Language Model(LLM). | [Visit](https://outskill.link/chatgpt) |
+| **Claude** | Anthropic's AI model focused on safe, interpretable, and creative conversations with high contextual reasoning and long context windows. | [Visit](https://outskill.link/claude) |
+| **Gemini** | Google's AI model integrated into Search and Workspace. Provides conversational, multimodal, and contextual help. | [Visit](https://outskill.link/gemini) |
+| **Perplexity** | AI search engine combining live web data and LLM reasoning to give factual, cited answers. Great for research. | [Visit](https://outskill.link/perplexity) |
+| **Microsoft Copilot** | Microsoft's AI assistant integrated across Windows, Edge, Office 365, and Bing for productivity enhancement. | [Visit](https://copilot.microsoft.com) |
+
+### 2. Content Writing & Marketing
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Writesonic** | AI content generation platform for blogs, ads, and marketing copy. Boosts productivity for writers and marketers. | [Visit](https://outskill.link/writesonic) |
+| **Jasper** | AI marketing platform for creating blog posts, social media, ads, and long-form content with brand voice consistency. | [Visit](https://www.jasper.ai) |
+| **Copy.ai** | AI-powered copywriting tool for marketing content, product descriptions, email campaigns, and social media posts. | [Visit](https://www.copy.ai) |
+| **Notion AI** | AI assistant built into Notion for writing, summarizing, brainstorming, and organizing knowledge bases. | [Visit](https://www.notion.so/product/ai) |
+| **Supergrow** | AI marketing platform to help grow leads, optimize campaigns, and accelerate audience engagement. | [Visit](https://outskill.link/supergrow) |
+| **Social Sonic** | Helps create, schedule, and optimize social media content using AI-driven insights. | [Visit](https://outskill.link/socialsonic) |
+
+### 3. Code & Development
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Claude Code** | AI-powered command-line coding agent that can autonomously handle complex development tasks, refactor code, and execute multi-step workflows. | [Visit](https://github.com/anthropics/claude-code) |
+| **GitHub Copilot** | AI pair programmer that suggests code completions, entire functions, and helps debug. Powered by OpenAI Codex. | [Visit](https://github.com/features/copilot) |
+| **Cursor** | AI-powered code editor built on VSCode with advanced code generation, refactoring, and chat capabilities. | [Visit](https://cursor.sh) |
+| **Replit** | Collaborative online IDE with AI code assistance for real-time coding and learning. Great for beginners. | [Visit](https://outskill.link/replit) |
+| **Bolt** | Developer tool or automation assistant built for fast prototyping and deployment of apps or workflows. | [Visit](https://outskill.link/bolt) |
+| **Tabnine** | AI code completion tool supporting multiple languages and IDEs with privacy-focused options. | [Visit](https://www.tabnine.com) |
+| **Codeium** | Free AI-powered code acceleration toolkit with autocomplete, chat, and search across your codebase. | [Visit](https://codeium.com) |
+
+### 4. Design & Visual Content
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Midjourney** | Text-to-image model producing high-quality, artistic visuals for creators and designers. Industry-leading quality. | [Visit](https://outskill.link/midjourney) |
+| **DALL-E 3** | OpenAI's text-to-image generator integrated into ChatGPT, creating precise, contextual images from descriptions. | [Visit](https://openai.com/dall-e-3) |
+| **Stable Diffusion** | Open-source text-to-image model allowing local deployment and customization for image generation. | [Visit](https://stability.ai) |
+| **Adobe Firefly** | Adobe's AI image generator integrated into Creative Cloud for commercial-safe generative AI content. | [Visit](https://www.adobe.com/products/firefly.html) |
+| **Canva AI** | AI-powered design features in Canva including Magic Design, background removal, and content generation. | [Visit](https://www.canva.com/ai-image-generator) |
+| **Leonardo** | AI art platform for creating game assets, illustrations, and concept art using text prompts. | [Visit](https://outskill.link/leonardo) |
+| **Krea** | AI design and art creation tool enabling rapid visual exploration and creative experimentation. | [Visit](https://outskill.link/krea) |
+| **Magnific AI** | AI image upscaler and enhancer that adds detail, improves resolution, and refines visuals. | [Visit](https://outskill.link/magnific) |
+| **Phot AI** | AI-powered tool for editing, enhancing, and generating photos or visual content. Great for quick creative visuals. | [Visit](https://outskill.link/phot) |
+
+### 5. Video Generation & Editing
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Runway ML** | Creative AI suite for video editing, image generation, and media production using machine learning. | [Visit](https://outskill.link/runwayml) |
+| **HeyGen** | AI video generator that turns text or scripts into realistic avatar videos with voice and lip sync. | [Visit](https://outskill.link/heygen) |
+| **Kling** | Emerging generative video platform focusing on ultra-realistic, cinematic outputs. | [Visit](https://outskill.link/kling) |
+| **Pika** | AI video generation platform for creating and editing videos from text prompts with cinematic quality. | [Visit](https://pika.art) |
+| **Descript** | AI-powered video and podcast editor with transcription, overdub, and multi-track editing capabilities. | [Visit](https://www.descript.com) |
+| **Higgsfield** | Advanced AI company developing realistic 3D / video generation technology for creative industries. | [Visit](https://outskill.link/higgsfield) |
+
+### 6. Audio & Voice
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Eleven Labs** | Industry-leading AI voice synthesis platform for lifelike text-to-speech and dubbing in multiple languages. | [Visit](https://outskill.link/elevenlabs) |
+| **Suno** | AI music generator for composing songs, jingles, and soundscapes from text prompts. | [Visit](https://outskill.link/suno) |
+| **Whispr Flow** | Converts speech to text in real time across apps. Helps users dictate, format, and edit content hands-free. | [Visit](https://outskill.link/wisprflow) |
+| **Murf AI** | AI voice generator for creating professional voiceovers for videos, presentations, and e-learning. | [Visit](https://murf.ai) |
+| **Vapi** | Voice or visual API platform enabling AI calling agents or multimodal experiences. | [Visit](https://outskill.link/vapi) |
+
+### 7. Research & Knowledge Management
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Notebook LM** | Google's AI research assistant that summarizes, queries, and connects your notes and documents intelligently. | [Visit](https://outskill.link/notebook-lm) |
+| **Elicit** | AI research assistant that helps find, summarize, and extract data from academic papers. | [Visit](https://elicit.org) |
+| **Consensus** | AI-powered search engine that finds answers from scientific research with citations. | [Visit](https://consensus.app) |
+| **Semantic Scholar** | AI-powered academic search engine helping researchers find relevant papers with intelligent filtering. | [Visit](https://www.semanticscholar.org) |
+| **Chronicle** | AI-powered tool for journaling, storytelling, or knowledge management to capture key moments. | [Visit](https://outskill.link/chronicle) |
+
+### 8. Productivity & Automation
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **N8N** | Open-source workflow automation tool with 400+ integrations, AI nodes, and self-hosting options for building complex automation pipelines. | [Visit](https://n8n.io) |
+| **Zapier AI** | Workflow automation platform with AI-powered app integration and intelligent workflow suggestions. | [Visit](https://zapier.com/ai) |
+| **Make (Integromat)** | Visual automation platform with AI modules for connecting apps and automating complex workflows. | [Visit](https://www.make.com) |
+| **Mem** | AI-powered note-taking and knowledge management that auto-organizes and surfaces relevant information. | [Visit](https://get.mem.ai) |
+| **Motion** | AI calendar and project management tool that automatically schedules tasks and optimizes your day. | [Visit](https://www.usemotion.com) |
+| **Rocket** | Automation tool that accelerates tasks, launches workflows, or optimizes processes using AI. | [Visit](https://outskill.link/rocket) |
+| **Numerous AI** | A multi-purpose AI platform offering various automation and generation tools under one suite. | [Visit](https://outskill.link/numerous) |
+
+### 9. Meeting & Collaboration
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Fireflies** | Records, transcribes, and summarizes meetings automatically. Integrates with Zoom, Meet, and Teams to extract insights. | [Visit](https://outskill.link/fireflies) |
+| **Otter.ai** | AI meeting assistant that transcribes conversations in real-time, generates summaries, and extracts action items. | [Visit](https://otter.ai) |
+| **Granola** | AI note-taking assistant for meetings — transcribes, summarizes, and organizes discussions. | [Visit](https://outskill.link/granola) |
+| **Fathom** | Free AI meeting assistant that records, transcribes, and summarizes video calls with instant highlights. | [Visit](https://fathom.video) |
+
+### 10. Data & Analytics
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Lyzr AI** | AI platform for analytics and automation — "laser-focused" insight generation and workflow optimization. | [Visit](https://outskill.link/lyzr) |
+| **Julius AI** | AI data analyst that helps analyze, visualize, and interpret data through natural language conversations. | [Visit](https://julius.ai) |
+| **DataChat** | Conversational AI for data analytics, allowing teams to analyze data using natural language. | [Visit](https://datachat.ai) |
+
+### 11. Translation & Language
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **DeepL** | AI-powered translation service known for natural, accurate translations across 30+ languages. | [Visit](https://www.deepl.com) |
+| **Reverso** | AI translation tool with context examples, grammar checking, and pronunciation features. | [Visit](https://www.reverso.net) |
+
+### 12. Specialized & Emerging Tools
+
+| Tool Name | What does it do? | Tool Link |
+|-----------|-----------------|-----------|
+| **Lovable** | AI design assistant helping teams quickly create delightful, user-friendly web apps. | [Visit](https://outskill.link/lovable) |
+| **Emergent** | AI discovery engine identifying emerging trends, ideas, and insights from large datasets. | [Visit](https://outskill.link/emergent) |
+| **Happenstance** | AI idea generator fostering serendipitous discoveries, creative prompts, and connections. | [Visit](https://outskill.link/happenstance) |
+| **Crystal** | AI tool that analyzes personality and communication style to improve interpersonal effectiveness. | [Visit](https://outskill.link/crystal-knows) |
+| **Humanic AI** | Focuses on human-centric AI for personalization, empathy modeling, and user understanding. | [Visit](https://outskill.link/humanic) |
+| **Genspark** | Generates creative ideas, articles, and media using generative AI — a "spark" for inspiration. | [Visit](https://outskill.link/genspark) |
+| **Emily** | AI tool for engineers to scaffold, deploy, and manage ML or microservice projects. Simplifies orchestration and deployment. | [Visit](https://outskill.link/emily) |
+
+---
+
+## B. Quick References / Cheat Sheets
+
+A consolidated collection of all essential quick references for easy lookup.
+
+### B.1 How GenAI Works
+
+| Component | One-Liner |
+|-----------|-----------|
+| **Training** | Learn patterns from data |
+| **Parameters** | Store patterns as numbers |
+| **Tokens** | Break text into chunks |
+| **Attention** | Decide what's relevant |
+| **Prediction** | Guess next token, repeat |
+| **Temperature** | Safe ↔ Creative dial |
+
+**Key takeaway:** GenAI doesn't think — it asks "What word probably comes next?" thousands of times. That's the whole trick.
+
+---
+
+### B.2 AI Model Types
+
+| Term | One-Liner |
+|------|-----------|
+| **Foundational** | The base AI "engine" trained on massive data |
+| **Proprietary** | Secret recipe — access via API only |
+| **Open Source** | Public recipe — download and modify freely |
+| **Application** | Products built ON TOP of foundational models |
+| **Perplexity** | Search app using GPT-4/Claude underneath |
+| **Gamma** | Presentation app using GPT-4/Claude underneath |
+
+**Key takeaway:** Foundational models are the engines (GPT-4, Llama). Proprietary = secret engine, Open source = public engine. Apps like Perplexity and Gamma are car service built using those engines — they add a nice interface but don't build the AI themselves.
+
+---
+
+### B.3 Prompt Engineering Techniques
+
+| Technique | Complexity | Token Cost | Best For | Avoid For |
+|-----------|-----------|------------|----------|-----------|
+| Zero-Shot | Low | Low | Simple tasks | Complex formatting |
+| Few-Shot | Medium | Medium | Pattern matching | Self-explanatory tasks |
+| CoT | Medium | High | Multi-step reasoning | Simple lookups |
+| ReAct | High | High | Agent workflows | Linear tasks |
+| Role-Based | Low | Low | Domain expertise | Generic tasks |
+| Chaining | High | High | RAG pipelines | Single-step tasks |
+| Constraints | Low | Low | Compliance | Creative tasks |
+| Self-Consistency | High | Very High | High-stakes decisions | Deterministic tasks |
+| Meta-Prompting | Medium | Medium | Template building | Direct execution |
+| Negative | Low | Low | Behavior prevention | Positive alternatives exist |
+| Output Structuring | Medium | Low | API integration | Human-only reading |
+| Iterative | High | High | Quality refinement | One-shot needs |
+
+---
+
+### B.4 AI Architectures
 
 | If Your Task Is... | Use This | Example |
 |--------------------|----------|---------|
@@ -1436,56 +1467,11 @@ Use this **decision tree** to pick the simplest architecture that solves your pr
 | Dynamic, figure-it-out task | Agent | "Research and summarize topic X" |
 | Complex project needing review | Agentic | Content creation with editing cycles |
 
-**The key thing to remember is...** Start with the simplest option that works. You can always upgrade to a more complex architecture if needed.
+**Key takeaway:** Start with the simplest option that works. You can always upgrade to a more complex architecture if needed.
 
 ---
 
-# 12. AI Tools Directory
-
-A curated list of popular AI tools across different categories — from conversational AI to creative content generation.
-
-| Tool Name | What does it do? | Tool Link |
-|-----------|-----------------|-----------|
-| **Whispr Flow** | Converts speech to text in real time across apps. Helps users dictate, format, and edit content hands-free. | [Visit](https://outskill.link/wisprflow) |
-| **Gemini** | Google's AI assistant integrated into Search and Workspace. Provides conversational, multimodal, and contextual help. | [Visit](https://outskill.link/gemini) |
-| **Emily** | AI tool for engineers to scaffold, deploy, and manage ML or microservice projects. Simplifies orchestration and deployment. | [Visit](https://outskill.link/emily) |
-| **Fireflies** | Records, transcribes, and summarizes meetings automatically. Integrates with Zoom, Meet, and Teams to extract insights. | [Visit](https://outskill.link/fireflies) |
-| **ChatGPT** | OpenAI's conversational assistant that can chat, code, write, summarize, and brainstorm across domains. | [Visit](https://outskill.link/chatgpt) |
-| **Claude** | Anthropic's AI model focused on safe, interpretable, and creative conversations with high contextual reasoning. | [Visit](https://outskill.link/claude) |
-| **Phot AI** | AI-powered tool for editing, enhancing, and generating photos or visual content. Great for quick creative visuals. | [Visit](https://outskill.link/phot) |
-| **Supergrow** | AI marketing platform to help grow leads, optimize campaigns, and accelerate audience engagement. | [Visit](https://outskill.link/supergrow) |
-| **Perplexity** | AI search engine combining live web data and LLM reasoning to give factual, cited answers. | [Visit](https://outskill.link/perplexity) |
-| **Writesonic** | AI content generation platform for blogs, ads, and marketing copy. Boosts productivity for writers and marketers. | [Visit](https://outskill.link/writesonic) |
-| **Numerous AI** | A multi-purpose AI platform offering various automation and generation tools under one suite. | [Visit](https://outskill.link/numerous) |
-| **Genspark** | Generates creative ideas, articles, and media using generative AI — a "spark" for inspiration. | [Visit](https://outskill.link/genspark) |
-| **Suno** | AI music generator for composing songs, jingles, and soundscapes from text prompts. | [Visit](https://outskill.link/suno) |
-| **Notebook LM** | Google's AI research assistant that summarizes, queries, and connects your notes and documents intelligently. | [Visit](https://outskill.link/notebook-lm) |
-| **Social Sonic** | Helps create, schedule, and optimize social media content using AI-driven insights. | [Visit](https://outskill.link/socialsonic) |
-| **Bolt** | Developer tool or automation assistant built for fast prototyping and deployment of apps or workflows. | [Visit](https://outskill.link/bolt) |
-| **Vapi** | Voice or visual API platform enabling AI calling agents or multimodal experiences. | [Visit](https://outskill.link/vapi) |
-| **HeyGen** | AI video generator that turns text or scripts into realistic avatar videos with voice and lip sync. | [Visit](https://outskill.link/heygen) |
-| **Chronicle** | AI-powered tool for journaling, storytelling, or knowledge management to capture key moments. | [Visit](https://outskill.link/chronicle) |
-| **Runway ML** | Creative AI suite for video editing, image generation, and media production using machine learning. | [Visit](https://outskill.link/runwayml) |
-| **Midjourney** | Text-to-image model producing high-quality, artistic visuals for creators and designers. | [Visit](https://outskill.link/midjourney) |
-| **Kling** | Emerging generative video platform focusing on ultra-realistic, cinematic outputs. | [Visit](https://outskill.link/kling) |
-| **Krea** | AI design and art creation tool enabling rapid visual exploration and creative experimentation. | [Visit](https://outskill.link/krea) |
-| **Leonardo** | AI art platform for creating game assets, illustrations, and concept art using text prompts. | [Visit](https://outskill.link/leonardo) |
-| **Eleven Labs** | Industry-leading AI voice synthesis platform for lifelike text-to-speech and dubbing. | [Visit](https://outskill.link/elevenlabs) |
-| **Higgsfield** | Advanced AI company developing realistic 3D / video generation technology for creative industries. | [Visit](https://outskill.link/higgsfield) |
-| **Humanic AI** | Focuses on human-centric AI for personalization, empathy modeling, and user understanding. | [Visit](https://outskill.link/humanic) |
-| **Magnific AI** | AI image upscaler and enhancer that adds detail, improves resolution, and refines visuals. | [Visit](https://outskill.link/magnific) |
-| **Lovable** | AI design assistant helping teams quickly create delightful, user-friendly web apps. | [Visit](https://outskill.link/lovable) |
-| **Emergent** | AI discovery engine identifying emerging trends, ideas, and insights from large datasets. | [Visit](https://outskill.link/emergent) |
-| **Happenstance** | AI idea generator fostering serendipitous discoveries, creative prompts, and connections. | [Visit](https://outskill.link/happenstance) |
-| **Granola** | AI note-taking assistant for meetings — transcribes, summarizes, and organizes discussions. | [Visit](https://outskill.link/granola) |
-| **Crystal** | AI tool that analyzes personality and communication style to improve interpersonal effectiveness. | [Visit](https://outskill.link/crystal-knows) |
-| **Lyzr AI** | AI platform for analytics and automation — "laser-focused" insight generation and workflow optimization. | [Visit](https://outskill.link/lyzr) |
-| **Rocket** | Automation tool that accelerates tasks, launches workflows, or optimizes processes using AI. | [Visit](https://outskill.link/rocket) |
-| **Replit** | Collaborative online IDE with AI code assistance for real-time coding and learning. | [Visit](https://outskill.link/replit) |
-
----
-
-# 13. Quick Cheat Sheet
+### B.5 General Concepts
 
 | Concept | One-Liner |
 |---------|-----------|
@@ -1494,7 +1480,7 @@ A curated list of popular AI tools across different categories — from conversa
 | **Knowledge Cutoff** | AI's "last updated" date |
 | **Context Window** | How much AI can "remember" in a conversation |
 | **VERIFY** | 6-step checklist for responsible AI use |
-| **CRAFT** | 5-part recipe for better prompts |
+| **COSTAR** | 6-part prompting framework (Context, Objective, Style, Tone, Audience, Response) |
 | **Few-Shot** | Teaching AI by showing examples |
 | **RAG** | AI + your documents |
 | **Workflow** | Fixed sequence of AI steps |
@@ -1504,5 +1490,3 @@ A curated list of popular AI tools across different categories — from conversa
 ---
 
 *Remember: AI is a powerful tool, not magic. You're the pilot — AI is the autopilot. Know when to take the controls.*
-
----
