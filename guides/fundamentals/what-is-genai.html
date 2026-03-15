@@ -565,30 +565,32 @@
       darkGreen: '#1a9456',
     };
 
+    const OUTPUT_TYPES = [
+      { icon: '📝', label: 'Text' },
+      { icon: '🖼️', label: 'Images' },
+      { icon: '💻', label: 'Code' },
+      { icon: '🎵', label: 'Audio' },
+      { icon: '🎬', label: 'Video' },
+    ];
+
     function S1() {
-      const [outputs, setOutputs] = useState([]);
+      const [count, setCount] = useState(0);
 
       useEffect(() => {
-        const outputTypes = [
-          { icon: '📝', label: 'Text' },
-          { icon: '🖼️', label: 'Images' },
-          { icon: '💻', label: 'Code' },
-          { icon: '🎵', label: 'Audio' },
-          { icon: '🎬', label: 'Video' },
-        ];
-
-        let index = 0;
         const interval = setInterval(() => {
-          if (index < outputTypes.length) {
-            setOutputs(prev => [...prev, outputTypes[index]]);
-            index++;
-          } else {
-            clearInterval(interval);
-          }
+          setCount(prev => {
+            if (prev >= OUTPUT_TYPES.length) {
+              clearInterval(interval);
+              return prev;
+            }
+            return prev + 1;
+          });
         }, 400);
 
         return () => clearInterval(interval);
       }, []);
+
+      const outputs = OUTPUT_TYPES.slice(0, count);
 
       return (
         <>
