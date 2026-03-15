@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Types of AI Models - Foundational, Proprietary, Open Source</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f8f9fa;
+      color: #1a1a1a;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    @keyframes blink {
+      0%, 49%, 100% {
+        opacity: 1;
+      }
+      50%, 99% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const STAGES = [
+      { icon: "\u{1F3ED}", label: "Foundation", title: "Foundational Models", sub: "The AI engines that power everything" },
+      { icon: "\u{1F512}", label: "Proprietary", title: "Proprietary Models", sub: "Secret recipe, API access only" },
+      { icon: "\u{1F513}", label: "Open Source", title: "Open Source Models", sub: "Public recipe, full control" },
+      { icon: "\u{1F4F1}", label: "Apps", title: "Application Layer", sub: "Products built on top of models" },
+      { icon: "\u2696\uFE0F", label: "Compare", title: "Choosing the Right Model", sub: "Decision framework for your use case" },
+    ];
+
+    const P = {
+      root: {
+        display: 'flex',
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        backgroundColor: '#f8f9fa',
+      },
+      sidebar: {
+        width: '240px',
+        backgroundColor: '#fff',
+        borderRight: '1px solid #e0e0e0',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '24px 20px',
+        overflowY: 'auto',
+        position: 'relative',
+      },
+      backLink: {
+        fontSize: '13px',
+        color: '#6c5ce7',
+        textDecoration: 'none',
+        marginBottom: '24px',
+        fontWeight: 500,
+        transition: 'color 0.2s',
+        ':hover': {
+          color: '#5a4bc4',
+        },
+      },
+      stepContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        flex: 1,
+        position: 'relative',
+      },
+      stepLine: {
+        position: 'absolute',
+        left: '38px',
+        top: '48px',
+        width: '2px',
+        height: 'calc(100% - 96px)',
+        backgroundColor: '#e0e0e0',
+      },
+      stepLineActive: {
+        position: 'absolute',
+        left: '38px',
+        top: '48px',
+        width: '2px',
+        height: 'calc(100% - 96px)',
+        backgroundColor: '#6c5ce7',
+        transition: 'height 0.3s ease',
+      },
+      stepButton: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '12px',
+        backgroundColor: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+        borderRadius: '8px',
+        transition: 'all 0.2s',
+        fontSize: '13px',
+        color: '#666',
+        fontWeight: 500,
+        position: 'relative',
+        zIndex: 1,
+      },
+      stepButtonActive: {
+        backgroundColor: '#f0e8ff',
+        color: '#6c5ce7',
+      },
+      stepCircle: {
+        width: '32px',
+        height: '32px',
+        borderRadius: '50%',
+        backgroundColor: '#f0f0f0',
+        border: '2px solid #ddd',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '16px',
+        flexShrink: 0,
+        transition: 'all 0.2s',
+      },
+      stepCircleActive: {
+        width: '32px',
+        height: '32px',
+        borderRadius: '50%',
+        backgroundColor: '#6c5ce7',
+        border: '2px solid #6c5ce7',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '16px',
+        color: '#fff',
+        flexShrink: 0,
+        fontWeight: 700,
+      },
+      main: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        overflow: 'hidden',
+      },
+      topBar: {
+        backgroundColor: '#fff',
+        borderBottom: '1px solid #e0e0e0',
+        padding: '16px 32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: '64px',
+      },
+      badge: {
+        display: 'inline-block',
+        padding: '6px 12px',
+        backgroundColor: '#6c5ce7',
+        color: '#fff',
+        borderRadius: '20px',
+        fontSize: '11px',
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginRight: '12px',
+      },
+      title: {
+        fontSize: '20px',
+        fontWeight: 600,
+        color: '#1a1a1a',
+        fontFamily: "'Fraunces', serif",
+      },
+      navRow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+      },
+      navBtn: {
+        padding: '8px 12px',
+        backgroundColor: '#f0f0f0',
+        border: '1px solid #ddd',
+        borderRadius: '6px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        color: '#1a1a1a',
+        transition: 'all 0.2s',
+        fontWeight: 500,
+      },
+      navBtnDisabled: {
+        opacity: 0.5,
+        cursor: 'not-allowed',
+        backgroundColor: '#f8f8f8',
+      },
+      navP: {
+        fontSize: '12px',
+        color: '#888',
+        fontWeight: 500,
+      },
+      content: {
+        flex: 1,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '32px 40px',
+      },
+      explainRow: {
+        marginBottom: '28px',
+        animation: 'fadeIn 0.3s ease-in',
+      },
+      explain: {
+        fontSize: '15px',
+        lineHeight: '1.6',
+        color: '#444',
+        marginBottom: '8px',
+      },
+      scene: {
+        flex: 1,
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        border: '1px solid #e0e0e0',
+        padding: '28px',
+        marginBottom: '20px',
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        animation: 'fadeIn 0.3s ease-in',
+        minHeight: '0',
+      },
+      insight: {
+        padding: '16px 20px',
+        backgroundColor: '#f0f7ff',
+        borderLeft: '4px solid #6c5ce7',
+        borderRadius: '6px',
+        fontSize: '13px',
+        lineHeight: '1.5',
+        color: '#2c3e50',
+        fontStyle: 'italic',
+        animation: 'fadeIn 0.3s ease-in',
+      },
+    };
+
+    // Stage 1: Foundational Models
+    const S1 = () => {
+      const [expandedModel, setExpandedModel] = useState(null);
+
+      const models = [
+        { name: 'GPT-4', company: 'OpenAI', stat: 'Multimodal' },
+        { name: 'Claude 3.5', company: 'Anthropic', stat: 'Constitutional AI' },
+        { name: 'Llama 3.1', company: 'Meta', stat: 'Open Source' },
+        { name: 'Gemini', company: 'Google', stat: 'Multi-modal' },
+      ];
+
+      return (
+        <div style={P.scene}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '32px',
+            animation: 'slideIn 0.4s ease-out',
+          }}>
+            <div style={{
+              fontSize: '64px',
+              marginBottom: '16px',
+              animation: 'pulse 2s infinite',
+            }}>
+              \u{1F3ED}
+            </div>
+            <div style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              color: '#1a1a1a',
+              marginBottom: '8px',
+            }}>
+              The AI Engine
+            </div>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '20px',
+            width: '100%',
+            maxWidth: '500px',
+            marginBottom: '28px',
+          }}>
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#f0f0f0',
+              borderRadius: '8px',
+              textAlign: 'center',
+              animation: 'slideIn 0.4s ease-out 0.1s backwards',
+            }}>
+              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px' }}>Training Cost</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>$10M–$100M+</div>
+            </div>
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#f0f0f0',
+              borderRadius: '8px',
+              textAlign: 'center',
+              animation: 'slideIn 0.4s ease-out 0.2s backwards',
+            }}>
+              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px' }}>Data</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>Trillions of Tokens</div>
+            </div>
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#f0f0f0',
+              borderRadius: '8px',
+              textAlign: 'center',
+              animation: 'slideIn 0.4s ease-out 0.3s backwards',
+            }}>
+              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px' }}>Purpose</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>General-Purpose</div>
+            </div>
+          </div>
+
+          <div style={{ width: '100%', maxWidth: '500px', marginTop: '24px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>Examples:</div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px',
+            }}>
+              {models.map((model, i) => (
+                <div
+                  key={i}
+                  onClick={() => setExpandedModel(expandedModel === i ? null : i)}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: expandedModel === i ? '#6c5ce7' : '#f5f5f5',
+                    color: expandedModel === i ? '#fff' : '#1a1a1a',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    transition: 'all 0.2s',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div>{model.name}</div>
+                  {expandedModel === i && (
+                    <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.9 }}>
+                      {model.company} • {model.stat}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Stage 2: Proprietary Models
+    const S2 = () => {
+      const [expandedCard, setExpandedCard] = useState(null);
+
+      const models = [
+        { name: 'GPT-4 / GPT-4o', company: 'OpenAI', access: 'API Only' },
+        { name: 'Claude 3.5 / 4', company: 'Anthropic', access: 'API Only' },
+        { name: 'Gemini', company: 'Google', access: 'API Only' },
+      ];
+
+      const pros = ['Highest performance', 'Managed infrastructure', 'Regular updates'];
+      const cons = ['No customization', 'Vendor lock-in', 'Data privacy concerns'];
+
+      return (
+        <div style={P.scene}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '24px',
+            animation: 'slideIn 0.4s ease-out',
+          }}>
+            <div style={{
+              fontSize: '48px',
+              marginBottom: '12px',
+            }}>
+              \u{1F512}
+            </div>
+            <div style={{
+              fontSize: '15px',
+              color: '#666',
+              maxWidth: '400px',
+            }}>
+              Access via API • Weights & Training Data Hidden
+            </div>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '16px',
+            width: '100%',
+            maxWidth: '500px',
+            marginBottom: '28px',
+          }}>
+            {models.map((model, i) => (
+              <div
+                key={i}
+                onClick={() => setExpandedCard(expandedCard === i ? null : i)}
+                style={{
+                  padding: '16px',
+                  backgroundColor: '#f8f8f8',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  transform: expandedCard === i ? 'translateY(-4px)' : 'translateY(0)',
+                  boxShadow: expandedCard === i ? '0 4px 12px rgba(108, 92, 231, 0.15)' : 'none',
+                }}
+              >
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>{model.name}</div>
+                <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>{model.company}</div>
+                <div style={{ fontSize: '11px', color: '#666', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  \u{1F512} {model.access}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            padding: '20px',
+            backgroundColor: '#f0f7ff',
+            borderRadius: '8px',
+            marginBottom: '20px',
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#2c5aa0', marginBottom: '8px' }}>PROS</div>
+                <ul style={{ fontSize: '12px', color: '#444', lineHeight: '1.6', paddingLeft: '16px' }}>
+                  {pros.map((p, i) => <li key={i}>{p}</li>)}
+                </ul>
+              </div>
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#c0392b', marginBottom: '8px' }}>CONS</div>
+                <ul style={{ fontSize: '12px', color: '#444', lineHeight: '1.6', paddingLeft: '16px' }}>
+                  {cons.map((c, i) => <li key={i}>{c}</li>)}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            padding: '16px',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '8px',
+            fontSize: '12px',
+            color: '#666',
+            textAlign: 'center',
+            lineHeight: '1.5',
+          }}>
+            <div style={{ marginBottom: '8px', fontWeight: 600 }}>Your App</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>↓ API Request ↓</div>
+            <div style={{ marginTop: '8px', marginBottom: '8px', fontWeight: 600 }}>Cloud (Provider's Infrastructure)</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>↓ Response ↓</div>
+            <div style={{ marginTop: '8px', fontWeight: 600 }}>Your App</div>
+          </div>
+        </div>
+      );
+    };
+
+    // Stage 3: Open Source Models
+    const S3 = () => {
+      const [expandedModel, setExpandedModel] = useState(null);
+      const [showPros, setShowPros] = useState(true);
+
+      const models = [
+        { name: 'Llama 3.1', company: 'Meta', range: '8B–405B', color: '#6c5ce7' },
+        { name: 'Mistral', company: 'Mistral AI', range: '7B–8x22B', color: '#2ecc71' },
+        { name: 'Falcon', company: 'TII', range: '7B–180B', color: '#e74c3c' },
+        { name: 'Gemma', company: 'Google', range: '2B–27B', color: '#3498db' },
+      ];
+
+      const pros = ['Free to download', 'Fully customizable', 'Data stays private', 'No vendor lock-in'];
+      const cons = ['Require infrastructure', 'Slightly lower performance', 'Need ML expertise', 'Support from community'];
+
+      return (
+        <div style={P.scene}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '24px',
+            animation: 'slideIn 0.4s ease-out',
+          }}>
+            <div style={{
+              fontSize: '48px',
+              marginBottom: '12px',
+            }}>
+              \u{1F513}
+            </div>
+            <div style={{
+              fontSize: '15px',
+              color: '#666',
+              maxWidth: '400px',
+            }}>
+              Weights & Code Available • Run on Your Hardware
+            </div>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '14px',
+            width: '100%',
+            maxWidth: '480px',
+            marginBottom: '24px',
+          }}>
+            {models.map((model, i) => (
+              <div
+                key={i}
+                onClick={() => setExpandedModel(expandedModel === i ? null : i)}
+                style={{
+                  padding: '14px',
+                  backgroundColor: '#f8f8f8',
+                  border: `2px solid ${expandedModel === i ? model.color : '#e0e0e0'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <div style={{ fontSize: '14px', fontWeight: 600, color: model.color }}>{model.name}</div>
+                <div style={{ fontSize: '11px', color: '#888', marginTop: '3px' }}>{model.company}</div>
+                {expandedModel === i && (
+                  <div style={{ marginTop: '8px', fontSize: '11px', color: '#666', fontWeight: 500 }}>
+                    {model.range}
+                  </div>
+                )}
+                <div style={{
+                  marginTop: '8px',
+                  height: '6px',
+                  backgroundColor: '#e0e0e0',
+                  borderRadius: '3px',
+                  overflow: 'hidden',
+                }}>
+                  <div style={{
+                    height: '100%',
+                    backgroundColor: model.color,
+                    width: `${Math.random() * 40 + 60}%`,
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            marginBottom: '20px',
+          }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+              <button
+                onClick={() => setShowPros(true)}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  backgroundColor: showPros ? '#2ecc71' : '#f0f0f0',
+                  color: showPros ? '#fff' : '#666',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                Advantages
+              </button>
+              <button
+                onClick={() => setShowPros(false)}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  backgroundColor: !showPros ? '#e74c3c' : '#f0f0f0',
+                  color: !showPros ? '#fff' : '#666',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                Challenges
+              </button>
+            </div>
+            <div style={{
+              padding: '14px',
+              backgroundColor: showPros ? '#f0f8f4' : '#fef4f3',
+              borderRadius: '6px',
+              fontSize: '12px',
+              color: '#444',
+              lineHeight: '1.5',
+            }}>
+              <ul style={{ paddingLeft: '16px' }}>
+                {(showPros ? pros : cons).map((item, i) => (
+                  <li key={i} style={{ marginBottom: '6px' }}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            padding: '16px',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '8px',
+            fontSize: '12px',
+            color: '#666',
+            textAlign: 'center',
+            lineHeight: '1.6',
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: '8px' }}>Deployment Flow</div>
+            <div>Download Model \u{2192} Upload to Your Hardware \u{2192} Full Control</div>
+          </div>
+        </div>
+      );
+    };
+
+    // Stage 4: Application Layer
+    const S4 = () => {
+      const [selectedApp, setSelectedApp] = useState(null);
+
+      const apps = [
+        { name: 'Perplexity', models: ['GPT-4', 'Claude 3.5'], icon: '\u{1F50E}' },
+        { name: 'Gamma', models: ['GPT-4', 'Claude 3.5'], icon: '\u{1F4C4}' },
+        { name: 'Cursor', models: ['GPT-4', 'Claude 3.5'], icon: '\u{1F5A5}' },
+        { name: 'Copy.ai', models: ['GPT-4', 'Llama'], icon: '\u{2728}' },
+      ];
+
+      return (
+        <div style={P.scene}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '28px',
+            animation: 'slideIn 0.4s ease-out',
+          }}>
+            <div style={{
+              fontSize: '48px',
+              marginBottom: '12px',
+            }}>
+              \u{1F4F1}
+            </div>
+            <div style={{
+              fontSize: '15px',
+              color: '#666',
+              maxWidth: '400px',
+            }}>
+              Products built ON TOP of foundational models
+            </div>
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '520px',
+            marginBottom: '28px',
+          }}>
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#f8f8f8',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              textAlign: 'center',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#666',
+            }}>
+              FOUNDATIONAL MODELS
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px',
+              marginBottom: '16px',
+            }}>
+              {['GPT-4', 'Claude', 'Llama', 'Gemini'].map((model, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: '#6c5ce7',
+                    color: '#fff',
+                    borderRadius: '6px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                  }}
+                >
+                  {model}
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              fontSize: '12px',
+              textAlign: 'center',
+              color: '#999',
+              margin: '12px 0',
+            }}>
+              \u{2191} POWERS \u{2191}
+            </div>
+
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#f8f8f8',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              textAlign: 'center',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#666',
+            }}>
+              APPLICATION LAYER
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px',
+              marginBottom: '16px',
+            }}>
+              {apps.map((app, i) => (
+                <div
+                  key={i}
+                  onClick={() => setSelectedApp(selectedApp === i ? null : i)}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: selectedApp === i ? '#2ecc71' : '#f5f5f5',
+                    color: selectedApp === i ? '#fff' : '#1a1a1a',
+                    borderRadius: '6px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <div style={{ fontSize: '16px', marginBottom: '4px' }}>{app.icon}</div>
+                  {app.name}
+                  {selectedApp === i && (
+                    <div style={{ fontSize: '10px', marginTop: '6px', opacity: 0.9, fontWeight: 400 }}>
+                      Uses: {app.models.join(', ')}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              fontSize: '12px',
+              textAlign: 'center',
+              color: '#999',
+              margin: '12px 0',
+            }}>
+              \u{2191} SERVES \u{2191}
+            </div>
+
+            <div style={{
+              padding: '16px',
+              backgroundColor: '#f8f8f8',
+              borderRadius: '8px',
+              textAlign: 'center',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#666',
+            }}>
+              END USERS
+            </div>
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            padding: '16px',
+            backgroundColor: '#f0f7ff',
+            borderRadius: '8px',
+            fontSize: '12px',
+            color: '#444',
+            lineHeight: '1.6',
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: '8px', color: '#2c5aa0' }}>THE CAR ANALOGY</div>
+            <table style={{ width: '100%', fontSize: '11px' }}>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #d0d9e8' }}>
+                  <td style={{ padding: '6px 0', fontWeight: 600 }}>Engine</td>
+                  <td style={{ padding: '6px 0' }}>Toyota, Ford, BMW</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #d0d9e8' }}>
+                  <td style={{ padding: '6px 0', fontWeight: 600 }}>Car Service</td>
+                  <td style={{ padding: '6px 0' }}>Uber, Lyft, Grab</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '6px 0', fontWeight: 600 }}>Passenger</td>
+                  <td style={{ padding: '6px 0' }}>You</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    };
+
+    // Stage 5: Decision Framework
+    const S5 = () => {
+      const [priority, setPriority] = useState(null);
+
+      const priorities = [
+        { name: 'Performance', icon: '\u{26A1}', rec: 'Proprietary' },
+        { name: 'Privacy', icon: '\u{1F512}', rec: 'Open Source' },
+        { name: 'Cost', icon: '\u{1F4B0}', rec: 'Open Source' },
+        { name: 'Ease of Use', icon: '\u{1F31F}', rec: 'Application Layer' },
+      ];
+
+      const comparison = [
+        { label: 'Cost', prop: 'Pay per token', os: 'Free', app: 'Subscription' },
+        { label: 'Customization', prop: 'None', os: 'Full', app: 'Limited' },
+        { label: 'Data Privacy', prop: 'Cloud-based', os: 'Your hardware', app: 'Provider\'s servers' },
+        { label: 'Best For', prop: 'High-perf apps', os: 'Custom solutions', app: 'Quick start' },
+      ];
+
+      return (
+        <div style={P.scene}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '24px',
+            animation: 'slideIn 0.4s ease-out',
+          }}>
+            <div style={{
+              fontSize: '48px',
+              marginBottom: '12px',
+            }}>
+              \u{2696}\uFE0F
+            </div>
+            <div style={{
+              fontSize: '15px',
+              color: '#666',
+              maxWidth: '400px',
+            }}>
+              Match your priorities to the right model type
+            </div>
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            marginBottom: '24px',
+          }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>What's your priority?</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              {priorities.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPriority(priority === i ? null : i)}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: priority === i ? '#6c5ce7' : '#f0f0f0',
+                    color: priority === i ? '#fff' : '#1a1a1a',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <div style={{ fontSize: '16px', marginBottom: '4px' }}>{p.icon}</div>
+                  {p.name}
+                  {priority === i && (
+                    <div style={{ fontSize: '10px', marginTop: '6px', opacity: 0.9 }}>
+                      \u2192 {p.rec}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '520px',
+            marginBottom: '20px',
+            overflowX: 'auto',
+          }}>
+            <table style={{
+              width: '100%',
+              fontSize: '11px',
+              borderCollapse: 'collapse',
+              backgroundColor: '#f8f8f8',
+              borderRadius: '6px',
+              overflow: 'hidden',
+            }}>
+              <thead>
+                <tr style={{ backgroundColor: '#e8e8e8' }}>
+                  <th style={{ padding: '8px', textAlign: 'left', fontWeight: 600 }}>Aspect</th>
+                  <th style={{ padding: '8px', textAlign: 'center', fontWeight: 600 }}>Proprietary</th>
+                  <th style={{ padding: '8px', textAlign: 'center', fontWeight: 600 }}>Open Source</th>
+                  <th style={{ padding: '8px', textAlign: 'center', fontWeight: 600 }}>App Layer</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparison.map((row, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '8px', fontWeight: 500 }}>{row.label}</td>
+                    <td style={{ padding: '8px', textAlign: 'center', color: '#666' }}>{row.prop}</td>
+                    <td style={{ padding: '8px', textAlign: 'center', color: '#666' }}>{row.os}</td>
+                    <td style={{ padding: '8px', textAlign: 'center', color: '#666' }}>{row.app}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            padding: '16px',
+            backgroundColor: '#f0f7ff',
+            borderRadius: '8px',
+            fontSize: '12px',
+            color: '#444',
+            lineHeight: '1.6',
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: '8px', color: '#2c5aa0' }}>Decision Tree</div>
+            <div style={{ marginBottom: '8px' }}>
+              <strong>Do you need full control?</strong>
+              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
+                YES \u{2192} <span style={{ color: '#2ecc71', fontWeight: 600 }}>Open Source</span>
+              </div>
+            </div>
+            <div>
+              <strong>No. Is ease of use priority?</strong>
+              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
+                YES \u{2192} <span style={{ color: '#3498db', fontWeight: 600 }}>App Layer</span>
+              </div>
+              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
+                NO \u{2192} <span style={{ color: '#6c5ce7', fontWeight: 600 }}>Proprietary</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Main App
+    const App = () => {
+      const [stage, setStage] = useState(0);
+
+      const getScene = () => {
+        switch (stage) {
+          case 0: return <S1 />;
+          case 1: return <S2 />;
+          case 2: return <S3 />;
+          case 3: return <S4 />;
+          case 4: return <S5 />;
+          default: return <S1 />;
+        }
+      };
+
+      const getInsight = () => {
+        switch (stage) {
+          case 0:
+            return "Think of foundational models as Toyota engines — they power many different cars, from taxis to race cars.";
+          case 1:
+            return "You can buy the drink but can't see how it's made — highest quality, but you're dependent on the provider.";
+          case 2:
+            return "Like a recipe posted online — make it at home, modify it, or sell your own version. Full freedom.";
+          case 3:
+            return "Uber doesn't manufacture engines — they build a service using cars with existing engines. Same with Perplexity using GPT-4.";
+          case 4:
+            return "There's no single 'best' model — match the model type to your specific needs: performance, privacy, cost, or ease of use.";
+          default:
+            return "";
+        }
+      };
+
+      const getExplanation = () => {
+        switch (stage) {
+          case 0:
+            return "Foundational models are the 'engines' of AI — large pre-trained models trained on massive data that serve as the base intelligence. You don't build an engine from scratch to make a taxi service — you buy one and build around it.";
+          case 1:
+            return "Proprietary models keep their weights, training data, and code secret. You access them via API only — like Coca-Cola's secret recipe.";
+          case 2:
+            return "Open source models make weights (and sometimes code/data) publicly available. Download and run yourself — like a recipe posted online that you can modify.";
+          case 3:
+            return "Products like Perplexity, Gamma, and Cursor don't build foundational models — they build products ON TOP of them. Like Uber doesn't manufacture engines.";
+          case 4:
+            return "The right choice depends on your priorities: performance, cost, privacy, and customization. Here's how to decide.";
+          default:
+            return "";
+        }
+      };
+
+      return (
+        <div style={P.root}>
+          {/* Sidebar */}
+          <div style={P.sidebar}>
+            <a href="../../index.html" style={{...P.backLink, textDecoration: 'none', display: 'block', cursor: 'pointer' }}>
+              ← Back to All Guides
+            </a>
+
+            <div style={P.stepContainer}>
+              <div style={P.stepLine} />
+              {STAGES.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => setStage(i)}
+                  style={{
+                    ...P.stepButton,
+                    ...(stage === i ? P.stepButtonActive : {}),
+                  }}
+                >
+                  <div style={stage === i ? P.stepCircleActive : P.stepCircle}>
+                    {stage === i ? i + 1 : s.icon}
+                  </div>
+                  <div style={{ textAlign: 'left', flex: 1 }}>
+                    <div style={{ fontSize: '12px' }}>{s.label}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div style={P.main}>
+            {/* Top Bar */}
+            <div style={P.topBar}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={P.badge}>Guide</span>
+                <span style={P.title}>{STAGES[stage].title}</span>
+              </div>
+              <div style={P.navRow}>
+                <button
+                  onClick={() => setStage(Math.max(0, stage - 1))}
+                  disabled={stage === 0}
+                  style={{
+                    ...P.navBtn,
+                    ...(stage === 0 ? P.navBtnDisabled : {}),
+                  }}
+                >
+                  ← Prev
+                </button>
+                <span style={P.navP}>{stage + 1} / {STAGES.length}</span>
+                <button
+                  onClick={() => setStage(Math.min(STAGES.length - 1, stage + 1))}
+                  disabled={stage === STAGES.length - 1}
+                  style={{
+                    ...P.navBtn,
+                    ...(stage === STAGES.length - 1 ? P.navBtnDisabled : {}),
+                  }}
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div style={P.content} key={stage}>
+              <div style={P.explainRow}>
+                <div style={P.explain}>{getExplanation()}</div>
+              </div>
+              {getScene()}
+              <div style={P.insight}>{getInsight()}</div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

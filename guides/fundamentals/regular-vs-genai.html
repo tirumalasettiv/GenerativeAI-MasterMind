@@ -149,7 +149,7 @@
 
         .title {
             font-family: 'Fraunces', serif;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             color: #1a1a1a;
         }
@@ -164,7 +164,7 @@
             height: 40px;
             border: 2px solid #e0e0e0;
             background: #fff;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 18px;
             transition: all 0.2s;
@@ -187,6 +187,7 @@
             flex: 1;
             padding: 40px;
             overflow-y: auto;
+            scroll-behavior: smooth;
             display: flex;
             flex-direction: column;
             gap: 30px;
@@ -208,14 +209,15 @@
             align-items: center;
             justify-content: center;
             border: 2px solid #e0e0e0;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
             animation: fadeIn 0.6s ease;
         }
 
         .insight-box {
-            background: #f0f0f0;
+            background: #f0faf0;
             padding: 24px;
             border-radius: 12px;
-            border-left: 4px solid #6c5ce7;
+            border-left: 4px solid #2ecc71;
             font-size: 16px;
             line-height: 1.6;
             color: #333;
@@ -239,7 +241,7 @@
                 opacity: 1;
             }
             50% {
-                opacity: 0.5;
+                opacity: 0.7;
             }
         }
 
@@ -269,7 +271,7 @@
 
         .panel-title {
             font-family: 'Fraunces', serif;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #6c5ce7;
         }
@@ -363,7 +365,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             transition: all 0.2s;
         }
 
@@ -412,7 +414,7 @@
         }
 
         .comparison-col-text {
-            font-size: 14px;
+            font-size: 15px;
             color: #333;
             line-height: 1.5;
         }
@@ -453,12 +455,12 @@
         .card-title {
             font-family: 'Fraunces', serif;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 18px;
             margin-bottom: 12px;
         }
 
         .card-desc {
-            font-size: 13px;
+            font-size: 15px;
             line-height: 1.4;
             opacity: 0.8;
         }
@@ -513,7 +515,7 @@
             cursor: move;
             border: 2px solid #e0e0e0;
             transition: all 0.2s;
-            font-size: 14px;
+            font-size: 15px;
             text-align: center;
         }
 
@@ -568,7 +570,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        \u0031
+                        {"\uD83C\uDFAF"}
                     </button>
                     <div className="step-label">The Core</div>
                 </div>
@@ -587,7 +589,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        \u0032
+                        {"\uD83D\uDCDA"}
                     </button>
                     <div className="step-label">Analogy</div>
                 </div>
@@ -606,7 +608,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        \u0033
+                        {"\u26A1"}
                     </button>
                     <div className="step-label">Examples</div>
                 </div>
@@ -625,7 +627,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        \u0034
+                        {"\uD83E\uDDE9"}
                     </button>
                     <div className="step-label">Types</div>
                 </div>
@@ -644,7 +646,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        \u0035
+                        {"\uD83C\uDFAE"}
                     </button>
                     <div className="step-label">When to Use</div>
                 </div>
@@ -655,29 +657,30 @@
             return (
                 <>
                     <p className="explanation">
-                        Regular AI finds, sorts, or decides \u2014 Generative AI creates something new. One is a Picker, the other is a Maker.
+                        Regular AI finds, sorts, or decides — Generative AI creates something new. One is a Picker, the other is a Maker.
                     </p>
                     <div className="scene-card">
                         <div className="split-screen">
                             <div className="split-panel">
-                                <div className="panel-title">\ud83d\udd0d Regular AI</div>
-                                <div className="icon-large">\ud83d\udd0d</div>
+                                <div className="panel-title">🔍 Regular AI</div>
+                                <div className="icon-large">🔍</div>
                                 <p style={{ fontSize: '14px', color: '#666', textAlign: 'center' }}>Finds existing items</p>
                                 <div style={{ marginTop: '20px', padding: '16px', background: '#e8e4ff', borderRadius: '8px', fontSize: '13px' }}>
-                                    Search \u2192 Find \u2192 Sort
+                                    Search → Find → Sort
                                 </div>
                             </div>
                             <div className="split-panel">
-                                <div className="panel-title">\u270d\ufe0f Generative AI</div>
-                                <div className="icon-large">\u270d\ufe0f</div>
+                                <div className="panel-title">✍️ Generative AI</div>
+                                <div className="icon-large">✍️</div>
                                 <p style={{ fontSize: '14px', color: '#666', textAlign: 'center' }}>Creates new content</p>
                                 <div style={{ marginTop: '20px', padding: '16px', background: '#e8f8f5', borderRadius: '8px', fontSize: '13px' }}>
-                                    Prompt \u2192 Generate \u2192 Create
+                                    Prompt → Generate → Create
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="insight-box">
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
                         Both are AI. Generative AI is just a specific type that focuses on creation rather than selection.
                     </div>
                 </>
@@ -690,25 +693,25 @@
             return (
                 <>
                     <p className="explanation">
-                        Regular AI is like a librarian \u2014 finds existing books. Generative AI is like an author \u2014 writes new ones.
+                        Regular AI is like a librarian — finds existing books. Generative AI is like an author — writes new ones.
                     </p>
                     <div className="scene-card">
                         <div className="split-screen">
                             <div className="split-panel">
-                                <div className="panel-title">\ud83d\udcda Librarian (Regular AI)</div>
+                                <div className="panel-title">📚 Librarian (Regular AI)</div>
                                 <div className="librarian-scene">
                                     <div className="books">
                                         <div className="book"></div>
                                         <div className="book"></div>
                                         <div className="book"></div>
                                     </div>
-                                    <div className="icon-large">\ud83d\udcda</div>
+                                    <div className="icon-large">📚</div>
                                     <div className="interactive-prompt">Click a question below</div>
                                     <button
                                         className="question-btn"
                                         onClick={() => setShowResponse('find')}
                                     >
-                                        \u2754 Find me a book
+                                        ❔ Find me a book
                                     </button>
                                     {showResponse === 'find' && (
                                         <div className="response">
@@ -718,16 +721,16 @@
                                 </div>
                             </div>
                             <div className="split-panel">
-                                <div className="panel-title">\u270d\ufe0f Author (Generative AI)</div>
+                                <div className="panel-title">✍️ Author (Generative AI)</div>
                                 <div className="librarian-scene">
                                     <div style={{ width: '50px', height: '70px', background: '#f0f0f0', border: '2px dashed #999', borderRadius: '4px' }}></div>
-                                    <div className="icon-large">\u270d\ufe0f</div>
+                                    <div className="icon-large">✍️</div>
                                     <div className="interactive-prompt">Click a question below</div>
                                     <button
                                         className="question-btn"
                                         onClick={() => setShowResponse('write')}
                                     >
-                                        \u2754 Write me a book
+                                        ❔ Write me a book
                                     </button>
                                     {showResponse === 'write' && (
                                         <div className="response">
@@ -739,6 +742,7 @@
                         </div>
                     </div>
                     <div className="insight-box">
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
                         A librarian is great at finding what exists. An author creates what never existed. Both are valuable.
                     </div>
                 </>
@@ -750,31 +754,31 @@
 
             const examples = {
                 search: {
-                    icon: '\ud83d\udd0d',
+                    icon: '🔍',
                     task: 'Find information',
                     regular: 'Google finds existing web pages',
                     genai: 'ChatGPT writes a new answer',
                 },
                 images: {
-                    icon: '\ud83d\uddbc\ufe0f',
+                    icon: '🖼️',
                     task: 'Get an image',
                     regular: 'Google Images finds existing photos',
                     genai: 'DALL-E creates a new image',
                 },
                 music: {
-                    icon: '\ud83c\udfa5',
+                    icon: '🎥',
                     task: 'Listen to music',
                     regular: 'Spotify recommends existing songs',
                     genai: 'Suno creates a new song',
                 },
                 shopping: {
-                    icon: '\ud83d\udecd\ufe0f',
+                    icon: '🛍️',
                     task: 'Get a product',
                     regular: 'Amazon recommends existing products',
                     genai: 'AI designs a new product',
                 },
                 email: {
-                    icon: '\ud83d\udce7',
+                    icon: '📧',
                     task: 'Manage email',
                     regular: 'Spam filter sorts spam/not spam',
                     genai: 'AI writes a new email',
@@ -803,13 +807,13 @@
                                 <div className="comparison-row-title">{examples[selectedDomain].icon} {examples[selectedDomain].task}</div>
                                 <div className="comparison-cols">
                                     <div className="comparison-col">
-                                        <div className="comparison-col-icon">\ud83d\udd0d</div>
+                                        <div className="comparison-col-icon">🔍</div>
                                         <div className="comparison-col-text">
                                             <strong>Regular AI:</strong> {examples[selectedDomain].regular}
                                         </div>
                                     </div>
                                     <div className="comparison-col">
-                                        <div className="comparison-col-icon">\u270d\ufe0f</div>
+                                        <div className="comparison-col-icon">✍️</div>
                                         <div className="comparison-col-text">
                                             <strong>Generative AI:</strong> {examples[selectedDomain].genai}
                                         </div>
@@ -819,6 +823,7 @@
                         </div>
                     </div>
                     <div className="insight-box">
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
                         Regular AI: "Here's what I found." Generative AI: "Here's what I made."
                     </div>
                 </>
@@ -832,44 +837,44 @@
                 {
                     id: 'classification',
                     title: 'Classification',
-                    icon: '\ud83d\udcc4',
+                    icon: '📄',
                     desc: 'Sorts into categories',
-                    demo: 'Email \u2192 Spam / Not Spam',
+                    demo: 'Email → Spam / Not Spam',
                 },
                 {
                     id: 'recommendation',
                     title: 'Recommendation',
-                    icon: '\u2705',
+                    icon: '✅',
                     desc: 'Suggests existing items',
-                    demo: 'Netflix \u2192 Movies you might like',
+                    demo: 'Netflix → Movies you might like',
                 },
                 {
                     id: 'prediction',
                     title: 'Prediction',
-                    icon: '\ud83d\udd2e',
+                    icon: '🔮',
                     desc: 'Forecasts outcomes',
-                    demo: 'Weather \u2192 80% chance of rain',
+                    demo: 'Weather → 80% chance of rain',
                 },
                 {
                     id: 'detection',
                     title: 'Detection',
-                    icon: '\ud83d\udea8',
+                    icon: '🚨',
                     desc: 'Finds anomalies',
-                    demo: 'Bank \u2192 Fraud detection',
+                    demo: 'Bank → Fraud detection',
                 },
                 {
                     id: 'recognition',
                     title: 'Recognition',
-                    icon: '\ud83d\udc4b',
+                    icon: '👋',
                     desc: 'Identifies things',
-                    demo: 'Phone \u2192 Face unlock',
+                    demo: 'Phone → Face unlock',
                 },
             ];
 
             return (
                 <>
                     <p className="explanation">
-                        Before GenAI, these 5 types of AI were (and still are) everywhere \u2014 none of them create, they all analyze, sort, or choose.
+                        Before GenAI, these 5 types of AI were (and still are) everywhere — none of them create, they all analyze, sort, or choose.
                     </p>
                     <div className="scene-card">
                         <div className="cards-grid">
@@ -896,7 +901,8 @@
                         </div>
                     </div>
                     <div className="insight-box">
-                        These AI types power most of the tech you use daily \u2014 from Netflix recommendations to spam filters
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
+                        These AI types power most of the tech you use daily — from Netflix recommendations to spam filters
                     </div>
                 </>
             );
@@ -935,12 +941,12 @@
             return (
                 <>
                     <p className="explanation">
-                        Understanding when to use Regular AI vs GenAI is key \u2014 use the right tool for the right job
+                        Understanding when to use Regular AI vs GenAI is key — use the right tool for the right job
                     </p>
                     <div className="scene-card">
                         <div className="drag-area">
                             <div className="drop-zone">
-                                <div className="drop-zone-title">\ud83d\udd0d Regular AI</div>
+                                <div className="drop-zone-title">🔍 Regular AI</div>
                                 {tasks
                                     .filter((t) => placed[t.id] === 'regular')
                                     .map((task) => (
@@ -949,12 +955,12 @@
                                             className="task-item correct"
                                             onClick={() => handleTaskClick(task.id, null)}
                                         >
-                                            \u2713 {task.text}
+                                            ✓ {task.text}
                                         </div>
                                     ))}
                             </div>
                             <div className="drop-zone">
-                                <div className="drop-zone-title">\u270d\ufe0f Generative AI</div>
+                                <div className="drop-zone-title">✍️ Generative AI</div>
                                 {tasks
                                     .filter((t) => placed[t.id] === 'genai')
                                     .map((task) => (
@@ -963,7 +969,7 @@
                                             className="task-item correct"
                                             onClick={() => handleTaskClick(task.id, null)}
                                         >
-                                            \u2713 {task.text}
+                                            ✓ {task.text}
                                         </div>
                                     ))}
                             </div>
@@ -973,7 +979,7 @@
                     <div style={{ display: 'flex', gap: '30px', maxWidth: '900px' }}>
                         <div style={{ flex: 1 }}>
                             <div style={{ marginBottom: '20px', fontSize: '16px', fontWeight: '600', color: P.primaryColor }}>
-                                \ud83d\udcdc Available Tasks ({unplacedTasks.length})
+                                📜 Available Tasks ({unplacedTasks.length})
                             </div>
                             {unplacedTasks.map((task) => (
                                 <div
@@ -1004,7 +1010,7 @@
                                             e.target.style.borderColor = '#e0e0e0';
                                         }}
                                     >
-                                        \ud83d\udd0d {task.text}
+                                        🔍 {task.text}
                                     </button>
                                     <button
                                         onClick={() => handleTaskClick(task.id, 'genai')}
@@ -1026,17 +1032,18 @@
                                             e.target.style.borderColor = '#e0e0e0';
                                         }}
                                     >
-                                        \u270d\ufe0f {task.text}
+                                        ✍️ {task.text}
                                     </button>
                                 </div>
                             ))}
                             <div className="score-display">
-                                \ud83c\udf1f Score: {score}/{tasks.length}
+                                🌟 Score: {score}/{tasks.length}
                             </div>
                         </div>
                     </div>
 
                     <div className="insight-box">
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
                         Regular AI = Picker (chooses from what exists). Generative AI = Maker (creates something new). Best results come from combining both.
                     </div>
                 </>
@@ -1071,9 +1078,9 @@
                     <div className="main-content">
                         <div className="top-bar">
                             <div className="top-left">
-                                <a href="../../index.html" className="back-link">\u2190 Back to All Guides</a>
+                                <a href="../../index.html" className="back-link">← Back to All Guides</a>
                                 <div className="badge">INTERACTIVE GUIDE</div>
-                                <h1 className="title">{stages[currentStage].title}</h1>
+                                <h1 className="title"><span style={{ color: '#999', fontWeight: 400, fontSize: '22px', marginRight: '10px' }}>1.2</span>{stages[currentStage].title}</h1>
                             </div>
                             <div className="nav-arrows">
                                 <button
@@ -1081,14 +1088,14 @@
                                     onClick={() => setCurrentStage(Math.max(0, currentStage - 1))}
                                     disabled={currentStage === 0}
                                 >
-                                    \u2190
+                                    ←
                                 </button>
                                 <button
                                     className="arrow-btn"
                                     onClick={() => setCurrentStage(Math.min(stages.length - 1, currentStage + 1))}
                                     disabled={currentStage === stages.length - 1}
                                 >
-                                    \u2192
+                                    →
                                 </button>
                             </div>
                         </div>

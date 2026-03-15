@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Three Critical Limitations of GenAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(108, 92, 231, 0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .cursor { animation: blink 1s infinite; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const STAGES = [
+      { icon: "\u{1F47B}", label: "Overview", title: "The Three Weaknesses", sub: "What GenAI gets wrong" },
+      { icon: "\u{1F92F}", label: "Hallucinate", title: "Hallucinations", sub: "Confidently making things up" },
+      { icon: "\u{1F4C5}", label: "Cutoff", title: "Knowledge Cutoff", sub: "Frozen in time" },
+      { icon: "\u{1F9E0}", label: "Memory", title: "Context Window", sub: "Short-term memory limits" },
+      { icon: "\u{1F6E1}\uFE0F", label: "Mitigate", title: "Mitigation Strategies", sub: "How to work around limitations" }
+    ];
+
+    const P = {
+      root: {
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'row',
+        overflow: 'hidden',
+        background: '#ffffff'
+      },
+      sidebar: {
+        width: '200px',
+        backgroundColor: '#f8f9fa',
+        borderRight: '1px solid #e0e0e0',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '40px 24px',
+        gap: '8px',
+        overflow: 'auto',
+        position: 'relative'
+      },
+      stepButton: (isActive) => ({
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '16px 12px',
+        borderRadius: '12px',
+        border: 'none',
+        backgroundColor: isActive ? '#6c5ce7' : 'transparent',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        position: 'relative',
+        color: isActive ? '#ffffff' : '#666',
+        fontSize: '11px',
+        fontWeight: '600',
+        textAlign: 'center',
+        width: '100%'
+      }),
+      stepIcon: {
+        fontSize: '24px',
+        lineHeight: '1'
+      },
+      stepConnector: {
+        position: 'absolute',
+        left: '50%',
+        width: '2px',
+        height: '8px',
+        background: '#ddd',
+        transform: 'translateX(-50%)',
+        bottom: '-8px'
+      },
+      main: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      },
+      topBar: {
+        height: '72px',
+        borderBottom: '1px solid #e0e0e0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingLeft: '40px',
+        paddingRight: '40px',
+        backgroundColor: '#ffffff'
+      },
+      badge: {
+        display: 'inline-block',
+        backgroundColor: '#6c5ce7',
+        color: '#ffffff',
+        padding: '6px 12px',
+        borderRadius: '20px',
+        fontSize: '12px',
+        fontWeight: '600',
+        marginRight: '12px'
+      },
+      title: {
+        fontSize: '28px',
+        fontFamily: 'Fraunces, serif',
+        fontWeight: '700',
+        color: '#1a1a1a'
+      },
+      navRow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '24px'
+      },
+      navBtn: (disabled) => ({
+        background: 'none',
+        border: 'none',
+        fontSize: '24px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? '0.3' : '1',
+        transition: 'all 0.2s ease',
+        padding: '8px'
+      }),
+      navP: {
+        fontSize: '14px',
+        color: '#666',
+        fontWeight: '500'
+      },
+      content: {
+        flex: 1,
+        overflow: 'auto',
+        padding: '40px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '32px'
+      },
+      explainRow: {
+        animation: 'fadeIn 0.5s ease'
+      },
+      explain: {
+        fontSize: '16px',
+        lineHeight: '1.6',
+        color: '#2a2a2a',
+        maxWidth: '800px'
+      },
+      scene: {
+        minHeight: '240px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '12px',
+        padding: '32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        animation: 'fadeIn 0.6s ease 0.1s both'
+      },
+      insight: {
+        backgroundColor: '#2ecc71',
+        color: '#ffffff',
+        padding: '24px 32px',
+        borderRadius: '12px',
+        fontSize: '16px',
+        fontWeight: '500',
+        lineHeight: '1.6',
+        marginTop: '12px',
+        animation: 'slideInLeft 0.5s ease 0.2s both',
+        borderLeft: '6px solid #1a9456'
+      },
+      backLink: {
+        position: 'absolute',
+        top: '24px',
+        left: '24px',
+        fontSize: '14px',
+        color: '#6c5ce7',
+        textDecoration: 'none',
+        fontWeight: '600',
+        transition: 'color 0.2s ease'
+      }
+    };
+
+    function S1({ onNavigate }) {
+      const [animated, setAnimated] = useState([false, false, false]);
+
+      useEffect(() => {
+        const timers = [
+          setTimeout(() => setAnimated(prev => [true, prev[1], prev[2]]), 200),
+          setTimeout(() => setAnimated(prev => [prev[0], true, prev[2]]), 400),
+          setTimeout(() => setAnimated(prev => [prev[0], prev[1], true]), 600)
+        ];
+        return () => timers.forEach(t => clearTimeout(t));
+      }, []);
+
+      const cards = [
+        { icon: "\u{1F47B}", title: "Hallucinations", desc: "Makes things up confidently", color: "#ff6b6b", idx: 0 },
+        { icon: "\u{1F4C5}", title: "Knowledge Cutoff", desc: "Frozen knowledge at training date", color: "#ffa500", idx: 1 },
+        { icon: "\u{1F9E0}", title: "Context Window", desc: "Forgets long conversations", color: "#ffd700", idx: 2 }
+      ];
+
+      return (
+        <>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              GenAI has three major weaknesses that every user must understand: it can make things up (hallucinations), its knowledge has a cutoff date, and it can only 'remember' a limited conversation.
+            </p>
+          </div>
+          <div style={P.scene}>
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {cards.map((card, i) => (
+                <div
+                  key={i}
+                  onClick={() => onNavigate(i + 1)}
+                  style={{
+                    width: '180px',
+                    padding: '24px',
+                    backgroundColor: '#ffffff',
+                    borderLeft: `6px solid ${card.color}`,
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    opacity: animated[i] ? 1 : 0,
+                    transform: animated[i] ? 'scale(1)' : 'scale(0.9)',
+                    transition: 'all 0.4s ease',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    animation: animated[i] ? 'pulse 2s infinite' : 'none'
+                  }}
+                >
+                  <div style={{ fontSize: '40px', marginBottom: '12px' }}>{card.icon}</div>
+                  <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1a1a1a' }}>
+                    {card.title}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#666' }}>
+                    {card.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={P.insight}>
+            Understanding these limitations is the difference between using AI effectively and being misled by it.
+          </div>
+        </>
+      );
+    }
+
+    function S2({ onNavigate }) {
+      const [verified, setVerified] = useState({});
+      const [activeExample, setActiveExample] = useState(0);
+
+      const examples = [
+        {
+          question: "What research papers did Dr. Sarah Chen publish in 2023?",
+          responses: [
+            { title: "Neural Architectures for Quantum Computing", doi: "10.1234/qc.2023.1089" },
+            { title: "Interpretability in Deep Language Models", doi: "10.5678/dl.2023.0456" },
+            { title: "Graph Networks for Climate Prediction", doi: "10.9012/cp.2023.7834" }
+          ]
+        },
+        {
+          question: "Who won the Nobel Prize in Physics in 2015?",
+          responses: [
+            { title: "Research in gravitational wave detection", doi: "N/A" },
+            { title: "Discovery of cosmic background radiation patterns", doi: "N/A" },
+            { title: "Theoretical work on particle acceleration", doi: "N/A" }
+          ]
+        },
+        {
+          question: "What percentage of global gdp comes from AI?",
+          responses: [
+            { title: "In 2024, AI contributed 34.2% to global GDP growth", doi: "STAT-2024-001" },
+            { title: "By 2030, AI market is projected to reach $5.7 trillion", doi: "FORECAST-2024" },
+            { title: "Emerging markets show 42% AI adoption rate", doi: "SURVEY-2024-002" }
+          ]
+        }
+      ];
+
+      const example = examples[activeExample];
+
+      return (
+        <>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              It's like a confident friend who never admits they don't know something. Instead of saying "I don't know," GenAI will confidently make up an answer that sounds completely plausible but is totally wrong.
+            </p>
+          </div>
+          <div style={P.scene}>
+            <div style={{ width: '100%' }}>
+              <div style={{ marginBottom: '24px', padding: '20px', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #ddd' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>USER:</div>
+                <div style={{ fontSize: '15px', color: '#1a1a1a', fontWeight: '500' }}>{example.question}</div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>AI RESPONSE:</div>
+                <div style={{ display: 'grid', gap: '12px' }}>
+                  {example.responses.map((resp, i) => (
+                    <div key={i} style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e74c3c', position: 'relative' }}>
+                      <div style={{ fontSize: '14px', color: '#1a1a1a', marginBottom: '8px', fontWeight: '500' }}>
+                        {resp.title}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#7f8c8d', marginBottom: '12px' }}>
+                        DOI: {resp.doi}
+                      </div>
+                      <button
+                        onClick={() => setVerified({ ...verified, [i]: true })}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          backgroundColor: '#6c5ce7',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontWeight: '600'
+                        }}
+                      >
+                        Verify
+                      </button>
+                      {verified[i] && (
+                        <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#ffe6e6', borderRadius: '4px', fontSize: '13px', color: '#c0392b', fontWeight: '500' }}>
+                          ❌ This paper does NOT exist!
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>AI Confidence</div>
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#e74c3c' }}>98%</div>
+                </div>
+                <div style={{ borderLeft: '1px solid #ddd', height: '40px' }}></div>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Actual Accuracy</div>
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#e74c3c' }}>0%</div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '20px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                {examples.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setActiveExample(i); setVerified({}); }}
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      backgroundColor: activeExample === i ? '#6c5ce7' : '#ddd',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={P.insight}>
+            AI doesn't know what it doesn't know — it fills gaps with plausible-sounding fiction. Always verify critical facts.
+          </div>
+        </>
+      );
+    }
+
+    function S3() {
+      const [cutoffPosition, setCutoffPosition] = useState(50);
+      const [selectedQuestion, setSelectedQuestion] = useState(0);
+
+      const questions = [
+        { q: "Who won the 2024 Super Bowl?", year: 2024 },
+        { q: "What's the latest iPhone model?", year: 2024 },
+        { q: "What happened in the 2024 US Election?", year: 2024 },
+        { q: "What's the status of Mars rover Curiosity?", year: 2024 }
+      ];
+
+      const isAfterCutoff = questions[selectedQuestion].year > (2020 + Math.floor(cutoffPosition / 20));
+
+      return (
+        <>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              It's like talking to someone who's been in a coma since a certain date. GenAI was trained on data up to a specific point. It has no idea what happened after that.
+            </p>
+          </div>
+          <div style={P.scene}>
+            <div style={{ width: '100%' }}>
+              <div style={{ marginBottom: '32px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '16px' }}>TRAINING DATA CUTOFF</div>
+                <div style={{ position: 'relative', height: '60px', display: 'flex', alignItems: 'center' }}>
+                  <div style={{ width: '100%', height: '2px', backgroundColor: '#ddd', position: 'relative' }}>
+                    <div style={{ position: 'absolute', left: `${cutoffPosition}%`, top: '-29px', transform: 'translateX(-50%)', textAlign: 'center' }}>
+                      <div style={{ fontSize: '12px', fontWeight: '600', color: '#6c5ce7', marginBottom: '4px' }}>
+                        {2020 + Math.floor(cutoffPosition / 20)}
+                      </div>
+                      <div style={{ width: '40px', height: '40px', backgroundColor: '#6c5ce7', borderRadius: '50%', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '700' }}>
+                        |
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ position: 'absolute', left: 0, right: 0, top: '-40px', display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#999' }}>
+                    <span>2020</span>
+                    <span>2024</span>
+                  </div>
+                  <div style={{ position: 'absolute', left: 0, right: 0, top: '15px', display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#999' }}>
+                    <span style={{ color: '#2ecc71', fontWeight: '600' }}>AI KNOWS</span>
+                    <span style={{ color: '#e74c3c', fontWeight: '600' }}>AI GUESSES</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={cutoffPosition}
+                  onChange={(e) => setCutoffPosition(Number(e.target.value))}
+                  style={{ width: '100%', marginTop: '24px', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>TRY A QUESTION:</div>
+                <div style={{ display: 'grid', gap: '8px' }}>
+                  {questions.map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedQuestion(i)}
+                      style={{
+                        padding: '12px',
+                        textAlign: 'left',
+                        backgroundColor: selectedQuestion === i ? '#6c5ce7' : '#ffffff',
+                        color: selectedQuestion === i ? '#ffffff' : '#1a1a1a',
+                        border: '1px solid ' + (selectedQuestion === i ? '#6c5ce7' : '#ddd'),
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {item.q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '16px', backgroundColor: isAfterCutoff ? '#ffe6e6' : '#e6f7ff', borderRadius: '8px', borderLeft: `4px solid ${isAfterCutoff ? '#e74c3c' : '#3498db'}` }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: isAfterCutoff ? '#c0392b' : '#1a5c96' }}>
+                  {isAfterCutoff ? "⚠️ OUTSIDE KNOWLEDGE CUTOFF" : "✓ WITHIN KNOWLEDGE CUTOFF"}
+                </div>
+                <div style={{ fontSize: '14px', color: '#2a2a2a' }}>
+                  {isAfterCutoff
+                    ? "I was trained before this event — I'd be guessing or using unreliable information!"
+                    : "This event likely falls within my training data. I can answer with reasonable confidence."}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>MODEL CUTOFF DATES</div>
+                <div style={{ display: 'grid', gap: '8px', fontSize: '13px' }}>
+                  <div><strong>Claude 3.5:</strong> April 2024</div>
+                  <div><strong>GPT-4:</strong> April 2024</div>
+                  <div><strong>Gemini 1.5:</strong> May 2024</div>
+                  <div><strong>Llama 3:</strong> March 2024</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={P.insight}>
+            If the cutoff is January 2024, asking about events after that gets you guesses, not facts. Always check recency.
+          </div>
+        </>
+      );
+    }
+
+    function S4() {
+      const [fillAmount, setFillAmount] = useState(40);
+
+      const messages = [
+        { sender: "user", text: "Can you summarize this 100-page document?", tokens: 2000 },
+        { sender: "ai", text: "I'll process it for you. Reading through...", tokens: 150 },
+        { sender: "user", text: "What was mentioned on page 15?", tokens: 50 },
+        { sender: "ai", text: "Page 15 discusses...", tokens: 200 }
+      ];
+
+      return (
+        <>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              It's like talking to someone with short-term memory loss. GenAI can only 'remember' a certain amount of your conversation. Share a 100-page document? It might forget the beginning by the time it reaches the end.
+            </p>
+          </div>
+          <div style={P.scene}>
+            <div style={{ width: '100%' }}>
+              <div style={{ marginBottom: '32px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>CONTEXT WINDOW VISUALIZATION</div>
+                <div style={{ position: 'relative', height: '140px', backgroundColor: '#f0f0f0', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd' }}>
+                  {messages.map((msg, i) => {
+                    const isVisible = i >= Math.max(0, messages.length - Math.floor(fillAmount / 15));
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          padding: '12px',
+                          borderBottom: '1px solid #ddd',
+                          backgroundColor: isVisible ? '#ffffff' : '#e8e8e8',
+                          opacity: isVisible ? 1 : 0.3,
+                          fontSize: '12px',
+                          color: isVisible ? '#1a1a1a' : '#999',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <strong style={{ color: msg.sender === 'user' ? '#6c5ce7' : '#2ecc71' }}>
+                          {msg.sender === 'user' ? 'You' : 'AI'}:
+                        </strong> {msg.text} <span style={{ fontSize: '11px', color: '#999' }}>({msg.tokens}t)</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={fillAmount}
+                  onChange={(e) => setFillAmount(Number(e.target.value))}
+                  style={{ width: '100%', marginTop: '16px', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Tokens Used</div>
+                  <div style={{ fontSize: '20px', fontWeight: '700', color: '#6c5ce7' }}>{Math.floor(fillAmount * 1280)}</div>
+                </div>
+                <div style={{ width: '60%', height: '8px', backgroundColor: '#ddd', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${fillAmount}%`, height: '100%', backgroundColor: '#6c5ce7', transition: 'width 0.3s ease' }}></div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Capacity</div>
+                  <div style={{ fontSize: '20px', fontWeight: '700', color: '#999' }}>128k</div>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>CONTEXT WINDOW COMPARISON</div>
+                <div style={{ display: 'grid', gap: '12px', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <strong>GPT-4 Turbo</strong>
+                    <span style={{ color: '#2ecc71', fontWeight: '600' }}>128K tokens</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <strong>Claude 3.5 Sonnet</strong>
+                    <span style={{ color: '#2ecc71', fontWeight: '600' }}>200K tokens</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <strong>Gemini 1.5 Pro</strong>
+                    <span style={{ color: '#2ecc71', fontWeight: '600' }}>1M tokens</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <strong>GPT-4o</strong>
+                    <span style={{ color: '#2ecc71', fontWeight: '600' }}>128K tokens</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: '16px', backgroundColor: '#fff3cd', borderRadius: '8px', borderLeft: '4px solid #ffc107' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#856404' }}>
+                  💡 PRACTICAL IMPACT
+                </div>
+                <div style={{ fontSize: '14px', color: '#2a2a2a' }}>
+                  <strong>Page 1 of your 100-page doc...</strong> [FORGOTTEN by page 100] | <strong>Page 100...</strong> [CLEAR]
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={P.insight}>
+            Think of context window as a whiteboard — eventually you run out of space and have to erase the oldest notes.
+          </div>
+        </>
+      );
+    }
+
+    function S5({ onNavigate }) {
+      const [expandedPanel, setExpandedPanel] = useState(null);
+
+      const solutions = [
+        {
+          title: "Fix Hallucinations",
+          icon: "\u{1F47B}",
+          tactics: [
+            "Ask for sources and citations",
+            "Cross-verify with trusted sources",
+            "Use RAG (Retrieval-Augmented Generation)",
+            "Tell AI to say 'I don't know' if unsure"
+          ]
+        },
+        {
+          title: "Fix Knowledge Cutoff",
+          icon: "\u{1F4C5}",
+          tactics: [
+            "Use web-enabled AI (Perplexity, Bing Chat)",
+            "Provide recent context in your prompt",
+            "Use RAG with up-to-date documents",
+            "Ask AI about cutoff date before trusting answers"
+          ]
+        },
+        {
+          title: "Fix Context Window",
+          icon: "\u{1F9E0}",
+          tactics: [
+            "Break long documents into chunks",
+            "Summarize progressively",
+            "Use RAG for large document sets",
+            "Choose models with larger windows (Claude 3.5, Gemini 1.5)"
+          ]
+        }
+      ];
+
+      return (
+        <>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              Every limitation has a workaround. Here's how to mitigate each weakness and use AI more effectively. Notice that RAG (Retrieval-Augmented Generation) appears in all three solutions — a powerful pattern covered in Module 3.
+            </p>
+          </div>
+          <div style={P.scene}>
+            <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
+              {solutions.map((solution, i) => (
+                <div
+                  key={i}
+                  onClick={() => setExpandedPanel(expandedPanel === i ? null : i)}
+                  style={{
+                    padding: '24px',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    border: '2px solid #6c5ce7',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    transform: expandedPanel === i ? 'scale(1.02)' : 'scale(1)',
+                    boxShadow: expandedPanel === i ? '0 8px 24px rgba(108, 92, 231, 0.2)' : '0 2px 8px rgba(0,0,0,0.08)',
+                    animation: `slideInLeft 0.5s ease ${i * 0.1}s both`
+                  }}
+                >
+                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>{solution.icon}</div>
+                  <div style={{ fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '12px', fontFamily: 'Fraunces, serif' }}>
+                    {solution.title}
+                  </div>
+                  {expandedPanel === i && (
+                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid #f0f0f0', animation: 'fadeIn 0.3s ease' }}>
+                      {solution.tactics.map((tactic, j) => (
+                        <div key={j} style={{ fontSize: '13px', marginBottom: '10px', paddingLeft: '20px', position: 'relative', color: '#2a2a2a', lineHeight: '1.5' }}>
+                          <span style={{ position: 'absolute', left: '0', color: '#2ecc71', fontWeight: '700' }}>✓</span>
+                          {tactic}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ fontSize: '11px', color: '#999', marginTop: '12px', fontStyle: 'italic' }}>
+                    {expandedPanel === i ? "Click to collapse" : "Click to expand"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={P.insight}>
+            Always verify important facts, check if information might be outdated, and break long documents into smaller chunks. RAG is your most powerful mitigation tool.
+          </div>
+        </>
+      );
+    }
+
+    function Guide() {
+      const [stage, setStage] = useState(0);
+
+      const stageComponents = [S1, S2, S3, S4, S5];
+      const CurrentStage = stageComponents[stage];
+
+      const canGoPrev = stage > 0;
+      const canGoNext = stage < STAGES.length - 1;
+
+      const handleNext = () => canGoNext && setStage(stage + 1);
+      const handlePrev = () => canGoPrev && setStage(stage - 1);
+      const handleNavigate = (idx) => setStage(idx);
+
+      return (
+        <div style={P.root}>
+          <a href="../../index.html" style={P.backLink}>← Back to All Guides</a>
+
+          <div style={P.sidebar}>
+            {STAGES.map((s, i) => (
+              <div key={i} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => handleNavigate(i)}
+                  style={P.stepButton(i === stage)}
+                >
+                  <div style={P.stepIcon}>{s.icon}</div>
+                  <div>{s.label}</div>
+                </button>
+                {i < STAGES.length - 1 && <div style={P.stepConnector}></div>}
+              </div>
+            ))}
+          </div>
+
+          <div style={P.main}>
+            <div style={P.topBar}>
+              <div>
+                <span style={P.badge}>MODULE 2</span>
+                <span style={P.title}>{STAGES[stage].title}</span>
+              </div>
+              <div style={P.navRow}>
+                <button
+                  onClick={handlePrev}
+                  disabled={!canGoPrev}
+                  style={P.navBtn(!canGoPrev)}
+                  aria-label="Previous"
+                >
+                  ←
+                </button>
+                <span style={P.navP}>{stage + 1} / {STAGES.length}</span>
+                <button
+                  onClick={handleNext}
+                  disabled={!canGoNext}
+                  style={P.navBtn(!canGoNext)}
+                  aria-label="Next"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
+            <div style={P.content}>
+              <CurrentStage onNavigate={handleNavigate} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>

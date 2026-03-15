@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The VERIFY Framework: Using AI Responsibly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@6..72,600&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+      overflow: hidden;
+    }
+
+    #root {
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes blink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    @keyframes checkmark {
+      from {
+        transform: scale(0) rotate(-45deg);
+      }
+      to {
+        transform: scale(1) rotate(0);
+      }
+    }
+
+    @keyframes letterReveal {
+      from {
+        opacity: 0;
+        transform: scale(0.8) rotate(10deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const P = {
+      root: {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#fff',
+        overflow: 'hidden'
+      },
+      sidebar: {
+        width: '180px',
+        backgroundColor: '#f8f9fa',
+        borderRight: '1px solid #e9ecef',
+        padding: '24px 16px',
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '8px',
+        position: 'relative'
+      },
+      stepCircle: (isActive, isComplete) => ({
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        backgroundColor: isActive ? '#6c5ce7' : isComplete ? '#2ecc71' : '#e9ecef',
+        color: isActive || isComplete ? '#fff' : '#666',
+        fontSize: '24px',
+        fontWeight: '700',
+        position: 'relative',
+        zIndex: 2,
+        border: isActive ? '3px solid #6c5ce7' : 'none',
+        boxShadow: isActive ? '0 4px 12px rgba(108, 92, 231, 0.3)' : 'none',
+        '&:hover': {
+          transform: 'scale(1.05)'
+        }
+      }),
+      stepLabel: {
+        fontSize: '11px',
+        fontWeight: '500',
+        marginTop: '8px',
+        textAlign: 'center',
+        color: '#666',
+        width: '80px',
+        lineHeight: '1.2'
+      },
+      connector: (isComplete) => ({
+        width: '2px',
+        height: '28px',
+        backgroundColor: isComplete ? '#2ecc71' : '#d0d0d0',
+        margin: '4px 0',
+        transition: 'background-color 0.3s ease'
+      }),
+      main: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        backgroundColor: '#fff'
+      },
+      topBar: {
+        height: '64px',
+        borderBottom: '1px solid #e9ecef',
+        padding: '12px 32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#f8f9fa'
+      },
+      leftSection: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px'
+      },
+      backLink: {
+        fontSize: '13px',
+        color: '#6c5ce7',
+        textDecoration: 'none',
+        fontWeight: '500',
+        transition: 'color 0.2s ease',
+        '&:hover': {
+          color: '#1a9456'
+        }
+      },
+      badge: {
+        display: 'inline-block',
+        backgroundColor: '#e8f0fe',
+        color: '#6c5ce7',
+        padding: '6px 12px',
+        borderRadius: '20px',
+        fontSize: '11px',
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px'
+      },
+      title: {
+        fontSize: '20px',
+        fontWeight: '600',
+        color: '#1a1a1a',
+        fontFamily: "'Fraunces', serif"
+      },
+      navRow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '24px'
+      },
+      navBtn: (disabled) => ({
+        width: '36px',
+        height: '36px',
+        borderRadius: '8px',
+        border: '1px solid #d0d0d0',
+        backgroundColor: disabled ? '#f0f0f0' : '#fff',
+        color: disabled ? '#bbb' : '#1a1a1a',
+        cursor: disabled ? 'default' : 'pointer',
+        fontSize: '18px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'all 0.2s ease',
+        fontWeight: '600'
+      }),
+      navP: {
+        fontSize: '12px',
+        color: '#666',
+        fontWeight: '500',
+        minWidth: '60px',
+        textAlign: 'right'
+      },
+      content: {
+        flex: 1,
+        padding: '40px 48px',
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '32px'
+      },
+      explainRow: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px'
+      },
+      explain: {
+        fontSize: '16px',
+        lineHeight: '1.6',
+        color: '#333',
+        maxWidth: '600px'
+      },
+      scene: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: '12px',
+        padding: '32px',
+        border: '1px solid #e9ecef',
+        minHeight: '280px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        animation: 'fadeIn 0.5s ease-out'
+      },
+      insight: {
+        backgroundColor: '#e8f0fe',
+        borderLeft: '4px solid #6c5ce7',
+        borderRadius: '8px',
+        padding: '20px',
+        fontSize: '14px',
+        lineHeight: '1.6',
+        color: '#333',
+        fontStyle: 'italic'
+      },
+      sceneTitle: {
+        fontSize: '18px',
+        fontWeight: '600',
+        marginBottom: '20px',
+        color: '#1a1a1a',
+        fontFamily: "'Fraunces', serif"
+      },
+      sceneGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+        gap: '12px',
+        width: '100%'
+      },
+      card: (active) => ({
+        backgroundColor: active ? '#6c5ce7' : '#fff',
+        border: active ? '2px solid #6c5ce7' : '2px solid #d0d0d0',
+        borderRadius: '8px',
+        padding: '16px',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        textAlign: 'center',
+        color: active ? '#fff' : '#1a1a1a',
+        fontSize: '14px',
+        fontWeight: '500'
+      }),
+      button: (variant) => {
+        const baseStyles = {
+          padding: '10px 20px',
+          borderRadius: '6px',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '600',
+          transition: 'all 0.2s ease',
+          marginRight: '8px'
+        };
+        if (variant === 'primary') {
+          return {
+            ...baseStyles,
+            backgroundColor: '#6c5ce7',
+            color: '#fff'
+          };
+        }
+        return {
+          ...baseStyles,
+          backgroundColor: '#e9ecef',
+          color: '#1a1a1a'
+        };
+      },
+      highlightRed: {
+        backgroundColor: '#ffe5e5',
+        color: '#c23030',
+        padding: '2px 6px',
+        borderRadius: '3px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+      },
+      highlightGreen: {
+        backgroundColor: '#c8e6c9',
+        color: '#1b5e20',
+        padding: '2px 6px',
+        borderRadius: '3px',
+        fontWeight: '500'
+      },
+      highlightYellow: {
+        backgroundColor: '#fff9c4',
+        color: '#f57f17',
+        padding: '2px 6px',
+        borderRadius: '3px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+      },
+      letterBox: (color) => ({
+        width: '80px',
+        height: '80px',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: color,
+        color: '#fff',
+        fontSize: '48px',
+        fontWeight: '700',
+        fontFamily: "'Fraunces', serif",
+        animation: 'letterReveal 0.6s ease-out'
+      }),
+      iconBox: {
+        fontSize: '32px',
+        marginBottom: '12px'
+      }
+    };
+
+    const STAGES = [
+      { icon: "\u2705", label: "Overview", title: "The VERIFY Framework", sub: "6 steps to use AI responsibly" },
+      { icon: "\u{1F50D}", label: "Validate", title: "V — Validate", sub: "Check outputs against trusted sources" },
+      { icon: "\u{1F6AB}", label: "Exclude", title: "E — Exclude", sub: "Keep sensitive data out of prompts" },
+      { icon: "\u{1F50E}", label: "Review", title: "R — Review", sub: "Check for bias and accuracy" },
+      { icon: "\u{1F504}", label: "Iterate", title: "I — Iterate", sub: "Improve prompts through refinement" },
+      { icon: "\u{1F6A9}", label: "Flag", title: "F — Flag", sub: "Mark uncertainty in AI responses" },
+      { icon: "\u{1F464}", label: "Your Call", title: "Y — Your Judgment", sub: "You are the final decision-maker" }
+    ];
+
+    const OverviewStage = () => {
+      const [revealed, setRevealed] = useState([]);
+
+      useEffect(() => {
+        const letters = ['V', 'E', 'R', 'I', 'F', 'Y'];
+        letters.forEach((_, idx) => {
+          setTimeout(() => {
+            setRevealed(prev => [...prev, idx]);
+          }, idx * 150);
+        });
+      }, []);
+
+      const meanings = [
+        "Validate outputs against trusted sources",
+        "Exclude sensitive data from prompts",
+        "Review for bias and accuracy",
+        "Iterate prompts to improve results",
+        "Flag uncertainty in AI responses",
+        "Your judgment is final"
+      ];
+
+      const colors = ['#6c5ce7', '#2ecc71', '#1a9456', '#f39c12', '#e74c3c', '#3498db'];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <div style={P.explain}>
+              VERIFY is a 6-step checklist to make sure you're using AI safely and getting accurate results. Think of it like being a newspaper fact-checker — journalists don't publish the first thing a source tells them.
+            </div>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                {['V', 'E', 'R', 'I', 'F', 'Y'].map((letter, idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                    {revealed.includes(idx) && (
+                      <div style={P.letterBox(colors[idx])}>
+                        {letter}
+                      </div>
+                    )}
+                    {revealed.includes(idx) && (
+                      <div style={{
+                        fontSize: '12px',
+                        textAlign: 'center',
+                        maxWidth: '90px',
+                        color: '#666',
+                        animation: 'fadeIn 0.4s ease-out'
+                      }}>
+                        {meanings[idx]}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                fontSize: '14px',
+                color: '#666',
+                textAlign: 'center',
+                maxWidth: '400px',
+                marginTop: '16px',
+                padding: '20px',
+                backgroundColor: '#fff',
+                borderRadius: '8px',
+                border: '1px solid #e9ecef'
+              }}>
+                📰 <strong>Like a newspaper fact-checker:</strong> Verify with multiple sources, remove sensitive info, and always make the final call.
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            💡 VERIFY is like being a newspaper fact-checker — verify with multiple sources, remove sensitive info, and always make the final call.
+          </div>
+        </div>
+      );
+    };
+
+    const ValidateStage = () => {
+      const [mode, setMode] = useState('correct');
+      const [validated, setValidated] = useState([]);
+      const [checklist, setChecklist] = useState({
+        checkTrusted: false,
+        checkMultiple: false,
+        verifyFacts: false
+      });
+
+      const handleValidate = (idx) => {
+        if (!validated.includes(idx)) {
+          setValidated([...validated, idx]);
+          if (validated.length === 1) {
+            setTimeout(() => {
+              setMode('incorrect');
+              setValidated([]);
+            }, 600);
+          }
+        }
+      };
+
+      const toggleCheck = (key) => {
+        setChecklist({ ...checklist, [key]: !checklist[key] });
+      };
+
+      const sources = ['Wikipedia', 'Official Docs', 'Research Paper'];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <div style={P.explain}>
+              Like double-checking Wikipedia with textbooks. Always validate AI outputs against trusted, authoritative sources before using them. Don't rely on a single source.
+            </div>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: '13px', color: '#666', marginBottom: '8px', fontWeight: '500' }}>
+                  AI Statement:
+                </div>
+                <div style={{
+                  backgroundColor: '#fff',
+                  border: mode === 'correct' ? '2px solid #2ecc71' : '2px solid #e74c3c',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  color: '#333'
+                }}>
+                  {mode === 'correct'
+                    ? 'Python was created in 1991 by Guido van Rossum.'
+                    : 'Python was created in 1995 by James Gosling.'}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  Validate across sources:
+                </div>
+                <div style={P.sceneGrid}>
+                  {sources.map((source, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleValidate(idx)}
+                      style={{
+                        ...P.card(validated.includes(idx)),
+                        animation: validated.includes(idx) ? 'bounce 0.4s ease' : 'none'
+                      }}
+                    >
+                      <div style={{ fontSize: '20px', marginBottom: '8px' }}>
+                        {validated.includes(idx)
+                          ? (mode === 'correct' ? '✓' : '✗')
+                          : '?'}
+                      </div>
+                      {source}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: '#f0f0f0',
+                borderRadius: '8px',
+                padding: '16px',
+                fontSize: '13px'
+              }}>
+                <div style={{ fontWeight: '600', marginBottom: '12px', color: '#1a1a1a' }}>
+                  Validation Checklist:
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={checklist.checkTrusted} onChange={() => toggleCheck('checkTrusted')} />
+                  Check trusted sources
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={checklist.checkMultiple} onChange={() => toggleCheck('checkMultiple')} />
+                  Confirm with multiple sources
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={checklist.verifyFacts} onChange={() => toggleCheck('verifyFacts')} />
+                  Verify specific facts and dates
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            ✓ Never trust AI output for critical decisions without cross-referencing at least 2 independent, authoritative sources.
+          </div>
+        </div>
+      );
+    };
+
+    const ExcludeStage = () => {
+      const [redacted, setRedacted] = useState([]);
+      const [safetyScore, setSafetyScore] = useState(0);
+
+      const sensitiveItems = [
+        { text: 'John Smith', category: 'Name' },
+        { text: 'SSN 123-45-6789', category: 'Social Security' },
+        { text: '$85,000', category: 'Salary' }
+      ];
+
+      const handleRedact = (idx) => {
+        if (!redacted.includes(idx)) {
+          const newRedacted = [...redacted, idx];
+          setRedacted(newRedacted);
+          setSafetyScore(Math.min(newRedacted.length * 33, 100));
+        }
+      };
+
+      const categories = [
+        '🔐 SSNs & passwords',
+        '🔐 API keys & tokens',
+        '🏥 Medical records',
+        '💳 Financial data',
+        '🏢 Company secrets'
+      ];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <div style={P.explain}>
+              Like not sharing passwords on social media. Never include sensitive personal data, company secrets, or confidential information in AI prompts. What you share is never truly private.
+            </div>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  Unsafe Prompt — Click sensitive data to redact:
+                </div>
+                <div style={{
+                  backgroundColor: '#fff',
+                  border: '2px solid #e74c3c',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  color: '#333',
+                  lineHeight: '1.8'
+                }}>
+                  Analyze this customer data: <span style={P.highlightRed}>John Smith</span>, <span style={P.highlightRed}>SSN 123-45-6789</span>, salary <span style={P.highlightRed}>$85,000</span>. Calculate retention risk...
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  Redact sensitive items:
+                </div>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  {sensitiveItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleRedact(idx)}
+                      style={{
+                        ...P.card(redacted.includes(idx)),
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {redacted.includes(idx) ? '[REDACTED]' : item.text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '16px'
+              }}>
+                <div style={{
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: '8px',
+                  padding: '16px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
+                    NEVER include:
+                  </div>
+                  {categories.map((cat, idx) => (
+                    <div key={idx} style={{ fontSize: '12px', color: '#333', marginBottom: '6px', lineHeight: '1.4' }}>
+                      {cat}
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{
+                  backgroundColor: '#e8f0fe',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  border: '1px solid #d0d9f3'
+                }}>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#6c5ce7' }}>
+                    {safetyScore}%
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                    Data Safety Score
+                  </div>
+                  <div style={{
+                    width: '100%',
+                    height: '6px',
+                    backgroundColor: '#d0d9f3',
+                    borderRadius: '3px',
+                    marginTop: '8px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${safetyScore}%`,
+                      height: '100%',
+                      backgroundColor: '#6c5ce7',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            🔒 Anything you put in a prompt could be seen by the AI provider. Treat prompts like public messages — exclude anything private.
+          </div>
+        </div>
+      );
+    };
+
+    const ReviewStage = () => {
+      const [flagged, setFlagged] = useState([]);
+
+      const biasItems = [
+        { text: 'young and energetic', bias: 'Age bias', color: '#e74c3c' },
+        { text: 'he/him pronouns', bias: 'Gender bias', color: '#e74c3c' },
+        { text: 'native English speaker', bias: 'Discrimination', color: '#e74c3c' }
+      ];
+
+      const handleFlag = (idx) => {
+        if (!flagged.includes(idx)) {
+          setFlagged([...flagged, idx]);
+        }
+      };
+
+      const checklist = [
+        { label: 'Factual accuracy?', checked: flagged.length > 0 },
+        { label: 'Balanced perspective?', checked: flagged.length > 1 },
+        { label: 'Stereotypes present?', checked: flagged.length > 2 }
+      ];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <div style={P.explain}>
+              Like getting a second opinion from a friend. Review AI outputs for bias, stereotypes, factual errors, and assumptions before accepting them. AI learns from biased data.
+            </div>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  Job Description — Click to flag biased phrases:
+                </div>
+                <div style={{
+                  backgroundColor: '#fff',
+                  border: '2px solid #e9ecef',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  color: '#333',
+                  lineHeight: '1.8'
+                }}>
+                  We're seeking a <span onClick={() => handleFlag(0)} style={{ ...P.highlightRed, cursor: 'pointer' }}>young and energetic</span> software engineer who is a <span onClick={() => handleFlag(1)} style={{ ...P.highlightRed, cursor: 'pointer' }}>native English speaker</span> and comfortable with <span onClick={() => handleFlag(2)} style={{ ...P.highlightRed, cursor: 'pointer' }}>he/him pronouns</span> in a fast-paced environment.
+                </div>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '16px'
+              }}>
+                <div>
+                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
+                    Flagged Biases:
+                  </div>
+                  {biasItems.map((item, idx) => (
+                    flagged.includes(idx) && (
+                      <div key={idx} style={{
+                        backgroundColor: '#ffe5e5',
+                        borderLeft: `4px solid ${item.color}`,
+                        padding: '12px',
+                        borderRadius: '6px',
+                        marginBottom: '8px',
+                        animation: 'slideInRight 0.3s ease'
+                      }}>
+                        <div style={{ fontSize: '12px', fontWeight: '600', color: '#c23030' }}>
+                          ⚠ {item.bias}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#333', marginTop: '4px' }}>
+                          "{item.text}"
+                        </div>
+                      </div>
+                    )
+                  ))}
+                </div>
+
+                <div style={{
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: '8px',
+                  padding: '16px'
+                }}>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#1a1a1a', marginBottom: '12px' }}>
+                    Review Checklist:
+                  </div>
+                  {checklist.map((item, idx) => (
+                    <label key={idx} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '8px',
+                      cursor: 'pointer',
+                      opacity: item.checked ? '1' : '0.6'
+                    }}>
+                      <input type="checkbox" checked={item.checked} readOnly />
+                      <span style={{ fontSize: '12px' }}>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            🔍 AI reflects the biases in its training data. Your review is the last line of defense against perpetuating harmful assumptions.
+          </div>
+        </div>
+      );
+    };
+
+    const IterateStage = () => {
+      const [activeIteration, setActiveIteration] = useState(0);
+
+      const iterations = [
+        {
+          num: 1,
+          prompt: 'Write about AI',
+          quality: 25,
+          feedback: 'Too vague, generic response'
+        },
+        {
+          num: 2,
+          prompt: 'Write a 200-word blog post about AI in healthcare for hospital administrators',
+          quality: 65,
+          feedback: 'Better, but still missing specifics'
+        },
+        {
+          num: 3,
+          prompt: 'Write a 200-word blog post about AI in healthcare for hospital administrators. Focus on patient diagnosis accuracy. Include one statistic. Professional tone.',
+          quality: 95,
+          feedback: 'Excellent — specific and actionable'
+        }
+      ];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <div style={P.explain}>
+              Like asking follow-up questions until you understand. Don't accept the first response — refine your prompts to get progressively better results. The magic happens in iterations 2, 3, and 4.
+            </div>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                {iterations.map((iter, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveIteration(idx)}
+                    style={{
+                      ...P.button(activeIteration === idx ? 'primary' : 'secondary'),
+                      backgroundColor: activeIteration === idx ? '#6c5ce7' : '#e9ecef',
+                      color: activeIteration === idx ? '#fff' : '#1a1a1a',
+                      borderRadius: '6px',
+                      padding: '10px 16px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Iteration {iter.num}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{
+                backgroundColor: '#fff',
+                border: '2px solid #e9ecef',
+                borderRadius: '8px',
+                padding: '16px'
+              }}>
+                <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>
+                  Prompt:
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#333',
+                  lineHeight: '1.6',
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '6px',
+                  fontFamily: 'monospace'
+                }}>
+                  {iterations[activeIteration].prompt}
+                </div>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '16px'
+              }}>
+                <div style={{
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: '8px',
+                  padding: '16px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
+                    Quality Score:
+                  </div>
+                  <div style={{
+                    fontSize: '28px',
+                    fontWeight: '700',
+                    color: activeIteration === 0 ? '#e74c3c' : activeIteration === 1 ? '#f39c12' : '#2ecc71',
+                    marginBottom: '8px'
+                  }}>
+                    {iterations[activeIteration].quality}%
+                  </div>
+                  <div style={{
+                    width: '100%',
+                    height: '8px',
+                    backgroundColor: '#d0d0d0',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: `${iterations[activeIteration].quality}%`,
+                      height: '100%',
+                      backgroundColor: activeIteration === 0 ? '#e74c3c' : activeIteration === 1 ? '#f39c12' : '#2ecc71',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                </div>
+
+                <div style={{
+                  backgroundColor: '#e8f0fe',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  border: '1px solid #d0d9f3',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ fontSize: '13px', color: '#333', lineHeight: '1.6' }}>
+                    <strong style={{ color: '#6c5ce7' }}>Feedback:</strong><br />
+                    {iterations[activeIteration].feedback}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: '#fff9e6',
+                borderLeft: '4px solid #f39c12',
+                borderRadius: '8px',
+                padding: '16px',
+                fontSize: '13px',
+                color: '#333'
+              }}>
+                💡 Notice how each iteration adds specificity: word count, audience, focus area, and tone. That's what makes prompts work.
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            🔄 The first prompt is just a starting point. The magic happens in iterations 2, 3, and 4. Keep refining until you get what you need.
+          </div>
+        </div>
+      );
+    };
+
+    const FlagStage = () => {
+      const [flaggedWords, setFlaggedWords] = useState([]);
+
+      const uncertainText = [
+        'I believe',
+        'It\'s possible that',
+        'approximately',
+        'might be',
+        'as far as I know'
+      ];
+
+      const fullResponse = [
+        'I believe',
+        ' that climate change is a serious issue. ',
+        'It\'s possible that ',
+        'we have ',
+        'approximately',
+        ' 10-15 years to prevent the worst impacts. This ',
+        'might be ',
+        'optimistic, and ',
+        'as far as I know',
+        ', recent studies suggest this timeline.'
+      ];
+
+      const handleFlag = (idx) => {
+        if (!flaggedWords.includes(idx)) {
+          setFlaggedWords([...flaggedWords, idx]);
+        }
+      };
+
+      const isUncertain = (text) => uncertainText.some(u => text.includes(u));
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <div style={P.explain}>
+              Like putting a '?' next to anything you're not sure about. When AI gives uncertain or hedging responses, flag those sections for extra verification. Watch for qualifier words.
+            </div>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  AI Response — Click uncertain phrases to flag:
+                </div>
+                <div style={{
+                  backgroundColor: '#fff',
+                  border: '2px solid #e9ecef',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  color: '#333',
+                  lineHeight: '1.8'
+                }}>
+                  {fullResponse.map((segment, idx) => {
+                    const isUncertainSegment = isUncertain(segment);
+                    return (
+                      <span
+                        key={idx}
+                        onClick={() => isUncertainSegment && handleFlag(idx)}
+                        style={isUncertainSegment ? {
+                          ...P.highlightYellow,
+                          cursor: 'pointer'
+                        } : {}}
+                      >
+                        {flaggedWords.includes(idx) && <span style={{ fontSize: '10px', marginRight: '2px' }}>🚩</span>}
+                        {segment}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '12px'
+              }}>
+                <div style={{
+                  backgroundColor: '#c8e6c9',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>✓</div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#1b5e20' }}>
+                    High Confidence
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#2e7d32', marginTop: '4px' }}>
+                    Certain language
+                  </div>
+                </div>
+
+                <div style={{
+                  backgroundColor: '#fff9c4',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>⚠</div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#f57f17' }}>
+                    Medium
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#f9a825', marginTop: '4px' }}>
+                    Some hedging
+                  </div>
+                </div>
+
+                <div style={{
+                  backgroundColor: '#ffcdd2',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>?</div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#c62828' }}>
+                    Low/Hedging
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#e53935', marginTop: '4px' }}>
+                    Verify first
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: '#f0f0f0',
+                borderRadius: '8px',
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1a1a1a' }}>
+                  Flags found:
+                </div>
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: '#6c5ce7'
+                }}>
+                  {flaggedWords.length} / {uncertainText.length}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            🚩 When AI hedges with words like 'might,' 'possibly,' or 'I believe,' that's your signal to verify independently before making important decisions.
+          </div>
+        </div>
+      );
+    };
+
+    const YourJudgmentStage = () => {
+      const [responses, setResponses] = useState([null, null, null]);
+
+      const scenarios = [
+        {
+          title: 'Medical Dosage',
+          icon: '💊',
+          question: 'AI suggests a patient dosage. Should you follow it?',
+          correct: 'override',
+          answer: 'ALWAYS consult a doctor. Never rely on AI for medical decisions.',
+          reason: 'Medical decisions have life-or-death consequences. AI is not a doctor.'
+        },
+        {
+          title: 'Marketing Email',
+          icon: '📧',
+          question: 'AI writes a marketing email. Is it ready to send?',
+          correct: 'override',
+          answer: 'Review for brand voice first. Adjust tone and messaging.',
+          reason: 'The email may not match your brand\'s voice, values, or compliance standards.'
+        },
+        {
+          title: 'Production Code',
+          icon: '💻',
+          question: 'AI generates code for production. Deploy it?',
+          correct: 'override',
+          answer: 'Test thoroughly in staging first. Review for security.',
+          reason: 'Untested code can break systems, expose data, or create vulnerabilities.'
+        }
+      ];
+
+      const handleResponse = (idx, response) => {
+        const newResponses = [...responses];
+        newResponses[idx] = response;
+        setResponses(newResponses);
+      };
+
+      const allAnswered = responses.every(r => r !== null);
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <div style={P.explain}>
+              You're the driver, AI is just GPS. GPS suggests a route, but you decide whether to follow it, take a detour, or go a completely different way. Your judgment is always final.
+            </div>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+              {scenarios.map((scenario, idx) => (
+                <div key={idx} style={{
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  border: responses[idx] ? '2px solid #6c5ce7' : '1px solid #e9ecef'
+                }}>
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '24px' }}>{scenario.icon}</div>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a' }}>
+                        {scenario.title}
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+                        {scenario.question}
+                      </div>
+                    </div>
+                  </div>
+
+                  {!responses[idx] ? (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => handleResponse(idx, 'accept')} style={{
+                        ...P.button('secondary'),
+                        flex: 1
+                      }}>
+                        Accept
+                      </button>
+                      <button onClick={() => handleResponse(idx, 'override')} style={{
+                        ...P.button('primary'),
+                        flex: 1
+                      }}>
+                        Override
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{
+                      backgroundColor: responses[idx] === scenario.correct ? '#c8e6c9' : '#ffcdd2',
+                      borderRadius: '6px',
+                      padding: '12px',
+                      borderLeft: `4px solid ${responses[idx] === scenario.correct ? '#2ecc71' : '#e74c3c'}`
+                    }}>
+                      <div style={{
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: responses[idx] === scenario.correct ? '#1b5e20' : '#c23030',
+                        marginBottom: '6px'
+                      }}>
+                        {responses[idx] === scenario.correct ? '✓ Correct' : '✗ Not quite'}
+                      </div>
+                      <div style={{
+                        fontSize: '12px',
+                        color: '#333',
+                        lineHeight: '1.5',
+                        marginBottom: '6px'
+                      }}>
+                        {scenario.answer}
+                      </div>
+                      <div style={{
+                        fontSize: '11px',
+                        color: '#666',
+                        fontStyle: 'italic'
+                      }}>
+                        {scenario.reason}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {allAnswered && (
+                <div style={{
+                  backgroundColor: '#e8f0fe',
+                  borderLeft: '4px solid #6c5ce7',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  animation: 'slideInLeft 0.4s ease'
+                }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#6c5ce7', marginBottom: '8px' }}>
+                    ✓ You've completed the VERIFY Framework!
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#333', lineHeight: '1.6' }}>
+                    Remember: AI is a powerful assistant, but <strong>you are responsible for the final output</strong>. Always verify before trusting.
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            🎯 AI is a powerful assistant, but you're responsible for the final output. Always verify before trusting — that's the VERIFY way.
+          </div>
+        </div>
+      );
+    };
+
+    const StepButton = ({ idx, stage, isActive, isComplete, onClick }) => {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+          <button
+            onClick={onClick}
+            style={{
+              ...P.stepCircle(isActive, isComplete),
+              outline: 'none'
+            }}
+          >
+            {stage.icon}
+          </button>
+          <div style={P.stepLabel}>{stage.label}</div>
+          {idx < STAGES.length - 1 && <div style={P.connector(isComplete)} />}
+        </div>
+      );
+    };
+
+    const VerifyFramework = () => {
+      const [current, setCurrent] = useState(0);
+
+      const handlePrev = () => {
+        if (current > 0) setCurrent(current - 1);
+      };
+
+      const handleNext = () => {
+        if (current < STAGES.length - 1) setCurrent(current + 1);
+      };
+
+      const renderStage = () => {
+        switch (current) {
+          case 0:
+            return <OverviewStage />;
+          case 1:
+            return <ValidateStage />;
+          case 2:
+            return <ExcludeStage />;
+          case 3:
+            return <ReviewStage />;
+          case 4:
+            return <IterateStage />;
+          case 5:
+            return <FlagStage />;
+          case 6:
+            return <YourJudgmentStage />;
+          default:
+            return <OverviewStage />;
+        }
+      };
+
+      return (
+        <div style={P.root}>
+          <div style={P.sidebar}>
+            {STAGES.map((stage, idx) => (
+              <StepButton
+                key={idx}
+                idx={idx}
+                stage={stage}
+                isActive={idx === current}
+                isComplete={idx < current}
+                onClick={() => setCurrent(idx)}
+              />
+            ))}
+          </div>
+
+          <div style={P.main}>
+            <div style={P.topBar}>
+              <div style={P.leftSection}>
+                <a href="../../index.html" style={P.backLink}>
+                  ← Back to All Guides
+                </a>
+                <div style={P.badge}>Interactive Guide</div>
+                <div style={P.title}>{STAGES[current].title}</div>
+              </div>
+
+              <div style={P.navRow}>
+                <button
+                  onClick={handlePrev}
+                  disabled={current === 0}
+                  style={P.navBtn(current === 0)}
+                >
+                  ←
+                </button>
+                <div style={P.navP}>
+                  {current + 1} / {STAGES.length}
+                </div>
+                <button
+                  onClick={handleNext}
+                  disabled={current === STAGES.length - 1}
+                  style={P.navBtn(current === STAGES.length - 1)}
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
+            {renderStage()}
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<VerifyFramework />);
+  </script>
+</body>
+</html>
