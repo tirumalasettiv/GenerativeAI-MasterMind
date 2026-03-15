@@ -232,7 +232,7 @@
       navBtn: (disabled) => ({
         width: '36px',
         height: '36px',
-        borderRadius: '8px',
+        borderRadius: '12px',
         border: '1px solid #d0d0d0',
         backgroundColor: disabled ? '#f0f0f0' : '#fff',
         color: disabled ? '#bbb' : '#1a1a1a',
@@ -255,6 +255,7 @@
         flex: 1,
         padding: '40px 48px',
         overflowY: 'auto',
+        scrollBehavior: 'smooth',
         display: 'flex',
         flexDirection: 'column',
         gap: '32px'
@@ -265,28 +266,37 @@
         gap: '16px'
       },
       explain: {
-        fontSize: '16px',
+        fontSize: '18px',
         lineHeight: '1.6',
         color: '#333',
         maxWidth: '600px'
       },
       scene: {
         backgroundColor: '#f8f9fa',
-        borderRadius: '12px',
+        borderRadius: '16px',
         padding: '32px',
         border: '1px solid #e9ecef',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         minHeight: '280px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         animation: 'fadeIn 0.5s ease-out'
       },
+      insightLabel: {
+        fontSize: '11px',
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        color: '#1a9456',
+        marginBottom: '8px'
+      },
       insight: {
-        backgroundColor: '#e8f0fe',
-        borderLeft: '4px solid #6c5ce7',
+        backgroundColor: '#f0faf0',
+        borderLeft: '4px solid #2ecc71',
         borderRadius: '8px',
         padding: '20px',
-        fontSize: '14px',
+        fontSize: '16px',
         lineHeight: '1.6',
         color: '#333',
         fontStyle: 'italic'
@@ -386,13 +396,13 @@
     };
 
     const STAGES = [
-      { icon: "\u2705", label: "Overview", title: "The VERIFY Framework", sub: "6 steps to use AI responsibly" },
-      { icon: "\u{1F50D}", label: "Validate", title: "V — Validate", sub: "Check outputs against trusted sources" },
-      { icon: "\u{1F6AB}", label: "Exclude", title: "E — Exclude", sub: "Keep sensitive data out of prompts" },
-      { icon: "\u{1F50E}", label: "Review", title: "R — Review", sub: "Check for bias and accuracy" },
-      { icon: "\u{1F504}", label: "Iterate", title: "I — Iterate", sub: "Improve prompts through refinement" },
-      { icon: "\u{1F6A9}", label: "Flag", title: "F — Flag", sub: "Mark uncertainty in AI responses" },
-      { icon: "\u{1F464}", label: "Your Call", title: "Y — Your Judgment", sub: "You are the final decision-maker" }
+      { icon: "✅", label: "Overview", title: "The VERIFY Framework", sub: "6 steps to use AI responsibly" },
+      { icon: "🔍", label: "Validate", title: "V — Validate", sub: "Check outputs against trusted sources" },
+      { icon: "🚫", label: "Exclude", title: "E — Exclude", sub: "Keep sensitive data out of prompts" },
+      { icon: "🔎", label: "Review", title: "R — Review", sub: "Check for bias and accuracy" },
+      { icon: "🔄", label: "Iterate", title: "I — Iterate", sub: "Improve prompts through refinement" },
+      { icon: "🚩", label: "Flag", title: "F — Flag", sub: "Mark uncertainty in AI responses" },
+      { icon: "👤", label: "Your Call", title: "Y — Your Judgment", sub: "You are the final decision-maker" }
     ];
 
     const OverviewStage = () => {
@@ -468,7 +478,8 @@
           </div>
 
           <div style={P.insight}>
-            💡 VERIFY is like being a newspaper fact-checker — verify with multiple sources, remove sensitive info, and always make the final call.
+            <div style={P.insightLabel}>💡 INSIGHT</div>
+            VERIFY is like being a newspaper fact-checker — verify with multiple sources, remove sensitive info, and always make the final call.
           </div>
         </div>
       );
@@ -580,7 +591,8 @@
           </div>
 
           <div style={P.insight}>
-            ✓ Never trust AI output for critical decisions without cross-referencing at least 2 independent, authoritative sources.
+            <div style={P.insightLabel}>💡 INSIGHT</div>
+            Never trust AI output for critical decisions without cross-referencing at least 2 independent, authoritative sources.
           </div>
         </div>
       );
@@ -716,7 +728,8 @@
           </div>
 
           <div style={P.insight}>
-            🔒 Anything you put in a prompt could be seen by the AI provider. Treat prompts like public messages — exclude anything private.
+            <div style={P.insightLabel}>💡 INSIGHT</div>
+            Anything you put in a prompt could be seen by the AI provider. Treat prompts like public messages — exclude anything private.
           </div>
         </div>
       );
@@ -827,7 +840,8 @@
           </div>
 
           <div style={P.insight}>
-            🔍 AI reflects the biases in its training data. Your review is the last line of defense against perpetuating harmful assumptions.
+            <div style={P.insightLabel}>💡 INSIGHT</div>
+            AI reflects the biases in its training data. Your review is the last line of defense against perpetuating harmful assumptions.
           </div>
         </div>
       );
@@ -976,7 +990,8 @@
           </div>
 
           <div style={P.insight}>
-            🔄 The first prompt is just a starting point. The magic happens in iterations 2, 3, and 4. Keep refining until you get what you need.
+            <div style={P.insightLabel}>💡 INSIGHT</div>
+            The first prompt is just a starting point. The magic happens in iterations 2, 3, and 4. Keep refining until you get what you need.
           </div>
         </div>
       );
@@ -1130,7 +1145,8 @@
           </div>
 
           <div style={P.insight}>
-            🚩 When AI hedges with words like 'might,' 'possibly,' or 'I believe,' that's your signal to verify independently before making important decisions.
+            <div style={P.insightLabel}>💡 INSIGHT</div>
+            When AI hedges with words like 'might,' 'possibly,' or 'I believe,' that's your signal to verify independently before making important decisions.
           </div>
         </div>
       );
@@ -1273,7 +1289,8 @@
           </div>
 
           <div style={P.insight}>
-            🎯 AI is a powerful assistant, but you're responsible for the final output. Always verify before trusting — that's the VERIFY way.
+            <div style={P.insightLabel}>💡 INSIGHT</div>
+            AI is a powerful assistant, but you're responsible for the final output. Always verify before trusting — that's the VERIFY way.
           </div>
         </div>
       );
@@ -1350,7 +1367,7 @@
                 <a href="../../index.html" style={P.backLink}>
                   ← Back to All Guides
                 </a>
-                <div style={P.badge}>Interactive Guide</div>
+                <div style={P.badge}>1.6 Interactive Guide</div>
                 <div style={P.title}>{STAGES[current].title}</div>
               </div>
 

@@ -60,11 +60,11 @@
     const { useState, useEffect, useRef } = React;
 
     const STAGES = [
-      { icon: "\u{1F47B}", label: "Overview", title: "The Three Weaknesses", sub: "What GenAI gets wrong" },
-      { icon: "\u{1F92F}", label: "Hallucinate", title: "Hallucinations", sub: "Confidently making things up" },
-      { icon: "\u{1F4C5}", label: "Cutoff", title: "Knowledge Cutoff", sub: "Frozen in time" },
-      { icon: "\u{1F9E0}", label: "Memory", title: "Context Window", sub: "Short-term memory limits" },
-      { icon: "\u{1F6E1}\uFE0F", label: "Mitigate", title: "Mitigation Strategies", sub: "How to work around limitations" }
+      { icon: "👻", label: "Overview", title: "The Three Weaknesses", sub: "What GenAI gets wrong" },
+      { icon: "🤯", label: "Hallucinate", title: "Hallucinations", sub: "Confidently making things up" },
+      { icon: "📅", label: "Cutoff", title: "Knowledge Cutoff", sub: "Frozen in time" },
+      { icon: "🧠", label: "Memory", title: "Context Window", sub: "Short-term memory limits" },
+      { icon: "🛡️", label: "Mitigate", title: "Mitigation Strategies", sub: "How to work around limitations" }
     ];
 
     const P = {
@@ -162,7 +162,8 @@
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? '0.3' : '1',
         transition: 'all 0.2s ease',
-        padding: '8px'
+        padding: '8px',
+        borderRadius: '12px'
       }),
       navP: {
         fontSize: '14px',
@@ -175,13 +176,14 @@
         padding: '40px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '32px'
+        gap: '32px',
+        scrollBehavior: 'smooth'
       },
       explainRow: {
         animation: 'fadeIn 0.5s ease'
       },
       explain: {
-        fontSize: '16px',
+        fontSize: '18px',
         lineHeight: '1.6',
         color: '#2a2a2a',
         maxWidth: '800px'
@@ -189,16 +191,17 @@
       scene: {
         minHeight: '240px',
         backgroundColor: '#f8f9fa',
-        borderRadius: '12px',
+        borderRadius: '16px',
         padding: '32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        animation: 'fadeIn 0.6s ease 0.1s both'
+        animation: 'fadeIn 0.6s ease 0.1s both',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
       },
       insight: {
-        backgroundColor: '#2ecc71',
-        color: '#ffffff',
+        backgroundColor: '#f0faf0',
+        color: '#2a2a2a',
         padding: '24px 32px',
         borderRadius: '12px',
         fontSize: '16px',
@@ -206,7 +209,7 @@
         lineHeight: '1.6',
         marginTop: '12px',
         animation: 'slideInLeft 0.5s ease 0.2s both',
-        borderLeft: '6px solid #1a9456'
+        borderLeft: '6px solid #2ecc71'
       },
       backLink: {
         position: 'absolute',
@@ -233,9 +236,9 @@
       }, []);
 
       const cards = [
-        { icon: "\u{1F47B}", title: "Hallucinations", desc: "Makes things up confidently", color: "#ff6b6b", idx: 0 },
-        { icon: "\u{1F4C5}", title: "Knowledge Cutoff", desc: "Frozen knowledge at training date", color: "#ffa500", idx: 1 },
-        { icon: "\u{1F9E0}", title: "Context Window", desc: "Forgets long conversations", color: "#ffd700", idx: 2 }
+        { icon: "👻", title: "Hallucinations", desc: "Makes things up confidently", color: "#ff6b6b", idx: 0 },
+        { icon: "📅", title: "Knowledge Cutoff", desc: "Frozen knowledge at training date", color: "#ffa500", idx: 1 },
+        { icon: "🧠", title: "Context Window", desc: "Forgets long conversations", color: "#ffd700", idx: 2 }
       ];
 
       return (
@@ -278,6 +281,7 @@
             </div>
           </div>
           <div style={P.insight}>
+            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
             Understanding these limitations is the difference between using AI effectively and being misled by it.
           </div>
         </>
@@ -399,6 +403,7 @@
             </div>
           </div>
           <div style={P.insight}>
+            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
             AI doesn't know what it doesn't know — it fills gaps with plausible-sounding fiction. Always verify critical facts.
           </div>
         </>
@@ -508,6 +513,7 @@
             </div>
           </div>
           <div style={P.insight}>
+            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
             If the cutoff is January 2024, asking about events after that gets you guesses, not facts. Always check recency.
           </div>
         </>
@@ -615,6 +621,7 @@
             </div>
           </div>
           <div style={P.insight}>
+            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
             Think of context window as a whiteboard — eventually you run out of space and have to erase the oldest notes.
           </div>
         </>
@@ -627,7 +634,7 @@
       const solutions = [
         {
           title: "Fix Hallucinations",
-          icon: "\u{1F47B}",
+          icon: "👻",
           tactics: [
             "Ask for sources and citations",
             "Cross-verify with trusted sources",
@@ -637,7 +644,7 @@
         },
         {
           title: "Fix Knowledge Cutoff",
-          icon: "\u{1F4C5}",
+          icon: "📅",
           tactics: [
             "Use web-enabled AI (Perplexity, Bing Chat)",
             "Provide recent context in your prompt",
@@ -647,7 +654,7 @@
         },
         {
           title: "Fix Context Window",
-          icon: "\u{1F9E0}",
+          icon: "🧠",
           tactics: [
             "Break long documents into chunks",
             "Summarize progressively",
@@ -704,6 +711,7 @@
             </div>
           </div>
           <div style={P.insight}>
+            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
             Always verify important facts, check if information might be outdated, and break long documents into smaller chunks. RAG is your most powerful mitigation tool.
           </div>
         </>
@@ -745,7 +753,7 @@
           <div style={P.main}>
             <div style={P.topBar}>
               <div>
-                <span style={P.badge}>MODULE 2</span>
+                <span style={P.badge}>GUIDE 1.5</span>
                 <span style={P.title}>{STAGES[stage].title}</span>
               </div>
               <div style={P.navRow}>

@@ -64,10 +64,10 @@
     const { useState, useEffect, useRef } = React;
 
     const STAGES = [
-      { icon: "\u{1F3ED}", label: "Foundation", title: "Foundational Models", sub: "The AI engines that power everything" },
-      { icon: "\u{1F512}", label: "Proprietary", title: "Proprietary Models", sub: "Secret recipe, API access only" },
-      { icon: "\u{1F513}", label: "Open Source", title: "Open Source Models", sub: "Public recipe, full control" },
-      { icon: "\u{1F4F1}", label: "Apps", title: "Application Layer", sub: "Products built on top of models" },
+      { icon: "🏭", label: "Foundation", title: "Foundational Models", sub: "The AI engines that power everything" },
+      { icon: "🔒", label: "Proprietary", title: "Proprietary Models", sub: "Secret recipe, API access only" },
+      { icon: "🔓", label: "Open Source", title: "Open Source Models", sub: "Public recipe, full control" },
+      { icon: "📱", label: "Apps", title: "Application Layer", sub: "Products built on top of models" },
       { icon: "\u2696\uFE0F", label: "Compare", title: "Choosing the Right Model", sub: "Decision framework for your use case" },
     ];
 
@@ -199,6 +199,17 @@
         letterSpacing: '0.5px',
         marginRight: '12px',
       },
+      numberBadge: {
+        display: 'inline-block',
+        padding: '4px 10px',
+        backgroundColor: '#e0d4ff',
+        color: '#6c5ce7',
+        borderRadius: '20px',
+        fontSize: '12px',
+        fontWeight: 700,
+        letterSpacing: '0.5px',
+        marginRight: '12px',
+      },
       title: {
         fontSize: '20px',
         fontWeight: 600,
@@ -214,7 +225,7 @@
         padding: '8px 12px',
         backgroundColor: '#f0f0f0',
         border: '1px solid #ddd',
-        borderRadius: '6px',
+        borderRadius: '12px',
         cursor: 'pointer',
         fontSize: '14px',
         color: '#1a1a1a',
@@ -233,17 +244,18 @@
       },
       content: {
         flex: 1,
-        overflow: 'hidden',
+        overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
         padding: '32px 40px',
+        scrollBehavior: 'smooth',
       },
       explainRow: {
         marginBottom: '28px',
         animation: 'fadeIn 0.3s ease-in',
       },
       explain: {
-        fontSize: '15px',
+        fontSize: '18px',
         lineHeight: '1.6',
         color: '#444',
         marginBottom: '8px',
@@ -251,8 +263,9 @@
       scene: {
         flex: 1,
         backgroundColor: '#fff',
-        borderRadius: '12px',
+        borderRadius: '16px',
         border: '1px solid #e0e0e0',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         padding: '28px',
         marginBottom: '20px',
         overflow: 'auto',
@@ -265,14 +278,21 @@
       },
       insight: {
         padding: '16px 20px',
-        backgroundColor: '#f0f7ff',
-        borderLeft: '4px solid #6c5ce7',
+        backgroundColor: '#f0faf0',
+        borderLeft: '4px solid #2ecc71',
         borderRadius: '6px',
-        fontSize: '13px',
+        fontSize: '16px',
         lineHeight: '1.5',
         color: '#2c3e50',
-        fontStyle: 'italic',
         animation: 'fadeIn 0.3s ease-in',
+      },
+      insightLabel: {
+        fontWeight: 700,
+        color: '#1a9456',
+        marginBottom: '6px',
+        fontSize: '12px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
       },
     };
 
@@ -299,7 +319,7 @@
               marginBottom: '16px',
               animation: 'pulse 2s infinite',
             }}>
-              \u{1F3ED}
+              {"🏭"}
             </div>
             <div style={{
               fontSize: '18px',
@@ -412,14 +432,14 @@
               fontSize: '48px',
               marginBottom: '12px',
             }}>
-              \u{1F512}
+              {"🔒"}
             </div>
             <div style={{
               fontSize: '15px',
               color: '#666',
               maxWidth: '400px',
             }}>
-              Access via API • Weights & Training Data Hidden
+              {"Access via API \u2022 Weights & Training Data Hidden"}
             </div>
           </div>
 
@@ -449,7 +469,7 @@
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>{model.name}</div>
                 <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>{model.company}</div>
                 <div style={{ fontSize: '11px', color: '#666', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  \u{1F512} {model.access}
+                  {"🔒"} {model.access}
                 </div>
               </div>
             ))}
@@ -491,9 +511,9 @@
             lineHeight: '1.5',
           }}>
             <div style={{ marginBottom: '8px', fontWeight: 600 }}>Your App</div>
-            <div style={{ fontSize: '11px', color: '#999' }}>↓ API Request ↓</div>
-            <div style={{ marginTop: '8px', marginBottom: '8px', fontWeight: 600 }}>Cloud (Provider's Infrastructure)</div>
-            <div style={{ fontSize: '11px', color: '#999' }}>↓ Response ↓</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>{"↓ API Request ↓"}</div>
+            <div style={{ marginTop: '8px', marginBottom: '8px', fontWeight: 600 }}>{"Cloud (Provider\u2019s Infrastructure)"}</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>{"↓ Response ↓"}</div>
             <div style={{ marginTop: '8px', fontWeight: 600 }}>Your App</div>
           </div>
         </div>
@@ -506,10 +526,10 @@
       const [showPros, setShowPros] = useState(true);
 
       const models = [
-        { name: 'Llama 3.1', company: 'Meta', range: '8B–405B', color: '#6c5ce7' },
-        { name: 'Mistral', company: 'Mistral AI', range: '7B–8x22B', color: '#2ecc71' },
-        { name: 'Falcon', company: 'TII', range: '7B–180B', color: '#e74c3c' },
-        { name: 'Gemma', company: 'Google', range: '2B–27B', color: '#3498db' },
+        { name: 'Llama 3.1', company: 'Meta', range: '8B\u2013405B', color: '#6c5ce7' },
+        { name: 'Mistral', company: 'Mistral AI', range: '7B\u20138x22B', color: '#2ecc71' },
+        { name: 'Falcon', company: 'TII', range: '7B\u2013180B', color: '#e74c3c' },
+        { name: 'Gemma', company: 'Google', range: '2B\u201327B', color: '#3498db' },
       ];
 
       const pros = ['Free to download', 'Fully customizable', 'Data stays private', 'No vendor lock-in'];
@@ -526,14 +546,14 @@
               fontSize: '48px',
               marginBottom: '12px',
             }}>
-              \u{1F513}
+              {"🔓"}
             </div>
             <div style={{
               fontSize: '15px',
               color: '#666',
               maxWidth: '400px',
             }}>
-              Weights & Code Available • Run on Your Hardware
+              {"Weights & Code Available \u2022 Run on Your Hardware"}
             </div>
           </div>
 
@@ -651,7 +671,7 @@
             lineHeight: '1.6',
           }}>
             <div style={{ fontWeight: 600, marginBottom: '8px' }}>Deployment Flow</div>
-            <div>Download Model \u{2192} Upload to Your Hardware \u{2192} Full Control</div>
+            <div>{"Download Model \u2192 Upload to Your Hardware \u2192 Full Control"}</div>
           </div>
         </div>
       );
@@ -662,10 +682,10 @@
       const [selectedApp, setSelectedApp] = useState(null);
 
       const apps = [
-        { name: 'Perplexity', models: ['GPT-4', 'Claude 3.5'], icon: '\u{1F50E}' },
-        { name: 'Gamma', models: ['GPT-4', 'Claude 3.5'], icon: '\u{1F4C4}' },
-        { name: 'Cursor', models: ['GPT-4', 'Claude 3.5'], icon: '\u{1F5A5}' },
-        { name: 'Copy.ai', models: ['GPT-4', 'Llama'], icon: '\u{2728}' },
+        { name: 'Perplexity', models: ['GPT-4', 'Claude 3.5'], icon: '🔎' },
+        { name: 'Gamma', models: ['GPT-4', 'Claude 3.5'], icon: '📄' },
+        { name: 'Cursor', models: ['GPT-4', 'Claude 3.5'], icon: '🖥' },
+        { name: 'Copy.ai', models: ['GPT-4', 'Llama'], icon: '✨' },
       ];
 
       return (
@@ -679,7 +699,7 @@
               fontSize: '48px',
               marginBottom: '12px',
             }}>
-              \u{1F4F1}
+              {"📱"}
             </div>
             <div style={{
               fontSize: '15px',
@@ -738,7 +758,7 @@
               color: '#999',
               margin: '12px 0',
             }}>
-              \u{2191} POWERS \u{2191}
+              {"↑ POWERS ↑"}
             </div>
 
             <div style={{
@@ -793,7 +813,7 @@
               color: '#999',
               margin: '12px 0',
             }}>
-              \u{2191} SERVES \u{2191}
+              {"↑ SERVES ↑"}
             </div>
 
             <div style={{
@@ -846,10 +866,10 @@
       const [priority, setPriority] = useState(null);
 
       const priorities = [
-        { name: 'Performance', icon: '\u{26A1}', rec: 'Proprietary' },
-        { name: 'Privacy', icon: '\u{1F512}', rec: 'Open Source' },
-        { name: 'Cost', icon: '\u{1F4B0}', rec: 'Open Source' },
-        { name: 'Ease of Use', icon: '\u{1F31F}', rec: 'Application Layer' },
+        { name: 'Performance', icon: '⚡', rec: 'Proprietary' },
+        { name: 'Privacy', icon: '🔒', rec: 'Open Source' },
+        { name: 'Cost', icon: '💰', rec: 'Open Source' },
+        { name: 'Ease of Use', icon: '🌟', rec: 'Application Layer' },
       ];
 
       const comparison = [
@@ -870,7 +890,7 @@
               fontSize: '48px',
               marginBottom: '12px',
             }}>
-              \u{2696}\uFE0F
+              {"\u2696\ufe0f"}
             </div>
             <div style={{
               fontSize: '15px',
@@ -886,7 +906,7 @@
             maxWidth: '500px',
             marginBottom: '24px',
           }}>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>What's your priority?</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>{"What\u2019s your priority?"}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
               {priorities.map((p, i) => (
                 <button
@@ -908,7 +928,7 @@
                   {p.name}
                   {priority === i && (
                     <div style={{ fontSize: '10px', marginTop: '6px', opacity: 0.9 }}>
-                      \u2192 {p.rec}
+                      {"\u2192"} {p.rec}
                     </div>
                   )}
                 </button>
@@ -965,16 +985,16 @@
             <div style={{ marginBottom: '8px' }}>
               <strong>Do you need full control?</strong>
               <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
-                YES \u{2192} <span style={{ color: '#2ecc71', fontWeight: 600 }}>Open Source</span>
+                {"YES \u2192"} <span style={{ color: '#2ecc71', fontWeight: 600 }}>Open Source</span>
               </div>
             </div>
             <div>
               <strong>No. Is ease of use priority?</strong>
               <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
-                YES \u{2192} <span style={{ color: '#3498db', fontWeight: 600 }}>App Layer</span>
+                {"YES \u2192"} <span style={{ color: '#3498db', fontWeight: 600 }}>App Layer</span>
               </div>
               <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
-                NO \u{2192} <span style={{ color: '#6c5ce7', fontWeight: 600 }}>Proprietary</span>
+                {"NO \u2192"} <span style={{ color: '#6c5ce7', fontWeight: 600 }}>Proprietary</span>
               </div>
             </div>
           </div>
@@ -1000,15 +1020,15 @@
       const getInsight = () => {
         switch (stage) {
           case 0:
-            return "Think of foundational models as Toyota engines — they power many different cars, from taxis to race cars.";
+            return "Think of foundational models as Toyota engines \u2014 they power many different cars, from taxis to race cars.";
           case 1:
-            return "You can buy the drink but can't see how it's made — highest quality, but you're dependent on the provider.";
+            return "You can buy the drink but can\u2019t see how it\u2019s made \u2014 highest quality, but you\u2019re dependent on the provider.";
           case 2:
-            return "Like a recipe posted online — make it at home, modify it, or sell your own version. Full freedom.";
+            return "Like a recipe posted online \u2014 make it at home, modify it, or sell your own version. Full freedom.";
           case 3:
-            return "Uber doesn't manufacture engines — they build a service using cars with existing engines. Same with Perplexity using GPT-4.";
+            return "Uber doesn\u2019t manufacture engines \u2014 they build a service using cars with existing engines. Same with Perplexity using GPT-4.";
           case 4:
-            return "There's no single 'best' model — match the model type to your specific needs: performance, privacy, cost, or ease of use.";
+            return "There\u2019s no single \u2018best\u2019 model \u2014 match the model type to your specific needs: performance, privacy, cost, or ease of use.";
           default:
             return "";
         }
@@ -1017,15 +1037,15 @@
       const getExplanation = () => {
         switch (stage) {
           case 0:
-            return "Foundational models are the 'engines' of AI — large pre-trained models trained on massive data that serve as the base intelligence. You don't build an engine from scratch to make a taxi service — you buy one and build around it.";
+            return "Foundational models are the \u2018engines\u2019 of AI \u2014 large pre-trained models trained on massive data that serve as the base intelligence. You don\u2019t build an engine from scratch to make a taxi service \u2014 you buy one and build around it.";
           case 1:
-            return "Proprietary models keep their weights, training data, and code secret. You access them via API only — like Coca-Cola's secret recipe.";
+            return "Proprietary models keep their weights, training data, and code secret. You access them via API only \u2014 like Coca-Cola\u2019s secret recipe.";
           case 2:
-            return "Open source models make weights (and sometimes code/data) publicly available. Download and run yourself — like a recipe posted online that you can modify.";
+            return "Open source models make weights (and sometimes code/data) publicly available. Download and run yourself \u2014 like a recipe posted online that you can modify.";
           case 3:
-            return "Products like Perplexity, Gamma, and Cursor don't build foundational models — they build products ON TOP of them. Like Uber doesn't manufacture engines.";
+            return "Products like Perplexity, Gamma, and Cursor don\u2019t build foundational models \u2014 they build products ON TOP of them. Like Uber doesn\u2019t manufacture engines.";
           case 4:
-            return "The right choice depends on your priorities: performance, cost, privacy, and customization. Here's how to decide.";
+            return "The right choice depends on your priorities: performance, cost, privacy, and customization. Here\u2019s how to decide.";
           default:
             return "";
         }
@@ -1036,7 +1056,7 @@
           {/* Sidebar */}
           <div style={P.sidebar}>
             <a href="../../index.html" style={{...P.backLink, textDecoration: 'none', display: 'block', cursor: 'pointer' }}>
-              ← Back to All Guides
+              {"\u2190 Back to All Guides"}
             </a>
 
             <div style={P.stepContainer}>
@@ -1067,6 +1087,7 @@
             <div style={P.topBar}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span style={P.badge}>Guide</span>
+                <span style={P.numberBadge}>1.4</span>
                 <span style={P.title}>{STAGES[stage].title}</span>
               </div>
               <div style={P.navRow}>
@@ -1078,7 +1099,7 @@
                     ...(stage === 0 ? P.navBtnDisabled : {}),
                   }}
                 >
-                  ← Prev
+                  {"\u2190 Prev"}
                 </button>
                 <span style={P.navP}>{stage + 1} / {STAGES.length}</span>
                 <button
@@ -1089,7 +1110,7 @@
                     ...(stage === STAGES.length - 1 ? P.navBtnDisabled : {}),
                   }}
                 >
-                  Next →
+                  {"Next \u2192"}
                 </button>
               </div>
             </div>
@@ -1100,7 +1121,10 @@
                 <div style={P.explain}>{getExplanation()}</div>
               </div>
               {getScene()}
-              <div style={P.insight}>{getInsight()}</div>
+              <div style={P.insight}>
+                <div style={P.insightLabel}>{"💡"} INSIGHT</div>
+                <div>{getInsight()}</div>
+              </div>
             </div>
           </div>
         </div>
