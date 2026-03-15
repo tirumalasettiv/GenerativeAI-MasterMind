@@ -55,6 +55,80 @@
         opacity: 0;
       }
     }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 40px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
   </style>
 </head>
 <body>
@@ -1111,31 +1185,22 @@
       return (
         <div style={P.root}>
           {/* Sidebar */}
-          <div style={P.sidebar}>
-            <a href="../../index.html" style={{...P.backLink, textDecoration: 'none', display: 'block', cursor: 'pointer' }}>
-              Back to All Guides
-            </a>
-
-            <div style={P.stepContainer}>
-              <div style={P.stepLine} />
-              {STAGES.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => setStage(i)}
-                  style={{
-                    ...P.stepButton,
-                    ...(stage === i ? P.stepButtonActive : {}),
-                  }}
-                >
-                  <div style={stage === i ? P.stepCircleActive : P.stepCircle}>
-                    {stage === i ? (i + 1) : <SvgIcon svg={SIDEBAR_ICONS[i]} />}
-                  </div>
-                  <div style={{ textAlign: 'left', flex: 1 }}>
-                    <div style={{ fontSize: '12px' }}>{s.label}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
+          <div className="sidebar">
+            {STAGES.map((s, i) => (
+              <React.Fragment key={i}>
+                <div className={`step-wrapper ${stage === i ? 'active' : ''}`}>
+                  <button
+                    className={`step-btn ${stage === i ? 'active' : ''}`}
+                    onClick={() => setStage(i)}
+                    dangerouslySetInnerHTML={{__html: SIDEBAR_ICONS[i]}}
+                  />
+                  <div className="step-btn-label">{s.label}</div>
+                </div>
+                {i < STAGES.length - 1 && (
+                  <div className={`step-connector ${stage > i ? 'active' : ''}`} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
 
           {/* Main Content */}

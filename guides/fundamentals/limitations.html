@@ -51,6 +51,80 @@
     }
 
     .cursor { animation: blink 1s infinite; }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 40px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
   </style>
 </head>
 <body>
@@ -797,18 +871,21 @@
         <div style={P.root}>
           <a href="../../index.html" style={P.backLink}>Back to All Guides</a>
 
-          <div style={P.sidebar}>
+          <div className="sidebar">
             {STAGES.map((s, i) => (
-              <div key={i} style={{ position: 'relative' }}>
-                <button
-                  onClick={() => handleNavigate(i)}
-                  style={P.stepButton(i === stage)}
-                >
-                  <SvgIcon html={s.svgSm} />
-                  <div>{s.label}</div>
-                </button>
-                {i < STAGES.length - 1 && <div style={P.stepConnector}></div>}
-              </div>
+              <React.Fragment key={i}>
+                <div className={`step-wrapper ${stage === i ? 'active' : ''}`}>
+                  <button
+                    className={`step-btn ${stage === i ? 'active' : ''}`}
+                    onClick={() => handleNavigate(i)}
+                    dangerouslySetInnerHTML={{__html: s.svgSm}}
+                  />
+                  <div className="step-btn-label">{s.label}</div>
+                </div>
+                {i < STAGES.length - 1 && (
+                  <div className={`step-connector ${stage > i ? 'active' : ''}`} />
+                )}
+              </React.Fragment>
             ))}
           </div>
 

@@ -115,76 +115,76 @@
 
         .sidebar {
             width: 120px;
-            background: white;
+            background: #f8f9fa;
             border-right: 1px solid #e0e0e0;
+            padding: 40px 12px;
             overflow-y: auto;
-            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .step-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             flex-shrink: 0;
         }
 
-        .steps-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 24px;
-            padding: 8px 16px;
-        }
-
-        .step-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .step-dot {
-            width: 56px;
-            height: 56px;
+        .step-btn {
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
+            background: white;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f0f0f0;
-            color: #666;
-            font-size: 20px;
+            font-size: 24px;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            position: relative;
+            flex-shrink: 0;
         }
 
-        .step-item.active .step-dot {
+        .step-btn.active {
             background: #6c5ce7;
-            color: white;
             border-color: #6c5ce7;
-            box-shadow: 0 0 0 6px rgba(108, 92, 231, 0.1);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
         }
 
-        .step-label {
-            font-size: 12px;
+        .step-btn:hover {
+            border-color: #6c5ce7;
+            transform: translateY(-2px);
+        }
+
+        .step-btn-label {
+            font-size: 11px;
             font-weight: 600;
+            color: #999;
+            margin-top: 4px;
             text-align: center;
-            width: 80px;
-            color: #666;
+            letter-spacing: 0.3px;
             transition: color 0.3s ease;
         }
 
-        .step-item.active .step-label {
+        .step-wrapper.active .step-btn-label {
             color: #6c5ce7;
-            font-weight: 700;
         }
 
         .step-connector {
-            width: 3px;
-            height: 24px;
+            width: 2px;
+            height: 16px;
             background: #e0e0e0;
-            margin: -4px 0;
-            transition: background 0.3s ease;
+            margin: 2px 0;
+            flex-shrink: 0;
         }
 
-        .step-item:not(:last-child) .step-connector {
-            display: block;
+        .step-connector.active {
+            background: #6c5ce7;
         }
 
         .content-area {
@@ -1312,20 +1312,21 @@
 
                     <div className="main-container">
                         <div className="sidebar">
-                            <div className="steps-container">
-                                {STAGES.map((s, idx) => (
-                                    <div key={s.id}>
-                                        <div
-                                            className={`step-item ${currentStage === s.id ? 'active' : ''}`}
+                            {STAGES.map((s, idx) => (
+                                <React.Fragment key={s.id}>
+                                    <div className={`step-wrapper ${currentStage === s.id ? 'active' : ''}`}>
+                                        <button
+                                            className={`step-btn ${currentStage === s.id ? 'active' : ''}`}
                                             onClick={() => setCurrentStage(s.id)}
-                                        >
-                                            <div className="step-dot" dangerouslySetInnerHTML={{__html: s.icon}} />
-                                            <div className="step-label">{s.name}</div>
-                                        </div>
-                                        {idx < STAGES.length - 1 && <div className="step-connector"></div>}
+                                            dangerouslySetInnerHTML={{__html: s.icon}}
+                                        />
+                                        <div className="step-btn-label">{s.name}</div>
                                     </div>
-                                ))}
-                            </div>
+                                    {idx < STAGES.length - 1 && (
+                                        <div className={`step-connector ${currentStage > s.id ? 'active' : ''}`} />
+                                    )}
+                                </React.Fragment>
+                            ))}
                         </div>
 
                         <MainContent currentStage={currentStage} setCurrentStage={setCurrentStage} />
