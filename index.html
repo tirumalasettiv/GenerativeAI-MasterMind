@@ -124,29 +124,30 @@
               transition: "all 0.3s",
             }}
           >
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
               <span style={{ fontSize: 28 }}>{guide.emoji}</span>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", margin: 0, marginBottom: 3 }}>
-                  {guide.id} {guide.title}
-                </h3>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", margin: 0 }}>
+                    {guide.id} {guide.title}
+                  </h3>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: 1.2,
+                      color: badgeColor,
+                      background: badgeBg,
+                      padding: "2px 8px",
+                      borderRadius: 10,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {guide.badge}
+                  </span>
+                </div>
                 <p style={{ fontSize: 13, color: "#6a6a7a", margin: 0 }}>{guide.desc}</p>
               </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: 1.2,
-                  color: badgeColor,
-                  background: badgeBg,
-                  padding: "3px 10px",
-                  borderRadius: 12,
-                }}
-              >
-                {guide.badge}
-              </span>
             </div>
             <div
               style={{
@@ -192,30 +193,30 @@
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <span style={{ fontSize: 28 }}>{guide.emoji}</span>
             <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", margin: 0, marginBottom: 3 }}>
-                {guide.id} {guide.title}
-              </h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", margin: 0 }}>
+                  {guide.id} {guide.title}
+                </h3>
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    letterSpacing: 1.2,
+                    color: badgeColor,
+                    background: badgeBg,
+                    padding: "2px 8px",
+                    borderRadius: 10,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {guide.badge}
+                </span>
+              </div>
               <p style={{ fontSize: 13, color: "#6a6a7a", margin: 0 }}>{guide.desc}</p>
             </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: 1.2,
-                color: badgeColor,
-                background: badgeBg,
-                padding: "3px 10px",
-                borderRadius: 12,
-              }}
-            >
-              {guide.badge}
-            </span>
-            <span style={{ fontSize: 18, color: "#2ecc71" }}>✅ Available</span>
           </div>
         </a>
       );
