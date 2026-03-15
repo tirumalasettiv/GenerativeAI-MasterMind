@@ -727,54 +727,44 @@
 
     function S3() {
       const [active, setActive] = useState(null);
-      const [result, setResult] = useState('');
 
       const examples = [
         {
           id: 1,
-          icon: '💬',
-          label: 'ChatGPT',
           domain: 'Text',
-          action: 'Writing emails',
+          label: 'ChatGPT',
+          action: 'Writing emails, articles, summaries',
+          iconSvg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
         },
         {
           id: 2,
-          icon: '🖼️',
-          label: 'DALL-E',
           domain: 'Images',
-          action: 'Creating images',
+          label: 'DALL-E',
+          action: 'Creating art, photos, designs',
+          iconSvg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
         },
         {
           id: 3,
-          icon: '💻',
-          label: 'Copilot',
           domain: 'Code',
-          action: 'Writing code',
+          label: 'Copilot',
+          action: 'Writing and debugging code',
+          iconSvg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>',
         },
         {
           id: 4,
-          icon: '🎵',
-          label: 'ElevenLabs',
           domain: 'Voice',
-          action: 'Generating audio',
+          label: 'ElevenLabs',
+          action: 'Generating realistic speech',
+          iconSvg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
         },
         {
           id: 5,
-          icon: '🎬',
-          label: 'Runway',
           domain: 'Video',
-          action: 'Creating videos',
+          label: 'Runway',
+          action: 'Creating and editing videos',
+          iconSvg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
         },
       ];
-
-      const handleClick = (id) => {
-        setActive(id);
-        setResult(examples.find(e => e.id === id).action);
-        setTimeout(() => {
-          setActive(null);
-          setResult('');
-        }, 2000);
-      };
 
       return (
         <>
@@ -782,18 +772,35 @@
             See GenAI at work across 5 different domains.
           </div>
           <div className="scene-card">
-            <div className="examples-grid">
+            <div style={{ display: 'flex', gap: '16px', width: '100%', justifyContent: 'center', flexWrap: 'wrap' }}>
               {examples.map(example => (
                 <div
                   key={example.id}
-                  className={`example-item ${active === example.id ? 'active' : ''}`}
-                  onClick={() => handleClick(example.id)}
+                  onClick={() => setActive(active === example.id ? null : example.id)}
+                  style={{
+                    flex: '1 1 160px',
+                    maxWidth: '220px',
+                    padding: '20px 16px',
+                    background: active === example.id ? '#f5f3ff' : 'white',
+                    border: active === example.id ? '2px solid #6c5ce7' : '2px solid #e8e3f8',
+                    borderRadius: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    textAlign: 'center',
+                  }}
                 >
-                  <div className="example-icon">{example.icon}</div>
-                  <div className="example-label">{example.label}</div>
-                  {active === example.id && (
-                    <div className="example-content">{result}</div>
-                  )}
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#6c5ce7', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                    {example.domain}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+                    <span dangerouslySetInnerHTML={{__html: example.iconSvg}} />
+                  </div>
+                  <div style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>
+                    {example.label}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#666', lineHeight: '1.4' }}>
+                    {example.action}
+                  </div>
                 </div>
               ))}
             </div>
