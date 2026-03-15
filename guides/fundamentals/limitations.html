@@ -52,6 +52,97 @@
 
     .cursor { animation: blink 1s infinite; }
 
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .guide-number {
+      font-size: 22px;
+      color: #999;
+      font-weight: 400;
+      margin-right: 10px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #999;
+      margin-right: 8px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #e0e0e0;
+      background: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .arrow-btn:hover:not(:disabled) {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
     .sidebar {
       width: 120px;
       background: #f8f9fa;
@@ -869,8 +960,6 @@
 
       return (
         <div style={P.root}>
-          <a href="../../index.html" style={P.backLink}>Back to All Guides</a>
-
           <div className="sidebar">
             {STAGES.map((s, i) => (
               <React.Fragment key={i}>
@@ -890,30 +979,24 @@
           </div>
 
           <div style={P.main}>
-            <div style={P.topBar}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={P.title}>{STAGES[stage].title}</span>
-                <span style={P.badge}>GUIDE 1.5</span>
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">← Back to All Guides</a>
+                <span style={{ fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">1.5</span>
+                  <div className="title">{STAGES[stage].title}</div>
+                </div>
+                <div>
+                  <div className="badge">BEGINNER</div>
+                </div>
               </div>
-              <div style={P.navRow}>
-                <StageProgress current={stage} total={STAGES.length} />
-                <button
-                  onClick={handlePrev}
-                  disabled={!canGoPrev}
-                  style={P.navBtn(!canGoPrev)}
-                  aria-label="Previous"
-                >
-                  &#8592;
-                </button>
-                <span style={P.navP}>Page {stage + 1} of {STAGES.length}</span>
-                <button
-                  onClick={handleNext}
-                  disabled={!canGoNext}
-                  style={P.navBtn(!canGoNext)}
-                  aria-label="Next"
-                >
-                  &#8594;
-                </button>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {stage + 1} of {STAGES.length}</span>
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={!canGoPrev}>←</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={!canGoNext}>→</button>
+                </div>
               </div>
             </div>
 
