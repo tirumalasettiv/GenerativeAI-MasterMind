@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inside the Black Box: How Generative AI Works</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #root {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 32px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .badge {
+            background: #f0f0f0;
+            color: #666;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .top-title {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .nav-arrows {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: #2c3e50;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            padding: 16px 0;
+            flex-shrink: 0;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            padding: 8px 16px;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .step-dot {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            color: #666;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .step-item.active .step-dot {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 6px rgba(108, 92, 231, 0.1);
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            width: 80px;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .step-item.active .step-label {
+            color: #6c5ce7;
+            font-weight: 700;
+        }
+
+        .step-connector {
+            width: 3px;
+            height: 20px;
+            background: #e0e0e0;
+            margin: -4px 0;
+            transition: background 0.3s ease;
+        }
+
+        .step-item:not(:last-child) .step-connector {
+            display: block;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 32px;
+            background: white;
+        }
+
+        .back-link {
+            color: #6c5ce7;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #1a9456;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stage-title {
+            font-family: 'Fraunces', serif;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #2c3e50;
+        }
+
+        .analogy-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 32px;
+            font-style: italic;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-left: 4px solid #6c5ce7;
+            border-radius: 4px;
+        }
+
+        .scene-card {
+            background: linear-gradient(135deg, #f5f3ff 0%, #f0f8ff 100%);
+            border: 1px solid #e0d4ff;
+            border-radius: 12px;
+            padding: 28px;
+            margin: 20px 0;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-box {
+            background: #fffaf0;
+            border-left: 4px solid #2ecc71;
+            padding: 16px 20px;
+            border-radius: 6px;
+            margin-top: auto;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .insight-label {
+            font-weight: 700;
+            color: #1a9456;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .animated {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .cursor-blink {
+            animation: blink 1s infinite;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .interactive-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d0c4ff;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            background: white;
+            color: #2c3e50;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .interactive-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        .token-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .token-chip {
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #e0d4ff;
+            color: #6c5ce7;
+            font-size: 13px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .token-count {
+            font-size: 13px;
+            color: #666;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 8px 14px;
+            background: #f0f0f0;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            color: #666;
+        }
+
+        .preset-btn:hover {
+            background: #e0d4ff;
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
+
+        .attention-text {
+            position: relative;
+            display: inline-block;
+            word-spacing: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .attention-word {
+            position: relative;
+            cursor: pointer;
+            padding: 4px 2px;
+        }
+
+        .attention-word span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .attention-weights {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 120px;
+            margin: 20px 0;
+            gap: 8px;
+        }
+
+        .attention-bar {
+            flex: 1;
+            background: linear-gradient(to top, #6c5ce7, #d0c4ff);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .attention-bar:hover {
+            opacity: 0.8;
+        }
+
+        .attention-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .probability-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .probability-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prob-label {
+            width: 80px;
+            text-align: right;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .prob-bar-bg {
+            flex: 1;
+            height: 32px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .prob-percent {
+            min-width: 40px;
+            text-align: right;
+            font-weight: 600;
+            color: #6c5ce7;
+            font-size: 14px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #6c5ce7;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(108, 92, 231, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #6c5ce7;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(108, 92, 231, 0.3);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: #1a9456;
+            box-shadow: 0 4px 8px rgba(26, 148, 86, 0.3);
+        }
+
+        .slider::-moz-range-thumb:hover {
+            background: #1a9456;
+            box-shadow: 0 4px 8px rgba(26, 148, 86, 0.3);
+        }
+
+        .parameter-display {
+            display: flex;
+            justify-content: space-around;
+            gap: 16px;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .param-card {
+            flex: 1;
+            background: white;
+            border: 1px solid #d0c4ff;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .param-model {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .param-count {
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #6c5ce7;
+        }
+
+        .param-unit {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .network-node {
+            fill: #6c5ce7;
+            transition: all 0.2s ease;
+        }
+
+        .network-node:hover {
+            fill: #1a9456;
+            filter: drop-shadow(0 0 6px rgba(26, 148, 86, 0.5));
+        }
+
+        .network-line {
+            stroke: #d0c4ff;
+            stroke-width: 1;
+            transition: all 0.2s ease;
+        }
+
+        .network-line.active {
+            stroke: #1a9456;
+            stroke-width: 2;
+        }
+
+        .book-animation {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .text-flow {
+            padding: 8px 12px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+            animation: slideIn 0.5s ease-out;
+            border-left: 3px solid #6c5ce7;
+        }
+
+        .neural-net-viz {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .neural-nodes {
+            display: flex;
+            gap: 8px;
+        }
+
+        .neural-node {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e0d4ff;
+            border: 2px solid #6c5ce7;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .neural-arrow {
+            color: #6c5ce7;
+            font-size: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .memory-viz {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .memory-unit {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .memory-label {
+            width: 100px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .memory-dots {
+            display: flex;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .memory-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6c5ce7;
+            opacity: 0.6;
+        }
+
+        .memory-dot.active {
+            background: #1a9456;
+            opacity: 1;
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const P = {
+            primary: '#6c5ce7',
+            success: '#2ecc71',
+            successDark: '#1a9456',
+            light: '#f8f9fa',
+            border: '#e0e0e0',
+            text: '#2c3e50',
+            textMuted: '#666'
+        };
+
+        const STAGES = [
+            { id: 1, name: 'Training', emoji: '\u{1F4DA}' },
+            { id: 2, name: 'Parameters', emoji: '\u{1F9E0}' },
+            { id: 3, name: 'Tokens', emoji: '\u{1F9F0}' },
+            { id: 4, name: 'Attention', emoji: '\u{1F4D1}' },
+            { id: 5, name: 'Prediction', emoji: '\u{1F52E}' }
+        ];
+
+        // Training Stage Component
+        const S1 = ({ stage }) => {
+            const [books, setBooks] = useState([]);
+
+            useEffect(() => {
+                if (stage !== 1) return;
+
+                const texts = [
+                    'Capital of France is Paris',
+                    'Capital of Japan is Tokyo',
+                    'Capital of Germany is Berlin'
+                ];
+
+                texts.forEach((text, idx) => {
+                    setTimeout(() => {
+                        setBooks(prev => [...prev, { id: idx, text }]);
+                    }, idx * 600);
+                });
+
+                return () => setBooks([]);
+            }, [stage]);
+
+            return (
+                <div className="content-wrapper">
+                    <h2 className="stage-title">Training</h2>
+                    <div className="analogy-text">
+                        "A student who reads every library book but memorizes how sentences flow, not specific facts"
+                    </div>
+
+                    <div className="scene-card">
+                        <div className="book-animation">
+                            {books.map(book => (
+                                <div key={book.id} className="text-flow">
+                                    \u{1F4D6} {book.text}
+                                </div>
+                            ))}
+
+                            {books.length > 0 && (
+                                <div style={{ marginTop: '16px', textAlign: 'center', color: P.primary, fontWeight: '600', animation: 'pulse 2s ease-in-out infinite' }}>
+                                    Learning pattern: "Capital of [country] is [city]"
+                                </div>
+                            )}
+
+                            <div className="neural-net-viz">
+                                <div className="neural-nodes">
+                                    <div className="neural-node"></div>
+                                    <div className="neural-node"></div>
+                                    <div className="neural-node"></div>
+                                </div>
+                                <div className="neural-arrow">\u2192</div>
+                                <div className="neural-nodes">
+                                    <div className="neural-node"></div>
+                                    <div className="neural-node"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="insight-box">
+                        <div className="insight-label">\u{1F4A1} Insight</div>
+                        <div>AI learns <strong>patterns, not facts</strong> — like learning grammar rules by reading, not by memorizing a dictionary</div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Parameters Stage Component
+        const S2 = ({ stage }) => {
+            const [hoveredNode, setHoveredNode] = useState(null);
+
+            const NetworkViz = () => {
+                const nodePositions = [
+                    [30, 50], [70, 30], [50, 70], [10, 40], [90, 60],
+                    [40, 20], [60, 80], [25, 75], [80, 15]
+                ];
+
+                return (
+                    <svg viewBox="0 0 100 100" style={{ width: '280px', height: '220px', margin: '20px 0' }}>
+                        {nodePositions.map((pos1, i) =>
+                            nodePositions.map((pos2, j) =>
+                                i < j && Math.random() > 0.4 ? (
+                                    <line
+                                        key={`line-${i}-${j}`}
+                                        x1={pos1[0]}
+                                        y1={pos1[1]}
+                                        x2={pos2[0]}
+                                        y2={pos2[1]}
+                                        className={`network-line ${hoveredNode !== null && (hoveredNode === i || hoveredNode === j) ? 'active' : ''}`}
+                                    />
+                                ) : null
+                            )
+                        )}
+                        {nodePositions.map((pos, idx) => (
+                            <circle
+                                key={`node-${idx}`}
+                                cx={pos[0]}
+                                cy={pos[1]}
+                                r="3.5"
+                                className="network-node"
+                                onMouseEnter={() => setHoveredNode(idx)}
+                                onMouseLeave={() => setHoveredNode(null)}
+                                style={{ cursor: 'pointer' }}
+                            />
+                        ))}
+                    </svg>
+                );
+            };
+
+            return (
+                <div className="content-wrapper">
+                    <h2 className="stage-title">Parameters</h2>
+                    <div className="analogy-text">
+                        "Like muscle memory — you can't explain how you ride a bike, but your body knows"
+                    </div>
+
+                    <div className="scene-card">
+                        <NetworkViz />
+                        <p style={{ fontSize: '13px', color: P.textMuted, marginBottom: '20px' }}>
+                            Hover over nodes to see connections
+                        </p>
+
+                        <div className="parameter-display">
+                            <div className="param-card">
+                                <div className="param-model">GPT-2</div>
+                                <div className="param-count">1.5B</div>
+                                <div className="param-unit">parameters</div>
+                            </div>
+                            <div className="param-card">
+                                <div className="param-model">GPT-3</div>
+                                <div className="param-count">175B</div>
+                                <div className="param-unit">parameters</div>
+                            </div>
+                            <div className="param-card">
+                                <div className="param-model">GPT-4</div>
+                                <div className="param-count">~1.8T</div>
+                                <div className="param-unit">parameters</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="insight-box">
+                        <div className="insight-label">\u{1F4A1} Insight</div>
+                        <div><strong>More parameters = more patterns captured</strong> = better understanding. Each connection stores learned knowledge about language.</div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Tokens Stage Component
+        const S3 = ({ stage }) => {
+            const [userText, setUserText] = useState('Explain photosynthesis');
+            const [tokens, setTokens] = useState([]);
+
+            useEffect(() => {
+                if (stage !== 3) return;
+                generateTokens(userText);
+            }, [stage]);
+
+            const generateTokens = (text) => {
+                const tokenMap = {
+                    'Explain photosynthesis': ['Explain', ' photo', 'synth', 'esis'],
+                    'Hello world': ['Hello', ' world'],
+                    'Machine learning': ['Machine', ' learning'],
+                    'Neural networks': ['Neural', ' networks'],
+                    'Computer science': ['Computer', ' science'],
+                    'Artificial intelligence': ['Artificial', ' intelligence']
+                };
+
+                const result = tokenMap[text] || text.split(/(\s+)/).filter(t => t.trim());
+                setTokens([]);
+
+                result.forEach((token, idx) => {
+                    setTimeout(() => {
+                        setTokens(prev => [...prev, { id: idx, text: token }]);
+                    }, idx * 150);
+                });
+            };
+
+            const presets = [
+                'Explain photosynthesis',
+                'Hello world',
+                'Machine learning',
+                'Neural networks'
+            ];
+
+            const colors = [
+                '#d0c4ff', '#c8b8ff', '#b8a8ff', '#a898ff',
+                '#98f5ff', '#88e8ff', '#78d8ff', '#68c8ff'
+            ];
+
+            return (
+                <div className="content-wrapper">
+                    <h2 className="stage-title">Tokens</h2>
+                    <div className="analogy-text">
+                        "Lego bricks — smaller pieces AI can mix and match"
+                    </div>
+
+                    <div className="scene-card">
+                        <div style={{ width: '100%' }}>
+                            <input
+                                type="text"
+                                className="interactive-input"
+                                value={userText}
+                                onChange={(e) => {
+                                    setUserText(e.target.value);
+                                    generateTokens(e.target.value);
+                                }}
+                                placeholder="Type text to tokenize..."
+                            />
+
+                            <div className="preset-buttons">
+                                {presets.map(preset => (
+                                    <button
+                                        key={preset}
+                                        className="preset-btn"
+                                        onClick={() => {
+                                            setUserText(preset);
+                                            generateTokens(preset);
+                                        }}
+                                    >
+                                        {preset}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="token-chips">
+                                {tokens.map((token, idx) => (
+                                    <div
+                                        key={token.id}
+                                        className="token-chip"
+                                        style={{
+                                            background: colors[idx % colors.length],
+                                            animationDelay: `${idx * 0.1}s`
+                                        }}
+                                    >
+                                        {token.text === ' photo' ? '\u2205photo' : token.text === ' synth' ? '\u2205synth' : token.text === ' esis' ? '\u2205esis' : token.text === ' world' ? '\u2205world' : token.text === ' learning' ? '\u2205learning' : token.text === ' networks' ? '\u2205networks' : token.text === ' intelligence' ? '\u2205intelligence' : token.text === ' science' ? '\u2205science' : token.text}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="token-count">
+                                Total tokens: <strong>{tokens.length}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="insight-box">
+                        <div className="insight-label">\u{1F4A1} Insight</div>
+                        <div><strong>Context window, API cost, and speed</strong> are all measured in tokens — the fundamental unit of GenAI. Tokens are not words; they're the sub-word pieces AI processes.</div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Attention Stage Component
+        const S4 = ({ stage }) => {
+            const [selectedQuestion, setSelectedQuestion] = useState(0);
+
+            const questions = [
+                {
+                    text: 'The Eiffel Tower, built in 1889, is in which city?',
+                    words: ['The', 'Eiffel', 'Tower', ',', 'built', 'in', '1889', ',', 'is', 'in', 'which', 'city', '?'],
+                    attention: [0.05, 0.3, 0.35, 0.02, 0.04, 0.02, 0.05, 0.02, 0.08, 0.02, 0.03, 0.95, 0.01]
+                },
+                {
+                    text: 'What color is the sky on a clear day?',
+                    words: ['What', 'color', 'is', 'the', 'sky', 'on', 'a', 'clear', 'day', '?'],
+                    attention: [0.08, 0.15, 0.05, 0.02, 0.6, 0.03, 0.02, 0.02, 0.01, 0.02]
+                },
+                {
+                    text: 'How many legs does a cat have?',
+                    words: ['How', 'many', 'legs', 'does', 'a', 'cat', 'have', '?'],
+                    attention: [0.05, 0.08, 0.2, 0.05, 0.02, 0.55, 0.04, 0.01]
+                }
+            ];
+
+            const current = questions[selectedQuestion];
+            const maxAttention = Math.max(...current.attention);
+
+            return (
+                <div className="content-wrapper">
+                    <h2 className="stage-title">Attention (Transformers)</h2>
+                    <div className="analogy-text">
+                        "Highlighting key words in a sentence — deciding what matters most"
+                    </div>
+
+                    <div className="scene-card">
+                        <div style={{ width: '100%' }}>
+                            <div className="preset-buttons">
+                                {questions.map((q, idx) => (
+                                    <button
+                                        key={idx}
+                                        className="preset-btn"
+                                        onClick={() => setSelectedQuestion(idx)}
+                                        style={selectedQuestion === idx ? { background: P.primary, color: 'white', borderColor: P.primary } : {}}
+                                    >
+                                        Question {idx + 1}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div style={{ fontSize: '14px', fontWeight: '500', margin: '16px 0', color: P.text }}>
+                                {current.text}
+                            </div>
+
+                            <div className="attention-weights">
+                                {current.words.map((word, idx) => {
+                                    const normalizedAttention = current.attention[idx] / maxAttention;
+                                    const height = 20 + normalizedAttention * 100;
+
+                                    return (
+                                        <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div className="attention-bar" style={{ height: `${height}px` }}></div>
+                                            <div className="attention-label">{word}</div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <p style={{ fontSize: '12px', color: P.textMuted, textAlign: 'center', marginTop: '12px' }}>
+                                Taller bars = higher attention. Watch how AI focuses on key words.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="insight-box">
+                        <div className="insight-label">\u{1F4A1} Insight</div>
+                        <div>This is the <strong>'T' in GPT — the Transformer breakthrough</strong> that lets AI see ALL words at once instead of one by one. It decides which words matter most by computing attention weights.</div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Prediction Stage Component
+        const S5 = ({ stage }) => {
+            const [temperature, setTemperature] = useState(0.5);
+
+            const predictions = [
+                { word: 'Python', baseProb: 42 },
+                { word: 'JavaScript', baseProb: 18 },
+                { word: 'Scratch', baseProb: 12 },
+                { word: 'Rust', baseProb: 8 },
+                { word: 'C++', baseProb: 7 },
+                { word: 'Java', baseProb: 13 }
+            ];
+
+            const adjustedProbabilities = predictions.map(p => {
+                if (temperature === 0) {
+                    return { ...p, prob: p.word === 'Python' ? 100 : 0 };
+                }
+                const tempFactor = 1 + (temperature * 2);
+                const adjusted = Math.pow(p.baseProb / 100, 1 / (temperature + 0.1)) * 100;
+                return { ...p, prob: Math.max(0, Math.min(100, adjusted)) };
+            });
+
+            const sorted = [...adjustedProbabilities].sort((a, b) => b.prob - a.prob);
+            const total = sorted.reduce((sum, p) => sum + p.prob, 0);
+            const normalized = sorted.map(p => ({ ...p, prob: (p.prob / total) * 100 }));
+
+            return (
+                <div className="content-wrapper">
+                    <h2 className="stage-title">Prediction (Next Token)</h2>
+                    <div className="analogy-text">
+                        "Super-autocomplete — predicting the most likely next word"
+                    </div>
+
+                    <div className="scene-card">
+                        <div style={{ width: '100%' }}>
+                            <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '20px', color: P.text }}>
+                                "Best language for beginners is"
+                            </div>
+
+                            <div className="probability-bars">
+                                {normalized.map((item, idx) => (
+                                    <div key={item.word} className="probability-bar">
+                                        <div className="prob-label">{item.word}</div>
+                                        <div className="prob-bar-bg">
+                                            <div
+                                                className="prob-bar-fill"
+                                                style={{
+                                                    width: `${item.prob}%`,
+                                                    transition: 'width 0.4s ease'
+                                                }}
+                                            >
+                                                {item.prob > 8 && `${Math.round(item.prob)}%`}
+                                            </div>
+                                        </div>
+                                        <div className="prob-percent">{Math.round(item.prob)}%</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="slider-container">
+                                <div className="slider-label">
+                                    <span>Temperature: {temperature.toFixed(2)}</span>
+                                    <span style={{ fontSize: '11px', color: P.textMuted }}>Deterministic (0.0) ← → Creative (1.0)</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    value={temperature}
+                                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                                    className="slider"
+                                />
+                            </div>
+
+                            <p style={{ fontSize: '12px', color: P.textMuted, textAlign: 'center', marginTop: '12px' }}>
+                                {temperature === 0 ? '\u{1F94F} Deterministic: Always picks Python' : temperature < 0.5 ? '\u{1F3AF} Focused: Prefers likely answers' : temperature === 0.5 ? '\u{2696\uFE0F} Balanced: Mix of likely and creative' : '\u{1F3B2} Creative: More randomness'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="insight-box">
+                        <div className="insight-label">\u{1F4A1} Insight</div>
+                        <div>This is <strong>the whole trick — GenAI asks "what word probably comes next?" thousands of times</strong> to generate complete responses. Temperature controls the creativity of these predictions.</div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [currentStage, setCurrentStage] = useState(1);
+
+            const handlePrevious = () => {
+                if (currentStage > 1) setCurrentStage(currentStage - 1);
+            };
+
+            const handleNext = () => {
+                if (currentStage < 5) setCurrentStage(currentStage + 1);
+            };
+
+            const renderStage = () => {
+                switch (currentStage) {
+                    case 1: return <S1 stage={currentStage} />;
+                    case 2: return <S2 stage={currentStage} />;
+                    case 3: return <S3 stage={currentStage} />;
+                    case 4: return <S4 stage={currentStage} />;
+                    case 5: return <S5 stage={currentStage} />;
+                    default: return <S1 stage={currentStage} />;
+                }
+            };
+
+            return (
+                <div className="top-bar">
+                    <div className="top-left">
+                        <div className="badge">Fundamentals</div>
+                        <div className="top-title">Inside the Black Box</div>
+                    </div>
+                    <div className="nav-arrows">
+                        <button className="nav-btn" onClick={handlePrevious} disabled={currentStage === 1}>
+                            \u2190
+                        </button>
+                        <button className="nav-btn" onClick={handleNext} disabled={currentStage === 5}>
+                            \u2192
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const MainContent = ({ currentStage, setCurrentStage }) => {
+            const renderStage = () => {
+                switch (currentStage) {
+                    case 1: return <S1 stage={currentStage} />;
+                    case 2: return <S2 stage={currentStage} />;
+                    case 3: return <S3 stage={currentStage} />;
+                    case 4: return <S4 stage={currentStage} />;
+                    case 5: return <S5 stage={currentStage} />;
+                    default: return <S1 stage={currentStage} />;
+                }
+            };
+
+            return (
+                <div className="content-area">
+                    <a href="../../../index.html" className="back-link">\u2190 Back to All Guides</a>
+                    {renderStage()}
+                </div>
+            );
+        };
+
+        const RootApp = () => {
+            const [currentStage, setCurrentStage] = useState(1);
+
+            const handlePrevious = () => {
+                if (currentStage > 1) setCurrentStage(currentStage - 1);
+            };
+
+            const handleNext = () => {
+                if (currentStage < 5) setCurrentStage(currentStage + 1);
+            };
+
+            return (
+                <>
+                    <div className="top-bar">
+                        <div className="top-left">
+                            <div className="badge">Fundamentals</div>
+                            <div className="top-title">Inside the Black Box</div>
+                        </div>
+                        <div className="nav-arrows">
+                            <button className="nav-btn" onClick={handlePrevious} disabled={currentStage === 1}>
+                                \u2190
+                            </button>
+                            <button className="nav-btn" onClick={handleNext} disabled={currentStage === 5}>
+                                \u2192
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="main-container">
+                        <div className="sidebar">
+                            <div className="steps-container">
+                                {STAGES.map((s, idx) => (
+                                    <div key={s.id}>
+                                        <div
+                                            className={`step-item ${currentStage === s.id ? 'active' : ''}`}
+                                            onClick={() => setCurrentStage(s.id)}
+                                        >
+                                            <div className="step-dot">{s.emoji}</div>
+                                            <div className="step-label">{s.name}</div>
+                                        </div>
+                                        {idx < STAGES.length - 1 && <div className="step-connector"></div>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <MainContent currentStage={currentStage} setCurrentStage={setCurrentStage} />
+                    </div>
+                </>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<RootApp />);
+    </script>
+</body>
+</html>

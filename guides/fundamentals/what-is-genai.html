@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What is Generative AI? - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 40px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 12px;
+      background: #e0e0e0;
+      margin: 2px 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 40px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #2a2a2a;
+      max-width: 700px;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #f5f3ff 0%, #f9f6ff 100%);
+      border-radius: 12px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .insight-box {
+      background: #f0f8f0;
+      border-left: 4px solid #2ecc71;
+      padding: 20px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: auto;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes blink {
+      0%, 50%, 100% {
+        opacity: 1;
+      }
+      25%, 75% {
+        opacity: 0;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .typing {
+      display: inline-block;
+      overflow: hidden;
+      border-right: 2px solid #6c5ce7;
+      white-space: nowrap;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    /* Stage 1 specific styles */
+    .demo-outputs {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .output-type {
+      text-align: center;
+      min-width: 100px;
+    }
+
+    .output-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .output-text {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* Stage 2 specific styles */
+    .analogy-cards {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      max-width: 700px;
+    }
+
+    .analogy-card {
+      flex: 1;
+      min-width: 180px;
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .analogy-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(108, 92, 231, 0.1);
+    }
+
+    .analogy-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .analogy-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+
+    .analogy-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .analogy-description {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .analogy-card.expanded .analogy-description {
+      max-height: 200px;
+      margin-top: 12px;
+    }
+
+    /* Stage 3 specific styles */
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      max-width: 700px;
+    }
+
+    .example-item {
+      padding: 16px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .example-item:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .example-item.active {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .example-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .example-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .example-content {
+      font-size: 11px;
+      color: #999;
+      min-height: 40px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .example-item.active .example-content {
+      color: #6c5ce7;
+      font-weight: 500;
+    }
+
+    /* Stage 4 specific styles */
+    .prediction-chain {
+      max-width: 600px;
+    }
+
+    .prompt-input {
+      padding: 12px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+    }
+
+    .prediction-step {
+      margin-bottom: 20px;
+    }
+
+    .step-label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .probability-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .prob-btn {
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .prob-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+    }
+
+    .prob-btn.selected {
+      background: #6c5ce7;
+      color: white;
+      border-color: #6c5ce7;
+    }
+
+    /* Stage 5 specific styles */
+    .can-cannot {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 700px;
+    }
+
+    .capability-column {
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .capability-column.can {
+      border-color: #2ecc71;
+      background: #f0f8f0;
+    }
+
+    .capability-column.cannot {
+      border-color: #e74c3c;
+      background: #fef5f5;
+    }
+
+    .capability-header {
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .capability-list {
+      list-style: none;
+    }
+
+    .capability-item {
+      padding: 8px 0;
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .capability-mark {
+      font-weight: 700;
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    /* Stage 6 specific styles */
+    .timeline {
+      max-width: 700px;
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, #6c5ce7 0%, #2ecc71 100%);
+    }
+
+    .timeline-item {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -37px;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px #6c5ce7;
+    }
+
+    .timeline-year {
+      font-weight: 700;
+      color: #6c5ce7;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .timeline-event {
+      color: #2a2a2a;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const P = {
+      violet: '#6c5ce7',
+      green: '#2ecc71',
+      darkGreen: '#1a9456',
+    };
+
+    function S1() {
+      const [outputs, setOutputs] = useState([]);
+
+      useEffect(() => {
+        const outputTypes = [
+          { icon: '📝', label: 'Text' },
+          { icon: '🖼️', label: 'Images' },
+          { icon: '💻', label: 'Code' },
+          { icon: '🎵', label: 'Audio' },
+          { icon: '🎬', label: 'Video' },
+        ];
+
+        let index = 0;
+        const interval = setInterval(() => {
+          if (index < outputTypes.length) {
+            setOutputs(prev => [...prev, outputTypes[index]]);
+            index++;
+          } else {
+            clearInterval(interval);
+          }
+        }, 400);
+
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <>
+          <div className="explanation">
+            Generative AI is software that creates new content — text, images, code, audio, video — by predicting what should come next based on patterns it learned from millions of examples.
+          </div>
+          <div className="scene-card">
+            <div className="demo-outputs">
+              {outputs.map((output, idx) => (
+                <div key={idx} className="output-type fade-in">
+                  <div className="output-icon">{output.icon}</div>
+                  <div className="output-text">{output.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            Think of it as autocomplete on steroids — your phone suggests the next word, GenAI predicts entire paragraphs, images, or code.
+          </div>
+        </>
+      );
+    }
+
+    function S2() {
+      const [expanded, setExpanded] = useState(null);
+
+      const analogies = [
+        {
+          id: 1,
+          title: 'Autocomplete on Steroids',
+          icon: '📱',
+          description: 'Your phone suggests the next word. GenAI predicts entire paragraphs, emails, or creative text based on patterns from billions of examples.',
+        },
+        {
+          id: 2,
+          title: 'A Well-Read Parrot',
+          icon: '🦜',
+          description: 'It has "read" the internet and produces text that sounds intelligent and coherent, but it\'s sophisticated pattern matching, not true understanding.',
+        },
+        {
+          id: 3,
+          title: 'A Jazz Musician',
+          icon: '🎷',
+          description: 'It learned patterns from thousands of songs and improvises by combining those learned patterns in new ways — creative, but within its training.',
+        },
+      ];
+
+      return (
+        <>
+          <div className="explanation">
+            Let's understand GenAI through 3 different lenses.
+          </div>
+          <div className="scene-card">
+            <div className="analogy-cards">
+              {analogies.map(analogy => (
+                <div
+                  key={analogy.id}
+                  className={`analogy-card ${expanded === analogy.id ? 'expanded' : ''}`}
+                  onClick={() => setExpanded(expanded === analogy.id ? null : analogy.id)}
+                >
+                  <div className="analogy-icon">{analogy.icon}</div>
+                  <div className="analogy-title">{analogy.title}</div>
+                  <div className="analogy-description">{analogy.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            GenAI doesn't think or know things — it predicts what text/images should come next based on patterns.
+          </div>
+        </>
+      );
+    }
+
+    function S3() {
+      const [active, setActive] = useState(null);
+      const [result, setResult] = useState('');
+
+      const examples = [
+        {
+          id: 1,
+          icon: '💬',
+          label: 'ChatGPT',
+          domain: 'Text',
+          action: 'Writing emails',
+        },
+        {
+          id: 2,
+          icon: '🖼️',
+          label: 'DALL-E',
+          domain: 'Images',
+          action: 'Creating images',
+        },
+        {
+          id: 3,
+          icon: '💻',
+          label: 'Copilot',
+          domain: 'Code',
+          action: 'Writing code',
+        },
+        {
+          id: 4,
+          icon: '🎵',
+          label: 'ElevenLabs',
+          domain: 'Voice',
+          action: 'Generating audio',
+        },
+        {
+          id: 5,
+          icon: '🎬',
+          label: 'Runway',
+          domain: 'Video',
+          action: 'Creating videos',
+        },
+      ];
+
+      const handleClick = (id) => {
+        setActive(id);
+        setResult(examples.find(e => e.id === id).action);
+        setTimeout(() => {
+          setActive(null);
+          setResult('');
+        }, 2000);
+      };
+
+      return (
+        <>
+          <div className="explanation">
+            See GenAI at work across 5 different domains.
+          </div>
+          <div className="scene-card">
+            <div className="examples-grid">
+              {examples.map(example => (
+                <div
+                  key={example.id}
+                  className={`example-item ${active === example.id ? 'active' : ''}`}
+                  onClick={() => handleClick(example.id)}
+                >
+                  <div className="example-icon">{example.icon}</div>
+                  <div className="example-label">{example.label}</div>
+                  {active === example.id && (
+                    <div className="example-content">{result}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            From text to images to code to voice to video — GenAI creates across every content type.
+          </div>
+        </>
+      );
+    }
+
+    function S4() {
+      const [step, setStep] = useState(0);
+      const [selections, setSelections] = useState([]);
+
+      const steps = [
+        {
+          prompt: 'The best programming language for',
+          options: [
+            { text: 'beginners', prob: '38%' },
+            { text: 'data science', prob: '22%' },
+            { text: 'web development', prob: '18%' },
+            { text: 'AI/ML', prob: '15%' },
+          ],
+        },
+        {
+          prompt: 'is',
+          options: [
+            { text: 'Python', prob: '45%' },
+            { text: 'JavaScript', prob: '20%' },
+            { text: 'Java', prob: '18%' },
+            { text: 'Go', prob: '12%' },
+          ],
+        },
+        {
+          prompt: 'because it has',
+          options: [
+            { text: 'a gentle learning curve', prob: '42%' },
+            { text: 'rich libraries', prob: '28%' },
+            { text: 'great community support', prob: '20%' },
+            { text: 'fast execution', prob: '8%' },
+          ],
+        },
+      ];
+
+      const handleSelect = (option) => {
+        setSelections([...selections.slice(0, step), option]);
+        if (step < steps.length - 1) {
+          setStep(step + 1);
+        } else {
+          setTimeout(() => {
+            setStep(0);
+            setSelections([]);
+          }, 2000);
+        }
+      };
+
+      const currentStep = steps[step];
+      const fullText = `${currentStep.prompt} ${selections.map(s => s.text).join(' ')}`;
+
+      return (
+        <>
+          <div className="explanation">
+            At its core, GenAI does one thing: predicts the most likely next piece of content, over and over.
+          </div>
+          <div className="scene-card">
+            <div className="prediction-chain">
+              <div className="prompt-input">
+                <span>{fullText}</span>
+                {selections.length <= step && <span className="typing" />}
+              </div>
+
+              {step < steps.length && (
+                <div className="prediction-step">
+                  <div className="step-label">Next prediction options:</div>
+                  <div className="probability-buttons">
+                    {currentStep.options.map((option, idx) => (
+                      <button
+                        key={idx}
+                        className="prob-btn"
+                        onClick={() => handleSelect(option)}
+                      >
+                        {option.text} ({option.prob})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="insight-box">
+            This single trick — next-token prediction — scaled up billions of times is what powers ChatGPT, DALL-E, and every other GenAI tool.
+          </div>
+        </>
+      );
+    }
+
+    function S5() {
+      const [animating, setAnimating] = useState(false);
+
+      useEffect(() => {
+        setAnimating(true);
+      }, []);
+
+      const canDo = [
+        'Create text/images/code',
+        'Summarize documents',
+        'Brainstorm ideas',
+        'Translate languages',
+        'Explain concepts',
+      ];
+
+      const cannotDo = [
+        'Access live internet',
+        'Remember conversations',
+        'Guarantee accuracy',
+        'Truly understand',
+        'Reason rigorously',
+      ];
+
+      return (
+        <>
+          <div className="explanation">
+            GenAI is incredibly powerful but has real limits — understanding these is key to using it well.
+          </div>
+          <div className="scene-card">
+            <div className="can-cannot">
+              <div className="capability-column can">
+                <div className="capability-header">
+                  <span>✓</span>
+                  <span>CAN DO</span>
+                </div>
+                <ul className="capability-list">
+                  {canDo.map((item, idx) => (
+                    <li
+                      key={idx}
+                      className="capability-item"
+                      style={{ animationDelay: `${idx * 0.1}s` }}
+                    >
+                      <span className="capability-mark">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="capability-column cannot">
+                <div className="capability-header">
+                  <span>✕</span>
+                  <span>CAN\u0027T DO</span>
+                </div>
+                <ul className="capability-list">
+                  {cannotDo.map((item, idx) => (
+                    <li
+                      key={idx}
+                      className="capability-item"
+                      style={{ animationDelay: `${idx * 0.1}s` }}
+                    >
+                      <span className="capability-mark">✕</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            GenAI is pattern-matching, not reasoning — incredibly useful, but always verify important outputs.
+          </div>
+        </>
+      );
+    }
+
+    function S6() {
+      const [animating, setAnimating] = useState(false);
+
+      useEffect(() => {
+        setAnimating(true);
+      }, []);
+
+      const milestones = [
+        {
+          year: '2017',
+          event: '\u201cAttention Is All You Need\u201d paper published, introducing Transformers',
+        },
+        {
+          year: '2020',
+          event: 'GPT-3 launches with 175 billion parameters',
+        },
+        {
+          year: '2022',
+          event: 'ChatGPT reaches 100M users in 2 months (fastest adoption ever)',
+        },
+        {
+          year: '2023',
+          event: 'GPT-4, Claude, Midjourney V5 released',
+        },
+        {
+          year: '2024\u20132025',
+          event: 'AI Agents, Multi-modal AI, Enterprise adoption accelerates',
+        },
+      ];
+
+      return (
+        <>
+          <div className="explanation">
+            GenAI went mainstream in late 2022 with ChatGPT — here's why it's transforming everything.
+          </div>
+          <div className="scene-card">
+            <div className="timeline">
+              {milestones.map((milestone, idx) => (
+                <div
+                  key={idx}
+                  className="timeline-item"
+                  style={{ animationDelay: `${idx * 0.15}s` }}
+                >
+                  <div className="timeline-year">{milestone.year}</div>
+                  <div className="timeline-event">{milestone.event}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            We\u0027re still in the early days — like the internet in 1995. The best applications haven\u0027t been built yet.
+          </div>
+        </>
+      );
+    }
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stages = [
+        { icon: '💡', component: S1 },
+        { icon: '🔍', component: S2 },
+        { icon: '⚡', component: S3 },
+        { icon: '🎯', component: S4 },
+        { icon: '⚖️', component: S5 },
+        { icon: '📈', component: S6 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) {
+          setCurrentStage(currentStage + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) {
+          setCurrentStage(currentStage - 1);
+        }
+      };
+
+      const handleStageClick = (idx) => {
+        setCurrentStage(idx);
+      };
+
+      return (
+        <div className="container">
+          <div className="sidebar">
+            {stages.map((stage, idx) => (
+              <React.Fragment key={idx}>
+                <button
+                  className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                  onClick={() => handleStageClick(idx)}
+                >
+                  {stage.icon}
+                </button>
+                {idx < stages.length - 1 && (
+                  <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">← Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">INTERACTIVE GUIDE</div>
+                </div>
+                <div style={{ marginLeft: '12px' }}>
+                  <div className="title">What is Generative AI?</div>
+                </div>
+              </div>
+
+              <div className="nav-arrows">
+                <button
+                  className="arrow-btn"
+                  onClick={handlePrev}
+                  disabled={currentStage === 0}
+                  title="Previous stage"
+                >
+                  ←
+                </button>
+                <button
+                  className="arrow-btn"
+                  onClick={handleNext}
+                  disabled={currentStage === stages.length - 1}
+                  title="Next stage"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>
