@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic LLM Chat Architecture - Generative AI MasterMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Fraunces', serif;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes blink {
+      0%, 49%, 100% { opacity: 1; }
+      50%, 99% { opacity: 0; }
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const P = {
+      root: {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        height: '100vh',
+        backgroundColor: 'white',
+        overflow: 'hidden'
+      },
+      sidebar: {
+        width: '180px',
+        backgroundColor: '#f8f9fa',
+        borderRight: '1px solid #e9ecef',
+        padding: '24px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '24px'
+      },
+      stepCircle: (index, current, completed) => ({
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        backgroundColor: completed ? '#2ecc71' : (index === current ? '#6c5ce7' : '#e9ecef'),
+        color: completed || index === current ? 'white' : '#adb5bd',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 700,
+        fontSize: '20px',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        animation: index === current ? 'pulse 2s infinite' : 'none'
+      }),
+      stepLabel: {
+        fontSize: '12px',
+        textAlign: 'center',
+        color: '#495057',
+        fontWeight: 500,
+        maxWidth: '140px'
+      },
+      connector: (completed) => ({
+        width: '2px',
+        height: '12px',
+        backgroundColor: completed ? '#2ecc71' : '#e9ecef',
+        transition: 'all 0.3s ease'
+      }),
+      main: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      },
+      topBar: {
+        height: '64px',
+        backgroundColor: '#f8f9fa',
+        borderBottom: '1px solid #e9ecef',
+        padding: '12px 32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      },
+      leftSection: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px'
+      },
+      backLink: {
+        color: '#6c5ce7',
+        textDecoration: 'none',
+        fontSize: '14px',
+        fontWeight: 500,
+        cursor: 'pointer',
+        transition: 'color 0.2s'
+      },
+      badge: {
+        backgroundColor: '#e8f0fe',
+        color: '#6c5ce7',
+        padding: '6px 12px',
+        borderRadius: '20px',
+        fontSize: '12px',
+        fontWeight: 600
+      },
+      title: {
+        fontSize: '24px',
+        fontWeight: 700,
+        color: '#1a1a1a'
+      },
+      navRow: {
+        display: 'flex',
+        gap: '8px'
+      },
+      navBtn: (active) => ({
+        padding: '8px 16px',
+        border: 'none',
+        borderRadius: '8px',
+        backgroundColor: active ? '#6c5ce7' : '#e9ecef',
+        color: active ? 'white' : '#495057',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: 500,
+        transition: 'all 0.3s ease'
+      }),
+      navP: {
+        color: '#adb5bd',
+        fontSize: '14px'
+      },
+      content: {
+        flex: 1,
+        padding: '40px 48px',
+        overflowY: 'auto',
+        animation: 'fadeIn 0.3s ease'
+      },
+      explainRow: {
+        backgroundColor: '#f8f9fa',
+        padding: '20px 24px',
+        borderRadius: '12px',
+        marginBottom: '24px',
+        borderLeft: '4px solid #6c5ce7'
+      },
+      explain: {
+        fontSize: '15px',
+        lineHeight: '1.6',
+        color: '#495057'
+      },
+      scene: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: '16px',
+        padding: '32px',
+        border: '1px solid #e9ecef',
+        marginBottom: '24px',
+        minHeight: '320px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      },
+      insightLabel: {
+        fontSize: '12px',
+        fontWeight: 700,
+        color: '#1a9456',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '8px'
+      },
+      insight: {
+        backgroundColor: '#f0faf0',
+        borderLeft: '4px solid #2ecc71',
+        padding: '20px',
+        borderRadius: '8px',
+        fontSize: '15px',
+        lineHeight: '1.6',
+        color: '#1a1a1a'
+      }
+    };
+
+    const S1 = () => {
+      const [typing, setTyping] = useState('');
+      const [response, setResponse] = useState('');
+
+      useEffect(() => {
+        setTyping('');
+        setResponse('');
+        const timer1 = setTimeout(() => setTyping('Help me brainstorm product names for an AI tool'), 800);
+        const timer2 = setTimeout(() => {
+          setResponse('Here are some creative product names:\n1. MindWeave - suggests intelligent networking\n2. NeuralNova - evokes neural networks + innovation\n3. SynthThink - synthesis of human + AI thinking\n4. CognateAI - cognitive + collaborative\n5. BrainSpark - instant ideas from AI partnership');
+        }, 3000);
+        return () => { clearTimeout(timer1); clearTimeout(timer2); };
+      }, []);
+
+      return (
+        <div>
+          <div style={P.explainRow}>
+            <p style={P.explain}>Direct conversation with AI using only the knowledge it was trained on — like texting a very smart friend who has read a lot of books.</p>
+          </div>
+          <div style={P.scene}>
+            <div style={{ backgroundColor: '#fff', borderRadius: '12px', padding: '20px', border: '1px solid #e9ecef', maxWidth: '500px', margin: '0 auto', width: '100%' }}>
+              <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e9ecef' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#6c5ce7', marginBottom: '8px' }}>You</div>
+                <div style={{ fontSize: '14px', color: '#1a1a1a', minHeight: '20px' }}>
+                  {typing}
+                  {typing && typing !== 'Help me brainstorm product names for an AI tool' && <span style={{ animation: 'blink 0.6s infinite' }}>|</span>}
+                </div>
+              </div>
+              {response && (
+                <div style={{ animation: 'slideInRight 0.5s ease' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#2ecc71', marginBottom: '8px' }}>AI</div>
+                  <div style={{ fontSize: '13px', color: '#495057', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                    {response}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>Key Insight</div>
+            <p>LLM Chat is the simplest AI architecture. No databases, no tools — just the model\u0027s trained knowledge. Great for brainstorming, drafting, and explaining concepts.</p>
+          </div>
+        </div>
+      );
+    };
+
+    const S2 = () => {
+      const [temp, setTemp] = useState(0.7);
+      const [style, setStyle] = useState('balanced');
+
+      useEffect(() => {
+        if (temp < 0.3) setStyle('formal');
+        else if (temp > 0.7) setStyle('creative');
+        else setStyle('balanced');
+      }, [temp]);
+
+      const styleExamples = {
+        formal: 'The advancement of artificial intelligence represents a significant technological achievement.',
+        balanced: 'AI is advancing rapidly and changing how we work and create.',
+        creative: 'Mind-bending AI is revolutionizing everything \u2014 buckle up! \ud83d\ude80'
+      };
+
+      return (
+        <div>
+          <div style={P.explainRow}>
+            <p style={P.explain}>Under the hood, LLM Chat has just 3 components: your input (prompt), the model (billions of parameters), and the output (generated text).</p>
+          </div>
+          <div style={P.scene}>
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center', justifyContent: 'space-around' }}>
+              <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e9ecef', textAlign: 'center' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#6c5ce7', marginBottom: '12px', textTransform: 'uppercase' }}>Input</div>
+                <div style={{ fontSize: '13px', color: '#495057', marginBottom: '12px', fontStyle: 'italic' }}>"Write a product announcement"</div>
+                <div style={{ fontSize: '12px', color: '#adb5bd' }}>~45 tokens</div>
+              </div>
+              <div style={{ fontSize: '20px', color: '#adb5bd' }}>→</div>
+              <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e9ecef', textAlign: 'center' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#6c5ce7', marginBottom: '12px', textTransform: 'uppercase' }}>Model</div>
+                <div style={{ fontSize: '32px', marginBottom: '8px' }}>🧠</div>
+                <div style={{ fontSize: '12px', backgroundColor: '#e8f0fe', color: '#6c5ce7', padding: '6px 12px', borderRadius: '20px', display: 'inline-block', marginBottom: '8px' }}>175B parameters</div>
+                <div style={{ fontSize: '12px', color: '#adb5bd', marginTop: '12px' }}>
+                  <div>Temp: {temp.toFixed(1)}</div>
+                  <input type="range" min="0" max="1" step="0.1" value={temp} onChange={(e) => setTemp(parseFloat(e.target.value))} style={{ width: '100%', marginTop: '8px' }} />
+                  <div style={{ fontSize: '10px', marginTop: '4px' }}>Formal ↔ Creative</div>
+                </div>
+              </div>
+              <div style={{ fontSize: '20px', color: '#adb5bd' }}>→</div>
+              <div style={{ flex: 1, backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e9ecef', textAlign: 'center' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#6c5ce7', marginBottom: '12px', textTransform: 'uppercase' }}>Output</div>
+                <div style={{ fontSize: '13px', color: '#495057', marginBottom: '8px', fontStyle: 'italic', minHeight: '40px' }}>"{styleExamples[style]}"</div>
+                <div style={{ fontSize: '11px', color: '#2ecc71', fontWeight: 600 }}>Style: {style}</div>
+              </div>
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>Key Insight</div>
+            <p>The entire LLM Chat architecture fits in 3 boxes. Temperature controls creativity — low for facts, high for brainstorming. No retrieval, no tools, just pure generation.</p>
+          </div>
+        </div>
+      );
+    };
+
+    const S3 = () => {
+      const [expanded, setExpanded] = useState(null);
+
+      const useCases = [
+        { id: 1, emoji: '\ud83d\udca1', title: 'Brainstorming', desc: 'Generate product names, feature ideas, marketing angles', example: 'Prompt: "List 10 startup ideas in AI"' },
+        { id: 2, emoji: '\u270d\ufe0f', title: 'Content Drafting', desc: 'Emails, blog posts, social media copy', example: 'Prompt: "Draft an engaging LinkedIn post about learning AI"' },
+        { id: 3, emoji: '\ud83d\udcda', title: 'Explaining Concepts', desc: 'Break down complex topics for any audience', example: 'Prompt: "Explain neural networks like I\u0027m 10"' },
+        { id: 4, emoji: '\ud83d\udc68\u200d\ud83d\udcbb', title: 'Code Assistance', desc: 'Write, debug, and explain code snippets', example: 'Prompt: "Write a Python function to sort a list"' },
+        { id: 5, emoji: '\ud83c\udfad', title: 'Role Playing', desc: 'Practice conversations, interviews, negotiations', example: 'Prompt: "Practice a sales pitch for a new product"' },
+        { id: 6, emoji: '\ud83d\udcdd', title: 'Summarization', desc: 'Condense long text into key points', example: 'Prompt: "Summarize this article in 3 bullets"' }
+      ];
+
+      return (
+        <div>
+          <div style={P.explainRow}>
+            <p style={P.explain}>LLM Chat shines when general knowledge is enough and you don\u0027t need your specific data.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
+            {useCases.map(uc => (
+              <div
+                key={uc.id}
+                onClick={() => setExpanded(expanded === uc.id ? null : uc.id)}
+                style={{
+                  backgroundColor: '#fff',
+                  border: '1px solid #e9ecef',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  transform: expanded === uc.id ? 'scale(1.02)' : 'scale(1)',
+                  boxShadow: expanded === uc.id ? '0 8px 24px rgba(108, 92, 231, 0.1)' : 'none'
+                }}
+              >
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>{uc.emoji}</div>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1a1a1a', marginBottom: '8px' }}>{uc.title}</h3>
+                <p style={{ fontSize: '13px', color: '#495057', marginBottom: '12px' }}>{uc.desc}</p>
+                {expanded === uc.id && (
+                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e9ecef', animation: 'slideInRight 0.3s ease' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#6c5ce7', marginBottom: '6px' }}>Example:</div>
+                    <div style={{ fontSize: '12px', color: '#495057', fontStyle: 'italic' }}>{uc.example}</div>
+                    <div style={{ fontSize: '12px', color: '#2ecc71', fontWeight: 600, marginTop: '8px' }}>✓ Best For</div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>Key Insight</div>
+            <p>If your question could be answered by a well-read expert WITHOUT looking anything up, LLM Chat is your architecture. The moment you need YOUR data, upgrade to RAG.</p>
+          </div>
+        </div>
+      );
+    };
+
+    const S4 = () => {
+      const [flipped, setFlipped] = useState({});
+
+      const limitations = [
+        { id: 1, limit: 'Knowledge Cutoff', desc: 'AI doesn\u0027t know recent events', upgrade: 'Add web search (RAG)' },
+        { id: 2, limit: 'No Custom Data', desc: 'Can\u0027t access your documents', upgrade: 'Use RAG architecture' },
+        { id: 3, limit: 'Hallucinations', desc: 'May confidently make things up', upgrade: 'Ground with retrieval (RAG)' },
+        { id: 4, limit: 'No Tool Use', desc: 'Can\u0027t browse, calculate, or take actions', upgrade: 'Use AI Agent' }
+      ];
+
+      return (
+        <div>
+          <div style={P.explainRow}>
+            <p style={P.explain}>LLM Chat has clear boundaries — knowing them helps you decide when to move to a more powerful architecture.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '32px' }}>
+            {limitations.map(lim => (
+              <div
+                key={lim.id}
+                onClick={() => setFlipped({ ...flipped, [lim.id]: !flipped[lim.id] })}
+                style={{
+                  backgroundColor: flipped[lim.id] ? '#f0faf0' : '#fff',
+                  border: `1px solid ${flipped[lim.id] ? '#2ecc71' : '#e9ecef'}`,
+                  borderRadius: '12px',
+                  padding: '20px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  minHeight: '140px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
+                }}
+              >
+                {!flipped[lim.id] ? (
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a1a', marginBottom: '8px' }}>⚠️ {lim.limit}</div>
+                    <p style={{ fontSize: '13px', color: '#495057' }}>{lim.desc}</p>
+                    <div style={{ fontSize: '12px', color: '#adb5bd', marginTop: '12px', fontStyle: 'italic' }}>Click to see solution</div>
+                  </div>
+                ) : (
+                  <div style={{ animation: 'slideInRight 0.3s ease' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#2ecc71', marginBottom: '8px' }}>✓ Upgrade Path</div>
+                    <p style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 600 }}>{lim.upgrade}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={{ ...P.scene, minHeight: 'auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#6c5ce7', marginBottom: '16px', textTransform: 'uppercase' }}>Architecture Upgrade Path</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              {['LLM Chat', 'RAG', 'Workflow', 'Agent', 'Agentic'].map((arch, idx) => (
+                <React.Fragment key={idx}>
+                  <div style={{ backgroundColor: '#6c5ce7', color: 'white', padding: '8px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    {arch}
+                  </div>
+                  {idx < 4 && <div style={{ fontSize: '18px', color: '#adb5bd' }}>→</div>}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>Key Insight</div>
+            <p>Every limitation of LLM Chat points to the next architecture. No data access? → RAG. Need actions? → Agent. LLM Chat is your starting point — graduate from it as complexity grows.</p>
+          </div>
+        </div>
+      );
+    };
+
+    const App = () => {
+      const [stage, setStage] = useState(0);
+
+      const stages = [
+        { num: 1, title: 'What is LLM Chat?', component: S1 },
+        { num: 2, title: 'How It Works', component: S2 },
+        { num: 3, title: 'Best Use Cases', component: S3 },
+        { num: 4, title: 'Limitations & When to Upgrade', component: S4 }
+      ];
+
+      const StageComponent = stages[stage].component;
+
+      return (
+        <div style={P.root}>
+          <div style={P.sidebar}>
+            {stages.map((s, idx) => (
+              <div key={idx}>
+                <div
+                  onClick={() => setStage(idx)}
+                  style={P.stepCircle(idx, stage, idx < stage)}
+                >
+                  {idx < stage ? '✓' : s.num}
+                </div>
+                <div style={P.stepLabel}>{s.title}</div>
+                {idx < stages.length - 1 && <div style={P.connector(idx < stage)}></div>}
+              </div>
+            ))}
+          </div>
+          <div style={P.main}>
+            <div style={P.topBar}>
+              <div style={P.leftSection}>
+                <a href="../../index.html" style={P.backLink}>← Back</a>
+                <div style={P.badge}>BEGINNER</div>
+              </div>
+              <h1 style={P.title}>Basic LLM Chat Architecture</h1>
+              <div style={P.navRow}>
+                {stages.map((s, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setStage(idx)}
+                    style={P.navBtn(idx === stage)}
+                  >
+                    {s.num}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={P.content}>
+              <StageComponent />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

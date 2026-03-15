@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meta Prompting & COSTAR Framework - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 180px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 40px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 6px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+      width: 80px;
+      line-height: 1.2;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 12px;
+      background: #e0e0e0;
+      margin: 4px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 40px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #2a2a2a;
+      max-width: 800px;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #f5f3ff 0%, #f9f6ff 100%);
+      border-radius: 16px;
+      padding: 32px;
+      border: 1px solid #e8e3f8;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 20px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-top: auto;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes blink {
+      0%, 50%, 100% {
+        opacity: 1;
+      }
+      25%, 75% {
+        opacity: 0;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .typing {
+      display: inline-block;
+      overflow: hidden;
+      border-right: 2px solid #6c5ce7;
+      white-space: nowrap;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    /* Comparison styles */
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .comparison-item {
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .comparison-item.bad {
+      background: #fef5f5;
+      border-color: #e74c3c;
+    }
+
+    .comparison-item.good {
+      background: #f0f8f0;
+      border-color: #2ecc71;
+    }
+
+    .comparison-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .comparison-item.bad .comparison-title {
+      color: #c0392b;
+    }
+
+    .comparison-item.good .comparison-title {
+      color: #27ae60;
+    }
+
+    .comparison-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* Meta Prompt flow */
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 700px;
+    }
+
+    .flow-box {
+      padding: 16px 20px;
+      background: white;
+      border: 2px solid #6c5ce7;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #6c5ce7;
+      min-width: 120px;
+    }
+
+    .flow-arrow {
+      font-size: 20px;
+      color: #6c5ce7;
+    }
+
+    /* COSTAR Builder */
+    .costar-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .costar-box {
+      padding: 16px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .costar-box:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .costar-box.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .costar-label {
+      font-weight: 700;
+      font-size: 16px;
+      color: #6c5ce7;
+      margin-bottom: 6px;
+    }
+
+    .costar-description {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .costar-example {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 12px;
+      color: #333;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .costar-box.expanded .costar-example {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Meta Prompt demo */
+    .meta-demo {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .demo-input {
+      width: 100%;
+      padding: 12px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .demo-input:focus {
+      outline: none;
+      border-color: #6c5ce7;
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    }
+
+    .demo-presets {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preset-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+    }
+
+    .preset-btn.active {
+      background: #6c5ce7;
+      color: white;
+      border-color: #6c5ce7;
+    }
+
+    .generated-prompt {
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #333;
+      font-family: 'DM Sans', sans-serif;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .generated-prompt.show {
+      max-height: 400px;
+    }
+
+    /* Decision tree */
+    .decision-tree {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .decision-node {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .decision-node:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .decision-question {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+    }
+
+    .decision-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .decision-node.expanded .decision-answer {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .answer-text {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function S1() {
+      return (
+        <>
+          <div className="explanation">
+            Prompt engineering is about structuring your instructions to get the best possible outputs from AI. Think of it like giving directions — \u201cgo somewhere nice\u201d gets you lost, but \u201ctake I-95 North to Exit 12, turn left at the light\u201d gets you exactly where you want to go.
+          </div>
+          <div className="scene-card">
+            <div className="comparison-box">
+              <div className="comparison-item bad fade-in">
+                <div className="comparison-title">\u274c Vague Prompt</div>
+                <div className="comparison-content">
+                  \u201cWrite an email\u201d
+                </div>
+              </div>
+              <div className="comparison-item good fade-in" style={{ animationDelay: '0.2s' }}>
+                <div className="comparison-title">\u2713 Structured Prompt</div>
+                <div className="comparison-content">
+                  \u201cWrite a professional rejection email to a candidate, emphasizing their strengths and offering feedback\u201d
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label">{String.fromCodePoint(0x1F4A1)} INSIGHT</div>
+            More detail in your prompt = better, more targeted outputs. You\u2019re essentially teaching the AI what \u201cgood\u201d looks like for your specific need.
+          </div>
+        </>
+      );
+    }
+
+    function S2() {
+      const [selectedPreset, setSelectedPreset] = useState(0);
+      const [showPrompt, setShowPrompt] = useState(false);
+
+      const presets = [
+        {
+          goal: 'Write a PRD for account payable automation',
+          prompt: 'You are an expert product manager. Create a comprehensive Product Requirements Document for an account payable automation tool. Include: business case, user personas, key features, acceptance criteria, and success metrics. Format as a professional document suitable for engineering stakeholders.'
+        },
+        {
+          goal: 'Design API documentation',
+          prompt: 'You are a technical writer specializing in API docs. Create clear, concise API documentation for a payment processing endpoint. Include: endpoint description, parameters, response format, error codes, and practical code examples. Use a structured, beginner-friendly approach.'
+        }
+      ];
+
+      return (
+        <>
+          <div className="explanation">
+            Meta prompting is asking the AI to write the prompt for you. Instead of struggling to structure a complex request, you tell the AI your goal and let it be your prompt engineer.
+          </div>
+          <div className="scene-card">
+            <div className="meta-demo">
+              <div className="demo-presets">
+                {presets.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    className={`preset-btn ${selectedPreset === idx ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedPreset(idx);
+                      setShowPrompt(false);
+                    }}
+                  >
+                    Example {idx + 1}
+                  </button>
+                ))}
+              </div>
+              <div className="demo-input" style={{ cursor: 'default' }}>
+                {presets[selectedPreset].goal}
+              </div>
+              <button
+                className="preset-btn"
+                onClick={() => setShowPrompt(!showPrompt)}
+                style={{
+                  background: showPrompt ? '#6c5ce7' : 'white',
+                  color: showPrompt ? 'white' : '#6c5ce7',
+                  border: '2px solid #6c5ce7'
+                }}
+              >
+                {showPrompt ? '\u270d\ufe0f Optimized Prompt' : '\u2728 Generate Optimized Prompt'}
+              </button>
+              <div className={`generated-prompt ${showPrompt ? 'show' : ''}`} style={{ animationDelay: '0.2s' }}>
+                <strong>AI-Generated Optimized Prompt:</strong>
+                <br /><br />
+                {presets[selectedPreset].prompt}
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label">{String.fromCodePoint(0x1F4A1)} INSIGHT</div>
+            Meta prompting shifts the burden from you to the AI. When unsure how to ask something, start with your goal and let the AI structure the perfect prompt.
+          </div>
+        </>
+      );
+    }
+
+    function S3() {
+      const [expandedBox, setExpandedBox] = useState(null);
+
+      const costarComponents = [
+        {
+          id: 'C',
+          label: 'Context',
+          description: 'Background information and situation',
+          example: 'We\u2019re rejecting a high-potential candidate due to cultural fit concerns.'
+        },
+        {
+          id: 'O',
+          label: 'Objective',
+          description: 'What you want to achieve',
+          example: 'Write a rejection email that preserves the relationship.'
+        },
+        {
+          id: 'S',
+          label: 'Style',
+          description: 'How it should be written',
+          example: 'Professional, warm, conversational.'
+        },
+        {
+          id: 'T',
+          label: 'Tone',
+          description: 'The emotional color',
+          example: 'Empathetic, encouraging, honest.'
+        },
+        {
+          id: 'A',
+          label: 'Audience',
+          description: 'Who is receiving this',
+          example: 'A talented engineer with 10 years experience.'
+        },
+        {
+          id: 'R',
+          label: 'Response',
+          description: 'Format and structure',
+          example: 'Email format, 3-4 paragraphs, 150-200 words.'
+        }
+      ];
+
+      return (
+        <>
+          <div className="explanation">
+            COSTAR breaks prompts into 6 key components: Context, Objective, Style, Tone, Audience, Response. When you fill all 6, the AI understands not just WHAT to do, but HOW, for WHOM, and in what FORMAT.
+          </div>
+          <div className="scene-card">
+            <div className="costar-grid">
+              {costarComponents.map((comp, idx) => (
+                <div
+                  key={comp.id}
+                  className={`costar-box ${expandedBox === comp.id ? 'expanded' : ''}`}
+                  onClick={() => setExpandedBox(expandedBox === comp.id ? null : comp.id)}
+                >
+                  <div className="costar-label">{comp.id}</div>
+                  <div className="costar-description">{comp.label}</div>
+                  <div className="costar-example">
+                    <strong>{comp.label}:</strong> {comp.description}
+                    <br /><br />
+                    <em>Example: {comp.example}</em>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label">{String.fromCodePoint(0x1F4A1)} INSIGHT</div>
+            COSTAR ensures the AI understands the full picture. Missing even one component often results in generic, off-target outputs.
+          </div>
+        </>
+      );
+    }
+
+    function S4() {
+      const [compare, setCompare] = useState(false);
+
+      const examples = {
+        bad: {
+          prompt: 'Write a rejection email to a candidate.',
+          output: 'Dear Candidate,\n\nWe have decided to move forward with other candidates. Thank you for your interest.\n\nBest regards'
+        },
+        good: {
+          prompt: 'Context: We\u2019re rejecting a talented engineer who fit our technical needs but not our fast-paced culture. Objective: Write a rejection email that preserves the relationship and offers constructive feedback. Style: Professional yet warm. Tone: Empathetic and encouraging. Audience: An experienced senior engineer. Response: Email format, 3-4 paragraphs.',
+          output: 'Dear [Name],\n\nThank you for the time and effort you invested in our interview process. Your technical skills are genuinely impressive, and we were impressed by your portfolio.\n\nAfter careful consideration, we\u2019ve decided to move in a different direction. This wasn\u2019t about your qualifications — it\u2019s about finding the right cultural fit for our high-velocity environment. Your thoughtful, methodical approach is a strength; it may simply align better with teams that value that style.\n\nWe\u2019d love to stay connected. Companies like ours often hire great people years later, and we see potential collaboration ahead.\n\nBest regards'
+        }
+      };
+
+      return (
+        <>
+          <div className="explanation">
+            See the dramatic difference COSTAR makes. The same task — write a rejection email — produces completely different results.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%', maxWidth: '700px' }}>
+              <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                <button
+                  className="preset-btn"
+                  onClick={() => setCompare(!compare)}
+                  style={{
+                    background: compare ? '#2ecc71' : 'white',
+                    color: compare ? 'white' : '#2ecc71',
+                    border: '2px solid #2ecc71'
+                  }}
+                >
+                  {compare ? '\u2713 COSTAR Version' : '\u274c Vague Version'}
+                </button>
+              </div>
+              <div className={compare ? 'slide-in-right' : 'slide-in-left'}>
+                <div style={{ marginBottom: '12px' }}>
+                  <strong style={{ color: compare ? '#2ecc71' : '#e74c3c' }}>
+                    Prompt: {compare ? '(COSTAR)' : '(Vague)'}
+                  </strong>
+                </div>
+                <div style={{
+                  padding: '12px',
+                  background: compare ? '#f0f8f0' : '#fef5f5',
+                  borderLeft: `4px solid ${compare ? '#2ecc71' : '#e74c3c'}`,
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  marginBottom: '20px',
+                  lineHeight: '1.5'
+                }}>
+                  {compare ? examples.good.prompt : examples.bad.prompt}
+                </div>
+                <div style={{ marginBottom: '12px' }}>
+                  <strong style={{ color: compare ? '#2ecc71' : '#e74c3c' }}>
+                    Output:
+                  </strong>
+                </div>
+                <div style={{
+                  padding: '12px',
+                  background: compare ? '#f0f8f0' : '#fef5f5',
+                  borderLeft: `4px solid ${compare ? '#2ecc71' : '#e74c3c'}`,
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  lineHeight: '1.6',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word'
+                }}>
+                  {compare ? examples.good.output : examples.bad.output}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label">{String.fromCodePoint(0x1F4A1)} INSIGHT</div>
+            The COSTAR version wins because it gives the AI context, emotional guidance, and format constraints. Specificity unlocks quality.
+          </div>
+        </>
+      );
+    }
+
+    function S5() {
+      const [expandedNode, setExpandedNode] = useState(null);
+
+      const decisions = [
+        {
+          id: 1,
+          question: 'Do you know exactly what you want?',
+          answer: 'YES \u2192 Use COSTAR\nYou have a clear goal and just need to structure it perfectly. COSTAR gives you the exact framework to deliver all 6 dimensions.',
+          example: 'Scenario A: "I need a JSON response with specific fields" \u2192 COSTAR is your tool.'
+        },
+        {
+          id: 2,
+          question: 'Are you unsure how to ask?',
+          answer: 'YES \u2192 Use Meta Prompting\nYour goal is clear, but you don\'t know how to structure the request. Let the AI craft the perfect prompt.',
+          example: 'Scenario B: "I want to automate something but don\'t know how to ask" \u2192 Start with Meta Prompting.'
+        },
+        {
+          id: 3,
+          question: 'Is this complex and multi-step?',
+          answer: 'YES \u2192 Meta Prompting First, Then COSTAR\nUse Meta Prompting to break down the problem, then COSTAR to execute each piece with precision.',
+          example: 'Scenario C: "Build a complete customer onboarding flow" \u2192 Meta Prompt for structure, then COSTAR for each step.'
+        }
+      ];
+
+      return (
+        <>
+          <div className="explanation">
+            Neither meta prompting nor COSTAR is universally better. Choose based on your situation: when you know your destination, use COSTAR; when you\u2019re lost, use Meta Prompting.
+          </div>
+          <div className="scene-card">
+            <div className="decision-tree">
+              {decisions.map((decision, idx) => (
+                <div
+                  key={decision.id}
+                  className={`decision-node ${expandedNode === decision.id ? 'expanded' : ''}`}
+                  onClick={() => setExpandedNode(expandedNode === decision.id ? null : decision.id)}
+                >
+                  <div className="decision-question">{decision.question}</div>
+                  <div className="decision-answer">
+                    <div className="answer-text">
+                      {decision.answer.split('\n').map((line, i) => (
+                        <div key={i}>{line}</div>
+                      ))}
+                      <br />
+                      <em>{decision.example}</em>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label">{String.fromCodePoint(0x1F4A1)} INSIGHT</div>
+            Start with Meta Prompting when lost, switch to COSTAR when you know your destination. The best prompt engineers use both.
+          </div>
+        </>
+      );
+    }
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stages = [
+        { icon: String.fromCodePoint(0x1F4A1), label: 'What is Prompt\nEngineering?', component: S1 },
+        { icon: String.fromCodePoint(0x1F916), label: 'Meta\nPrompting', component: S2 },
+        { icon: String.fromCodePoint(0x1F387), label: 'COSTAR\nFramework', component: S3 },
+        { icon: String.fromCodePoint(0x1F3AF), label: 'Before vs\nAfter', component: S4 },
+        { icon: String.fromCodePoint(0x1F333), label: 'Which to\nUse?', component: S5 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) {
+          setCurrentStage(currentStage + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) {
+          setCurrentStage(currentStage - 1);
+        }
+      };
+
+      const handleStageClick = (idx) => {
+        setCurrentStage(idx);
+      };
+
+      return (
+        <div className="container">
+          <div className="sidebar">
+            {stages.map((stage, idx) => (
+              <React.Fragment key={idx}>
+                <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                  <button
+                    className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                    onClick={() => handleStageClick(idx)}
+                  >
+                    {stage.icon}
+                  </button>
+                  <div className="step-btn-label">{stage.label}</div>
+                </div>
+                {idx < stages.length - 1 && (
+                  <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">\u2190 Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">INTERACTIVE GUIDE</div>
+                </div>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">3.2</span>
+                  <div className="title">Meta Prompting & COSTAR</div>
+                </div>
+              </div>
+
+              <div className="nav-arrows">
+                <button
+                  className="arrow-btn"
+                  onClick={handlePrev}
+                  disabled={currentStage === 0}
+                  title="Previous stage"
+                >
+                  \u2190
+                </button>
+                <button
+                  className="arrow-btn"
+                  onClick={handleNext}
+                  disabled={currentStage === stages.length - 1}
+                  title="Next stage"
+                >
+                  \u2192
+                </button>
+              </div>
+            </div>
+
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>

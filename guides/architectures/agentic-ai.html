@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI: Multi-Agent Systems</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+    body { font-family: 'DM Sans', sans-serif; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes blink { 0%, 100% { stroke-width: 2; } 50% { stroke-width: 4; opacity: 0.7; } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const P = {
+      root: { display: 'flex', flexDirection: 'row', width: '100%', height: '100%', backgroundColor: '#ffffff', overflow: 'hidden' },
+      sidebar: { width: '180px', backgroundColor: '#f8f9fa', borderRight: '1px solid #e9ecef', padding: '20px', overflowY: 'auto' },
+      stepCircle: (stage, current) => ({
+        width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: stage < current ? '#2ecc71' : stage === current ? '#6c5ce7' : '#e9ecef',
+        color: '#ffffff', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s',
+        animation: stage === current ? 'pulse 2s infinite' : 'none'
+      }),
+      stepLabel: { fontSize: '12px', marginTop: '8px', color: '#4a5568', textAlign: 'center', maxWidth: '80px' },
+      main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+      topBar: { height: '64px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef', display: 'flex', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', justifyContent: 'space-between' },
+      leftSection: { display: 'flex', alignItems: 'center', gap: '16px' },
+      backLink: { color: '#6c5ce7', textDecoration: 'none', fontSize: '14px', fontWeight: '500', cursor: 'pointer', transition: 'opacity 0.2s' },
+      badge: { backgroundColor: '#e8f0fe', color: '#6c5ce7', padding: '4px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '700' },
+      title: { fontFamily: 'Fraunces, serif', fontSize: '28px', fontWeight: '700', color: '#1a202c' },
+      navRow: { display: 'flex', alignItems: 'center', gap: '8px' },
+      navBtn: (disabled) => ({
+        width: '36px', height: '36px', border: 'none', backgroundColor: disabled ? '#e9ecef' : '#f0f0f0', cursor: disabled ? 'not-allowed' : 'pointer',
+        fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', transition: 'all 0.2s',
+        color: disabled ? '#cbd5e0' : '#4a5568'
+      }),
+      navP: { fontSize: '14px', color: '#4a5568', fontWeight: '500' },
+      content: { flex: 1, overflowY: 'auto', padding: '40px 48px' },
+      explainRow: { display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' },
+      explain: { fontSize: '18px', lineHeight: '1.7', color: '#2d3748' },
+      scene: { backgroundColor: '#f8f9fa', borderRadius: '16px', padding: '32px', minHeight: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.5s' },
+      insightLabel: { color: '#1a9456', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' },
+      insight: { backgroundColor: '#f0faf0', borderLeft: '4px solid #2ecc71', padding: '16px', borderRadius: '4px', color: '#2d3748', fontSize: '16px', lineHeight: '1.6' }
+    };
+
+    function S1() {
+      const [activeAgent, setActiveAgent] = useState(null);
+      const agents = [
+        { name: 'Director', role: 'Orchestrator', tools: 'Task planning, delegation', produces: 'Project plan', color: '#a29bfe', emoji: '\ud83c\udfac' },
+        { name: 'Writer', role: 'Content Agent', tools: 'Text generation, research', produces: 'Script & dialogue', color: '#74b9ff', emoji: '\u270d\ufe0f' },
+        { name: 'Cinematographer', role: 'Visual Agent', tools: 'Shot planning, composition', produces: 'Shot list', color: '#fab1a0', emoji: '\ud83d\udcfd' },
+        { name: 'Editor', role: 'Review Agent', tools: 'Quality check, feedback', produces: 'Approved content', color: '#55efc4', emoji: '\u2705' },
+        { name: 'Sound Designer', role: 'Audio Agent', tools: 'Audio synthesis, mixing', produces: 'Soundscape', color: '#fd79a8', emoji: '\ud83c\udfb5' }
+      ];
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>Multiple specialized AI agents working together as a team, each with different expertise, collaborating to tackle complex projects — like an AI company with different departments.</p>
+          </div>
+          <div style={P.scene}>
+            <svg width="500" height="320" viewBox="0 0 500 320">
+              {/* Center Director */}
+              <circle cx="250" cy="160" r="35" fill={agents[0].color} opacity="0.8" />
+              <circle cx="250" cy="160" r="35" fill="none" stroke={agents[0].color} strokeWidth="2" style={{ animation: 'pulse 2s infinite' }} />
+              <text x="250" y="170" textAnchor="middle" fontSize="24" fill="#fff">{agents[0].emoji}</text>
+
+              {/* Connected Agents */}
+              {[agents[1], agents[2], agents[3], agents[4]].map((agent, i) => {
+                const angle = (i * 90 * Math.PI) / 180;
+                const x = 250 + 110 * Math.cos(angle);
+                const y = 160 + 110 * Math.sin(angle);
+                return (
+                  <g key={i}>
+                    <line x1="250" y1="160" x2={x} y2={y} stroke={agent.color} strokeWidth="2" style={{ animation: 'blink 2s infinite' }} opacity="0.6" />
+                    <circle cx={x} cy={y} r="30" fill={agent.color} opacity="0.7" style={{ cursor: 'pointer' }} onClick={() => setActiveAgent(i)} />
+                    <text x={x} y={y + 6} textAnchor="middle" fontSize="20" fill="#fff">{agent.emoji}</text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+          {activeAgent !== null && (
+            <div style={{ ...P.insight, animation: 'slideInRight 0.3s' }}>
+              <div style={P.insightLabel}>{agents[activeAgent + 1].role}</div>
+              <strong>{agents[activeAgent + 1].name}</strong><br/>
+              Tools: {agents[activeAgent + 1].tools}<br/>
+              Produces: {agents[activeAgent + 1].produces}
+            </div>
+          )}
+          <div style={{ ...P.insight, marginTop: '24px' }}>
+            <div style={P.insightLabel}>Key Message</div>
+            "Each agent is an expert. Together, they create what none could alone."
+          </div>
+        </div>
+      );
+    }
+
+    function S2() {
+      const [expandedPattern, setExpandedPattern] = useState(0);
+      const patterns = [
+        { name: 'Pipeline', desc: 'Agents work in sequence', example: 'Research \u2192 Write \u2192 Edit \u2192 Publish', bestFor: 'Content creation, document processing', visual: '\ud83d\udc04 \u2192 \ud83d\udc04 \u2192 \ud83d\udc04 \u2192 \ud83d\udc04' },
+        { name: 'Supervisor', desc: 'One agent assigns and reviews work', example: 'Manager delegates research tasks to specialists', bestFor: 'Complex projects needing coordination', visual: '\ud83d\udc60\n\ud83d\udc40 \ud83d\udc40 \ud83d\udc40' },
+        { name: 'Debate', desc: 'Agents argue different sides', example: 'Bull case vs Bear case \u2192 Final recommendation', bestFor: 'Decision-making, risk analysis', visual: '\ud83d\udcc4 \u2194\ufe0f \ud83d\udcc4 \u2192 \u2696\ufe0f' },
+        { name: 'Swarm', desc: 'Agents work in parallel', example: '5 researchers each tackle different sources', bestFor: 'Research, data collection, speed', visual: '\ud83c\udf0c \ud83c\udf0c \ud83c\udf0c \ud83c\udf0c \ud83c\udf0c' }
+      ];
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>There are 4 common patterns for organizing multi-agent teams. Each has different strengths and use cases.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '24px' }}>
+            {patterns.map((p, i) => (
+              <div key={i} style={{
+                border: '1px solid #e9ecef', borderRadius: '8px', padding: '16px', cursor: 'pointer',
+                backgroundColor: expandedPattern === i ? '#e8f0fe' : '#f8f9fa',
+                borderLeft: expandedPattern === i ? '4px solid #6c5ce7' : '4px solid transparent',
+                transition: 'all 0.3s', animation: expandedPattern === i ? 'slideInRight 0.3s' : 'none'
+              }} onClick={() => setExpandedPattern(i)}>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a202c', marginBottom: '8px' }}>{p.name}</div>
+                <div style={{ fontSize: '13px', color: '#718096' }}>{p.desc}</div>
+                {expandedPattern === i && (
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #cbd5e0' }}>
+                    <div style={{ fontSize: '12px', color: '#4a5568', marginBottom: '12px' }}>
+                      <strong>Example:</strong> {p.example}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#4a5568', marginBottom: '12px' }}>
+                      <strong>Best for:</strong> {p.bestFor}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>Pattern Selection</div>
+            Pipeline for sequential quality. Supervisor for complex coordination. Debate for better decisions. Swarm for speed. Most production systems mix 2-3 patterns.
+          </div>
+        </div>
+      );
+    }
+
+    function S3() {
+      const [launched, setLaunched] = useState(false);
+      const agents = [
+        { name: 'Market Researcher', color: '#a29bfe', tools: 'Web search, survey analysis', output: 'Market brief', emoji: '\ud83d\udd0d' },
+        { name: 'Content Writer', color: '#74b9ff', tools: 'Text generation, templates', output: 'Blog posts, emails, social', emoji: '\u270d\ufe0f' },
+        { name: 'Designer', color: '#fab1a0', tools: 'Image generation, layout', output: 'Graphics, landing page', emoji: '\ud83c\udfa8' },
+        { name: 'Editor/QA', color: '#55efc4', tools: 'Grammar, brand, fact check', output: 'Approved assets', emoji: '\u2705' }
+      ];
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>Let's see a concrete example — building a multi-agent system for a product launch. Watch how agents collaborate through handoff points.</p>
+          </div>
+          <div style={P.scene}>
+            <svg width="480" height="280" viewBox="0 0 480 280">
+              {/* Agent circles in workflow */}
+              {agents.map((agent, i) => {
+                const x = 60 + i * 110;
+                const y = 140;
+                return (
+                  <g key={i} style={{ animation: launched ? `slideInRight 0.${4 + i}s` : 'none' }}>
+                    <circle cx={x} cy={y} r="32" fill={agent.color} opacity="0.8" />
+                    <text x={x} y={y + 8} textAnchor="middle" fontSize="22" fill="#fff">{agent.emoji}</text>
+                    <text x={x} y={y + 65} textAnchor="middle" fontSize="11" fill="#2d3748" fontWeight="600">{agent.name}</text>
+                  </g>
+                );
+              })}
+              {/* Flow arrows */}
+              {[0, 1, 2].map((i) => (
+                <line key={i} x1={80 + i * 110} y1="140" x2={110 + i * 110} y2="140"
+                  stroke="#cbd5e0" strokeWidth="2" markerEnd="url(#arrowhead)" style={{ opacity: launched ? 1 : 0.3 }} />
+              ))}
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                  <polygon points="0 0, 10 3, 0 6" fill="#cbd5e0" />
+                </marker>
+              </defs>
+              {/* Supervisor arc */}
+              <path d="M 60 100 Q 240 50 420 100" stroke="#6c5ce7" strokeWidth="2" fill="none" strokeDasharray="5,5" opacity="0.5" />
+              <text x="240" y="40" textAnchor="middle" fontSize="12" fill="#6c5ce7" fontWeight="600">Supervisor Oversees</text>
+            </svg>
+          </div>
+          <button onClick={() => setLaunched(!launched)} style={{
+            backgroundColor: '#6c5ce7', color: '#fff', border: 'none', padding: '10px 20px',
+            borderRadius: '4px', cursor: 'pointer', marginTop: '16px', fontWeight: '600', fontSize: '14px',
+            transition: 'background 0.2s'
+          }} onMouseOver={(e) => e.target.style.backgroundColor = '#5f3dc4'} onMouseOut={(e) => e.target.style.backgroundColor = '#6c5ce7'}>
+            {launched ? 'Reset' : 'Launch Campaign'}
+          </button>
+          <div style={{ ...P.insight, marginTop: '24px' }}>
+            <div style={P.insightLabel}>Revision Loop Magic</div>
+            The revision loop is what makes multi-agent special. In a workflow, content goes through once. In a multi-agent system, the Editor can send it back to the Writer 3 times until it\u0027s perfect.
+          </div>
+        </div>
+      );
+    }
+
+    function S4() {
+      const [expandedPanel, setExpandedPanel] = useState(0);
+      const panels = [
+        { title: 'Agent Design', content: 'Define role description (system prompt), tool access (what each agent can use), and output format (what they produce).' },
+        { title: 'Communication', content: 'Agents talk via shared memory (blackboard), direct messages (agent-to-agent), or event bus (publish-subscribe).' },
+        { title: 'Memory & State', content: 'Short-term: conversation context. Long-term: vector store for past work. Shared state: team knowledge base.' },
+        { title: 'Error Handling', content: 'Retry with feedback, escalate to supervisor, fallback to simpler agent, or escalate to human-in-the-loop.' }
+      ];
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>Key decisions when designing a multi-agent system — agent roles, communication, memory, and error handling.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '24px' }}>
+            {panels.map((panel, i) => (
+              <div key={i} style={{
+                border: '1px solid #e9ecef', borderRadius: '8px', padding: '20px', cursor: 'pointer',
+                backgroundColor: expandedPanel === i ? '#e8f0fe' : '#f8f9fa',
+                transition: 'all 0.3s'
+              }} onClick={() => setExpandedPanel(i)}>
+                <div style={{ fontSize: '16px', fontWeight: '700', color: '#1a202c', marginBottom: '12px' }}>{panel.title}</div>
+                {expandedPanel === i && (
+                  <div style={{ fontSize: '14px', color: '#4a5568', lineHeight: '1.6', animation: 'slideInRight 0.3s' }}>
+                    {panel.content}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>Design Philosophy</div>
+            The hardest part of multi-agent systems isn\u0027t the individual agents — it\u0027s the coordination. Define clear handoffs, communication protocols, and failure modes before writing code.
+          </div>
+        </div>
+      );
+    }
+
+    function S5() {
+      const [checkedCount, setCheckedCount] = useState(0);
+      const [checks, setChecks] = useState([false, false, false, false]);
+      const items = [
+        'Multiple expertise areas needed?',
+        'Quality matters more than speed?',
+        'Work benefits from review/critique cycles?',
+        'Complex project, not a simple task?'
+      ];
+      const tools = [
+        { name: 'CrewAI', desc: 'Open-source framework for building cooperative AI agents' },
+        { name: 'AutoGen', desc: 'Framework for autonomous agent research and multi-agent conversation' },
+        { name: 'LangGraph', desc: 'Graph-based framework for building agent workflows' },
+        { name: 'Swarm (OpenAI)', desc: 'Lightweight multi-agent orchestration framework' }
+      ];
+      const handleCheck = (i) => {
+        const newChecks = [...checks];
+        newChecks[i] = !newChecks[i];
+        setChecks(newChecks);
+        setCheckedCount(newChecks.filter(Boolean).length);
+      };
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>Real tools for building multi-agent systems, and how to decide if you actually need one.</p>
+          </div>
+
+          <div style={{ marginBottom: '32px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1a202c', marginBottom: '16px' }}>Available Tools</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              {tools.map((tool, i) => (
+                <div key={i} style={{ backgroundColor: '#f8f9fa', padding: '16px', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+                  <div style={{ fontWeight: '700', color: '#1a202c', marginBottom: '6px' }}>{tool.name}</div>
+                  <div style={{ fontSize: '13px', color: '#4a5568' }}>{tool.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '32px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1a202c', marginBottom: '16px' }}>Decision Checklist</h3>
+            {items.map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', cursor: 'pointer' }}
+                onClick={() => handleCheck(i)}>
+                <input type="checkbox" checked={checks[i]} onChange={() => {}} style={{ cursor: 'pointer', width: '18px', height: '18px' }} />
+                <span style={{ fontSize: '15px', color: '#2d3748' }}>{item}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: '20px', padding: '12px 16px', backgroundColor: '#e8f0fe', borderRadius: '4px', fontSize: '14px', fontWeight: '600', color: '#6c5ce7' }}>
+              {checkedCount}/4 checked: {checkedCount >= 3 ? '\ud83d\udc4b Agentic AI recommended' : checkedCount < 2 ? '\ud83d\udca1 Try a simpler architecture first' : '\ud83e\udd14 Consider your specific needs'}
+            </div>
+          </div>
+
+          <div style={{ ...P.insight, marginBottom: '24px' }}>
+            <div style={P.insightLabel}>Architecture Hierarchy</div>
+            LLM Chat \u2192 RAG \u2192 Workflow \u2192 Agent \u2192 Agentic. Start simple. Don\u0027t use a construction crew when you need a handyman.
+          </div>
+
+          <div style={P.insight}>
+            <div style={P.insightLabel}>Final Thought</div>
+            Multi-agent systems are the most powerful but also the most complex architecture. Use them when the task genuinely requires multiple specialists and review cycles. For everything else, start simpler.
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [currentStage, setCurrentStage] = useState(0);
+      const stages = [
+        { title: 'What is Agentic AI?', component: S1 },
+        { title: 'Team Patterns', component: S2 },
+        { title: 'Product Launch Team', component: S3 },
+        { title: 'Building Multi-Agent Systems', component: S4 },
+        { title: 'Tools & When to Use', component: S5 }
+      ];
+      const CurrentComponent = stages[currentStage].component;
+
+      return (
+        <div style={P.root}>
+          {/* Sidebar */}
+          <div style={P.sidebar}>
+            {stages.map((stage, i) => (
+              <div key={i} style={{ marginBottom: '24px', cursor: 'pointer' }} onClick={() => setCurrentStage(i)}>
+                <div style={P.stepCircle(i, currentStage)}>{i + 1}</div>
+                <div style={P.stepLabel}>{stage.title}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Main Content */}
+          <div style={P.main}>
+            {/* Top Bar */}
+            <div style={P.topBar}>
+              <div style={P.leftSection}>
+                <a href="../../index.html" style={P.backLink} onMouseOver={(e) => e.target.style.opacity = '0.7'} onMouseOut={(e) => e.target.style.opacity = '1'}>← Back</a>
+                <div style={P.badge}>DEEP DIVE</div>
+              </div>
+              <div style={P.navRow}>
+                <button style={P.navBtn(currentStage === 0)} onClick={() => setCurrentStage(Math.max(0, currentStage - 1))}>←</button>
+                <span style={P.navP}>{currentStage + 1}/5</span>
+                <button style={P.navBtn(currentStage === 4)} onClick={() => setCurrentStage(Math.min(4, currentStage + 1))}>→</button>
+              </div>
+            </div>
+
+            {/* Stage Title */}
+            <div style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef', paddingLeft: '48px', paddingRight: '48px', paddingTop: '20px', paddingBottom: '20px' }}>
+              <h1 style={P.title}>Agentic AI: Multi-Agent Systems</h1>
+            </div>
+
+            {/* Content */}
+            <CurrentComponent />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

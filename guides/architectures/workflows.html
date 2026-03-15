@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Workflows: Orchestrated Pipelines</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; overflow: hidden; }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const P = {
+      root: { display: 'flex', flexDirection: 'row', width: '100%', height: '100vh', backgroundColor: 'white', overflow: 'hidden' },
+      sidebar: { width: '180px', backgroundColor: '#f8f9fa', borderRight: '1px solid #e9ecef', padding: '24px 0', overflowY: 'auto' },
+      stepCircle: (step, active, complete) => ({
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 12px',
+        fontSize: '18px',
+        fontWeight: '700',
+        color: 'white',
+        backgroundColor: active ? '#6c5ce7' : (complete ? '#2ecc71' : '#e9ecef'),
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        animation: active ? 'pulse 2s infinite' : 'none'
+      }),
+      stepLabel: { textAlign: 'center', fontSize: '12px', color: '#4a4a4a', padding: '0 8px', marginBottom: '24px', cursor: 'pointer' },
+      connector: (complete) => ({ height: '40px', width: '2px', margin: '-12px auto 0', backgroundColor: complete ? '#2ecc71' : '#e9ecef', transition: 'all 0.3s ease' }),
+      main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+      topBar: { height: '64px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+      leftSection: { display: 'flex', alignItems: 'center', gap: '16px' },
+      backLink: { color: '#6c5ce7', textDecoration: 'none', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+      badge: { backgroundColor: '#e8f0fe', color: '#6c5ce7', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' },
+      title: { fontFamily: 'Fraunces, serif', fontSize: '28px', fontWeight: '700', color: '#1a1a1a' },
+      navRow: { display: 'flex', gap: '8px', alignItems: 'center' },
+      navBtn: (active) => ({ padding: '8px 12px', backgroundColor: active ? '#6c5ce7' : 'transparent', color: active ? 'white' : '#4a4a4a', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'all 0.2s' }),
+      navP: { fontSize: '12px', color: '#7a7a7a' },
+      content: { flex: 1, padding: '40px 48px', overflowY: 'auto', animation: 'fadeIn 0.4s ease' },
+      explainRow: { marginBottom: '32px' },
+      explain: { fontSize: '18px', lineHeight: '1.6', color: '#2a2a2a', marginBottom: '16px' },
+      scene: { backgroundColor: '#f8f9fa', borderRadius: '16px', padding: '32px', marginBottom: '24px', border: '1px solid #e9ecef', minHeight: '400px' },
+      insightLabel: { color: '#1a9456', fontSize: '12px', fontWeight: '700', marginBottom: '8px' },
+      insight: { backgroundColor: '#f0faf0', borderLeft: '4px solid #2ecc71', padding: '16px', borderRadius: '8px', fontSize: '15px', lineHeight: '1.6', color: '#1a4a2a' }
+    };
+
+    function S1({ active }) {
+      const [highlight, setHighlight] = useState(null);
+
+      return (
+        <div style={P.explainRow}>
+          <p style={P.explain}>Multiple AI steps chained together in a fixed sequence — like a factory assembly line where each station does one specific job.</p>
+          <div style={P.scene}>
+            <svg viewBox="0 0 800 280" style={{ width: '100%', maxHeight: '280px' }}>
+              {/* Conveyor belt */}
+              <rect x="50" y="140" width="700" height="20" fill="#d4d4d4" rx="4" />
+              <line x1="50" y1="140" x2="750" y2="140" stroke="#999" strokeWidth="2" strokeDasharray="10,5" />
+              <line x1="50" y1="160" x2="750" y2="160" stroke="#999" strokeWidth="2" strokeDasharray="10,5" />
+
+              {/* Stations */}
+              {[0, 1, 2, 3, 4].map((i) => {
+                const x = 70 + i * 140;
+                const isHighlight = highlight === i;
+                const color = isHighlight ? '#6c5ce7' : '#4a69bd';
+                return (
+                  <g key={i}>
+                    <rect x={x} y="80" width="100" height="60" fill={color} rx="8" opacity={isHighlight ? 1 : 0.7} style={{ transition: 'all 0.3s' }} />
+                    <text x={x + 50} y="115" textAnchor="middle" fill="white" fontSize="12" fontWeight="700">
+                      {['Frame', 'Engine', 'Paint', 'QA', 'Ship'][i]}
+                    </text>
+                    {i < 4 && (
+                      <polygon points={x + 105 + ',150 ' + (x + 125) + ',145 ' + (x + 125) + ',155'} fill="#999" />
+                    )}
+                  </g>
+                );
+              })}
+
+              {/* Table below */}
+              <text x="50" y="240" fontSize="12" fontWeight="700" fill="#1a1a1a">Fixed flow • You design • High reliability • Low flexibility</text>
+            </svg>
+            <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+              {['Fixed Flow', 'You Design', 'High Reliability', 'Low Flexibility'].map((item) => (
+                <div key={item} style={{ padding: '12px', backgroundColor: '#fff', border: '1px solid #e9ecef', borderRadius: '8px', fontSize: '13px', fontWeight: '500' }}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>KEY INSIGHT</div>
+            <p>Workflows = assembly line. Same steps, same order, every time. The power is in predictability — you know exactly what will happen.</p>
+          </div>
+        </div>
+      );
+    }
+
+    function S2({ active }) {
+      const [selected, setSelected] = useState('TRIGGER');
+
+      const blocks = {
+        TRIGGER: { icon: '\u{1F550}', title: 'TRIGGER', desc: 'What starts it', examples: ['Timer', 'New email', 'Webhook', 'Form submission'] },
+        ACTION: { icon: '\u{2699}\uFE0F', title: 'ACTION', desc: 'Non-AI steps', examples: ['Fetch data', 'Filter', 'Transform', 'API calls'] },
+        'AI NODE': { icon: '\u{1F9E0}', title: 'AI NODE', desc: 'LLM steps', examples: ['Summarize', 'Classify', 'Generate', 'Extract'] },
+        OUTPUT: { icon: '\u{2708}\uFE0F', title: 'OUTPUT', desc: 'Where results go', examples: ['Email', 'Slack', 'Database', 'File'] }
+      };
+
+      return (
+        <div style={P.explainRow}>
+          <p style={P.explain}>Every workflow has 4 building blocks: Triggers, Actions, AI Nodes, and Outputs. Understanding these lets you design any pipeline.</p>
+          <div style={P.scene}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
+              {Object.entries(blocks).map(([key, block]) => (
+                <div
+                  key={key}
+                  onClick={() => setSelected(key)}
+                  style={{
+                    padding: '20px',
+                    backgroundColor: selected === key ? '#6c5ce7' : '#fff',
+                    border: selected === key ? 'none' : '2px solid #e9ecef',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    color: selected === key ? 'white' : '#1a1a1a'
+                  }}
+                >
+                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>{block.icon}</div>
+                  <div style={{ fontWeight: '700', fontSize: '13px', marginBottom: '4px' }}>{block.title}</div>
+                  <div style={{ fontSize: '11px', opacity: 0.8 }}>{block.desc}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ backgroundColor: selected === 'TRIGGER' || selected === 'OUTPUT' ? '#e8f0fe' : '#f0faf0', padding: '20px', borderRadius: '12px' }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>Examples:</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                {blocks[selected].examples.map((ex) => (
+                  <div key={ex} style={{ padding: '8px 12px', backgroundColor: 'white', borderRadius: '6px', fontSize: '13px' }}>
+                    {ex}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>KEY INSIGHT</div>
+            <p>Think of workflows as LEGO: Triggers start the machine, Actions handle data plumbing, AI Nodes do the thinking, Outputs deliver results. Mix and match to build any automation.</p>
+          </div>
+        </div>
+      );
+    }
+
+    function S3({ active }) {
+      const [tab, setTab] = useState(0);
+
+      const workflows = [
+        {
+          name: 'Competitor Monitor',
+          steps: ['Timer (weekly)', 'Fetch Website', 'Extract Changes (AI)', 'Compare to Last Week (AI)', 'Format Report', 'Send to Slack'],
+          savings: '8 hrs/week'
+        },
+        {
+          name: 'Content Pipeline',
+          steps: ['New Brief (form)', 'Research Topic (AI)', 'Generate Draft (AI)', 'Edit & Polish (AI)', 'Create Images (AI)', 'Publish to CMS'],
+          savings: '12 hrs/week'
+        },
+        {
+          name: 'Support Triage',
+          steps: ['New Ticket', 'Classify Urgency (AI)', 'Extract Key Info (AI)', 'Route to Team', 'Auto-Reply (AI)'],
+          savings: '6 hrs/week'
+        }
+      ];
+
+      const workflow = workflows[tab];
+
+      return (
+        <div style={P.explainRow}>
+          <p style={P.explain}>Here are 3 production workflow patterns you can build today with tools like N8N, Make, or Zapier.</p>
+          <div style={P.scene}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+              {workflows.map((w, i) => (
+                <button
+                  key={i}
+                  onClick={() => setTab(i)}
+                  style={P.navBtn(tab === i)}
+                >
+                  {w.name}
+                </button>
+              ))}
+            </div>
+            <svg viewBox="0 0 800 180" style={{ width: '100%', height: '180px', marginBottom: '20px' }}>
+              {workflow.steps.map((step, i) => {
+                const x = 40 + i * 130;
+                const isAI = step.includes('(AI)');
+                return (
+                  <g key={i}>
+                    <rect x={x} y="60" width="100" height="50" fill={isAI ? '#6c5ce7' : '#999'} rx="6" />
+                    <text x={x + 50} y="90" textAnchor="middle" fill="white" fontSize="11" fontWeight="500">
+                      {step.split('(')[0].trim()}
+                    </text>
+                    {i < workflow.steps.length - 1 && (
+                      <polygon points={x + 105 + ',87 ' + (x + 120) + ',82 ' + (x + 120) + ',92'} fill="#999" />
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+            <div style={{ padding: '12px 16px', backgroundColor: '#e8f0fe', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '500' }}>
+              \u{23F1} Estimated time savings: <strong>{workflow.savings}</strong>
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>KEY INSIGHT</div>
+            <p>The best workflows automate the boring 80%. Notice how AI handles understanding and generating, while traditional steps handle data plumbing. That combo is the sweet spot.</p>
+          </div>
+        </div>
+      );
+    }
+
+    function S4({ active }) {
+      const [answers, setAnswers] = useState([false, false, false, false]);
+
+      const questions = [
+        'Do you know all the steps in advance?',
+        'Same process every time?',
+        'Need to handle unexpected situations?',
+        'Multiple tools, dynamic decisions?'
+      ];
+
+      const recommendation = answers[0] && answers[1] && !answers[2] && !answers[3] ? 'WORKFLOW' : 'AGENT';
+
+      return (
+        <div style={P.explainRow}>
+          <p style={P.explain}>The critical question — when do you use a fixed workflow vs letting an AI agent figure it out?</p>
+          <div style={P.scene}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '24px' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', marginBottom: '12px' }}>{\u{1F4D2}}</div>
+                <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '8px' }}>WORKFLOW</div>
+                <div style={{ fontSize: '13px', color: '#666' }}>Recipe metaphor • Do step 1, then 2, then 3 • You plan the steps • Same path every time</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', marginBottom: '12px' }}>{\u{1F468}\u{200D}\u{1F373}}</div>
+                <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '8px' }}>AGENT</div>
+                <div style={{ fontSize: '13px', color: '#666' }}>Chef metaphor • Achieve this goal • AI plans the steps • Different path based on situation</div>
+              </div>
+            </div>
+            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px' }}>
+              {questions.map((q, i) => (
+                <div key={i} style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <input
+                    type="checkbox"
+                    checked={answers[i]}
+                    onChange={(e) => {
+                      const newAnswers = [...answers];
+                      newAnswers[i] = e.target.checked;
+                      setAnswers(newAnswers);
+                    }}
+                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '13px' }}>{q}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: recommendation === 'WORKFLOW' ? '#e8f0fe' : '#f0e8fe', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>RECOMMENDATION:</div>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: recommendation === 'WORKFLOW' ? '#6c5ce7' : '#9b59b6' }}>
+                {recommendation}
+              </div>
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>KEY INSIGHT</div>
+            <p>Recipe (Workflow) vs Chef (Agent). If you can write down every step beforehand, use a workflow. If you need adaptability, use an agent. Most real systems combine both.</p>
+          </div>
+        </div>
+      );
+    }
+
+    function S5({ active }) {
+      const [expanded, setExpanded] = useState(null);
+
+      const steps = [
+        { num: 1, title: 'Trigger: Timer (8am daily)', config: 'Runs every morning at 8:00 AM' },
+        { num: 2, title: 'Action: Fetch top 5 articles from RSS feeds', config: 'Connects to 5 RSS feeds and retrieves latest articles' },
+        { num: 3, title: 'AI Node: Summarize each article (3 sentences)', config: 'Prompt: "Summarize this news article in exactly 3 sentences. Focus on key facts."' },
+        { num: 4, title: 'AI Node: Generate personal digest intro', config: 'Prompt: "Write a 1-sentence intro for today\'s news digest. Make it engaging."' },
+        { num: 5, title: 'Output: Send formatted email', config: 'Template: Subject: [Date] News Digest | Body: Intro + Articles + Footer' }
+      ];
+
+      return (
+        <div style={P.explainRow}>
+          <p style={P.explain}>Let's walk through designing a workflow from scratch using the 4 building blocks.</p>
+          <div style={P.scene}>
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '16px', color: '#1a1a1a' }}>Example: Daily News Digest</div>
+              {steps.map((step, i) => (
+                <div key={i} style={{ marginBottom: '8px' }}>
+                  <div
+                    onClick={() => setExpanded(expanded === i ? null : i)}
+                    style={{
+                      padding: '12px 16px',
+                      backgroundColor: expanded === i ? '#6c5ce7' : '#fff',
+                      border: expanded === i ? 'none' : '1px solid #e9ecef',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      color: expanded === i ? 'white' : '#1a1a1a',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    Step {step.num}: {step.title}
+                  </div>
+                  {expanded === i && (
+                    <div style={{ padding: '12px 16px', backgroundColor: '#f8f9fa', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px', fontSize: '12px', marginBottom: '4px' }}>
+                      {step.config}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div style={{ padding: '16px', backgroundColor: '#e8f0fe', borderRadius: '8px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', marginBottom: '8px', color: '#6c5ce7' }}>TOOL RECOMMENDATIONS</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                {[
+                  { tool: 'N8N', desc: 'Self-hosted, free, best for AI' },
+                  { tool: 'Make', desc: 'Visual, cloud-based, easy' },
+                  { tool: 'Zapier', desc: 'Most integrations, simplest' }
+                ].map((t) => (
+                  <div key={t.tool} style={{ padding: '8px', backgroundColor: 'white', borderRadius: '6px', fontSize: '11px' }}>
+                    <div style={{ fontWeight: '700', marginBottom: '2px' }}>{t.tool}</div>
+                    <div style={{ opacity: 0.7 }}>{t.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={P.insight}>
+            <div style={P.insightLabel}>KEY INSIGHT</div>
+            <p>Start with a 3-step workflow: Trigger \u{2192} AI \u{2192} Output. Add complexity only when needed. N8N is the best free option for AI workflows because of its native AI nodes and self-hosting capability.</p>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [step, setStep] = useState(0);
+
+      const stages = [
+        { title: 'What are AI Workflows?', component: S1 },
+        { title: 'Anatomy of a Workflow', component: S2 },
+        { title: 'Real-World Examples', component: S3 },
+        { title: 'Workflow vs Agent', component: S4 },
+        { title: 'Build Your First Workflow', component: S5 }
+      ];
+
+      const CurrentScene = stages[step].component;
+
+      return (
+        <div style={P.root}>
+          {/* Sidebar */}
+          <div style={P.sidebar}>
+            {stages.map((stage, i) => (
+              <div key={i}>
+                <div
+                  onClick={() => setStep(i)}
+                  style={P.stepCircle(step === i, i < step)}
+                >
+                  {i < step ? '\u2713' : i + 1}
+                </div>
+                <div style={P.stepLabel} onClick={() => setStep(i)}>
+                  {stage.title}
+                </div>
+                {i < stages.length - 1 && <div style={P.connector(i < step)} />}
+              </div>
+            ))}
+          </div>
+
+          {/* Main content */}
+          <div style={P.main}>
+            {/* Top bar */}
+            <div style={P.topBar}>
+              <div style={P.leftSection}>
+                <a href="../../index.html" style={P.backLink}>\u{2190} Back</a>
+                <div style={P.badge}>INTERACTIVE</div>
+              </div>
+              <div style={P.title}>AI Workflows: Orchestrated Pipelines</div>
+              <div style={P.navRow}>
+                <button
+                  onClick={() => setStep(Math.max(0, step - 1))}
+                  disabled={step === 0}
+                  style={{ ...P.navBtn(false), opacity: step === 0 ? 0.5 : 1, cursor: step === 0 ? 'default' : 'pointer' }}
+                >
+                  \u{2190}
+                </button>
+                <span style={P.navP}>{step + 1} / {stages.length}</span>
+                <button
+                  onClick={() => setStep(Math.min(stages.length - 1, step + 1))}
+                  disabled={step === stages.length - 1}
+                  style={{ ...P.navBtn(false), opacity: step === stages.length - 1 ? 0.5 : 1, cursor: step === stages.length - 1 ? 'default' : 'pointer' }}
+                >
+                  \u{2192}
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div style={P.content}>
+              <CurrentScene active={step} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

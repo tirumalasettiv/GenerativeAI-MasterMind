@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAG Architecture Deep Dive</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; overflow: hidden; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes blink { 0%, 49%, 100% { opacity: 1; } 50%, 99% { opacity: 0; } }
+    @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const P = {
+      root: {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        height: '100vh',
+        backgroundColor: 'white',
+        overflow: 'hidden'
+      },
+      sidebar: {
+        width: 180,
+        backgroundColor: '#f8f9fa',
+        borderRight: '1px solid #e9ecef',
+        padding: '24px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 16
+      },
+      stepCircle: (stage, current) => ({
+        width: 60,
+        height: 60,
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 600,
+        color: 'white',
+        cursor: 'pointer',
+        backgroundColor: stage < current ? '#2ecc71' : stage === current ? '#6c5ce7' : '#e9ecef',
+        color: stage < current || stage === current ? 'white' : '#666',
+        transition: 'all 0.3s ease',
+        fontSize: 14
+      }),
+      stepLabel: {
+        fontSize: 11,
+        color: '#666',
+        textAlign: 'center',
+        width: 140
+      },
+      connector: (isActive) => ({
+        width: 2,
+        height: 20,
+        backgroundColor: isActive ? '#2ecc71' : '#e9ecef',
+        transition: 'background-color 0.3s ease'
+      }),
+      main: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      },
+      topBar: {
+        height: 64,
+        backgroundColor: '#f8f9fa',
+        borderBottom: '1px solid #e9ecef',
+        padding: '12px 32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      },
+      leftSection: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16
+      },
+      backLink: {
+        color: '#6c5ce7',
+        textDecoration: 'none',
+        fontSize: 14,
+        fontWeight: 500,
+        cursor: 'pointer'
+      },
+      badge: {
+        backgroundColor: '#e8f0fe',
+        color: '#6c5ce7',
+        padding: '4px 12px',
+        borderRadius: 4,
+        fontSize: 12,
+        fontWeight: 600
+      },
+      title: {
+        fontFamily: 'Fraunces, serif',
+        fontSize: 28,
+        fontWeight: 700,
+        color: '#1a1a1a'
+      },
+      navRow: {
+        display: 'flex',
+        gap: 12
+      },
+      navBtn: (active) => ({
+        padding: '8px 16px',
+        border: 'none',
+        backgroundColor: active ? '#6c5ce7' : 'transparent',
+        color: active ? 'white' : '#666',
+        borderRadius: 6,
+        cursor: 'pointer',
+        fontSize: 13,
+        fontWeight: 500,
+        transition: 'all 0.2s ease'
+      }),
+      navP: {
+        color: '#999',
+        fontSize: 13
+      },
+      content: {
+        flex: 1,
+        padding: '40px 48px',
+        overflowY: 'auto',
+        animation: 'fadeIn 0.5s ease'
+      },
+      explainRow: {
+        marginBottom: 32,
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
+        animation: 'slideInLeft 0.5s ease'
+      },
+      explain: {
+        fontSize: 16,
+        color: '#333',
+        lineHeight: 1.6
+      },
+      scene: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 16,
+        padding: 32,
+        border: '1px solid #e9ecef',
+        marginBottom: 32,
+        animation: 'slideInRight 0.5s ease',
+        minHeight: 400
+      },
+      insightLabel: {
+        fontSize: 13,
+        fontWeight: 600,
+        color: '#1a9456',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: 8
+      },
+      insight: {
+        backgroundColor: '#f0faf0',
+        borderLeft: '4px solid #2ecc71',
+        padding: 20,
+        borderRadius: 8,
+        fontSize: 15,
+        color: '#2d5016',
+        lineHeight: 1.7,
+        animation: 'slideInLeft 0.6s ease'
+      }
+    };
+
+    function S1() {
+      const [showRAG, setShowRAG] = useState(true);
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              AI that first searches your documents to find relevant information, then generates answers based on what it found. Think of it as a librarian who checks your files before answering your question, ensuring every response is grounded in your actual data.
+            </p>
+          </div>
+
+          <div style={P.scene}>
+            <h3 style={{ marginBottom: 20, color: '#1a1a1a' }}>Question: "What does our policy say about remote work?"</h3>
+
+            <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+              <button
+                onClick={() => setShowRAG(true)}
+                style={P.navBtn(showRAG)}
+              >
+                With RAG
+              </button>
+              <button
+                onClick={() => setShowRAG(false)}
+                style={P.navBtn(!showRAG)}
+              >
+                Without RAG
+              </button>
+            </div>
+
+            {showRAG ? (
+              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+                <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#e8f0fe', borderRadius: 8 }}>
+                  <strong style={{ color: '#6c5ce7' }}>Step 1: Query Search</strong>
+                  <p style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Searching documents for "remote work policy"...</p>
+                </div>
+                <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#f0faf0', borderRadius: 8 }}>
+                  <strong style={{ color: '#2ecc71' }}>Step 2: Chunks Found</strong>
+                  <p style={{ fontSize: 13, color: '#2d5016', marginTop: 4 }}>✓ Found 3 relevant sections from Company Handbook 2024</p>
+                </div>
+                <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#e8f0fe', borderRadius: 8 }}>
+                  <strong style={{ color: '#6c5ce7' }}>Step 3: LLM Synthesis</strong>
+                  <p style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Reading question + retrieved chunks together...</p>
+                </div>
+                <div style={{ padding: 12, backgroundColor: '#f0faf0', borderRadius: 8, borderLeft: '4px solid #2ecc71' }}>
+                  <strong style={{ color: '#2ecc71' }}>Answer (Grounded)</strong>
+                  <p style={{ fontSize: 13, color: '#2d5016', marginTop: 4 }}>
+                    "Remote work is allowed 2 days per week for eligible employees. See Section 4.2 of Company Handbook 2024 and Policy DRL-2024-08."
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div style={{ animation: 'fadeIn 0.4s ease' }}>
+                <div style={{ padding: 12, backgroundColor: '#ffe8e8', borderRadius: 8, borderLeft: '4px solid #e74c3c' }}>
+                  <strong style={{ color: '#c0392b' }}>Answer (Hallucinated)</strong>
+                  <p style={{ fontSize: 13, color: '#922b21', marginTop: 4 }}>
+                    "Most companies offer flexible remote work options. Some allow full-time remote, while others prefer 3 days in office..."
+                  </p>
+                  <p style={{ fontSize: 12, color: '#a93226', marginTop: 8, fontStyle: 'italic' }}>⚠ No sources. Generic. Could be wrong about YOUR policy.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={P.insight}>
+            <p style={P.insightLabel}>Key Insight</p>
+            RAG = AI that checks YOUR documents before answering. It reduces hallucinations and gives sourced answers. Think of it as giving AI an open-book exam instead of a closed-book exam.
+          </div>
+        </div>
+      );
+    }
+
+    function S2() {
+      const [expanded, setExpanded] = useState(null);
+
+      const components = [
+        {
+          id: 1,
+          icon: '\u{1F4E4}',
+          name: 'Document Loader',
+          desc: 'Reads your files',
+          detail: 'Scans PDFs, docs, web pages, databases, and more. Extracts raw text and metadata from any source.'
+        },
+        {
+          id: 2,
+          icon: '\u{2702}',
+          name: 'Chunker',
+          desc: 'Splits into pieces',
+          detail: 'Divides docs into searchable chunks (like cutting a book into paragraphs). Size matters: too big = noise, too small = lost context.'
+        },
+        {
+          id: 3,
+          icon: '\u{2328}',
+          name: 'Embeddings',
+          desc: 'Converts to vectors',
+          detail: 'Transforms text chunks into numeric vectors that capture meaning. Similar concepts have similar vectors. Models: OpenAI, Cohere, Sentence Transformers.'
+        },
+        {
+          id: 4,
+          icon: '\u{1F4BE}',
+          name: 'Vector Database',
+          desc: 'Stores & retrieves',
+          detail: 'Stores vectors and finds similar ones fast using similarity search. Like a card catalog that understands meaning. Examples: Pinecone, ChromaDB, Weaviate.'
+        },
+        {
+          id: 5,
+          icon: '\u{1F9E0}',
+          name: 'LLM',
+          desc: 'Generates answer',
+          detail: 'Reads the user question + retrieved chunks and synthesizes a final answer with citations. Uses GPT-4, Claude, Llama, etc.'
+        }
+      ];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              RAG has 5 key components working together in a pipeline. Understanding each one helps you design and optimize RAG systems. Think of it as an assembly line where each station adds value.
+            </p>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 24 }}>
+              {components.map((comp, idx) => (
+                <div key={comp.id}>
+                  <div
+                    onClick={() => setExpanded(expanded === comp.id ? null : comp.id)}
+                    style={{
+                      padding: 12,
+                      backgroundColor: expanded === comp.id ? '#e8f0fe' : '#f8f9fa',
+                      border: `2px solid ${expanded === comp.id ? '#6c5ce7' : '#e9ecef'}`,
+                      borderRadius: 8,
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>{comp.icon}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 4 }}>{comp.name}</div>
+                    <div style={{ fontSize: 11, color: '#666' }}>{comp.desc}</div>
+                  </div>
+                  {expanded === comp.id && (
+                    <div style={{
+                      marginTop: 8,
+                      padding: 12,
+                      backgroundColor: '#f0faf0',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      color: '#2d5016',
+                      animation: 'slideInLeft 0.3s ease'
+                    }}>
+                      {comp.detail}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #e9ecef' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#666', marginBottom: 12 }}>Pipeline Flow:</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#666' }}>
+                <span>Load</span>
+                <span style={{ color: '#6c5ce7' }}>→</span>
+                <span>Chunk</span>
+                <span style={{ color: '#6c5ce7' }}>→</span>
+                <span>Embed</span>
+                <span style={{ color: '#6c5ce7' }}>→</span>
+                <span>Store</span>
+                <span style={{ color: '#6c5ce7' }}>→</span>
+                <span>Retrieve</span>
+                <span style={{ color: '#6c5ce7' }}>→</span>
+                <span>Generate</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            <p style={P.insightLabel}>Key Insight</p>
+            RAG pipeline: Load → Chunk → Embed → Store → Retrieve → Generate. Each component can be optimized independently. Start simple, then tune the weakest link in your chain.
+          </div>
+        </div>
+      );
+    }
+
+    function S3() {
+      const [chunkSize, setChunkSize] = useState(500);
+      const [overlap, setOverlap] = useState(10);
+      const [strategy, setStrategy] = useState('fixed');
+
+      const sample = "RAG systems work by first retrieving relevant document chunks and then passing them to an LLM. The retrieval quality is paramount. If you retrieve irrelevant chunks, the LLM will struggle to generate accurate answers. Chunking strategy directly impacts retrieval quality.";
+
+      const strategies = [
+        { id: 'fixed', name: 'Fixed-Size', desc: 'Chunks of exactly N tokens. Simple but misses semantic boundaries.' },
+        { id: 'sentence', name: 'Sentence-Based', desc: 'Chunks by sentence boundaries. Better semantic units. Handles structure well.' },
+        { id: 'semantic', name: 'Semantic', desc: 'Chunks based on topic shifts. Requires more computation but highest quality.' }
+      ];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              The quality of your RAG system depends critically on how you split documents and convert text to searchable vectors. Small changes here cascade into big quality differences downstream.
+            </p>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>Chunk Size: {chunkSize} tokens</label>
+              <input
+                type="range"
+                min="100"
+                max="1000"
+                step="100"
+                value={chunkSize}
+                onChange={(e) => setChunkSize(Number(e.target.value))}
+                style={{ width: '100%', marginTop: 8 }}
+              />
+            </div>
+
+            <div style={{
+              padding: 12,
+              backgroundColor: '#f0faf0',
+              borderRadius: 8,
+              marginBottom: 24,
+              fontSize: 13,
+              color: '#2d5016',
+              lineHeight: 1.6
+            }}>
+              <strong>Sample Chunking:</strong>
+              <p style={{ marginTop: 8, fontStyle: 'italic' }}>"{sample.substring(0, chunkSize / 2)}..."</p>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>Chunk Overlap: {overlap}%</label>
+              <input
+                type="range"
+                min="0"
+                max="30"
+                step="5"
+                value={overlap}
+                onChange={(e) => setOverlap(Number(e.target.value))}
+                style={{ width: '100%', marginTop: 8 }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 12 }}>Chunking Strategy:</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                {strategies.map((s) => (
+                  <div
+                    key={s.id}
+                    onClick={() => setStrategy(s.id)}
+                    style={{
+                      padding: 12,
+                      backgroundColor: strategy === s.id ? '#e8f0fe' : '#f8f9fa',
+                      border: `2px solid ${strategy === s.id ? '#6c5ce7' : '#e9ecef'}`,
+                      borderRadius: 8,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, color: '#1a1a1a', fontSize: 13, marginBottom: 4 }}>{s.name}</div>
+                    <div style={{ fontSize: 12, color: '#666' }}>{s.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            <p style={P.insightLabel}>Key Insight</p>
+            Chunking is the #1 factor in RAG quality. Too big chunks → noise drowns the signal. Too small chunks → context is lost. Aim for semantic boundaries (paragraphs, sections) with 10-20% overlap for best results.
+          </div>
+        </div>
+      );
+    }
+
+    function S4() {
+      const [topK, setTopK] = useState(3);
+
+      const results = [
+        { score: 0.95, color: '#2ecc71', text: 'Remote work is allowed 2 days per week for eligible employees.' },
+        { score: 0.87, color: '#f0ad4e', text: 'Employees must coordinate with their manager before choosing remote days.' },
+        { score: 0.72, color: '#f0ad4e', text: 'All team meetings are held on Tuesdays and Thursdays in the office.' },
+        { score: 0.45, color: '#e74c3c', text: 'The company has offices in New York, San Francisco, and London.' },
+        { score: 0.31, color: '#e74c3c', text: 'IT support is available 24/7 for all technical issues.' }
+      ];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              Once chunks are stored as vectors, retrieval finds the most relevant ones using similarity search. The LLM then reads the question + retrieved chunks together to synthesize a grounded answer with citations.
+            </p>
+          </div>
+
+          <div style={P.scene}>
+            <input
+              type="text"
+              placeholder="Search: What's our remote work policy?"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '1px solid #e9ecef',
+                borderRadius: 8,
+                marginBottom: 24,
+                fontSize: 14
+              }}
+            />
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>Top-K Results: {topK}</label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                value={topK}
+                onChange={(e) => setTopK(Number(e.target.value))}
+                style={{ width: '100%', marginTop: 8 }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 12 }}>Retrieved Chunks:</p>
+              {results.slice(0, topK).map((r, idx) => (
+                <div key={idx} style={{
+                  padding: 12,
+                  marginBottom: 8,
+                  backgroundColor: '#f8f9fa',
+                  borderLeft: `4px solid ${r.color}`,
+                  borderRadius: 4,
+                  animation: 'slideInRight 0.3s ease'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                    <p style={{ fontSize: 13, color: '#333', flex: 1 }}>{r.text}</p>
+                    <span style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: r.color,
+                      marginLeft: 12,
+                      whiteSpace: 'nowrap'
+                    }}>Score: {r.score}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              padding: 12,
+              backgroundColor: '#e8f0fe',
+              borderRadius: 8,
+              marginBottom: 24
+            }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: '#6c5ce7', marginBottom: 8 }}>Assembled Prompt:</p>
+              <p style={{ fontSize: 12, color: '#333', lineHeight: 1.5 }}>
+                <strong>System:</strong> "You are an AI assistant. Answer questions using only the provided context. Cite sources."<br/>
+                <strong>Context:</strong> [Top {topK} retrieved chunks]<br/>
+                <strong>User:</strong> "What's our remote work policy?"
+              </p>
+            </div>
+
+            <div style={{
+              padding: 12,
+              backgroundColor: '#f0faf0',
+              borderRadius: 8,
+              borderLeft: '4px solid #2ecc71'
+            }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: '#2ecc71', marginBottom: 8 }}>Generated Answer:</p>
+              <p style={{ fontSize: 13, color: '#2d5016', lineHeight: 1.6 }}>
+                "Remote work is allowed 2 days per week for eligible employees, coordinated with your manager. All team meetings are held on Tuesdays and Thursdays in the office."
+              </p>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            <p style={P.insightLabel}>Key Insight</p>
+            Retrieval quality > model quality. A perfect LLM with bad retrieval gives bad answers. A good LLM with great retrieval gives great answers. Invest heavily in your retrieval pipeline.
+          </div>
+        </div>
+      );
+    }
+
+    function S5() {
+      const [expandedPattern, setExpandedPattern] = useState(null);
+
+      const patterns = [
+        {
+          id: 'rewrite',
+          name: 'Query Rewriting',
+          icon: '\u{270D}',
+          desc: 'Rewrites user queries into optimized search queries',
+          detail: 'User query: "How do I work from home?" → [Search: "remote work policy", "work from home", "remote work approval process"]'
+        },
+        {
+          id: 'hybrid',
+          name: 'Hybrid Search',
+          icon: '\u{1F50D}',
+          desc: 'Combines keyword + semantic search results',
+          detail: 'Uses both BM25 (keyword) and vector (semantic) search, then fuses results with RRF. Catches both exact phrase matches and semantic matches.'
+        },
+        {
+          id: 'rerank',
+          name: 'Re-ranking',
+          icon: '\u{1F4C4}',
+          desc: 'Re-orders initial results by relevance',
+          detail: 'Uses a cross-encoder model to score all retrieved chunks and re-order them. Improves top-K quality significantly. Models: ms-marco-MiniLM, mmarco-mMiniLMv2.'
+        },
+        {
+          id: 'eval',
+          name: 'Evaluation',
+          icon: '\u{1F4CA}',
+          desc: 'Measures RAG system quality',
+          detail: 'Metrics: Faithfulness (answer matches context), Answer Relevance (answers user question), Context Precision (top-K is relevant). Use with RAGAS or custom evaluation.'
+        }
+      ];
+
+      return (
+        <div style={P.content}>
+          <div style={P.explainRow}>
+            <p style={P.explain}>
+              Production RAG systems use advanced patterns to improve accuracy, handle edge cases, and scale reliably. These patterns layer on top of the basic RAG pipeline to achieve enterprise-grade performance.
+            </p>
+          </div>
+
+          <div style={P.scene}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 24 }}>
+              {patterns.map((p) => (
+                <div key={p.id}>
+                  <div
+                    onClick={() => setExpandedPattern(expandedPattern === p.id ? null : p.id)}
+                    style={{
+                      padding: 16,
+                      backgroundColor: expandedPattern === p.id ? '#e8f0fe' : '#f8f9fa',
+                      border: `2px solid ${expandedPattern === p.id ? '#6c5ce7' : '#e9ecef'}`,
+                      borderRadius: 8,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                      <div style={{ fontSize: 24 }}>{p.icon}</div>
+                      <div style={{ fontWeight: 600, color: '#1a1a1a' }}>{p.name}</div>
+                    </div>
+                    <p style={{ fontSize: 12, color: '#666' }}>{p.desc}</p>
+                  </div>
+                  {expandedPattern === p.id && (
+                    <div style={{
+                      marginTop: 8,
+                      padding: 12,
+                      backgroundColor: '#f0faf0',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      color: '#2d5016',
+                      animation: 'slideInLeft 0.3s ease'
+                    }}>
+                      {p.detail}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #e9ecef' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 16 }}>Production RAG Architecture:</p>
+              <div style={{
+                padding: 16,
+                backgroundColor: '#f8f9fa',
+                borderRadius: 8,
+                fontSize: 12,
+                color: '#666',
+                lineHeight: 1.8
+              }}>
+                User Query → Query Rewriter → [Keyword Search + Semantic Search] → Fusion → Re-ranker → Top-K Chunks → LLM → Evaluate Answer → Output
+              </div>
+            </div>
+
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e9ecef' }}>
+              <p style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>Popular Frameworks: LangChain, LlamaIndex, Semantic Kernel, Haystack</p>
+              <p style={{ fontSize: 12, color: '#999' }}>Vector Databases: Pinecone, Weaviate, ChromaDB, Milvus, Qdrant</p>
+            </div>
+          </div>
+
+          <div style={P.insight}>
+            <p style={P.insightLabel}>Key Insight</p>
+            Production RAG = basic RAG + query rewriting + hybrid search + re-ranking. Start with basic RAG, measure quality, then add patterns where you see gaps. Don't over-engineer from day one.
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [stage, setStage] = useState(1);
+
+      const stages = [
+        { num: 1, label: 'What is RAG?', component: S1 },
+        { num: 2, label: '5 Components', component: S2 },
+        { num: 3, label: 'Chunking', component: S3 },
+        { num: 4, label: 'Retrieval', component: S4 },
+        { num: 5, label: 'Production', component: S5 }
+      ];
+
+      const CurrentScene = stages.find(s => s.num === stage).component;
+
+      return (
+        <div style={P.root}>
+          <div style={P.sidebar}>
+            {stages.map((s, idx) => (
+              <div key={s.num}>
+                <div
+                  onClick={() => setStage(s.num)}
+                  style={P.stepCircle(s.num, stage)}
+                >
+                  {s.num < stage ? '\u2713' : s.num}
+                </div>
+                <div style={P.stepLabel}>{s.label}</div>
+                {idx < stages.length - 1 && <div style={P.connector(s.num < stage)} />}
+              </div>
+            ))}
+          </div>
+
+          <div style={P.main}>
+            <div style={P.topBar}>
+              <div style={P.leftSection}>
+                <a href="../../index.html" style={P.backLink}>← Back</a>
+                <div style={P.badge}>DEEP DIVE</div>
+              </div>
+              <h1 style={P.title}>RAG Architecture Deep Dive</h1>
+              <div style={P.navRow}>
+                {stages.map((s) => (
+                  <button
+                    key={s.num}
+                    onClick={() => setStage(s.num)}
+                    style={P.navBtn(stage === s.num)}
+                  >
+                    {s.num}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <CurrentScene />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
