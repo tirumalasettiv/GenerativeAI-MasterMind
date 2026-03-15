@@ -815,8 +815,8 @@
           <div style={P.main}>
             <div style={P.topBar}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={P.badge}>GUIDE 1.5</span>
                 <span style={P.title}>{STAGES[stage].title}</span>
+                <span style={P.badge}>GUIDE 1.5</span>
               </div>
               <div style={P.navRow}>
                 <StageProgress current={stage} total={STAGES.length} />
@@ -828,7 +828,7 @@
                 >
                   &#8592;
                 </button>
-                <span style={P.navP}>{stage + 1} / {STAGES.length}</span>
+                <span style={P.navP}>Page {stage + 1} of {STAGES.length}</span>
                 <button
                   onClick={handleNext}
                   disabled={!canGoNext}

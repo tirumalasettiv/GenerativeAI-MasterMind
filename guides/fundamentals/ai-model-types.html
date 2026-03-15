@@ -1143,9 +1143,9 @@
             {/* Top Bar */}
             <div style={P.topBar}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={P.badge}>Guide</span>
                 <span style={P.numberBadge}>1.4</span>
                 <span style={P.title}>{STAGES[stage].title}</span>
+                <span style={P.badge}>Guide</span>
               </div>
               <div style={P.navRow}>
                 <button
@@ -1159,7 +1159,7 @@
                   Prev
                 </button>
                 <ProgressIndicator current={stage} total={STAGES.length} />
-                <span style={P.navP}>{stage + 1} / {STAGES.length}</span>
+                <span style={P.navP}>Page {stage + 1} of {STAGES.length}</span>
                 <button
                   onClick={() => setStage(Math.min(STAGES.length - 1, stage + 1))}
                   disabled={stage === STAGES.length - 1}

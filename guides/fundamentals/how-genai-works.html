@@ -1288,13 +1288,13 @@
                 <>
                     <div className="top-bar">
                         <div className="top-left">
-                            <div className="badge">Fundamentals</div>
                             <div className="number-badge">1.3</div>
                             <div className="top-title">Inside the Black Box</div>
+                            <div className="badge">Fundamentals</div>
                         </div>
                         <div style={{display: 'flex', alignItems: 'center'}}>
                             <div className="stage-progress">
-                                <span className="stage-progress-label">{currentStage}/5</span>
+                                <span className="stage-progress-label">Page {currentStage} of 5</span>
                                 {STAGES.map(s => (
                                     <div key={s.id} className={`stage-progress-dot ${currentStage === s.id ? 'active' : currentStage > s.id ? 'completed' : ''}`} />
                                 ))}
