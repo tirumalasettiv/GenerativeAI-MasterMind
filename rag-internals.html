@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG Under the Hood — Deep Dive</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const CHUNKS = [
+      { id: 0, title: "Annual Leave", text: "All full-time employees are entitled to 20 days of paid annual leave per calendar year. Leave accrues at 1.67 days per month. Unused leave up to 5 days may be carried over.", section: "\u00A73.1" },
+      { id: 1, title: "Sick Leave", text: "Employees receive 10 days of paid sick leave per year. A medical certificate is required for absences exceeding 3 consecutive days. Unused sick leave does not carry over.", section: "\u00A73.2" },
+      { id: 2, title: "Parental Leave", text: "New parents are entitled to 12 weeks of paid parental leave. This applies to both birth and adoptive parents. Leave must begin within 30 days of the child's birth or adoption date.", section: "\u00A73.3" },
+      { id: 3, title: "Public Holidays", text: "The company observes 11 public holidays per year. If a holiday falls on a weekend, the following Monday is observed. Employees required to work on holidays receive double pay.", section: "\u00A73.4" },
+    ];
+
+    const FULL_DOC_LINES = [
+      { text: "ACME Employee Handbook - Leave Policy", bold: true, accent: false },
+      { text: "", bold: false, accent: false },
+      { text: "Section 3.1: Annual Leave", bold: true, accent: true },
+      { text: "All full-time employees are entitled to 20 days of paid annual leave per calendar year.", bold: false, accent: false },
+      { text: "Leave accrues at 1.67 days per month. Unused leave up to 5 days may be carried over.", bold: false, accent: false },
+      { text: "", bold: false, accent: false },
+      { text: "Section 3.2: Sick Leave", bold: true, accent: true },
+      { text: "Employees receive 10 days of paid sick leave per year.", bold: false, accent: false },
+      { text: "A medical certificate is required for absences exceeding 3 consecutive days.", bold: false, accent: false },
+      { text: "", bold: false, accent: false },
+      { text: "Section 3.3: Parental Leave", bold: true, accent: true },
+      { text: "New parents are entitled to 12 weeks of paid parental leave.", bold: false, accent: false },
+    ];
+
+    const VECS = [
+      [0.82, 0.15, 0.91, 0.33, 0.67, 0.12],
+      [0.71, 0.88, 0.23, 0.56, 0.34, 0.77],
+      [0.44, 0.32, 0.68, 0.91, 0.55, 0.28],
+      [0.38, 0.65, 0.41, 0.27, 0.89, 0.53],
+    ];
+
+    const QS = [
+      { text: "How many vacation days do I get?", scores: [0.96, 0.31, 0.42, 0.28], top: 0, answer: "You get 20 days of paid annual leave per year. Leave accrues at 1.67 days/month, and up to 5 unused days carry over." },
+      { text: "Do I need a doctor's note when sick?", scores: [0.29, 0.94, 0.35, 0.22], top: 1, answer: "Yes \u2014 a medical certificate is required for absences over 3 consecutive days. You have 10 sick days per year." },
+      { text: "What happens if I adopt a child?", scores: [0.38, 0.27, 0.93, 0.19], top: 2, answer: "Adoptive parents get the same 12 weeks of paid parental leave. It must begin within 30 days of adoption." },
+      { text: "Do I get paid extra on holidays?", scores: [0.24, 0.33, 0.21, 0.95], top: 3, answer: "Yes! Employees working on any of the 11 public holidays receive double pay." },
+    ];
+
+    const STAGES = [
+      { icon: "\u{1F4C4}", label: "Ingest", title: "Document Ingestion", sub: "Loading raw documents" },
+      { icon: "\u2702\uFE0F", label: "Chunk", title: "Chunking", sub: "Splitting into searchable pieces" },
+      { icon: "\u{1F522}", label: "Embed", title: "Embeddings", sub: "Text \u2192 number vectors" },
+      { icon: "\u{1F5C4}\uFE0F", label: "Store", title: "Vector Database", sub: "Indexed for similarity search" },
+      { icon: "\u{1F50D}", label: "Query", title: "Query & Retrieval", sub: "Finding the best match" },
+      { icon: "\u{1F9E9}", label: "Assemble", title: "Prompt Assembly", sub: "Building the augmented prompt" },
+      { icon: "\u2728", label: "Generate", title: "Generation", sub: "Grounded answer from LLM" },
+    ];
+
+    const A = "#6c5ce7", G = "#2ecc71", GD = "#1a9456";
+    const CC = ["#6c5ce7", "#2ecc71", "#e17055", "#f39c12"];
+    const INSIGHTS = [
+      ["\u{1F4A1}", "Like photocopying a textbook so the librarian can work with it \u2014 the original stays safe."],
+      ["\u{1F4A1}", "Like cutting a book into index cards \u2014 each covers one topic, small enough to search fast."],
+      ["\u{1F4A1}", "Like GPS coordinates in \"meaning space\" \u2014 similar topics end up near each other."],
+      ["\u{1F4A1}", "Like a constellation map \u2014 nearby stars discuss similar topics. We find the nearest one."],
+      ["\u{1F4A1}", "Like asking \"which index card is closest in meaning?\" \u2014 math finds the best match instantly."],
+      ["\u{1F4A1}", "Like an open-book exam \u2014 the question PLUS the relevant pages, so no guessing needed."],
+      ["\u{1F4A1}", "The answer cites real data. If info isn't in the knowledge base, it says \"I don't know.\""],
+    ];
+
+    function TW({ text, speed = 16 }) {
+      const [d, setD] = useState("");
+      const i = useRef(0);
+      useEffect(() => {
+        setD(""); i.current = 0;
+        const t = setInterval(() => { i.current++; setD(text.slice(0, i.current)); if (i.current >= text.length) clearInterval(t); }, speed);
+        return () => clearInterval(t);
+      }, [text]);
+      return <span>{d}{d.length < text.length && <span className="cur">|</span>}</span>;
+    }
+
+    function Bar({ value, color, w = 70 }) {
+      const [a, setA] = useState(0);
+      useEffect(() => { const t = setTimeout(() => setA(value * 100), 100); return () => clearTimeout(t); }, [value]);
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: w, height: 10, background: "#e8e8f0", borderRadius: 5, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${a}%`, background: color, borderRadius: 5, transition: "width 0.6s cubic-bezier(.22,.68,0,1.2)" }} />
+          </div>
+          <span style={{ fontSize: 14, color: "#3d3d4d", fontFamily: "monospace", fontWeight: 500 }}>{value.toFixed(2)}</span>
+        </div>
+      );
+    }
+
+    function S1() {
+      const [lines, setLines] = useState(0);
+      useEffect(() => { const t = setInterval(() => setLines(p => Math.min(p + 1, 11)), 200); return () => clearInterval(t); }, []);
+      return (
+        <div style={P.termWrap}>
+          <div style={P.termBar}>
+            <span style={{ ...P.dot, background: "#ff5f56" }} /><span style={{ ...P.dot, background: "#ffbd2e" }} /><span style={{ ...P.dot, background: "#27c93f" }} />
+            <span style={{ marginLeft: 10, fontSize: 15, color: "#4a4a5a", fontWeight: 600 }}>employee_handbook.pdf</span>
+          </div>
+          <div style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: 16, lineHeight: 1.7 }}>
+            {FULL_DOC_LINES.slice(0, lines).map((l, i) => (
+              <div key={i} style={{ color: l.accent ? A : l.bold ? "#1a1a2e" : "#2d2d3d", fontWeight: l.bold ? 700 : 400 }}>{l.text || "\u00A0"}</div>
+            ))}
+            {lines < 11 && <span className="cur" style={{ color: A }}>{"\u2588"}</span>}
+          </div>
+        </div>
+      );
+    }
+
+    function S2() {
+      const [ac, setAc] = useState(-1);
+      useEffect(() => { const t = setInterval(() => setAc(p => p >= 3 ? 3 : p + 1), 500); return () => clearInterval(t); }, []);
+      return (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {CHUNKS.map((c, i) => (
+            <div key={i} onClick={() => setAc(i)} style={{
+              padding: "12px 14px", borderRadius: 12, cursor: "pointer", transition: "all 0.3s",
+              border: `2px solid ${i <= ac ? CC[i] : "#dddde8"}`, background: i === ac ? "#fafafe" : "#fff",
+              boxShadow: i === ac ? `0 4px 16px ${CC[i]}15` : "none",
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: CC[i] }}>{c.section}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a2e", marginTop: 3 }}>{c.title}</div>
+              <div style={{ fontSize: 16, color: "#2d2d3d", marginTop: 5, lineHeight: 1.6 }}>
+                {i === ac ? c.text : c.text.slice(0, 65) + "..."}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function S3() {
+      const [ai, setAi] = useState(0);
+      return (
+        <div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+            {CHUNKS.map((c, i) => (
+              <button key={i} onClick={() => setAi(i)} style={{
+                padding: "5px 16px", borderRadius: 20, border: `2px solid ${CC[i]}`, fontSize: 15, fontWeight: 700,
+                background: i === ai ? CC[i] : "transparent", color: i === ai ? "#fff" : CC[i],
+                cursor: "pointer", fontFamily: "'DM Sans'", transition: "all 0.2s",
+              }}>{c.section}</button>
+            ))}
+          </div>
+          <div style={{ background: "#f7f6fd", borderRadius: 12, border: "1px solid #e4e0f2", padding: "12px 16px" }}>
+            <div style={{ fontSize: 15, color: "#2d2d3d", marginBottom: 8 }}>"{CHUNKS[ai].text.slice(0, 60)}..."</div>
+            <div style={{ textAlign: "center", fontSize: 23, color: "#b0b0be", margin: "6px 0" }}>{"\u2B07\uFE0F"} <span style={{ fontSize: 15, color: "#4a4a5a", fontWeight: 600 }}>Embedding Model</span></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 20px" }}>
+              {VECS[ai].map((v, j) => (
+                <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 14, color: "#4a4a5a", fontFamily: "monospace", width: 24, fontWeight: 600 }}>d{j + 1}</span>
+                  <Bar value={v} color={CC[ai]} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function S4() {
+      const [hov, setHov] = useState(-1);
+      const pos = [{ x: 25, y: 20 }, { x: 70, y: 75 }, { x: 35, y: 70 }, { x: 75, y: 22 }];
+      return (
+        <div style={{
+          position: "relative", width: "100%", height: "100%", minHeight: 220,
+          background: "linear-gradient(135deg, #f7f6fd, #eee9fd)", borderRadius: 14,
+          border: "1px solid #d8d3ea", overflow: "hidden",
+        }}>
+          {[25, 50, 75].map(p => <div key={`h${p}`} style={{ position: "absolute", top: `${p}%`, left: 0, right: 0, height: 1, background: "#d0cbe5" }} />)}
+          {[25, 50, 75].map(p => <div key={`v${p}`} style={{ position: "absolute", left: `${p}%`, top: 0, bottom: 0, width: 1, background: "#d0cbe5" }} />)}
+          <div style={{ position: "absolute", bottom: 6, right: 10, fontSize: 11, color: "#9a90b8", letterSpacing: 1.5, fontWeight: 700 }}>VECTOR SPACE</div>
+          {CHUNKS.map((c, i) => (
+            <div key={i} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(-1)} style={{
+              position: "absolute", left: `${pos[i].x}%`, top: `${pos[i].y}%`, transform: "translate(-50%,-50%)",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer", zIndex: hov === i ? 10 : 1,
+            }}>
+              <div style={{
+                width: hov === i ? 26 : 18, height: hov === i ? 26 : 18, borderRadius: "50%", background: CC[i],
+                boxShadow: `0 0 ${hov === i ? 24 : 8}px ${CC[i]}55`, transition: "all 0.3s",
+              }} />
+              <span style={{ fontSize: 14, color: CC[i], fontWeight: 700 }}>{hov === i ? c.title : c.section}</span>
+              {hov === i && (
+                <div style={{
+                  position: "absolute", top: -48, background: "#fff", border: `1px solid ${CC[i]}44`, borderRadius: 8,
+                  padding: "5px 10px", fontSize: 14, color: "#2d2d3d", whiteSpace: "nowrap", animation: "fadeIn 0.2s",
+                  boxShadow: "0 3px 12px rgba(0,0,0,0.1)", fontFamily: "monospace",
+                }}>
+                  [{VECS[i].slice(0, 3).map(v => v.toFixed(2)).join(", ")}, ...]
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function S5() {
+      const [qi, setQi] = useState(null);
+      const [ph, setPh] = useState("pick");
+      const run = (i) => { setQi(i); setPh("searching"); setTimeout(() => setPh("results"), 1000); };
+      return (
+        <div>
+          {ph === "pick" ? (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {QS.map((q, i) => (
+                <button key={i} onClick={() => run(i)} style={{
+                  padding: "10px 14px", borderRadius: 10, border: "2px solid #dddde8", background: "#fafafe",
+                  cursor: "pointer", fontSize: 16, color: "#1a1a2e", textAlign: "left", fontWeight: 500, fontFamily: "'DM Sans'",
+                }}>{q.text}</button>
+              ))}
+            </div>
+          ) : (
+            <div>
+              <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 360, marginLeft: "auto", marginBottom: 12 }}>{QS[qi].text}</div>
+              {ph === "searching" ? (
+                <div style={{ textAlign: "center", padding: 16, color: "#4a4a5a", fontSize: 18 }}>
+                  <span style={{ fontSize: 30, animation: "pulse 0.8s infinite alternate" }}>{"\u{1F50D}"}</span> Computing scores...
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {CHUNKS.map((c, i) => {
+                    const s = QS[qi].scores[i], isT = i === QS[qi].top;
+                    return (
+                      <div key={i} style={{
+                        display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: 8,
+                        border: `2px solid ${isT ? G : "#e8e8f0"}`, background: isT ? "#eefaf2" : "#fff",
+                      }}>
+                        <div style={{ width: 10, height: 10, borderRadius: "50%", background: CC[i], marginRight: 10, flexShrink: 0 }} />
+                        <span style={{ fontSize: 16, color: "#1a1a2e", fontWeight: 600, flex: 1 }}>{c.title}</span>
+                        <div style={{ width: 80, height: 10, background: "#e8e8f0", borderRadius: 5, overflow: "hidden", marginRight: 8 }}>
+                          <div style={{ height: "100%", width: `${s * 100}%`, background: isT ? G : "#c0c0d0", borderRadius: 5, transition: "width 0.8s cubic-bezier(.22,.68,0,1.2)" }} />
+                        </div>
+                        <span style={{ fontSize: 15, fontFamily: "monospace", color: isT ? GD : "#6a6a7a", fontWeight: isT ? 700 : 400, minWidth: 38 }}>{(s * 100).toFixed(0)}%</span>
+                        {isT && <span style={{ fontSize: 13, background: G, color: "#fff", padding: "2px 8px", borderRadius: 8, fontWeight: 700, marginLeft: 6 }}>BEST</span>}
+                      </div>
+                    );
+                  })}
+                  <button onClick={() => { setQi(null); setPh("pick"); }} style={{ marginTop: 6, padding: "6px 16px", border: "1px solid #d0d0dd", borderRadius: 16, background: "#fff", cursor: "pointer", fontSize: 15, color: A, fontWeight: 700, fontFamily: "'DM Sans'", alignSelf: "flex-start" }}>{"\u2190"} Try another</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function S6() {
+      const [ph, setPh] = useState(0);
+      useEffect(() => {
+        const t1 = setTimeout(() => setPh(1), 500);
+        const t2 = setTimeout(() => setPh(2), 1200);
+        const t3 = setTimeout(() => setPh(3), 1900);
+        return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+      }, []);
+      const bl = [
+        { color: A, bg: "#faf9fe", label: "\u2460 SYSTEM INSTRUCTION", text: '"Answer ONLY using the provided context. Say you don\'t know if unsure."' },
+        { color: GD, bg: "#eefaf2", label: "\u2461 RETRIEVED CONTEXT", text: '"Employees are entitled to 20 days annual leave. Accrues at 1.67 days/month..."' },
+        { color: "#d63031", bg: "#fdf2ef", label: "\u2462 USER QUESTION", text: '"How many vacation days do I get?"' },
+      ];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {bl.map((b, i) => (
+            <div key={i}>
+              <div style={{
+                padding: "10px 14px", borderRadius: 10, border: `2px solid ${b.color}28`, background: b.bg,
+                opacity: ph >= i ? 1 : 0.1, transition: "opacity 0.5s",
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: b.color, letterSpacing: 1 }}>{b.label}</div>
+                <div style={{ fontSize: 16, color: "#2d2d3d", marginTop: 5, fontFamily: "monospace", lineHeight: 1.6 }}>{b.text}</div>
+              </div>
+              {i < 2 && <div style={{ textAlign: "center", fontSize: 18, color: "#c0c0d0", margin: "1px 0", opacity: ph >= i + 1 ? 1 : 0.1 }}>{"\uFF0B"}</div>}
+            </div>
+          ))}
+          {ph >= 3 && (
+            <div style={{ textAlign: "center", animation: "fadeIn 0.3s" }}>
+              <div style={{ fontSize: 20, color: "#c0c0d0" }}>{"\u2B07\uFE0F"}</div>
+              <div style={{ padding: "8px 14px", borderRadius: 10, border: "2px solid #f39c12", background: "linear-gradient(135deg, #fef9f3, #fdf4ea)", display: "inline-block" }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#c87f0a", letterSpacing: 1 }}>AUGMENTED PROMPT {"\u2192"} LLM</span>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function S7() {
+      const [qi, setQi] = useState(null);
+      const [ans, setAns] = useState(false);
+      const run = (i) => { setQi(i); setAns(false); setTimeout(() => setAns(true), 500); };
+      return (
+        <div>
+          {qi === null ? (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {QS.map((q, i) => (
+                <button key={i} onClick={() => run(i)} style={{
+                  padding: "10px 14px", borderRadius: 10, border: "2px solid #dddde8", background: "#fafafe",
+                  cursor: "pointer", fontSize: 16, color: "#1a1a2e", textAlign: "left", fontWeight: 500, fontFamily: "'DM Sans'",
+                }}>{q.text}</button>
+              ))}
+            </div>
+          ) : (
+            <div>
+              <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 340, marginLeft: "auto", marginBottom: 10 }}>{QS[qi].text}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 8 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: CC[QS[qi].top] }} />
+                <span style={{ fontSize: 15, color: "#3d3d4d", fontWeight: 600 }}>Using: {CHUNKS[QS[qi].top].title}</span>
+              </div>
+              {ans && (
+                <div style={{ background: "#f4f4fa", border: `1px solid ${G}44`, padding: "12px 16px", borderRadius: "14px 14px 14px 4px", fontSize: 18, lineHeight: 1.7, color: "#1a1a2e", animation: "fadeIn 0.4s" }}>
+                  <TW text={QS[qi].answer} speed={14} />
+                  <div style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: GD, background: "#e2f5ea", display: "inline-block", padding: "3px 10px", borderRadius: 8 }}>{"\u2705"} Source: {CHUNKS[QS[qi].top].title}</div>
+                </div>
+              )}
+              <button onClick={() => setQi(null)} style={{ marginTop: 8, padding: "5px 14px", border: "1px solid #d0d0dd", borderRadius: 14, background: "#fff", cursor: "pointer", fontSize: 15, color: A, fontWeight: 700, fontFamily: "'DM Sans'" }}>{"\u2190"} Try another</button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function RAGInternals() {
+      const [stage, setStage] = useState(0);
+      const cur = STAGES[stage];
+      const scenes = [<S1 />, <S2 />, <S3 />, <S4 />, <S5 />, <S6 />, <S7 />];
+
+      return (
+        <div style={P.root}>
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
+            @keyframes fadeIn { from {opacity:0;transform:translateY(6px)} to {opacity:1;transform:translateY(0)} }
+            @keyframes pulse { from {transform:scale(1)} to {transform:scale(1.15)} }
+            .cur { animation: blink 0.7s infinite; }
+            @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            button:hover { filter: brightness(1.06); }
+            html, body, #root { height: 100%; overflow: hidden; }
+          `}</style>
+
+          <div style={P.sidebar}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: "#a0a0b0", marginBottom: 10, textAlign: "center" }}>STAGES</div>
+            {STAGES.map((s, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <button onClick={() => setStage(i)} style={{
+                  width: 44, height: 44, borderRadius: "50%", border: "none", display: "flex",
+                  alignItems: "center", justifyContent: "center", fontSize: 22, cursor: "pointer",
+                  transition: "all 0.3s", fontFamily: "'DM Sans'",
+                  background: i === stage ? A : i < stage ? G : "#e8e8f0",
+                  color: i <= stage ? "#fff" : "#aaa",
+                  transform: i === stage ? "scale(1.15)" : "scale(1)",
+                  boxShadow: i === stage ? `0 0 14px ${A}30` : "none",
+                }}>{s.icon}</button>
+                <div style={{
+                  fontSize: 12, fontWeight: 700, marginTop: 2, textAlign: "center",
+                  color: i === stage ? A : i < stage ? GD : "#b0b0be", letterSpacing: 0.2,
+                }}>{s.label}</div>
+                {i < STAGES.length - 1 && (
+                  <div style={{ width: 3, height: 10, margin: "2px 0", background: i < stage ? G : "#e0e0ed", borderRadius: 2 }} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={P.main}>
+            <div style={P.topBar}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={P.badge}>DEEP DIVE</span>
+                  <h1 style={P.title}>RAG <span style={{ color: A }}>Under the Hood</span></h1>
+                </div>
+              </div>
+              <div style={P.navRow}>
+                <button disabled={stage === 0} onClick={() => setStage(stage - 1)} style={{ ...P.navBtn, opacity: stage === 0 ? 0.3 : 1 }}>{"\u2190"}</button>
+                <span style={{ fontSize: 15, color: "#6a6a7a", fontWeight: 600, minWidth: 40, textAlign: "center" }}>{stage + 1}/{STAGES.length}</span>
+                <button disabled={stage === STAGES.length - 1} onClick={() => setStage(stage + 1)} style={{ ...P.navBtn, ...P.navP, opacity: stage === STAGES.length - 1 ? 0.3 : 1 }}>{"\u2192"}</button>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, color: "#1a1a2e" }}>
+                <span style={{ color: A }}>Stage {stage + 1}:</span> {cur.title}
+              </h2>
+              <p style={{ fontSize: 18, color: "#4a4a5a", fontWeight: 500, marginTop: 2 }}>{cur.sub}</p>
+            </div>
+
+            <div style={P.content} key={stage}>
+              <div style={P.explainRow}>
+                <p style={P.explain}>{
+                  ["First, we load the raw document into our system \u2014 PDFs, Word docs, wikis, or database exports.",
+                   "Documents are too long to search efficiently, so we split them into chunks \u2014 smaller, meaningful pieces.",
+                   "We convert each chunk into a list of numbers called a vector. Similar meaning \u2192 similar numbers.",
+                   "Vectors are stored in a vector database \u2014 optimized for finding similar items by comparing numbers.",
+                   "When a user asks a question, we convert it to a vector and find the most similar chunk.",
+                   "The system assembles a super-prompt: system instructions + retrieved context + user question.",
+                   "The LLM reads the augmented prompt and generates an answer grounded in your actual data."][stage]
+                }</p>
+              </div>
+              <div style={P.scene}>
+                <div style={{ animation: "fadeIn 0.3s" }}>{scenes[stage]}</div>
+              </div>
+              <div style={P.insight}>
+                <span style={{ fontSize: 20, flexShrink: 0 }}>{INSIGHTS[stage][0]}</span>
+                <span>{INSIGHTS[stage][1]}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const P = {
+      root: { display: "flex", width: "100%", height: "100vh", overflow: "hidden", fontFamily: "'DM Sans', sans-serif", color: "#1a1a2e", background: "linear-gradient(180deg, #f7f6fd 0%, #fff 50%, #fafafe 100%)" },
+      sidebar: { width: 120, flexShrink: 0, background: "#fff", borderRight: "1px solid #e8e8f0", padding: "12px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" },
+      main: { width: "75%", maxWidth: "75%", display: "flex", flexDirection: "column", padding: "16px 32px 12px", overflow: "hidden", minWidth: 0, margin: "0 auto" },
+      topBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexShrink: 0 },
+      badge: { fontSize: 11, fontWeight: 700, letterSpacing: 2, color: A, background: "#eee9fd", padding: "3px 12px", borderRadius: 14 },
+      title: { fontFamily: "'Fraunces', serif", fontSize: 30, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.2 },
+      navRow: { display: "flex", alignItems: "center", gap: 6 },
+      navBtn: { width: 36, height: 36, borderRadius: 8, border: "1px solid #d0d0dd", background: "#fff", cursor: "pointer", fontSize: 18, fontWeight: 600, color: "#3d3d4d", fontFamily: "'DM Sans'", display: "flex", alignItems: "center", justifyContent: "center" },
+      navP: { background: A, color: "#fff", border: "none" },
+      content: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 },
+      explainRow: { flexShrink: 0, marginBottom: 10 },
+      explain: { fontSize: 18, color: "#2d2d3d", lineHeight: 1.7, margin: 0 },
+      scene: { flex: 1, background: "#fff", borderRadius: 14, padding: "14px 18px", border: "1px solid #e0e0ec", boxShadow: "0 2px 16px rgba(0,0,0,0.04)", overflow: "auto", minHeight: 0 },
+      insight: { display: "flex", alignItems: "center", gap: 10, background: "#f7f6fd", borderRadius: 10, padding: "10px 14px", marginTop: 10, border: "1px solid #e8e4f2", fontSize: 16, color: "#2d2d3d", lineHeight: 1.6, flexShrink: 0 },
+      termWrap: { background: "#fafafe", borderRadius: 10, border: "1px solid #e0e0ec", overflow: "hidden" },
+      termBar: { display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "#f0f0f5", borderBottom: "1px solid #e0e0ec" },
+      dot: { width: 12, height: 12, borderRadius: "50%" },
+    };
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<RAGInternals />);
+  </script>
+</body>
+</html>

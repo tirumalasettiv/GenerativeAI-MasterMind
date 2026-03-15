@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG Interactive Guides — Venkat's GenAI Course</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(180deg, #f7f6fd 0%, #fff 50%, #fafafe 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a1a2e;
+    }
+    .container {
+      max-width: 720px;
+      width: 100%;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #6c5ce7;
+      background: #eee9fd;
+      padding: 4px 14px;
+      border-radius: 14px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    h1 span { color: #6c5ce7; }
+    .subtitle {
+      font-size: 18px;
+      color: #4a4a5a;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border: 2px solid #e8e8f0;
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+    .card:hover {
+      border-color: #6c5ce7;
+      box-shadow: 0 8px 30px rgba(108, 92, 231, 0.12);
+      transform: translateY(-3px);
+    }
+    .card-icon { font-size: 36px; margin-bottom: 12px; }
+    .card-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 2px 8px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .card-badge.beginner { color: #2ecc71; background: #e2f5ea; }
+    .card-badge.advanced { color: #6c5ce7; background: #eee9fd; }
+    .card h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 15px;
+      color: #4a4a5a;
+      line-height: 1.6;
+    }
+    .card .arrow {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #6c5ce7;
+    }
+    .footer {
+      margin-top: 48px;
+      font-size: 14px;
+      color: #a0a0b0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">INTERACTIVE LEARNING</div>
+    <h1>RAG <span>Interactive Guides</span></h1>
+    <p class="subtitle">Two interactive walkthroughs that teach Retrieval-Augmented Generation from concept to implementation. No build tools needed — just open in your browser.</p>
+
+    <div class="cards">
+      <a href="rag-explainer.html" class="card">
+        <div class="card-icon">🤖</div>
+        <span class="card-badge beginner">BEGINNER</span>
+        <h2>What is RAG?</h2>
+        <p>Start here — a friendly, visual introduction to RAG with the librarian analogy, step-by-step walkthrough, and interactive demo.</p>
+        <span class="arrow">Open guide →</span>
+      </a>
+
+      <a href="rag-internals.html" class="card">
+        <div class="card-icon">⚙️</div>
+        <span class="card-badge advanced">DEEP DIVE</span>
+        <h2>RAG Under the Hood</h2>
+        <p>Go deeper — see document ingestion, chunking, embeddings, vector search, prompt assembly, and generation in action.</p>
+        <span class="arrow">Open guide →</span>
+      </a>
+    </div>
+
+    <p class="footer">Built for Venkat's GenAI MasterMind Course</p>
+  </div>
+</body>
+</html>
