@@ -71,7 +71,7 @@
 
         .top-title {
             font-family: 'Fraunces', serif;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             color: #2c3e50;
         }
@@ -162,7 +162,7 @@
         }
 
         .step-label {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             text-align: center;
             width: 80px;
@@ -192,7 +192,7 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            padding: 32px;
+            padding: 32px 40px;
             background: white;
             scroll-behavior: smooth;
         }
@@ -221,14 +221,15 @@
 
         .stage-title {
             font-family: 'Fraunces', serif;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             margin-bottom: 16px;
             color: #2c3e50;
         }
 
         .analogy-text {
-            font-size: 17px;
+            font-size: 18px;
+            line-height: 1.7;
             color: #666;
             margin-bottom: 32px;
             font-style: italic;
@@ -239,13 +240,13 @@
         }
 
         .scene-card {
-            background: linear-gradient(135deg, #f5f3ff 0%, #f0f8ff 100%);
+            background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
             border: 1px solid #e0d4ff;
             border-radius: 16px;
-            padding: 40px;
+            padding: 36px 40px;
             box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
             margin: 20px 0;
-            min-height: 320px;
+            min-height: 280px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -257,11 +258,11 @@
         .insight-box {
             background: #f0faf0;
             border-left: 4px solid #2ecc71;
-            padding: 24px;
+            padding: 24px 28px;
             border-radius: 6px;
             margin-top: auto;
-            font-size: 16px;
-            line-height: 1.6;
+            font-size: 17px;
+            line-height: 1.7;
             color: #555;
         }
 
@@ -354,18 +355,19 @@
             border-radius: 20px;
             background: #e0d4ff;
             color: #6c5ce7;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             animation: slideIn 0.3s ease-out;
             transition: transform 0.2s ease;
         }
 
         .token-chip:hover {
-            transform: scale(1.08);
+            transform: scale(1.12);
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.2);
         }
 
         .token-count {
-            font-size: 14px;
+            font-size: 15px;
             color: #666;
             margin-top: 12px;
             text-align: center;
@@ -384,7 +386,7 @@
             border: 1px solid #d0d0d0;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             transition: all 0.2s ease;
             color: #666;
@@ -451,7 +453,7 @@
         .probability-bars {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
             margin: 20px 0;
             width: 100%;
         }
@@ -467,12 +469,12 @@
             text-align: right;
             font-weight: 600;
             color: #2c3e50;
-            font-size: 15px;
+            font-size: 16px;
         }
 
         .prob-bar-bg {
             flex: 1;
-            height: 36px;
+            height: 40px;
             background: #f0f0f0;
             border-radius: 6px;
             overflow: hidden;
@@ -481,7 +483,7 @@
 
         .prob-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #6c5ce7, #8b7cf6, #a29bfe);
+            background: linear-gradient(90deg, #5a4bd1, #6c5ce7, #8b7cf6, #a78bfa);
             transition: all 0.4s ease;
             display: flex;
             align-items: center;
@@ -497,7 +499,7 @@
             text-align: right;
             font-weight: 600;
             color: #6c5ce7;
-            font-size: 15px;
+            font-size: 16px;
         }
 
         .slider-container {
@@ -559,7 +561,7 @@
         .parameter-display {
             display: flex;
             justify-content: space-around;
-            gap: 16px;
+            gap: 20px;
             margin: 20px 0;
             width: 100%;
         }
@@ -569,7 +571,7 @@
             background: white;
             border: 1px solid #d0c4ff;
             border-radius: 8px;
-            padding: 16px;
+            padding: 20px;
             text-align: center;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -582,19 +584,19 @@
         .param-model {
             font-weight: 600;
             color: #2c3e50;
-            font-size: 13px;
+            font-size: 15px;
             margin-bottom: 8px;
         }
 
         .param-count {
             font-family: 'Fraunces', serif;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             color: #6c5ce7;
         }
 
         .param-unit {
-            font-size: 12px;
+            font-size: 14px;
             color: #999;
             margin-top: 4px;
         }
@@ -632,7 +634,7 @@
             padding: 8px 12px;
             background: #f0f0f0;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 15px;
             color: #666;
             animation: slideIn 0.5s ease-out;
             border-left: 3px solid #6c5ce7;
@@ -670,7 +672,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 16px 0;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .comparison-table th,
@@ -729,6 +731,37 @@
             opacity: 1;
             transform: scale(1.2);
         }
+
+        .stage-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 16px;
+        }
+
+        .stage-progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .stage-progress-dot.active {
+            background: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+        }
+
+        .stage-progress-dot.completed {
+            background: #2ecc71;
+        }
+
+        .stage-progress-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-right: 4px;
+        }
     </style>
 </head>
 <body>
@@ -748,11 +781,11 @@
         };
 
         const STAGES = [
-            { id: 1, name: 'Training', emoji: '📚' },
-            { id: 2, name: 'Parameters', emoji: '🧠' },
-            { id: 3, name: 'Tokens', emoji: '🧰' },
-            { id: 4, name: 'Attention', emoji: '📑' },
-            { id: 5, name: 'Prediction', emoji: '🔮' }
+            { id: 1, name: 'Training', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>' },
+            { id: 2, name: 'Parameters', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-8.66-3.34l2.83-2.83m11.31-11.31l2.83-2.83M1 12h4m14 0h4M4.34 4.34l2.83 2.83m11.31 11.31l2.83 2.83"/></svg>' },
+            { id: 3, name: 'Tokens', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="6" height="10" rx="1"/><rect x="9" y="4" width="6" height="16" rx="1"/><rect x="16" y="9" width="6" height="6" rx="1"/></svg>' },
+            { id: 4, name: 'Attention', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' },
+            { id: 5, name: 'Prediction', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>' }
         ];
 
         // Training Stage Component
@@ -788,7 +821,8 @@
                         <div className="book-animation">
                             {books.map(book => (
                                 <div key={book.id} className="text-flow">
-                                    {"📖"} {book.text}
+                                    <span style={{display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px'}} dangerouslySetInnerHTML={{__html: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>'}} />
+                                    {book.text}
                                 </div>
                             ))}
 
@@ -814,7 +848,7 @@
                     </div>
 
                     <div className="insight-box">
-                        <div className="insight-label">{"💡"} Insight</div>
+                        <div className="insight-label"><span style={{display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px'}} dangerouslySetInnerHTML={{__html: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> Insight</div>
                         <div>AI learns <strong>patterns, not facts</strong> — like learning grammar rules by reading, not by memorizing a dictionary</div>
                     </div>
                 </div>
@@ -896,7 +930,7 @@
                     </div>
 
                     <div className="insight-box">
-                        <div className="insight-label">{"💡"} Insight</div>
+                        <div className="insight-label"><span style={{display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px'}} dangerouslySetInnerHTML={{__html: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> Insight</div>
                         <div><strong>More parameters = more patterns captured</strong> = better understanding. Each connection stores learned knowledge about language.</div>
                     </div>
                 </div>
@@ -1002,7 +1036,7 @@
                     </div>
 
                     <div className="insight-box">
-                        <div className="insight-label">{"💡"} Insight</div>
+                        <div className="insight-label"><span style={{display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px'}} dangerouslySetInnerHTML={{__html: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> Insight</div>
                         <div><strong>Context window, API cost, and speed</strong> are all measured in tokens — the fundamental unit of GenAI. Tokens are not words; they're the sub-word pieces AI processes.</div>
                     </div>
                 </div>
@@ -1081,7 +1115,7 @@
                     </div>
 
                     <div className="insight-box">
-                        <div className="insight-label">{"💡"} Insight</div>
+                        <div className="insight-label"><span style={{display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px'}} dangerouslySetInnerHTML={{__html: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> Insight</div>
                         <div>This is the <strong>'T' in GPT — the Transformer breakthrough</strong> that lets AI see ALL words at once instead of one by one. It decides which words matter most by computing attention weights.</div>
                     </div>
                 </div>
@@ -1164,13 +1198,13 @@
                             </div>
 
                             <p style={{ fontSize: '12px', color: P.textMuted, textAlign: 'center', marginTop: '12px' }}>
-                                {temperature === 0 ? '🥏 Deterministic: Always picks Python' : temperature < 0.5 ? '🎯 Focused: Prefers likely answers' : temperature === 0.5 ? '⚖️ Balanced: Mix of likely and creative' : '🎲 Creative: More randomness'}
+                                {temperature === 0 ? 'Deterministic: Always picks Python' : temperature < 0.5 ? 'Focused: Prefers likely answers' : temperature === 0.5 ? 'Balanced: Mix of likely and creative' : 'Creative: More randomness'}
                             </p>
                         </div>
                     </div>
 
                     <div className="insight-box">
-                        <div className="insight-label">{"💡"} Insight</div>
+                        <div className="insight-label"><span style={{display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px'}} dangerouslySetInnerHTML={{__html: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> Insight</div>
                         <div>This is <strong>the whole trick — GenAI asks "what word probably comes next?" thousands of times</strong> to generate complete responses. Temperature controls the creativity of these predictions.</div>
                     </div>
                 </div>
@@ -1258,13 +1292,21 @@
                             <div className="number-badge">1.3</div>
                             <div className="top-title">Inside the Black Box</div>
                         </div>
-                        <div className="nav-arrows">
-                            <button className="nav-btn" onClick={handlePrevious} disabled={currentStage === 1}>
-                                ←
-                            </button>
-                            <button className="nav-btn" onClick={handleNext} disabled={currentStage === 5}>
-                                →
-                            </button>
+                        <div style={{display: 'flex', alignItems: 'center'}}>
+                            <div className="stage-progress">
+                                <span className="stage-progress-label">{currentStage}/5</span>
+                                {STAGES.map(s => (
+                                    <div key={s.id} className={`stage-progress-dot ${currentStage === s.id ? 'active' : currentStage > s.id ? 'completed' : ''}`} />
+                                ))}
+                            </div>
+                            <div className="nav-arrows">
+                                <button className="nav-btn" onClick={handlePrevious} disabled={currentStage === 1}>
+                                    ←
+                                </button>
+                                <button className="nav-btn" onClick={handleNext} disabled={currentStage === 5}>
+                                    →
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1277,7 +1319,7 @@
                                             className={`step-item ${currentStage === s.id ? 'active' : ''}`}
                                             onClick={() => setCurrentStage(s.id)}
                                         >
-                                            <div className="step-dot">{s.emoji}</div>
+                                            <div className="step-dot" dangerouslySetInnerHTML={{__html: s.icon}} />
                                             <div className="step-label">{s.name}</div>
                                         </div>
                                         {idx < STAGES.length - 1 && <div className="step-connector"></div>}

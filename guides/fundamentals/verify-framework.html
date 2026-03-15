@@ -118,6 +118,29 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    const svgIcon = (svg, size) => React.createElement('span', {
+      dangerouslySetInnerHTML: { __html: svg.replace(/width="\d+"/, 'width="' + (size || 28) + '"').replace(/height="\d+"/, 'height="' + (size || 28) + '"') },
+      style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0 }
+    });
+
+    const SVG = {
+      validate: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
+      exclude: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>',
+      review: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+      iterate: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
+      flag: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+      user: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      lightbulb: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+      overview: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
+      newspaper: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/><line x1="7" y1="16" x2="11" y2="16"/></svg>',
+      lock: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+      medical: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a3 3 0 00-3 3v4H5a3 3 0 00-3 3v0a3 3 0 003 3h4v4a3 3 0 003 3v0a3 3 0 003-3v-4h4a3 3 0 003-3v0a3 3 0 00-3-3h-4V5a3 3 0 00-3-3z"/></svg>',
+      mail: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 4 12 13 2 4"/></svg>',
+      code: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+      warning: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      flagSmall: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>'
+    };
+
     const P = {
       root: {
         display: 'flex',
@@ -155,13 +178,10 @@
         position: 'relative',
         zIndex: 2,
         border: isActive ? '3px solid #6c5ce7' : 'none',
-        boxShadow: isActive ? '0 4px 12px rgba(108, 92, 231, 0.3)' : 'none',
-        '&:hover': {
-          transform: 'scale(1.05)'
-        }
+        boxShadow: isActive ? '0 4px 12px rgba(108, 92, 231, 0.3)' : 'none'
       }),
       stepLabel: {
-        fontSize: '11px',
+        fontSize: '12px',
         fontWeight: '500',
         marginTop: '8px',
         textAlign: 'center',
@@ -198,14 +218,11 @@
         gap: '16px'
       },
       backLink: {
-        fontSize: '13px',
+        fontSize: '14px',
         color: '#6c5ce7',
         textDecoration: 'none',
         fontWeight: '500',
-        transition: 'color 0.2s ease',
-        '&:hover': {
-          color: '#1a9456'
-        }
+        transition: 'color 0.2s ease'
       },
       badge: {
         display: 'inline-block',
@@ -213,13 +230,13 @@
         color: '#6c5ce7',
         padding: '6px 12px',
         borderRadius: '20px',
-        fontSize: '11px',
+        fontSize: '12px',
         fontWeight: '600',
         textTransform: 'uppercase',
         letterSpacing: '0.5px'
       },
       title: {
-        fontSize: '20px',
+        fontSize: '36px',
         fontWeight: '600',
         color: '#1a1a1a',
         fontFamily: "'Fraunces', serif"
@@ -245,7 +262,7 @@
         fontWeight: '600'
       }),
       navP: {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#666',
         fontWeight: '500',
         minWidth: '60px',
@@ -253,12 +270,12 @@
       },
       content: {
         flex: 1,
-        padding: '40px 48px',
+        padding: '32px 48px',
         overflowY: 'auto',
         scrollBehavior: 'smooth',
         display: 'flex',
         flexDirection: 'column',
-        gap: '32px'
+        gap: '24px'
       },
       explainRow: {
         display: 'flex',
@@ -266,43 +283,46 @@
         gap: '16px'
       },
       explain: {
-        fontSize: '18px',
-        lineHeight: '1.6',
+        fontSize: '20px',
+        lineHeight: '1.7',
         color: '#333',
-        maxWidth: '600px'
+        maxWidth: '680px'
       },
       scene: {
-        backgroundColor: '#f8f9fa',
+        background: 'linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%)',
         borderRadius: '16px',
-        padding: '32px',
+        padding: '36px 40px',
         border: '1px solid #e9ecef',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        minHeight: '280px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         animation: 'fadeIn 0.5s ease-out'
       },
       insightLabel: {
-        fontSize: '11px',
+        fontSize: '14px',
         fontWeight: '700',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
         color: '#1a9456',
-        marginBottom: '8px'
+        marginBottom: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
       },
       insight: {
         backgroundColor: '#f0faf0',
         borderLeft: '4px solid #2ecc71',
         borderRadius: '8px',
-        padding: '20px',
-        fontSize: '16px',
-        lineHeight: '1.6',
+        padding: '24px 28px',
+        fontSize: '17px',
+        lineHeight: '1.7',
         color: '#333',
-        fontStyle: 'italic'
+        fontStyle: 'italic',
+        marginTop: '24px'
       },
       sceneTitle: {
-        fontSize: '18px',
+        fontSize: '24px',
         fontWeight: '600',
         marginBottom: '20px',
         color: '#1a1a1a',
@@ -311,7 +331,7 @@
       sceneGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: '12px',
+        gap: '24px',
         width: '100%'
       },
       card: (active) => ({
@@ -323,7 +343,7 @@
         transition: 'all 0.3s ease',
         textAlign: 'center',
         color: active ? '#fff' : '#1a1a1a',
-        fontSize: '14px',
+        fontSize: '16px',
         fontWeight: '500'
       }),
       button: (variant) => {
@@ -332,7 +352,7 @@
           borderRadius: '6px',
           border: 'none',
           cursor: 'pointer',
-          fontSize: '14px',
+          fontSize: '16px',
           fontWeight: '600',
           transition: 'all 0.2s ease',
           marginRight: '8px'
@@ -378,7 +398,7 @@
       letterBox: (color) => ({
         width: '80px',
         height: '80px',
-        borderRadius: '8px',
+        borderRadius: '12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -387,23 +407,55 @@
         fontSize: '48px',
         fontWeight: '700',
         fontFamily: "'Fraunces', serif",
-        animation: 'letterReveal 0.6s ease-out'
+        animation: 'letterReveal 0.6s ease-out',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
       }),
       iconBox: {
         fontSize: '32px',
         marginBottom: '12px'
-      }
+      },
+      progressBar: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '8px 0'
+      },
+      progressDot: (isActive, isComplete) => ({
+        width: isActive ? '28px' : '10px',
+        height: '10px',
+        borderRadius: '5px',
+        backgroundColor: isActive ? '#6c5ce7' : isComplete ? '#2ecc71' : '#d0d0d0',
+        transition: 'all 0.3s ease'
+      })
     };
 
     const STAGES = [
-      { icon: "✅", label: "Overview", title: "The VERIFY Framework", sub: "6 steps to use AI responsibly" },
-      { icon: "🔍", label: "Validate", title: "V — Validate", sub: "Check outputs against trusted sources" },
-      { icon: "🚫", label: "Exclude", title: "E — Exclude", sub: "Keep sensitive data out of prompts" },
-      { icon: "🔎", label: "Review", title: "R — Review", sub: "Check for bias and accuracy" },
-      { icon: "🔄", label: "Iterate", title: "I — Iterate", sub: "Improve prompts through refinement" },
-      { icon: "🚩", label: "Flag", title: "F — Flag", sub: "Mark uncertainty in AI responses" },
-      { icon: "👤", label: "Your Call", title: "Y — Your Judgment", sub: "You are the final decision-maker" }
+      { svgKey: "overview", label: "Overview", title: "The VERIFY Framework", sub: "6 steps to use AI responsibly" },
+      { svgKey: "validate", label: "Validate", title: "V — Validate", sub: "Check outputs against trusted sources" },
+      { svgKey: "exclude", label: "Exclude", title: "E — Exclude", sub: "Keep sensitive data out of prompts" },
+      { svgKey: "review", label: "Review", title: "R — Review", sub: "Check for bias and accuracy" },
+      { svgKey: "iterate", label: "Iterate", title: "I — Iterate", sub: "Improve prompts through refinement" },
+      { svgKey: "flag", label: "Flag", title: "F — Flag", sub: "Mark uncertainty in AI responses" },
+      { svgKey: "user", label: "Your Call", title: "Y — Your Judgment", sub: "You are the final decision-maker" }
     ];
+
+    const InsightBox = ({ children }) => (
+      <div style={P.insight}>
+        <div style={P.insightLabel}>
+          {svgIcon(SVG.lightbulb, 20)}
+          INSIGHT
+        </div>
+        {children}
+      </div>
+    );
+
+    const ProgressIndicator = ({ current, total }) => (
+      <div style={P.progressBar}>
+        {Array.from({ length: total }).map((_, idx) => (
+          <div key={idx} style={P.progressDot(idx === current, idx < current)} />
+        ))}
+      </div>
+    );
 
     const OverviewStage = () => {
       const [revealed, setRevealed] = useState([]);
@@ -428,17 +480,19 @@
 
       const colors = ['#6c5ce7', '#2ecc71', '#1a9456', '#f39c12', '#e74c3c', '#3498db'];
 
+      const letterSvgs = [SVG.validate, SVG.exclude, SVG.review, SVG.iterate, SVG.flag, SVG.user];
+
       return (
         <div style={P.content}>
           <div style={P.explainRow}>
             <div style={P.explain}>
-              VERIFY is a 6-step checklist to make sure you're using AI safely and getting accurate results. Think of it like being a newspaper fact-checker — journalists don't publish the first thing a source tells them.
+              VERIFY is a 6-step checklist to make sure you're using AI safely and getting accurate results. Think of it like being a newspaper fact-checker -- journalists don't publish the first thing a source tells them.
             </div>
           </div>
 
           <div style={P.scene}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%', alignItems: 'center' }}>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 {['V', 'E', 'R', 'I', 'F', 'Y'].map((letter, idx) => (
                   <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                     {revealed.includes(idx) && (
@@ -447,12 +501,18 @@
                       </div>
                     )}
                     {revealed.includes(idx) && (
+                      <div style={{ color: colors[idx], marginBottom: '2px' }}>
+                        {svgIcon(letterSvgs[idx], 22)}
+                      </div>
+                    )}
+                    {revealed.includes(idx) && (
                       <div style={{
-                        fontSize: '12px',
+                        fontSize: '14px',
                         textAlign: 'center',
-                        maxWidth: '90px',
-                        color: '#666',
-                        animation: 'fadeIn 0.4s ease-out'
+                        maxWidth: '100px',
+                        color: '#555',
+                        animation: 'fadeIn 0.4s ease-out',
+                        lineHeight: '1.4'
                       }}>
                         {meanings[idx]}
                       </div>
@@ -462,25 +522,29 @@
               </div>
 
               <div style={{
-                fontSize: '14px',
-                color: '#666',
+                fontSize: '16px',
+                color: '#555',
                 textAlign: 'center',
-                maxWidth: '400px',
+                maxWidth: '480px',
                 marginTop: '16px',
-                padding: '20px',
+                padding: '20px 24px',
                 backgroundColor: '#fff',
-                borderRadius: '8px',
-                border: '1px solid #e9ecef'
+                borderRadius: '12px',
+                border: '1px solid #e9ecef',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                justifyContent: 'center'
               }}>
-                📰 <strong>Like a newspaper fact-checker:</strong> Verify with multiple sources, remove sensitive info, and always make the final call.
+                {svgIcon(SVG.newspaper, 48)}
+                <span><strong>Like a newspaper fact-checker:</strong> Verify with multiple sources, remove sensitive info, and always make the final call.</span>
               </div>
             </div>
           </div>
 
-          <div style={P.insight}>
-            <div style={P.insightLabel}>💡 INSIGHT</div>
-            VERIFY is like being a newspaper fact-checker — verify with multiple sources, remove sensitive info, and always make the final call.
-          </div>
+          <InsightBox>
+            VERIFY is like being a newspaper fact-checker -- verify with multiple sources, remove sensitive info, and always make the final call.
+          </InsightBox>
         </div>
       );
     };
@@ -523,7 +587,7 @@
           <div style={P.scene}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
               <div>
-                <div style={{ fontSize: '13px', color: '#666', marginBottom: '8px', fontWeight: '500' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '500' }}>
                   AI Statement:
                 </div>
                 <div style={{
@@ -531,7 +595,7 @@
                   border: mode === 'correct' ? '2px solid #2ecc71' : '2px solid #e74c3c',
                   borderRadius: '8px',
                   padding: '16px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   color: '#333'
                 }}>
                   {mode === 'correct'
@@ -541,7 +605,7 @@
               </div>
 
               <div>
-                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
                   Validate across sources:
                 </div>
                 <div style={P.sceneGrid}>
@@ -557,6 +621,7 @@
                       <div style={{ fontSize: '20px', marginBottom: '8px' }}>
                         {validated.includes(idx)
                           ? (mode === 'correct' ? '✓' : '✗')
+
                           : '?'}
                       </div>
                       {source}
@@ -569,20 +634,20 @@
                 backgroundColor: '#f0f0f0',
                 borderRadius: '8px',
                 padding: '16px',
-                fontSize: '13px'
+                fontSize: '16px'
               }}>
                 <div style={{ fontWeight: '600', marginBottom: '12px', color: '#1a1a1a' }}>
                   Validation Checklist:
                 </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer', fontSize: '16px' }}>
                   <input type="checkbox" checked={checklist.checkTrusted} onChange={() => toggleCheck('checkTrusted')} />
                   Check trusted sources
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer', fontSize: '16px' }}>
                   <input type="checkbox" checked={checklist.checkMultiple} onChange={() => toggleCheck('checkMultiple')} />
                   Confirm with multiple sources
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '16px' }}>
                   <input type="checkbox" checked={checklist.verifyFacts} onChange={() => toggleCheck('verifyFacts')} />
                   Verify specific facts and dates
                 </label>
@@ -590,10 +655,9 @@
             </div>
           </div>
 
-          <div style={P.insight}>
-            <div style={P.insightLabel}>💡 INSIGHT</div>
+          <InsightBox>
             Never trust AI output for critical decisions without cross-referencing at least 2 independent, authoritative sources.
-          </div>
+          </InsightBox>
         </div>
       );
     };
@@ -617,11 +681,11 @@
       };
 
       const categories = [
-        '🔐 SSNs & passwords',
-        '🔐 API keys & tokens',
-        '🏥 Medical records',
-        '💳 Financial data',
-        '🏢 Company secrets'
+        { icon: SVG.lock, text: 'SSNs & passwords' },
+        { icon: SVG.lock, text: 'API keys & tokens' },
+        { icon: SVG.lock, text: 'Medical records' },
+        { icon: SVG.lock, text: 'Financial data' },
+        { icon: SVG.lock, text: 'Company secrets' }
       ];
 
       return (
@@ -635,15 +699,15 @@
           <div style={P.scene}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
               <div>
-                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
-                  Unsafe Prompt — Click sensitive data to redact:
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  Unsafe Prompt -- Click sensitive data to redact:
                 </div>
                 <div style={{
                   backgroundColor: '#fff',
                   border: '2px solid #e74c3c',
                   borderRadius: '8px',
                   padding: '16px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   color: '#333',
                   lineHeight: '1.8'
                 }}>
@@ -652,10 +716,10 @@
               </div>
 
               <div>
-                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
                   Redact sensitive items:
                 </div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                   {sensitiveItems.map((item, idx) => (
                     <div
                       key={idx}
@@ -674,19 +738,20 @@
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
+                gap: '24px'
               }}>
                 <div style={{
                   backgroundColor: '#f0f0f0',
                   borderRadius: '8px',
                   padding: '16px'
                 }}>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
+                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
                     NEVER include:
                   </div>
                   {categories.map((cat, idx) => (
-                    <div key={idx} style={{ fontSize: '12px', color: '#333', marginBottom: '6px', lineHeight: '1.4' }}>
-                      {cat}
+                    <div key={idx} style={{ fontSize: '14px', color: '#333', marginBottom: '8px', lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {svgIcon(cat.icon, 16)}
+                      {cat.text}
                     </div>
                   ))}
                 </div>
@@ -704,7 +769,7 @@
                   <div style={{ fontSize: '24px', fontWeight: '700', color: '#6c5ce7' }}>
                     {safetyScore}%
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  <div style={{ fontSize: '14px', color: '#666', marginTop: '4px' }}>
                     Data Safety Score
                   </div>
                   <div style={{
@@ -716,7 +781,7 @@
                     overflow: 'hidden'
                   }}>
                     <div style={{
-                      width: `${safetyScore}%`,
+                      width: safetyScore + '%',
                       height: '100%',
                       backgroundColor: '#6c5ce7',
                       transition: 'width 0.3s ease'
@@ -727,10 +792,9 @@
             </div>
           </div>
 
-          <div style={P.insight}>
-            <div style={P.insightLabel}>💡 INSIGHT</div>
-            Anything you put in a prompt could be seen by the AI provider. Treat prompts like public messages — exclude anything private.
-          </div>
+          <InsightBox>
+            Anything you put in a prompt could be seen by the AI provider. Treat prompts like public messages -- exclude anything private.
+          </InsightBox>
         </div>
       );
     };
@@ -767,15 +831,15 @@
           <div style={P.scene}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
               <div>
-                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
-                  Job Description — Click to flag biased phrases:
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  Job Description -- Click to flag biased phrases:
                 </div>
                 <div style={{
                   backgroundColor: '#fff',
                   border: '2px solid #e9ecef',
                   borderRadius: '8px',
                   padding: '16px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   color: '#333',
                   lineHeight: '1.8'
                 }}>
@@ -786,26 +850,27 @@
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
+                gap: '24px'
               }}>
                 <div>
-                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
+                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
                     Flagged Biases:
                   </div>
                   {biasItems.map((item, idx) => (
                     flagged.includes(idx) && (
                       <div key={idx} style={{
                         backgroundColor: '#ffe5e5',
-                        borderLeft: `4px solid ${item.color}`,
+                        borderLeft: '4px solid ' + item.color,
                         padding: '12px',
                         borderRadius: '6px',
                         marginBottom: '8px',
                         animation: 'slideInRight 0.3s ease'
                       }}>
-                        <div style={{ fontSize: '12px', fontWeight: '600', color: '#c23030' }}>
-                          ⚠ {item.bias}
+                        <div style={{ fontSize: '14px', fontWeight: '600', color: '#c23030', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {svgIcon(SVG.warning, 16)}
+                          {item.bias}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#333', marginTop: '4px' }}>
+                        <div style={{ fontSize: '14px', color: '#333', marginTop: '4px' }}>
                           "{item.text}"
                         </div>
                       </div>
@@ -818,7 +883,7 @@
                   borderRadius: '8px',
                   padding: '16px'
                 }}>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#1a1a1a', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', marginBottom: '12px' }}>
                     Review Checklist:
                   </div>
                   {checklist.map((item, idx) => (
@@ -831,7 +896,7 @@
                       opacity: item.checked ? '1' : '0.6'
                     }}>
                       <input type="checkbox" checked={item.checked} readOnly />
-                      <span style={{ fontSize: '12px' }}>{item.label}</span>
+                      <span style={{ fontSize: '14px' }}>{item.label}</span>
                     </label>
                   ))}
                 </div>
@@ -839,10 +904,9 @@
             </div>
           </div>
 
-          <div style={P.insight}>
-            <div style={P.insightLabel}>💡 INSIGHT</div>
+          <InsightBox>
             AI reflects the biases in its training data. Your review is the last line of defense against perpetuating harmful assumptions.
-          </div>
+          </InsightBox>
         </div>
       );
     };
@@ -867,7 +931,7 @@
           num: 3,
           prompt: 'Write a 200-word blog post about AI in healthcare for hospital administrators. Focus on patient diagnosis accuracy. Include one statistic. Professional tone.',
           quality: 95,
-          feedback: 'Excellent — specific and actionable'
+          feedback: 'Excellent -- specific and actionable'
         }
       ];
 
@@ -875,7 +939,7 @@
         <div style={P.content}>
           <div style={P.explainRow}>
             <div style={P.explain}>
-              Like asking follow-up questions until you understand. Don't accept the first response — refine your prompts to get progressively better results. The magic happens in iterations 2, 3, and 4.
+              Like asking follow-up questions until you understand. Don't accept the first response -- refine your prompts to get progressively better results. The magic happens in iterations 2, 3, and 4.
             </div>
           </div>
 
@@ -892,7 +956,7 @@
                       color: activeIteration === idx ? '#fff' : '#1a1a1a',
                       borderRadius: '6px',
                       padding: '10px 16px',
-                      fontSize: '13px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       cursor: 'pointer'
                     }}
@@ -908,11 +972,11 @@
                 borderRadius: '8px',
                 padding: '16px'
               }}>
-                <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px', fontWeight: '600' }}>
                   Prompt:
                 </div>
                 <div style={{
-                  fontSize: '14px',
+                  fontSize: '16px',
                   color: '#333',
                   lineHeight: '1.6',
                   padding: '12px',
@@ -927,14 +991,14 @@
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
+                gap: '24px'
               }}>
                 <div style={{
                   backgroundColor: '#f0f0f0',
                   borderRadius: '8px',
                   padding: '16px'
                 }}>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
+                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>
                     Quality Score:
                   </div>
                   <div style={{
@@ -953,7 +1017,7 @@
                     overflow: 'hidden'
                   }}>
                     <div style={{
-                      width: `${iterations[activeIteration].quality}%`,
+                      width: iterations[activeIteration].quality + '%',
                       height: '100%',
                       backgroundColor: activeIteration === 0 ? '#e74c3c' : activeIteration === 1 ? '#f39c12' : '#2ecc71',
                       transition: 'width 0.3s ease'
@@ -969,7 +1033,7 @@
                   display: 'flex',
                   alignItems: 'center'
                 }}>
-                  <div style={{ fontSize: '13px', color: '#333', lineHeight: '1.6' }}>
+                  <div style={{ fontSize: '16px', color: '#333', lineHeight: '1.6' }}>
                     <strong style={{ color: '#6c5ce7' }}>Feedback:</strong><br />
                     {iterations[activeIteration].feedback}
                   </div>
@@ -981,18 +1045,21 @@
                 borderLeft: '4px solid #f39c12',
                 borderRadius: '8px',
                 padding: '16px',
-                fontSize: '13px',
-                color: '#333'
+                fontSize: '16px',
+                color: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
               }}>
-                💡 Notice how each iteration adds specificity: word count, audience, focus area, and tone. That's what makes prompts work.
+                {svgIcon(SVG.lightbulb, 20)}
+                Notice how each iteration adds specificity: word count, audience, focus area, and tone. That's what makes prompts work.
               </div>
             </div>
           </div>
 
-          <div style={P.insight}>
-            <div style={P.insightLabel}>💡 INSIGHT</div>
+          <InsightBox>
             The first prompt is just a starting point. The magic happens in iterations 2, 3, and 4. Keep refining until you get what you need.
-          </div>
+          </InsightBox>
         </div>
       );
     };
@@ -1040,15 +1107,15 @@
           <div style={P.scene}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
               <div>
-                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
-                  AI Response — Click uncertain phrases to flag:
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
+                  AI Response -- Click uncertain phrases to flag:
                 </div>
                 <div style={{
                   backgroundColor: '#fff',
                   border: '2px solid #e9ecef',
                   borderRadius: '8px',
                   padding: '16px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   color: '#333',
                   lineHeight: '1.8'
                 }}>
@@ -1063,7 +1130,7 @@
                           cursor: 'pointer'
                         } : {}}
                       >
-                        {flaggedWords.includes(idx) && <span style={{ fontSize: '10px', marginRight: '2px' }}>🚩</span>}
+                        {flaggedWords.includes(idx) && <span style={{ marginRight: '2px', display: 'inline-flex', verticalAlign: 'middle' }}>{svgIcon(SVG.flagSmall, 14)}</span>}
                         {segment}
                       </span>
                     );
@@ -1074,7 +1141,7 @@
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '12px'
+                gap: '16px'
               }}>
                 <div style={{
                   backgroundColor: '#c8e6c9',
@@ -1082,11 +1149,11 @@
                   padding: '12px',
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>✓</div>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#1b5e20' }}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>{'✓'}</div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1b5e20' }}>
                     High Confidence
                   </div>
-                  <div style={{ fontSize: '11px', color: '#2e7d32', marginTop: '4px' }}>
+                  <div style={{ fontSize: '14px', color: '#2e7d32', marginTop: '4px' }}>
                     Certain language
                   </div>
                 </div>
@@ -1097,11 +1164,11 @@
                   padding: '12px',
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>⚠</div>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#f57f17' }}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px', display: 'flex', justifyContent: 'center' }}>{svgIcon(SVG.warning, 20)}</div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#f57f17' }}>
                     Medium
                   </div>
-                  <div style={{ fontSize: '11px', color: '#f9a825', marginTop: '4px' }}>
+                  <div style={{ fontSize: '14px', color: '#f9a825', marginTop: '4px' }}>
                     Some hedging
                   </div>
                 </div>
@@ -1113,10 +1180,10 @@
                   textAlign: 'center'
                 }}>
                   <div style={{ fontSize: '20px', marginBottom: '4px' }}>?</div>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#c62828' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#c62828' }}>
                     Low/Hedging
                   </div>
-                  <div style={{ fontSize: '11px', color: '#e53935', marginTop: '4px' }}>
+                  <div style={{ fontSize: '14px', color: '#e53935', marginTop: '4px' }}>
                     Verify first
                   </div>
                 </div>
@@ -1130,7 +1197,7 @@
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1a1a1a' }}>
+                <div style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a' }}>
                   Flags found:
                 </div>
                 <div style={{
@@ -1144,10 +1211,9 @@
             </div>
           </div>
 
-          <div style={P.insight}>
-            <div style={P.insightLabel}>💡 INSIGHT</div>
+          <InsightBox>
             When AI hedges with words like 'might,' 'possibly,' or 'I believe,' that's your signal to verify independently before making important decisions.
-          </div>
+          </InsightBox>
         </div>
       );
     };
@@ -1155,10 +1221,11 @@
     const YourJudgmentStage = () => {
       const [responses, setResponses] = useState([null, null, null]);
 
+      const scenarioSvgs = [SVG.medical, SVG.mail, SVG.code];
+
       const scenarios = [
         {
           title: 'Medical Dosage',
-          icon: '💊',
           question: 'AI suggests a patient dosage. Should you follow it?',
           correct: 'override',
           answer: 'ALWAYS consult a doctor. Never rely on AI for medical decisions.',
@@ -1166,7 +1233,6 @@
         },
         {
           title: 'Marketing Email',
-          icon: '📧',
           question: 'AI writes a marketing email. Is it ready to send?',
           correct: 'override',
           answer: 'Review for brand voice first. Adjust tone and messaging.',
@@ -1174,7 +1240,6 @@
         },
         {
           title: 'Production Code',
-          icon: '💻',
           question: 'AI generates code for production. Deploy it?',
           correct: 'override',
           answer: 'Test thoroughly in staging first. Review for security.',
@@ -1202,18 +1267,18 @@
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
               {scenarios.map((scenario, idx) => (
                 <div key={idx} style={{
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px',
-                  padding: '16px',
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  padding: '20px',
                   border: responses[idx] ? '2px solid #6c5ce7' : '1px solid #e9ecef'
                 }}>
-                  <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-                    <div style={{ fontSize: '24px' }}>{scenario.icon}</div>
+                  <div style={{ display: 'flex', gap: '16px', marginBottom: '12px', alignItems: 'center' }}>
+                    <div style={{ color: '#6c5ce7' }}>{svgIcon(scenarioSvgs[idx], 36)}</div>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a' }}>
+                      <div style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a', fontFamily: "'Fraunces', serif" }}>
                         {scenario.title}
                       </div>
-                      <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+                      <div style={{ fontSize: '16px', color: '#666', marginTop: '4px' }}>
                         {scenario.question}
                       </div>
                     </div>
@@ -1239,10 +1304,10 @@
                       backgroundColor: responses[idx] === scenario.correct ? '#c8e6c9' : '#ffcdd2',
                       borderRadius: '6px',
                       padding: '12px',
-                      borderLeft: `4px solid ${responses[idx] === scenario.correct ? '#2ecc71' : '#e74c3c'}`
+                      borderLeft: '4px solid ' + (responses[idx] === scenario.correct ? '#2ecc71' : '#e74c3c')
                     }}>
                       <div style={{
-                        fontSize: '12px',
+                        fontSize: '14px',
                         fontWeight: '600',
                         color: responses[idx] === scenario.correct ? '#1b5e20' : '#c23030',
                         marginBottom: '6px'
@@ -1250,7 +1315,7 @@
                         {responses[idx] === scenario.correct ? '✓ Correct' : '✗ Not quite'}
                       </div>
                       <div style={{
-                        fontSize: '12px',
+                        fontSize: '14px',
                         color: '#333',
                         lineHeight: '1.5',
                         marginBottom: '6px'
@@ -1258,7 +1323,7 @@
                         {scenario.answer}
                       </div>
                       <div style={{
-                        fontSize: '11px',
+                        fontSize: '14px',
                         color: '#666',
                         fontStyle: 'italic'
                       }}>
@@ -1277,10 +1342,10 @@
                   padding: '16px',
                   animation: 'slideInLeft 0.4s ease'
                 }}>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#6c5ce7', marginBottom: '8px' }}>
-                    ✓ You've completed the VERIFY Framework!
+                  <div style={{ fontSize: '16px', fontWeight: '600', color: '#6c5ce7', marginBottom: '8px' }}>
+                    {'✓'} You've completed the VERIFY Framework!
                   </div>
-                  <div style={{ fontSize: '13px', color: '#333', lineHeight: '1.6' }}>
+                  <div style={{ fontSize: '16px', color: '#333', lineHeight: '1.6' }}>
                     Remember: AI is a powerful assistant, but <strong>you are responsible for the final output</strong>. Always verify before trusting.
                   </div>
                 </div>
@@ -1288,10 +1353,9 @@
             </div>
           </div>
 
-          <div style={P.insight}>
-            <div style={P.insightLabel}>💡 INSIGHT</div>
-            AI is a powerful assistant, but you're responsible for the final output. Always verify before trusting — that's the VERIFY way.
-          </div>
+          <InsightBox>
+            AI is a powerful assistant, but you're responsible for the final output. Always verify before trusting -- that's the VERIFY way.
+          </InsightBox>
         </div>
       );
     };
@@ -1306,7 +1370,7 @@
               outline: 'none'
             }}
           >
-            {stage.icon}
+            {svgIcon(SVG[stage.svgKey], 24)}
           </button>
           <div style={P.stepLabel}>{stage.label}</div>
           {idx < STAGES.length - 1 && <div style={P.connector(isComplete)} />}
@@ -1365,19 +1429,20 @@
             <div style={P.topBar}>
               <div style={P.leftSection}>
                 <a href="../../index.html" style={P.backLink}>
-                  ← Back to All Guides
+                  {'←'} Back to All Guides
                 </a>
                 <div style={P.badge}>1.6 Interactive Guide</div>
                 <div style={P.title}>{STAGES[current].title}</div>
               </div>
 
               <div style={P.navRow}>
+                <ProgressIndicator current={current} total={STAGES.length} />
                 <button
                   onClick={handlePrev}
                   disabled={current === 0}
                   style={P.navBtn(current === 0)}
                 >
-                  ←
+                  {'←'}
                 </button>
                 <div style={P.navP}>
                   {current + 1} / {STAGES.length}
@@ -1387,7 +1452,7 @@
                   disabled={current === STAGES.length - 1}
                   style={P.navBtn(current === STAGES.length - 1)}
                 >
-                  →
+                  {'→'}
                 </button>
               </div>
             </div>

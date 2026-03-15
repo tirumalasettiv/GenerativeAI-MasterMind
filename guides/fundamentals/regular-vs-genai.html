@@ -89,6 +89,10 @@
             background: #f5f5f5;
         }
 
+        .step-btn svg {
+            display: block;
+        }
+
         .step-label {
             margin-top: 8px;
             font-size: 11px;
@@ -149,7 +153,7 @@
 
         .title {
             font-family: 'Fraunces', serif;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             color: #1a1a1a;
         }
@@ -157,6 +161,14 @@
         .nav-arrows {
             display: flex;
             gap: 10px;
+            align-items: center;
+        }
+
+        .stage-progress {
+            font-size: 13px;
+            font-weight: 600;
+            color: #999;
+            margin-right: 8px;
         }
 
         .arrow-btn {
@@ -185,7 +197,7 @@
 
         .content-area {
             flex: 1;
-            padding: 40px;
+            padding: 32px 48px;
             overflow-y: auto;
             scroll-behavior: smooth;
             display: flex;
@@ -194,17 +206,16 @@
         }
 
         .explanation {
-            font-size: 18px;
-            line-height: 1.6;
+            font-size: 20px;
+            line-height: 1.7;
             color: #333;
             max-width: 800px;
         }
 
         .scene-card {
-            background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+            background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
             border-radius: 16px;
-            padding: 40px;
-            min-height: 300px;
+            padding: 40px 48px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -215,13 +226,14 @@
 
         .insight-box {
             background: #f0faf0;
-            padding: 24px;
+            padding: 24px 28px;
             border-radius: 12px;
             border-left: 4px solid #2ecc71;
-            font-size: 16px;
-            line-height: 1.6;
+            font-size: 17px;
+            line-height: 1.7;
             color: #333;
             max-width: 800px;
+            margin-top: 24px;
             animation: fadeIn 0.8s ease;
         }
 
@@ -257,7 +269,7 @@
         .split-screen {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
+            gap: 48px;
             width: 100%;
         }
 
@@ -271,14 +283,20 @@
 
         .panel-title {
             font-family: 'Fraunces', serif;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             color: #6c5ce7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .icon-large {
             font-size: 64px;
             animation: pulse 2s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .librarian-scene {
@@ -365,13 +383,16 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .domain-tab.active {
             border-color: #6c5ce7;
-            background: #6c5ce7;
+            background: linear-gradient(135deg, #6c5ce7 0%, #8b7cf7 100%);
             color: #fff;
         }
 
@@ -394,13 +415,13 @@
             font-weight: 700;
             color: #6c5ce7;
             margin-bottom: 16px;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         .comparison-cols {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 32px;
         }
 
         .comparison-col {
@@ -411,18 +432,20 @@
         .comparison-col-icon {
             font-size: 24px;
             flex-shrink: 0;
+            display: flex;
+            align-items: flex-start;
         }
 
         .comparison-col-text {
-            font-size: 15px;
+            font-size: 16px;
             color: #333;
             line-height: 1.5;
         }
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
             width: 100%;
         }
 
@@ -450,17 +473,20 @@
         .card-icon {
             font-size: 36px;
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .card-title {
             font-family: 'Fraunces', serif;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 20px;
             margin-bottom: 12px;
         }
 
         .card-desc {
-            font-size: 15px;
+            font-size: 16px;
             line-height: 1.4;
             opacity: 0.8;
         }
@@ -505,6 +531,10 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: #6c5ce7;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .task-item {
@@ -515,7 +545,7 @@
             cursor: move;
             border: 2px solid #e0e0e0;
             transition: all 0.2s;
-            font-size: 15px;
+            font-size: 16px;
             text-align: center;
         }
 
@@ -537,10 +567,14 @@
 
         .score-display {
             margin-top: 20px;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             text-align: center;
             color: #6c5ce7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
     </style>
 </head>
@@ -558,6 +592,42 @@
             darkGray: '#333',
         };
 
+        const SVG_ICONS = {
+            target: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+            book: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>',
+            grid: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+            layers: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+            compass: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>',
+            searchLarge: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+            penToolLarge: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>',
+            search48: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+            penTool48: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>',
+            search20: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+            penTool20: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>',
+            search24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+            penTool24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>',
+            lightbulb: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+            star: '<svg width="20" height="20" viewBox="0 0 24 24" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+            clipboard: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
+            domainSearch: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+            domainImage: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+            domainMusic: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+            domainShopping: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>',
+            domainEmail: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+            cardClassify: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+            cardRecommend: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+            cardPredict: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M8 3.5A10 10 0 0112 2a10 10 0 014 1.5"/></svg>',
+            cardDetect: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            cardRecognize: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        };
+
+        function SvgIcon({ html, style }) {
+            return React.createElement('span', {
+                dangerouslySetInnerHTML: { __html: html },
+                style: Object.assign({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }, style || {})
+            });
+        }
+
         function S1({ isActive, onClick }) {
             return (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -570,7 +640,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        {"\uD83C\uDFAF"}
+                        <SvgIcon html={SVG_ICONS.target} />
                     </button>
                     <div className="step-label">The Core</div>
                 </div>
@@ -589,7 +659,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        {"\uD83D\uDCDA"}
+                        <SvgIcon html={SVG_ICONS.book} />
                     </button>
                     <div className="step-label">Analogy</div>
                 </div>
@@ -608,7 +678,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        {"\u26A1"}
+                        <SvgIcon html={SVG_ICONS.grid} />
                     </button>
                     <div className="step-label">Examples</div>
                 </div>
@@ -627,7 +697,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        {"\uD83E\uDDE9"}
+                        <SvgIcon html={SVG_ICONS.layers} />
                     </button>
                     <div className="step-label">Types</div>
                 </div>
@@ -646,7 +716,7 @@
                             color: isActive ? '#fff' : '#333',
                         }}
                     >
-                        {"\uD83C\uDFAE"}
+                        <SvgIcon html={SVG_ICONS.compass} />
                     </button>
                     <div className="step-label">When to Use</div>
                 </div>
@@ -662,16 +732,16 @@
                     <div className="scene-card">
                         <div className="split-screen">
                             <div className="split-panel">
-                                <div className="panel-title">🔍 Regular AI</div>
-                                <div className="icon-large">🔍</div>
+                                <div className="panel-title"><SvgIcon html={SVG_ICONS.search48} /> Regular AI</div>
+                                <div className="icon-large"><SvgIcon html={SVG_ICONS.searchLarge} /></div>
                                 <p style={{ fontSize: '14px', color: '#666', textAlign: 'center' }}>Finds existing items</p>
                                 <div style={{ marginTop: '20px', padding: '16px', background: '#e8e4ff', borderRadius: '8px', fontSize: '13px' }}>
                                     Search → Find → Sort
                                 </div>
                             </div>
                             <div className="split-panel">
-                                <div className="panel-title">✍️ Generative AI</div>
-                                <div className="icon-large">✍️</div>
+                                <div className="panel-title"><SvgIcon html={SVG_ICONS.penTool48} /> Generative AI</div>
+                                <div className="icon-large"><SvgIcon html={SVG_ICONS.penToolLarge} /></div>
                                 <p style={{ fontSize: '14px', color: '#666', textAlign: 'center' }}>Creates new content</p>
                                 <div style={{ marginTop: '20px', padding: '16px', background: '#e8f8f5', borderRadius: '8px', fontSize: '13px' }}>
                                     Prompt → Generate → Create
@@ -680,7 +750,7 @@
                         </div>
                     </div>
                     <div className="insight-box">
-                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcon html={SVG_ICONS.lightbulb} /> INSIGHT</div>
                         Both are AI. Generative AI is just a specific type that focuses on creation rather than selection.
                     </div>
                 </>
@@ -698,20 +768,20 @@
                     <div className="scene-card">
                         <div className="split-screen">
                             <div className="split-panel">
-                                <div className="panel-title">📚 Librarian (Regular AI)</div>
+                                <div className="panel-title"><SvgIcon html={SVG_ICONS.search48} /> Librarian (Regular AI)</div>
                                 <div className="librarian-scene">
                                     <div className="books">
                                         <div className="book"></div>
                                         <div className="book"></div>
                                         <div className="book"></div>
                                     </div>
-                                    <div className="icon-large">📚</div>
+                                    <div className="icon-large"><SvgIcon html={SVG_ICONS.searchLarge} /></div>
                                     <div className="interactive-prompt">Click a question below</div>
                                     <button
                                         className="question-btn"
                                         onClick={() => setShowResponse('find')}
                                     >
-                                        ❔ Find me a book
+                                        ? Find me a book
                                     </button>
                                     {showResponse === 'find' && (
                                         <div className="response">
@@ -721,16 +791,16 @@
                                 </div>
                             </div>
                             <div className="split-panel">
-                                <div className="panel-title">✍️ Author (Generative AI)</div>
+                                <div className="panel-title"><SvgIcon html={SVG_ICONS.penTool48} /> Author (Generative AI)</div>
                                 <div className="librarian-scene">
                                     <div style={{ width: '50px', height: '70px', background: '#f0f0f0', border: '2px dashed #999', borderRadius: '4px' }}></div>
-                                    <div className="icon-large">✍️</div>
+                                    <div className="icon-large"><SvgIcon html={SVG_ICONS.penToolLarge} /></div>
                                     <div className="interactive-prompt">Click a question below</div>
                                     <button
                                         className="question-btn"
                                         onClick={() => setShowResponse('write')}
                                     >
-                                        ❔ Write me a book
+                                        ? Write me a book
                                     </button>
                                     {showResponse === 'write' && (
                                         <div className="response">
@@ -742,7 +812,7 @@
                         </div>
                     </div>
                     <div className="insight-box">
-                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcon html={SVG_ICONS.lightbulb} /> INSIGHT</div>
                         A librarian is great at finding what exists. An author creates what never existed. Both are valuable.
                     </div>
                 </>
@@ -752,33 +822,36 @@
         function Stage3() {
             const [selectedDomain, setSelectedDomain] = useState('search');
 
+            const domainIcons = {
+                search: SVG_ICONS.domainSearch,
+                images: SVG_ICONS.domainImage,
+                music: SVG_ICONS.domainMusic,
+                shopping: SVG_ICONS.domainShopping,
+                email: SVG_ICONS.domainEmail,
+            };
+
             const examples = {
                 search: {
-                    icon: '🔍',
                     task: 'Find information',
                     regular: 'Google finds existing web pages',
                     genai: 'ChatGPT writes a new answer',
                 },
                 images: {
-                    icon: '🖼️',
                     task: 'Get an image',
                     regular: 'Google Images finds existing photos',
                     genai: 'DALL-E creates a new image',
                 },
                 music: {
-                    icon: '🎥',
                     task: 'Listen to music',
                     regular: 'Spotify recommends existing songs',
                     genai: 'Suno creates a new song',
                 },
                 shopping: {
-                    icon: '🛍️',
                     task: 'Get a product',
                     regular: 'Amazon recommends existing products',
                     genai: 'AI designs a new product',
                 },
                 email: {
-                    icon: '📧',
                     task: 'Manage email',
                     regular: 'Spam filter sorts spam/not spam',
                     genai: 'AI writes a new email',
@@ -799,21 +872,21 @@
                                         className={`domain-tab ${selectedDomain === key ? 'active' : ''}`}
                                         onClick={() => setSelectedDomain(key)}
                                     >
-                                        {val.icon} {key.charAt(0).toUpperCase() + key.slice(1)}
+                                        <SvgIcon html={domainIcons[key]} /> {key.charAt(0).toUpperCase() + key.slice(1)}
                                     </button>
                                 ))}
                             </div>
                             <div className="comparison-row">
-                                <div className="comparison-row-title">{examples[selectedDomain].icon} {examples[selectedDomain].task}</div>
+                                <div className="comparison-row-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcon html={domainIcons[selectedDomain]} /> {examples[selectedDomain].task}</div>
                                 <div className="comparison-cols">
                                     <div className="comparison-col">
-                                        <div className="comparison-col-icon">🔍</div>
+                                        <div className="comparison-col-icon"><SvgIcon html={SVG_ICONS.search24} /></div>
                                         <div className="comparison-col-text">
                                             <strong>Regular AI:</strong> {examples[selectedDomain].regular}
                                         </div>
                                     </div>
                                     <div className="comparison-col">
-                                        <div className="comparison-col-icon">✍️</div>
+                                        <div className="comparison-col-icon"><SvgIcon html={SVG_ICONS.penTool24} /></div>
                                         <div className="comparison-col-text">
                                             <strong>Generative AI:</strong> {examples[selectedDomain].genai}
                                         </div>
@@ -823,7 +896,7 @@
                         </div>
                     </div>
                     <div className="insight-box">
-                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcon html={SVG_ICONS.lightbulb} /> INSIGHT</div>
                         Regular AI: "Here's what I found." Generative AI: "Here's what I made."
                     </div>
                 </>
@@ -837,35 +910,35 @@
                 {
                     id: 'classification',
                     title: 'Classification',
-                    icon: '📄',
+                    iconHtml: SVG_ICONS.cardClassify,
                     desc: 'Sorts into categories',
                     demo: 'Email → Spam / Not Spam',
                 },
                 {
                     id: 'recommendation',
                     title: 'Recommendation',
-                    icon: '✅',
+                    iconHtml: SVG_ICONS.cardRecommend,
                     desc: 'Suggests existing items',
                     demo: 'Netflix → Movies you might like',
                 },
                 {
                     id: 'prediction',
                     title: 'Prediction',
-                    icon: '🔮',
+                    iconHtml: SVG_ICONS.cardPredict,
                     desc: 'Forecasts outcomes',
                     demo: 'Weather → 80% chance of rain',
                 },
                 {
                     id: 'detection',
                     title: 'Detection',
-                    icon: '🚨',
+                    iconHtml: SVG_ICONS.cardDetect,
                     desc: 'Finds anomalies',
                     demo: 'Bank → Fraud detection',
                 },
                 {
                     id: 'recognition',
                     title: 'Recognition',
-                    icon: '👋',
+                    iconHtml: SVG_ICONS.cardRecognize,
                     desc: 'Identifies things',
                     demo: 'Phone → Face unlock',
                 },
@@ -888,7 +961,7 @@
                                         color: selectedCard === type.id ? '#fff' : '#333',
                                     }}
                                 >
-                                    <div className="card-icon">{type.icon}</div>
+                                    <div className="card-icon"><SvgIcon html={type.iconHtml} /></div>
                                     <div className="card-title">{type.title}</div>
                                     <div className="card-desc">{type.desc}</div>
                                     {selectedCard === type.id && (
@@ -901,7 +974,7 @@
                         </div>
                     </div>
                     <div className="insight-box">
-                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcon html={SVG_ICONS.lightbulb} /> INSIGHT</div>
                         These AI types power most of the tech you use daily — from Netflix recommendations to spam filters
                     </div>
                 </>
@@ -946,7 +1019,7 @@
                     <div className="scene-card">
                         <div className="drag-area">
                             <div className="drop-zone">
-                                <div className="drop-zone-title">🔍 Regular AI</div>
+                                <div className="drop-zone-title"><SvgIcon html={SVG_ICONS.search24} /> Regular AI</div>
                                 {tasks
                                     .filter((t) => placed[t.id] === 'regular')
                                     .map((task) => (
@@ -960,7 +1033,7 @@
                                     ))}
                             </div>
                             <div className="drop-zone">
-                                <div className="drop-zone-title">✍️ Generative AI</div>
+                                <div className="drop-zone-title"><SvgIcon html={SVG_ICONS.penTool24} /> Generative AI</div>
                                 {tasks
                                     .filter((t) => placed[t.id] === 'genai')
                                     .map((task) => (
@@ -978,8 +1051,8 @@
 
                     <div style={{ display: 'flex', gap: '30px', maxWidth: '900px' }}>
                         <div style={{ flex: 1 }}>
-                            <div style={{ marginBottom: '20px', fontSize: '16px', fontWeight: '600', color: P.primaryColor }}>
-                                📜 Available Tasks ({unplacedTasks.length})
+                            <div style={{ marginBottom: '20px', fontSize: '16px', fontWeight: '600', color: P.primaryColor, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <SvgIcon html={SVG_ICONS.clipboard} /> Available Tasks ({unplacedTasks.length})
                             </div>
                             {unplacedTasks.map((task) => (
                                 <div
@@ -1002,6 +1075,10 @@
                                             fontSize: '13px',
                                             fontWeight: '500',
                                             transition: 'all 0.2s',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '6px',
                                         }}
                                         onMouseEnter={(e) => {
                                             e.target.style.borderColor = P.primaryColor;
@@ -1010,7 +1087,7 @@
                                             e.target.style.borderColor = '#e0e0e0';
                                         }}
                                     >
-                                        🔍 {task.text}
+                                        <SvgIcon html={SVG_ICONS.search20} /> {task.text}
                                     </button>
                                     <button
                                         onClick={() => handleTaskClick(task.id, 'genai')}
@@ -1024,6 +1101,10 @@
                                             fontSize: '13px',
                                             fontWeight: '500',
                                             transition: 'all 0.2s',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '6px',
                                         }}
                                         onMouseEnter={(e) => {
                                             e.target.style.borderColor = P.primaryColor;
@@ -1032,18 +1113,18 @@
                                             e.target.style.borderColor = '#e0e0e0';
                                         }}
                                     >
-                                        ✍️ {task.text}
+                                        <SvgIcon html={SVG_ICONS.penTool20} /> {task.text}
                                     </button>
                                 </div>
                             ))}
                             <div className="score-display">
-                                🌟 Score: {score}/{tasks.length}
+                                <SvgIcon html={SVG_ICONS.star} /> Score: {score}/{tasks.length}
                             </div>
                         </div>
                     </div>
 
                     <div className="insight-box">
-                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>{"\uD83D\uDCA1"} INSIGHT</div>
+                        <div style={{ fontWeight: 700, color: '#1a9456', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcon html={SVG_ICONS.lightbulb} /> INSIGHT</div>
                         Regular AI = Picker (chooses from what exists). Generative AI = Maker (creates something new). Best results come from combining both.
                     </div>
                 </>
@@ -1083,6 +1164,7 @@
                                 <h1 className="title"><span style={{ color: '#999', fontWeight: 400, fontSize: '22px', marginRight: '10px' }}>1.2</span>{stages[currentStage].title}</h1>
                             </div>
                             <div className="nav-arrows">
+                                <span className="stage-progress">Stage {currentStage + 1} of 5</span>
                                 <button
                                     className="arrow-btn"
                                     onClick={() => setCurrentStage(Math.max(0, currentStage - 1))}

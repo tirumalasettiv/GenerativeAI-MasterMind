@@ -59,12 +59,34 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    /* ---- SVG Icon Strings ---- */
+    const SVG_GHOST = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="1.5"><path d="M12 2C7 2 3 6 3 11v7l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2v-7c0-5-4-9-9-9z"/><circle cx="9" cy="10" r="1" fill="#e74c3c"/><circle cx="15" cy="10" r="1" fill="#e74c3c"/></svg>';
+    const SVG_CALENDAR = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+    const SVG_BRAIN = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="1.5"><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/><circle cx="12" cy="9" r="2"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>';
+    const SVG_SHIELD = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>';
+    const SVG_OVERVIEW = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><path d="M12 2a8 8 0 00-8 8c0 3.36 2.07 6.23 5 7.4V22h6v-4.6c2.93-1.17 5-4.04 5-7.4a8 8 0 00-8-8z"/><path d="M8 2L6 4M16 2l2 2M4 8H2M22 8h-2"/></svg>';
+    const SVG_LIGHTBULB = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="2"><path d="M12 2a7 7 0 00-3 13.3V18h6v-2.7A7 7 0 0012 2z"/><path d="M9 21h6"/></svg>';
+
+    /* Small sidebar versions */
+    const SVG_GHOST_SM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C7 2 3 6 3 11v7l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2v-7c0-5-4-9-9-9z"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/></svg>';
+    const SVG_CALENDAR_SM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+    const SVG_BRAIN_SM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/><circle cx="12" cy="9" r="2"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>';
+    const SVG_SHIELD_SM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>';
+    const SVG_OVERVIEW_SM = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a8 8 0 00-8 8c0 3.36 2.07 6.23 5 7.4V22h6v-4.6c2.93-1.17 5-4.04 5-7.4a8 8 0 00-8-8z"/><path d="M8 2L6 4M16 2l2 2M4 8H2M22 8h-2"/></svg>';
+
+    function SvgIcon({ html, style }) {
+      return React.createElement('span', {
+        dangerouslySetInnerHTML: { __html: html },
+        style: Object.assign({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }, style || {})
+      });
+    }
+
     const STAGES = [
-      { icon: "👻", label: "Overview", title: "The Three Weaknesses", sub: "What GenAI gets wrong" },
-      { icon: "🤯", label: "Hallucinate", title: "Hallucinations", sub: "Confidently making things up" },
-      { icon: "📅", label: "Cutoff", title: "Knowledge Cutoff", sub: "Frozen in time" },
-      { icon: "🧠", label: "Memory", title: "Context Window", sub: "Short-term memory limits" },
-      { icon: "🛡️", label: "Mitigate", title: "Mitigation Strategies", sub: "How to work around limitations" }
+      { svgSm: SVG_OVERVIEW_SM, svg: SVG_OVERVIEW, label: "Overview", title: "The Three Weaknesses", sub: "What GenAI gets wrong" },
+      { svgSm: SVG_GHOST_SM, svg: SVG_GHOST, label: "Hallucinate", title: "Hallucinations", sub: "Confidently making things up" },
+      { svgSm: SVG_CALENDAR_SM, svg: SVG_CALENDAR, label: "Cutoff", title: "Knowledge Cutoff", sub: "Frozen in time" },
+      { svgSm: SVG_BRAIN_SM, svg: SVG_BRAIN, label: "Memory", title: "Context Window", sub: "Short-term memory limits" },
+      { svgSm: SVG_SHIELD_SM, svg: SVG_SHIELD, label: "Mitigate", title: "Mitigation Strategies", sub: "How to work around limitations" }
     ];
 
     const P = {
@@ -77,13 +99,13 @@
         background: '#ffffff'
       },
       sidebar: {
-        width: '200px',
+        width: '210px',
         backgroundColor: '#f8f9fa',
         borderRight: '1px solid #e0e0e0',
         display: 'flex',
         flexDirection: 'column',
-        padding: '40px 24px',
-        gap: '8px',
+        padding: '56px 20px 40px',
+        gap: '6px',
         overflow: 'auto',
         position: 'relative'
       },
@@ -92,7 +114,7 @@
         flexDirection: 'column',
         alignItems: 'center',
         gap: '8px',
-        padding: '16px 12px',
+        padding: '14px 10px',
         borderRadius: '12px',
         border: 'none',
         backgroundColor: isActive ? '#6c5ce7' : 'transparent',
@@ -100,23 +122,19 @@
         transition: 'all 0.3s ease',
         position: 'relative',
         color: isActive ? '#ffffff' : '#666',
-        fontSize: '11px',
+        fontSize: '12px',
         fontWeight: '600',
         textAlign: 'center',
         width: '100%'
       }),
-      stepIcon: {
-        fontSize: '24px',
-        lineHeight: '1'
-      },
       stepConnector: {
         position: 'absolute',
         left: '50%',
         width: '2px',
-        height: '8px',
+        height: '6px',
         background: '#ddd',
         transform: 'translateX(-50%)',
-        bottom: '-8px'
+        bottom: '-6px'
       },
       main: {
         flex: 1,
@@ -125,27 +143,27 @@
         overflow: 'hidden'
       },
       topBar: {
-        height: '72px',
+        minHeight: '76px',
         borderBottom: '1px solid #e0e0e0',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingLeft: '40px',
-        paddingRight: '40px',
+        paddingLeft: '48px',
+        paddingRight: '48px',
         backgroundColor: '#ffffff'
       },
       badge: {
         display: 'inline-block',
         backgroundColor: '#6c5ce7',
         color: '#ffffff',
-        padding: '6px 12px',
+        padding: '6px 14px',
         borderRadius: '20px',
         fontSize: '12px',
         fontWeight: '600',
-        marginRight: '12px'
+        marginRight: '14px'
       },
       title: {
-        fontSize: '28px',
+        fontSize: '36px',
         fontFamily: 'Fraunces, serif',
         fontWeight: '700',
         color: '#1a1a1a'
@@ -166,14 +184,14 @@
         borderRadius: '12px'
       }),
       navP: {
-        fontSize: '14px',
+        fontSize: '15px',
         color: '#666',
         fontWeight: '500'
       },
       content: {
         flex: 1,
         overflow: 'auto',
-        padding: '40px',
+        padding: '32px 48px',
         display: 'flex',
         flexDirection: 'column',
         gap: '32px',
@@ -183,31 +201,31 @@
         animation: 'fadeIn 0.5s ease'
       },
       explain: {
-        fontSize: '18px',
-        lineHeight: '1.6',
+        fontSize: '20px',
+        lineHeight: '1.7',
         color: '#2a2a2a',
-        maxWidth: '800px'
+        maxWidth: '820px'
       },
       scene: {
-        minHeight: '240px',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'transparent',
+        background: 'linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%)',
         borderRadius: '16px',
-        padding: '32px',
+        padding: '36px 40px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         animation: 'fadeIn 0.6s ease 0.1s both',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
+        boxShadow: '0 4px 20px rgba(0,0,0,0.07)'
       },
       insight: {
         backgroundColor: '#f0faf0',
         color: '#2a2a2a',
-        padding: '24px 32px',
+        padding: '24px 28px',
         borderRadius: '12px',
-        fontSize: '16px',
+        fontSize: '17px',
         fontWeight: '500',
-        lineHeight: '1.6',
-        marginTop: '12px',
+        lineHeight: '1.7',
+        marginTop: '24px',
         animation: 'slideInLeft 0.5s ease 0.2s both',
         borderLeft: '6px solid #2ecc71'
       },
@@ -219,9 +237,33 @@
         color: '#6c5ce7',
         textDecoration: 'none',
         fontWeight: '600',
-        transition: 'color 0.2s ease'
+        transition: 'color 0.2s ease',
+        zIndex: 10
       }
     };
+
+    /* ---- Stage Progress Indicator ---- */
+    function StageProgress({ current, total }) {
+      return React.createElement('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          marginRight: '20px'
+        }
+      }, Array.from({ length: total }).map(function(_, i) {
+        return React.createElement('div', {
+          key: i,
+          style: {
+            width: i === current ? '28px' : '10px',
+            height: '6px',
+            borderRadius: '3px',
+            backgroundColor: i === current ? '#6c5ce7' : (i < current ? '#b8b0f0' : '#ddd'),
+            transition: 'all 0.3s ease'
+          }
+        });
+      }));
+    }
 
     function S1({ onNavigate }) {
       const [animated, setAnimated] = useState([false, false, false]);
@@ -236,9 +278,9 @@
       }, []);
 
       const cards = [
-        { icon: "👻", title: "Hallucinations", desc: "Makes things up confidently", color: "#ff6b6b", idx: 0 },
-        { icon: "📅", title: "Knowledge Cutoff", desc: "Frozen knowledge at training date", color: "#ffa500", idx: 1 },
-        { icon: "🧠", title: "Context Window", desc: "Forgets long conversations", color: "#ffd700", idx: 2 }
+        { svg: SVG_GHOST, title: "Hallucinations", desc: "Makes things up confidently", color: "#ff6b6b", idx: 0 },
+        { svg: SVG_CALENDAR, title: "Knowledge Cutoff", desc: "Frozen knowledge at training date", color: "#ffa500", idx: 1 },
+        { svg: SVG_BRAIN, title: "Context Window", desc: "Forgets long conversations", color: "#ffd700", idx: 2 }
       ];
 
       return (
@@ -249,31 +291,33 @@
             </p>
           </div>
           <div style={P.scene}>
-            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', justifyContent: 'center' }}>
               {cards.map((card, i) => (
                 <div
                   key={i}
                   onClick={() => onNavigate(i + 1)}
                   style={{
-                    width: '180px',
-                    padding: '24px',
+                    width: '200px',
+                    padding: '28px 24px',
                     backgroundColor: '#ffffff',
-                    borderLeft: `6px solid ${card.color}`,
-                    borderRadius: '8px',
+                    borderLeft: '6px solid ' + card.color,
+                    borderRadius: '12px',
                     textAlign: 'center',
                     cursor: 'pointer',
                     opacity: animated[i] ? 1 : 0,
                     transform: animated[i] ? 'scale(1)' : 'scale(0.9)',
                     transition: 'all 0.4s ease',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     animation: animated[i] ? 'pulse 2s infinite' : 'none'
                   }}
                 >
-                  <div style={{ fontSize: '40px', marginBottom: '12px' }}>{card.icon}</div>
-                  <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#1a1a1a' }}>
+                  <div style={{ marginBottom: '14px' }}>
+                    <SvgIcon html={card.svg} />
+                  </div>
+                  <div style={{ fontSize: '20px', fontWeight: '600', marginBottom: '10px', color: '#1a1a1a' }}>
                     {card.title}
                   </div>
-                  <div style={{ fontSize: '13px', color: '#666' }}>
+                  <div style={{ fontSize: '16px', color: '#666' }}>
                     {card.desc}
                   </div>
                 </div>
@@ -281,7 +325,10 @@
             </div>
           </div>
           <div style={P.insight}>
-            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <SvgIcon html={SVG_LIGHTBULB} />
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a9456' }}>INSIGHT</span>
+            </div>
             Understanding these limitations is the difference between using AI effectively and being misled by it.
           </div>
         </>
@@ -330,31 +377,31 @@
           </div>
           <div style={P.scene}>
             <div style={{ width: '100%' }}>
-              <div style={{ marginBottom: '24px', padding: '20px', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #ddd' }}>
+              <div style={{ marginBottom: '28px', padding: '22px', backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #ddd' }}>
                 <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>USER:</div>
-                <div style={{ fontSize: '15px', color: '#1a1a1a', fontWeight: '500' }}>{example.question}</div>
+                <div style={{ fontSize: '16px', color: '#1a1a1a', fontWeight: '500' }}>{example.question}</div>
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px', fontWeight: '600' }}>AI RESPONSE:</div>
-                <div style={{ display: 'grid', gap: '12px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '14px', fontWeight: '600' }}>AI RESPONSE:</div>
+                <div style={{ display: 'grid', gap: '14px' }}>
                   {example.responses.map((resp, i) => (
-                    <div key={i} style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e74c3c', position: 'relative' }}>
-                      <div style={{ fontSize: '14px', color: '#1a1a1a', marginBottom: '8px', fontWeight: '500' }}>
+                    <div key={i} style={{ padding: '18px', backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e74c3c', position: 'relative' }}>
+                      <div style={{ fontSize: '15px', color: '#1a1a1a', marginBottom: '8px', fontWeight: '500' }}>
                         {resp.title}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#7f8c8d', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '13px', color: '#7f8c8d', marginBottom: '14px' }}>
                         DOI: {resp.doi}
                       </div>
                       <button
                         onClick={() => setVerified({ ...verified, [i]: true })}
                         style={{
-                          padding: '6px 12px',
-                          fontSize: '12px',
+                          padding: '8px 16px',
+                          fontSize: '13px',
                           backgroundColor: '#6c5ce7',
                           color: '#ffffff',
                           border: 'none',
-                          borderRadius: '4px',
+                          borderRadius: '6px',
                           cursor: 'pointer',
                           fontWeight: '600'
                         }}
@@ -362,8 +409,8 @@
                         Verify
                       </button>
                       {verified[i] && (
-                        <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#ffe6e6', borderRadius: '4px', fontSize: '13px', color: '#c0392b', fontWeight: '500' }}>
-                          ❌ This paper does NOT exist!
+                        <div style={{ marginTop: '14px', padding: '14px', backgroundColor: '#ffe6e6', borderRadius: '6px', fontSize: '15px', color: '#c0392b', fontWeight: '500' }}>
+                          This paper does NOT exist!
                         </div>
                       )}
                     </div>
@@ -371,26 +418,26 @@
                 </div>
               </div>
 
-              <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ marginTop: '24px', padding: '18px', backgroundColor: '#f0f0f0', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>AI Confidence</div>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#e74c3c' }}>98%</div>
+                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '4px' }}>AI Confidence</div>
+                  <div style={{ fontSize: '20px', fontWeight: '600', color: '#e74c3c' }}>98%</div>
                 </div>
                 <div style={{ borderLeft: '1px solid #ddd', height: '40px' }}></div>
                 <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Actual Accuracy</div>
-                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#e74c3c' }}>0%</div>
+                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '4px' }}>Actual Accuracy</div>
+                  <div style={{ fontSize: '20px', fontWeight: '600', color: '#e74c3c' }}>0%</div>
                 </div>
               </div>
 
-              <div style={{ marginTop: '20px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <div style={{ marginTop: '24px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 {examples.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => { setActiveExample(i); setVerified({}); }}
                     style={{
-                      width: '12px',
-                      height: '12px',
+                      width: '14px',
+                      height: '14px',
                       borderRadius: '50%',
                       backgroundColor: activeExample === i ? '#6c5ce7' : '#ddd',
                       border: 'none',
@@ -403,8 +450,11 @@
             </div>
           </div>
           <div style={P.insight}>
-            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
-            AI doesn't know what it doesn't know — it fills gaps with plausible-sounding fiction. Always verify critical facts.
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <SvgIcon html={SVG_LIGHTBULB} />
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a9456' }}>INSIGHT</span>
+            </div>
+            AI doesn't know what it doesn't know -- it fills gaps with plausible-sounding fiction. Always verify critical facts.
           </div>
         </>
       );
@@ -432,12 +482,12 @@
           </div>
           <div style={P.scene}>
             <div style={{ width: '100%' }}>
-              <div style={{ marginBottom: '32px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '16px' }}>TRAINING DATA CUTOFF</div>
+              <div style={{ marginBottom: '36px' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#666', marginBottom: '18px' }}>TRAINING DATA CUTOFF</div>
                 <div style={{ position: 'relative', height: '60px', display: 'flex', alignItems: 'center' }}>
                   <div style={{ width: '100%', height: '2px', backgroundColor: '#ddd', position: 'relative' }}>
-                    <div style={{ position: 'absolute', left: `${cutoffPosition}%`, top: '-29px', transform: 'translateX(-50%)', textAlign: 'center' }}>
-                      <div style={{ fontSize: '12px', fontWeight: '600', color: '#6c5ce7', marginBottom: '4px' }}>
+                    <div style={{ position: 'absolute', left: cutoffPosition + '%', top: '-29px', transform: 'translateX(-50%)', textAlign: 'center' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#6c5ce7', marginBottom: '4px' }}>
                         {2020 + Math.floor(cutoffPosition / 20)}
                       </div>
                       <div style={{ width: '40px', height: '40px', backgroundColor: '#6c5ce7', borderRadius: '50%', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '700' }}>
@@ -445,11 +495,11 @@
                       </div>
                     </div>
                   </div>
-                  <div style={{ position: 'absolute', left: 0, right: 0, top: '-40px', display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#999' }}>
+                  <div style={{ position: 'absolute', left: 0, right: 0, top: '-40px', display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#999' }}>
                     <span>2020</span>
                     <span>2024</span>
                   </div>
-                  <div style={{ position: 'absolute', left: 0, right: 0, top: '15px', display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#999' }}>
+                  <div style={{ position: 'absolute', left: 0, right: 0, top: '15px', display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#999' }}>
                     <span style={{ color: '#2ecc71', fontWeight: '600' }}>AI KNOWS</span>
                     <span style={{ color: '#e74c3c', fontWeight: '600' }}>AI GUESSES</span>
                   </div>
@@ -464,22 +514,22 @@
                 />
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>TRY A QUESTION:</div>
-                <div style={{ display: 'grid', gap: '8px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#666', marginBottom: '14px' }}>TRY A QUESTION:</div>
+                <div style={{ display: 'grid', gap: '10px' }}>
                   {questions.map((item, i) => (
                     <button
                       key={i}
                       onClick={() => setSelectedQuestion(i)}
                       style={{
-                        padding: '12px',
+                        padding: '14px',
                         textAlign: 'left',
                         backgroundColor: selectedQuestion === i ? '#6c5ce7' : '#ffffff',
                         color: selectedQuestion === i ? '#ffffff' : '#1a1a1a',
                         border: '1px solid ' + (selectedQuestion === i ? '#6c5ce7' : '#ddd'),
-                        borderRadius: '6px',
+                        borderRadius: '8px',
                         cursor: 'pointer',
-                        fontSize: '14px',
+                        fontSize: '15px',
                         fontWeight: '500',
                         transition: 'all 0.2s ease'
                       }}
@@ -490,20 +540,20 @@
                 </div>
               </div>
 
-              <div style={{ padding: '16px', backgroundColor: isAfterCutoff ? '#ffe6e6' : '#e6f7ff', borderRadius: '8px', borderLeft: `4px solid ${isAfterCutoff ? '#e74c3c' : '#3498db'}` }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: isAfterCutoff ? '#c0392b' : '#1a5c96' }}>
-                  {isAfterCutoff ? "⚠️ OUTSIDE KNOWLEDGE CUTOFF" : "✓ WITHIN KNOWLEDGE CUTOFF"}
+              <div style={{ padding: '18px', backgroundColor: isAfterCutoff ? '#ffe6e6' : '#e6f7ff', borderRadius: '10px', borderLeft: '4px solid ' + (isAfterCutoff ? '#e74c3c' : '#3498db') }}>
+                <div style={{ fontSize: '15px', fontWeight: '600', marginBottom: '8px', color: isAfterCutoff ? '#c0392b' : '#1a5c96' }}>
+                  {isAfterCutoff ? "OUTSIDE KNOWLEDGE CUTOFF" : "WITHIN KNOWLEDGE CUTOFF"}
                 </div>
-                <div style={{ fontSize: '14px', color: '#2a2a2a' }}>
+                <div style={{ fontSize: '15px', color: '#2a2a2a' }}>
                   {isAfterCutoff
-                    ? "I was trained before this event — I'd be guessing or using unreliable information!"
+                    ? "I was trained before this event -- I'd be guessing or using unreliable information!"
                     : "This event likely falls within my training data. I can answer with reasonable confidence."}
                 </div>
               </div>
 
-              <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                <div style={{ fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>MODEL CUTOFF DATES</div>
-                <div style={{ display: 'grid', gap: '8px', fontSize: '13px' }}>
+              <div style={{ marginTop: '24px', padding: '18px', backgroundColor: '#f0f0f0', borderRadius: '10px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '14px' }}>MODEL CUTOFF DATES</div>
+                <div style={{ display: 'grid', gap: '10px', fontSize: '15px' }}>
                   <div><strong>Claude 3.5:</strong> April 2024</div>
                   <div><strong>GPT-4:</strong> April 2024</div>
                   <div><strong>Gemini 1.5:</strong> May 2024</div>
@@ -513,7 +563,10 @@
             </div>
           </div>
           <div style={P.insight}>
-            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <SvgIcon html={SVG_LIGHTBULB} />
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a9456' }}>INSIGHT</span>
+            </div>
             If the cutoff is January 2024, asking about events after that gets you guesses, not facts. Always check recency.
           </div>
         </>
@@ -539,27 +592,27 @@
           </div>
           <div style={P.scene}>
             <div style={{ width: '100%' }}>
-              <div style={{ marginBottom: '32px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>CONTEXT WINDOW VISUALIZATION</div>
-                <div style={{ position: 'relative', height: '140px', backgroundColor: '#f0f0f0', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd' }}>
+              <div style={{ marginBottom: '36px' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#666', marginBottom: '14px' }}>CONTEXT WINDOW VISUALIZATION</div>
+                <div style={{ position: 'relative', backgroundColor: '#f0f0f0', borderRadius: '10px', overflow: 'hidden', border: '2px solid #ddd' }}>
                   {messages.map((msg, i) => {
                     const isVisible = i >= Math.max(0, messages.length - Math.floor(fillAmount / 15));
                     return (
                       <div
                         key={i}
                         style={{
-                          padding: '12px',
+                          padding: '14px 16px',
                           borderBottom: '1px solid #ddd',
                           backgroundColor: isVisible ? '#ffffff' : '#e8e8e8',
                           opacity: isVisible ? 1 : 0.3,
-                          fontSize: '12px',
+                          fontSize: '15px',
                           color: isVisible ? '#1a1a1a' : '#999',
                           transition: 'all 0.3s ease'
                         }}
                       >
                         <strong style={{ color: msg.sender === 'user' ? '#6c5ce7' : '#2ecc71' }}>
                           {msg.sender === 'user' ? 'You' : 'AI'}:
-                        </strong> {msg.text} <span style={{ fontSize: '11px', color: '#999' }}>({msg.tokens}t)</span>
+                        </strong> {msg.text} <span style={{ fontSize: '12px', color: '#999' }}>({msg.tokens}t)</span>
                       </div>
                     );
                   })}
@@ -570,27 +623,27 @@
                   max="100"
                   value={fillAmount}
                   onChange={(e) => setFillAmount(Number(e.target.value))}
-                  style={{ width: '100%', marginTop: '16px', cursor: 'pointer' }}
+                  style={{ width: '100%', marginTop: '18px', cursor: 'pointer' }}
                 />
               </div>
 
-              <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ marginBottom: '24px', padding: '20px', backgroundColor: '#f0f0f0', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Tokens Used</div>
-                  <div style={{ fontSize: '20px', fontWeight: '700', color: '#6c5ce7' }}>{Math.floor(fillAmount * 1280)}</div>
+                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '4px' }}>Tokens Used</div>
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#6c5ce7' }}>{Math.floor(fillAmount * 1280)}</div>
                 </div>
-                <div style={{ width: '60%', height: '8px', backgroundColor: '#ddd', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${fillAmount}%`, height: '100%', backgroundColor: '#6c5ce7', transition: 'width 0.3s ease' }}></div>
+                <div style={{ width: '60%', height: '10px', backgroundColor: '#ddd', borderRadius: '5px', overflow: 'hidden' }}>
+                  <div style={{ width: fillAmount + '%', height: '100%', backgroundColor: '#6c5ce7', transition: 'width 0.3s ease' }}></div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Capacity</div>
-                  <div style={{ fontSize: '20px', fontWeight: '700', color: '#999' }}>128k</div>
+                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '4px' }}>Capacity</div>
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#999' }}>128k</div>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-                <div style={{ fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '12px' }}>CONTEXT WINDOW COMPARISON</div>
-                <div style={{ display: 'grid', gap: '12px', fontSize: '13px' }}>
+              <div style={{ marginBottom: '24px', padding: '20px', backgroundColor: '#f0f0f0', borderRadius: '10px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#666', marginBottom: '14px' }}>CONTEXT WINDOW COMPARISON</div>
+                <div style={{ display: 'grid', gap: '14px', fontSize: '15px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <strong>GPT-4 Turbo</strong>
                     <span style={{ color: '#2ecc71', fontWeight: '600' }}>128K tokens</span>
@@ -610,19 +663,23 @@
                 </div>
               </div>
 
-              <div style={{ padding: '16px', backgroundColor: '#fff3cd', borderRadius: '8px', borderLeft: '4px solid #ffc107' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#856404' }}>
-                  💡 PRACTICAL IMPACT
+              <div style={{ padding: '18px', backgroundColor: '#fff3cd', borderRadius: '10px', borderLeft: '4px solid #ffc107' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <SvgIcon html={SVG_LIGHTBULB} />
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#856404' }}>PRACTICAL IMPACT</span>
                 </div>
-                <div style={{ fontSize: '14px', color: '#2a2a2a' }}>
+                <div style={{ fontSize: '15px', color: '#2a2a2a' }}>
                   <strong>Page 1 of your 100-page doc...</strong> [FORGOTTEN by page 100] | <strong>Page 100...</strong> [CLEAR]
                 </div>
               </div>
             </div>
           </div>
           <div style={P.insight}>
-            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
-            Think of context window as a whiteboard — eventually you run out of space and have to erase the oldest notes.
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <SvgIcon html={SVG_LIGHTBULB} />
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a9456' }}>INSIGHT</span>
+            </div>
+            Think of context window as a whiteboard -- eventually you run out of space and have to erase the oldest notes.
           </div>
         </>
       );
@@ -634,7 +691,7 @@
       const solutions = [
         {
           title: "Fix Hallucinations",
-          icon: "👻",
+          svg: SVG_GHOST,
           tactics: [
             "Ask for sources and citations",
             "Cross-verify with trusted sources",
@@ -644,7 +701,7 @@
         },
         {
           title: "Fix Knowledge Cutoff",
-          icon: "📅",
+          svg: SVG_CALENDAR,
           tactics: [
             "Use web-enabled AI (Perplexity, Bing Chat)",
             "Provide recent context in your prompt",
@@ -654,7 +711,7 @@
         },
         {
           title: "Fix Context Window",
-          icon: "🧠",
+          svg: SVG_BRAIN,
           tactics: [
             "Break long documents into chunks",
             "Summarize progressively",
@@ -668,42 +725,44 @@
         <>
           <div style={P.explainRow}>
             <p style={P.explain}>
-              Every limitation has a workaround. Here's how to mitigate each weakness and use AI more effectively. Notice that RAG (Retrieval-Augmented Generation) appears in all three solutions — a powerful pattern covered in Module 3.
+              Every limitation has a workaround. Here's how to mitigate each weakness and use AI more effectively. Notice that RAG (Retrieval-Augmented Generation) appears in all three solutions -- a powerful pattern covered in Module 3.
             </p>
           </div>
           <div style={P.scene}>
-            <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
+            <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '28px' }}>
               {solutions.map((solution, i) => (
                 <div
                   key={i}
                   onClick={() => setExpandedPanel(expandedPanel === i ? null : i)}
                   style={{
-                    padding: '24px',
+                    padding: '28px',
                     backgroundColor: '#ffffff',
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     border: '2px solid #6c5ce7',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     transform: expandedPanel === i ? 'scale(1.02)' : 'scale(1)',
-                    boxShadow: expandedPanel === i ? '0 8px 24px rgba(108, 92, 231, 0.2)' : '0 2px 8px rgba(0,0,0,0.08)',
-                    animation: `slideInLeft 0.5s ease ${i * 0.1}s both`
+                    boxShadow: expandedPanel === i ? '0 8px 24px rgba(108, 92, 231, 0.2)' : '0 4px 16px rgba(0,0,0,0.08)',
+                    animation: 'slideInLeft 0.5s ease ' + (i * 0.1) + 's both'
                   }}
                 >
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>{solution.icon}</div>
-                  <div style={{ fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '12px', fontFamily: 'Fraunces, serif' }}>
+                  <div style={{ marginBottom: '14px' }}>
+                    <SvgIcon html={solution.svg} />
+                  </div>
+                  <div style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px', fontFamily: 'Fraunces, serif' }}>
                     {solution.title}
                   </div>
                   {expandedPanel === i && (
-                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid #f0f0f0', animation: 'fadeIn 0.3s ease' }}>
+                    <div style={{ marginTop: '18px', paddingTop: '18px', borderTop: '2px solid #f0f0f0', animation: 'fadeIn 0.3s ease' }}>
                       {solution.tactics.map((tactic, j) => (
-                        <div key={j} style={{ fontSize: '13px', marginBottom: '10px', paddingLeft: '20px', position: 'relative', color: '#2a2a2a', lineHeight: '1.5' }}>
-                          <span style={{ position: 'absolute', left: '0', color: '#2ecc71', fontWeight: '700' }}>✓</span>
+                        <div key={j} style={{ fontSize: '15px', marginBottom: '12px', paddingLeft: '22px', position: 'relative', color: '#2a2a2a', lineHeight: '1.6' }}>
+                          <span style={{ position: 'absolute', left: '0', color: '#2ecc71', fontWeight: '700' }}>+</span>
                           {tactic}
                         </div>
                       ))}
                     </div>
                   )}
-                  <div style={{ fontSize: '11px', color: '#999', marginTop: '12px', fontStyle: 'italic' }}>
+                  <div style={{ fontSize: '12px', color: '#999', marginTop: '14px', fontStyle: 'italic' }}>
                     {expandedPanel === i ? "Click to collapse" : "Click to expand"}
                   </div>
                 </div>
@@ -711,7 +770,10 @@
             </div>
           </div>
           <div style={P.insight}>
-            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '8px', color: '#1a9456' }}>{"💡 INSIGHT"}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <SvgIcon html={SVG_LIGHTBULB} />
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#1a9456' }}>INSIGHT</span>
+            </div>
             Always verify important facts, check if information might be outdated, and break long documents into smaller chunks. RAG is your most powerful mitigation tool.
           </div>
         </>
@@ -733,7 +795,7 @@
 
       return (
         <div style={P.root}>
-          <a href="../../index.html" style={P.backLink}>← Back to All Guides</a>
+          <a href="../../index.html" style={P.backLink}>Back to All Guides</a>
 
           <div style={P.sidebar}>
             {STAGES.map((s, i) => (
@@ -742,7 +804,7 @@
                   onClick={() => handleNavigate(i)}
                   style={P.stepButton(i === stage)}
                 >
-                  <div style={P.stepIcon}>{s.icon}</div>
+                  <SvgIcon html={s.svgSm} />
                   <div>{s.label}</div>
                 </button>
                 {i < STAGES.length - 1 && <div style={P.stepConnector}></div>}
@@ -752,18 +814,19 @@
 
           <div style={P.main}>
             <div style={P.topBar}>
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span style={P.badge}>GUIDE 1.5</span>
                 <span style={P.title}>{STAGES[stage].title}</span>
               </div>
               <div style={P.navRow}>
+                <StageProgress current={stage} total={STAGES.length} />
                 <button
                   onClick={handlePrev}
                   disabled={!canGoPrev}
                   style={P.navBtn(!canGoPrev)}
                   aria-label="Previous"
                 >
-                  ←
+                  &#8592;
                 </button>
                 <span style={P.navP}>{stage + 1} / {STAGES.length}</span>
                 <button
@@ -772,7 +835,7 @@
                   style={P.navBtn(!canGoNext)}
                   aria-label="Next"
                 >
-                  →
+                  &#8594;
                 </button>
               </div>
             </div>

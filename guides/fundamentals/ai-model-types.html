@@ -63,12 +63,47 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    /* SVG icon helper: renders an inline SVG via dangerouslySetInnerHTML */
+    const SvgIcon = ({ svg, style }) => (
+      React.createElement('span', {
+        style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 0, ...style },
+        dangerouslySetInnerHTML: { __html: svg }
+      })
+    );
+
+    /* Reusable SVG strings */
+    const SVG = {
+      factory48: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><path d="M3 21V7l6 4V7l6 4V3h6v18H3z"/></svg>',
+      lock48: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+      unlock48: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>',
+      phone48: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+      chart48: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+      factory24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21V7l6 4V7l6 4V3h6v18H3z"/></svg>',
+      lock24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+      unlock24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>',
+      phone24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+      chart24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+      lightbulb: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a9456" stroke-width="1.8"><path d="M9 21h6"/><path d="M9 18h6"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+      lockSmall: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+      search24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+      doc24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+      monitor24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+      sparkle24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z"/></svg>',
+      bolt24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+      shield24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+      dollar24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+      star24: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    };
+
+    const SIDEBAR_ICONS = [SVG.factory24, SVG.lock24, SVG.unlock24, SVG.phone24, SVG.chart24];
+    const CONTENT_ICONS = [SVG.factory48, SVG.lock48, SVG.unlock48, SVG.phone48, SVG.chart48];
+
     const STAGES = [
-      { icon: "🏭", label: "Foundation", title: "Foundational Models", sub: "The AI engines that power everything" },
-      { icon: "🔒", label: "Proprietary", title: "Proprietary Models", sub: "Secret recipe, API access only" },
-      { icon: "🔓", label: "Open Source", title: "Open Source Models", sub: "Public recipe, full control" },
-      { icon: "📱", label: "Apps", title: "Application Layer", sub: "Products built on top of models" },
-      { icon: "\u2696\uFE0F", label: "Compare", title: "Choosing the Right Model", sub: "Decision framework for your use case" },
+      { label: "Foundation", title: "Foundational Models", sub: "The AI engines that power everything" },
+      { label: "Proprietary", title: "Proprietary Models", sub: "Secret recipe, API access only" },
+      { label: "Open Source", title: "Open Source Models", sub: "Public recipe, full control" },
+      { label: "Apps", title: "Application Layer", sub: "Products built on top of models" },
+      { label: "Compare", title: "Choosing the Right Model", sub: "Decision framework for your use case" },
     ];
 
     const P = {
@@ -90,15 +125,12 @@
         position: 'relative',
       },
       backLink: {
-        fontSize: '13px',
+        fontSize: '14px',
         color: '#6c5ce7',
         textDecoration: 'none',
         marginBottom: '24px',
         fontWeight: 500,
         transition: 'color 0.2s',
-        ':hover': {
-          color: '#5a4bc4',
-        },
       },
       stepContainer: {
         display: 'flex',
@@ -134,7 +166,7 @@
         cursor: 'pointer',
         borderRadius: '8px',
         transition: 'all 0.2s',
-        fontSize: '13px',
+        fontSize: '14px',
         color: '#666',
         fontWeight: 500,
         position: 'relative',
@@ -211,7 +243,7 @@
         marginRight: '12px',
       },
       title: {
-        fontSize: '20px',
+        fontSize: '36px',
         fontWeight: 600,
         color: '#1a1a1a',
         fontFamily: "'Fraunces', serif",
@@ -238,7 +270,7 @@
         backgroundColor: '#f8f8f8',
       },
       navP: {
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#888',
         fontWeight: 500,
       },
@@ -247,7 +279,7 @@
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        padding: '32px 40px',
+        padding: '32px 48px',
         scrollBehavior: 'smooth',
       },
       explainRow: {
@@ -255,18 +287,18 @@
         animation: 'fadeIn 0.3s ease-in',
       },
       explain: {
-        fontSize: '18px',
-        lineHeight: '1.6',
+        fontSize: '20px',
+        lineHeight: '1.7',
         color: '#444',
         marginBottom: '8px',
       },
       scene: {
         flex: 1,
-        backgroundColor: '#fff',
+        background: 'linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%)',
         borderRadius: '16px',
         border: '1px solid #e0e0e0',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        padding: '28px',
+        boxShadow: '0 4px 16px rgba(108, 92, 231, 0.06), 0 2px 8px rgba(0,0,0,0.04)',
+        padding: '36px 40px',
         marginBottom: '20px',
         overflow: 'auto',
         display: 'flex',
@@ -277,24 +309,46 @@
         minHeight: '0',
       },
       insight: {
-        padding: '16px 20px',
+        padding: '24px 28px',
         backgroundColor: '#f0faf0',
         borderLeft: '4px solid #2ecc71',
         borderRadius: '6px',
-        fontSize: '16px',
-        lineHeight: '1.5',
+        fontSize: '17px',
+        lineHeight: '1.7',
         color: '#2c3e50',
         animation: 'fadeIn 0.3s ease-in',
+        marginTop: '24px',
       },
       insightLabel: {
         fontWeight: 700,
         color: '#1a9456',
         marginBottom: '6px',
-        fontSize: '12px',
+        fontSize: '14px',
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
       },
     };
+
+    /* Progress indicator component */
+    const ProgressIndicator = ({ current, total }) => (
+      React.createElement('div', { style: { display: 'flex', gap: '6px', alignItems: 'center' } },
+        Array.from({ length: total }, (_, i) =>
+          React.createElement('div', {
+            key: i,
+            style: {
+              width: i === current ? '24px' : '8px',
+              height: '8px',
+              borderRadius: '4px',
+              backgroundColor: i === current ? '#6c5ce7' : i < current ? '#b8acf6' : '#ddd',
+              transition: 'all 0.3s ease',
+            }
+          })
+        )
+      )
+    );
 
     // Stage 1: Foundational Models
     const S1 = () => {
@@ -315,14 +369,13 @@
             animation: 'slideIn 0.4s ease-out',
           }}>
             <div style={{
-              fontSize: '64px',
               marginBottom: '16px',
               animation: 'pulse 2s infinite',
             }}>
-              {"🏭"}
+              <SvgIcon svg={SVG.factory48} />
             </div>
             <div style={{
-              fontSize: '18px',
+              fontSize: '20px',
               fontWeight: 600,
               color: '#1a1a1a',
               marginBottom: '8px',
@@ -334,9 +387,9 @@
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '20px',
+            gap: '24px',
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             marginBottom: '28px',
           }}>
             <div style={{
@@ -346,8 +399,8 @@
               textAlign: 'center',
               animation: 'slideIn 0.4s ease-out 0.1s backwards',
             }}>
-              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px' }}>Training Cost</div>
-              <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>$10M–$100M+</div>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '6px' }}>Training Cost</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>$10M-$100M+</div>
             </div>
             <div style={{
               padding: '16px',
@@ -356,7 +409,7 @@
               textAlign: 'center',
               animation: 'slideIn 0.4s ease-out 0.2s backwards',
             }}>
-              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px' }}>Data</div>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '6px' }}>Data</div>
               <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>Trillions of Tokens</div>
             </div>
             <div style={{
@@ -366,29 +419,29 @@
               textAlign: 'center',
               animation: 'slideIn 0.4s ease-out 0.3s backwards',
             }}>
-              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px' }}>Purpose</div>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '6px' }}>Purpose</div>
               <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>General-Purpose</div>
             </div>
           </div>
 
-          <div style={{ width: '100%', maxWidth: '500px', marginTop: '24px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>Examples:</div>
+          <div style={{ width: '100%', maxWidth: '600px', marginTop: '24px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>Examples:</div>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px',
+              gap: '16px',
             }}>
               {models.map((model, i) => (
                 <div
                   key={i}
                   onClick={() => setExpandedModel(expandedModel === i ? null : i)}
                   style={{
-                    padding: '12px',
+                    padding: '14px',
                     backgroundColor: expandedModel === i ? '#6c5ce7' : '#f5f5f5',
                     color: expandedModel === i ? '#fff' : '#1a1a1a',
                     borderRadius: '6px',
                     cursor: 'pointer',
-                    fontSize: '13px',
+                    fontSize: '14px',
                     fontWeight: 500,
                     transition: 'all 0.2s',
                     textAlign: 'center',
@@ -396,8 +449,8 @@
                 >
                   <div>{model.name}</div>
                   {expandedModel === i && (
-                    <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.9 }}>
-                      {model.company} • {model.stat}
+                    <div style={{ fontSize: '12px', marginTop: '4px', opacity: 0.9 }}>
+                      {model.company} - {model.stat}
                     </div>
                   )}
                 </div>
@@ -429,26 +482,25 @@
             animation: 'slideIn 0.4s ease-out',
           }}>
             <div style={{
-              fontSize: '48px',
               marginBottom: '12px',
             }}>
-              {"🔒"}
+              <SvgIcon svg={SVG.lock48} />
             </div>
             <div style={{
-              fontSize: '15px',
+              fontSize: '16px',
               color: '#666',
               maxWidth: '400px',
             }}>
-              {"Access via API \u2022 Weights & Training Data Hidden"}
+              Access via API - Weights & Training Data Hidden
             </div>
           </div>
 
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '16px',
+            gap: '24px',
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             marginBottom: '28px',
           }}>
             {models.map((model, i) => (
@@ -466,10 +518,10 @@
                   boxShadow: expandedCard === i ? '0 4px 12px rgba(108, 92, 231, 0.15)' : 'none',
                 }}
               >
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>{model.name}</div>
-                <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>{model.company}</div>
-                <div style={{ fontSize: '11px', color: '#666', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {"🔒"} {model.access}
+                <div style={{ fontSize: '16px', fontWeight: 600, color: '#1a1a1a' }}>{model.name}</div>
+                <div style={{ fontSize: '14px', color: '#888', marginTop: '4px' }}>{model.company}</div>
+                <div style={{ fontSize: '14px', color: '#666', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <SvgIcon svg={SVG.lockSmall} /> {model.access}
                 </div>
               </div>
             ))}
@@ -477,22 +529,22 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             padding: '20px',
             backgroundColor: '#f0f7ff',
             borderRadius: '8px',
             marginBottom: '20px',
           }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: '#2c5aa0', marginBottom: '8px' }}>PROS</div>
-                <ul style={{ fontSize: '12px', color: '#444', lineHeight: '1.6', paddingLeft: '16px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#2c5aa0', marginBottom: '8px' }}>PROS</div>
+                <ul style={{ fontSize: '14px', color: '#444', lineHeight: '1.6', paddingLeft: '16px' }}>
                   {pros.map((p, i) => <li key={i}>{p}</li>)}
                 </ul>
               </div>
               <div>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: '#c0392b', marginBottom: '8px' }}>CONS</div>
-                <ul style={{ fontSize: '12px', color: '#444', lineHeight: '1.6', paddingLeft: '16px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#c0392b', marginBottom: '8px' }}>CONS</div>
+                <ul style={{ fontSize: '14px', color: '#444', lineHeight: '1.6', paddingLeft: '16px' }}>
                   {cons.map((c, i) => <li key={i}>{c}</li>)}
                 </ul>
               </div>
@@ -501,19 +553,19 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             padding: '16px',
             backgroundColor: '#f5f5f5',
             borderRadius: '8px',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#666',
             textAlign: 'center',
             lineHeight: '1.5',
           }}>
             <div style={{ marginBottom: '8px', fontWeight: 600 }}>Your App</div>
-            <div style={{ fontSize: '11px', color: '#999' }}>{"↓ API Request ↓"}</div>
-            <div style={{ marginTop: '8px', marginBottom: '8px', fontWeight: 600 }}>{"Cloud (Provider\u2019s Infrastructure)"}</div>
-            <div style={{ fontSize: '11px', color: '#999' }}>{"↓ Response ↓"}</div>
+            <div style={{ fontSize: '14px', color: '#999' }}>{"API Request"}</div>
+            <div style={{ marginTop: '8px', marginBottom: '8px', fontWeight: 600 }}>Cloud (Provider's Infrastructure)</div>
+            <div style={{ fontSize: '14px', color: '#999' }}>{"Response"}</div>
             <div style={{ marginTop: '8px', fontWeight: 600 }}>Your App</div>
           </div>
         </div>
@@ -526,10 +578,10 @@
       const [showPros, setShowPros] = useState(true);
 
       const models = [
-        { name: 'Llama 3.1', company: 'Meta', range: '8B\u2013405B', color: '#6c5ce7' },
-        { name: 'Mistral', company: 'Mistral AI', range: '7B\u20138x22B', color: '#2ecc71' },
-        { name: 'Falcon', company: 'TII', range: '7B\u2013180B', color: '#e74c3c' },
-        { name: 'Gemma', company: 'Google', range: '2B\u201327B', color: '#3498db' },
+        { name: 'Llama 3.1', company: 'Meta', range: '8B-405B', color: '#6c5ce7' },
+        { name: 'Mistral', company: 'Mistral AI', range: '7B-8x22B', color: '#2ecc71' },
+        { name: 'Falcon', company: 'TII', range: '7B-180B', color: '#e74c3c' },
+        { name: 'Gemma', company: 'Google', range: '2B-27B', color: '#3498db' },
       ];
 
       const pros = ['Free to download', 'Fully customizable', 'Data stays private', 'No vendor lock-in'];
@@ -543,26 +595,25 @@
             animation: 'slideIn 0.4s ease-out',
           }}>
             <div style={{
-              fontSize: '48px',
               marginBottom: '12px',
             }}>
-              {"🔓"}
+              <SvgIcon svg={SVG.unlock48} />
             </div>
             <div style={{
-              fontSize: '15px',
+              fontSize: '16px',
               color: '#666',
               maxWidth: '400px',
             }}>
-              {"Weights & Code Available \u2022 Run on Your Hardware"}
+              Weights & Code Available - Run on Your Hardware
             </div>
           </div>
 
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '14px',
+            gap: '24px',
             width: '100%',
-            maxWidth: '480px',
+            maxWidth: '600px',
             marginBottom: '24px',
           }}>
             {models.map((model, i) => (
@@ -570,18 +621,18 @@
                 key={i}
                 onClick={() => setExpandedModel(expandedModel === i ? null : i)}
                 style={{
-                  padding: '14px',
+                  padding: '16px',
                   backgroundColor: '#f8f8f8',
-                  border: `2px solid ${expandedModel === i ? model.color : '#e0e0e0'}`,
+                  border: ('2px solid ' + (expandedModel === i ? model.color : '#e0e0e0')),
                   borderRadius: '8px',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
               >
-                <div style={{ fontSize: '14px', fontWeight: 600, color: model.color }}>{model.name}</div>
-                <div style={{ fontSize: '11px', color: '#888', marginTop: '3px' }}>{model.company}</div>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: model.color }}>{model.name}</div>
+                <div style={{ fontSize: '14px', color: '#888', marginTop: '3px' }}>{model.company}</div>
                 {expandedModel === i && (
-                  <div style={{ marginTop: '8px', fontSize: '11px', color: '#666', fontWeight: 500 }}>
+                  <div style={{ marginTop: '8px', fontSize: '14px', color: '#666', fontWeight: 500 }}>
                     {model.range}
                   </div>
                 )}
@@ -595,7 +646,7 @@
                   <div style={{
                     height: '100%',
                     backgroundColor: model.color,
-                    width: `${Math.random() * 40 + 60}%`,
+                    width: ((Math.random() * 40 + 60) + '%'),
                   }} />
                 </div>
               </div>
@@ -604,21 +655,21 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             marginBottom: '20px',
           }}>
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
               <button
                 onClick={() => setShowPros(true)}
                 style={{
                   flex: 1,
-                  padding: '8px 12px',
+                  padding: '10px 14px',
                   backgroundColor: showPros ? '#2ecc71' : '#f0f0f0',
                   color: showPros ? '#fff' : '#666',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  fontSize: '12px',
+                  fontSize: '14px',
                   fontWeight: 600,
                   transition: 'all 0.2s',
                 }}
@@ -629,13 +680,13 @@
                 onClick={() => setShowPros(false)}
                 style={{
                   flex: 1,
-                  padding: '8px 12px',
+                  padding: '10px 14px',
                   backgroundColor: !showPros ? '#e74c3c' : '#f0f0f0',
                   color: !showPros ? '#fff' : '#666',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  fontSize: '12px',
+                  fontSize: '14px',
                   fontWeight: 600,
                   transition: 'all 0.2s',
                 }}
@@ -644,12 +695,12 @@
               </button>
             </div>
             <div style={{
-              padding: '14px',
+              padding: '16px',
               backgroundColor: showPros ? '#f0f8f4' : '#fef4f3',
               borderRadius: '6px',
-              fontSize: '12px',
+              fontSize: '14px',
               color: '#444',
-              lineHeight: '1.5',
+              lineHeight: '1.6',
             }}>
               <ul style={{ paddingLeft: '16px' }}>
                 {(showPros ? pros : cons).map((item, i) => (
@@ -661,17 +712,17 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             padding: '16px',
             backgroundColor: '#f5f5f5',
             borderRadius: '8px',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#666',
             textAlign: 'center',
             lineHeight: '1.6',
           }}>
             <div style={{ fontWeight: 600, marginBottom: '8px' }}>Deployment Flow</div>
-            <div>{"Download Model \u2192 Upload to Your Hardware \u2192 Full Control"}</div>
+            <div>Download Model > Upload to Your Hardware > Full Control</div>
           </div>
         </div>
       );
@@ -681,11 +732,13 @@
     const S4 = () => {
       const [selectedApp, setSelectedApp] = useState(null);
 
+      const appIcons = [SVG.search24, SVG.doc24, SVG.monitor24, SVG.sparkle24];
+
       const apps = [
-        { name: 'Perplexity', models: ['GPT-4', 'Claude 3.5'], icon: '🔎' },
-        { name: 'Gamma', models: ['GPT-4', 'Claude 3.5'], icon: '📄' },
-        { name: 'Cursor', models: ['GPT-4', 'Claude 3.5'], icon: '🖥' },
-        { name: 'Copy.ai', models: ['GPT-4', 'Llama'], icon: '✨' },
+        { name: 'Perplexity', models: ['GPT-4', 'Claude 3.5'] },
+        { name: 'Gamma', models: ['GPT-4', 'Claude 3.5'] },
+        { name: 'Cursor', models: ['GPT-4', 'Claude 3.5'] },
+        { name: 'Copy.ai', models: ['GPT-4', 'Llama'] },
       ];
 
       return (
@@ -696,13 +749,12 @@
             animation: 'slideIn 0.4s ease-out',
           }}>
             <div style={{
-              fontSize: '48px',
               marginBottom: '12px',
             }}>
-              {"📱"}
+              <SvgIcon svg={SVG.phone48} />
             </div>
             <div style={{
-              fontSize: '15px',
+              fontSize: '16px',
               color: '#666',
               maxWidth: '400px',
             }}>
@@ -712,7 +764,7 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '520px',
+            maxWidth: '600px',
             marginBottom: '28px',
           }}>
             <div style={{
@@ -721,7 +773,7 @@
               borderRadius: '8px',
               marginBottom: '16px',
               textAlign: 'center',
-              fontSize: '13px',
+              fontSize: '14px',
               fontWeight: 600,
               color: '#666',
             }}>
@@ -731,19 +783,19 @@
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px',
+              gap: '16px',
               marginBottom: '16px',
             }}>
               {['GPT-4', 'Claude', 'Llama', 'Gemini'].map((model, i) => (
                 <div
                   key={i}
                   style={{
-                    padding: '12px',
+                    padding: '14px',
                     backgroundColor: '#6c5ce7',
                     color: '#fff',
                     borderRadius: '6px',
                     textAlign: 'center',
-                    fontSize: '12px',
+                    fontSize: '14px',
                     fontWeight: 600,
                   }}
                 >
@@ -753,12 +805,12 @@
             </div>
 
             <div style={{
-              fontSize: '12px',
+              fontSize: '14px',
               textAlign: 'center',
               color: '#999',
               margin: '12px 0',
             }}>
-              {"↑ POWERS ↑"}
+              POWERS
             </div>
 
             <div style={{
@@ -767,7 +819,7 @@
               borderRadius: '8px',
               marginBottom: '16px',
               textAlign: 'center',
-              fontSize: '13px',
+              fontSize: '14px',
               fontWeight: 600,
               color: '#666',
             }}>
@@ -777,7 +829,7 @@
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px',
+              gap: '16px',
               marginBottom: '16px',
             }}>
               {apps.map((app, i) => (
@@ -785,21 +837,23 @@
                   key={i}
                   onClick={() => setSelectedApp(selectedApp === i ? null : i)}
                   style={{
-                    padding: '12px',
+                    padding: '14px',
                     backgroundColor: selectedApp === i ? '#2ecc71' : '#f5f5f5',
                     color: selectedApp === i ? '#fff' : '#1a1a1a',
                     borderRadius: '6px',
                     textAlign: 'center',
-                    fontSize: '12px',
+                    fontSize: '14px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
                 >
-                  <div style={{ fontSize: '16px', marginBottom: '4px' }}>{app.icon}</div>
+                  <div style={{ marginBottom: '4px' }}>
+                    <SvgIcon svg={appIcons[i]} style={{ color: selectedApp === i ? '#fff' : '#6c5ce7' }} />
+                  </div>
                   {app.name}
                   {selectedApp === i && (
-                    <div style={{ fontSize: '10px', marginTop: '6px', opacity: 0.9, fontWeight: 400 }}>
+                    <div style={{ fontSize: '12px', marginTop: '6px', opacity: 0.9, fontWeight: 400 }}>
                       Uses: {app.models.join(', ')}
                     </div>
                   )}
@@ -808,12 +862,12 @@
             </div>
 
             <div style={{
-              fontSize: '12px',
+              fontSize: '14px',
               textAlign: 'center',
               color: '#999',
               margin: '12px 0',
             }}>
-              {"↑ SERVES ↑"}
+              SERVES
             </div>
 
             <div style={{
@@ -821,7 +875,7 @@
               backgroundColor: '#f8f8f8',
               borderRadius: '8px',
               textAlign: 'center',
-              fontSize: '13px',
+              fontSize: '14px',
               fontWeight: 600,
               color: '#666',
             }}>
@@ -831,16 +885,16 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             padding: '16px',
             backgroundColor: '#f0f7ff',
             borderRadius: '8px',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#444',
             lineHeight: '1.6',
           }}>
             <div style={{ fontWeight: 600, marginBottom: '8px', color: '#2c5aa0' }}>THE CAR ANALOGY</div>
-            <table style={{ width: '100%', fontSize: '11px' }}>
+            <table style={{ width: '100%', fontSize: '14px' }}>
               <tbody>
                 <tr style={{ borderBottom: '1px solid #d0d9e8' }}>
                   <td style={{ padding: '6px 0', fontWeight: 600 }}>Engine</td>
@@ -865,17 +919,19 @@
     const S5 = () => {
       const [priority, setPriority] = useState(null);
 
+      const priorityIcons = [SVG.bolt24, SVG.shield24, SVG.dollar24, SVG.star24];
+
       const priorities = [
-        { name: 'Performance', icon: '⚡', rec: 'Proprietary' },
-        { name: 'Privacy', icon: '🔒', rec: 'Open Source' },
-        { name: 'Cost', icon: '💰', rec: 'Open Source' },
-        { name: 'Ease of Use', icon: '🌟', rec: 'Application Layer' },
+        { name: 'Performance', rec: 'Proprietary' },
+        { name: 'Privacy', rec: 'Open Source' },
+        { name: 'Cost', rec: 'Open Source' },
+        { name: 'Ease of Use', rec: 'Application Layer' },
       ];
 
       const comparison = [
         { label: 'Cost', prop: 'Pay per token', os: 'Free', app: 'Subscription' },
         { label: 'Customization', prop: 'None', os: 'Full', app: 'Limited' },
-        { label: 'Data Privacy', prop: 'Cloud-based', os: 'Your hardware', app: 'Provider\'s servers' },
+        { label: 'Data Privacy', prop: 'Cloud-based', os: 'Your hardware', app: "Provider's servers" },
         { label: 'Best For', prop: 'High-perf apps', os: 'Custom solutions', app: 'Quick start' },
       ];
 
@@ -887,13 +943,12 @@
             animation: 'slideIn 0.4s ease-out',
           }}>
             <div style={{
-              fontSize: '48px',
               marginBottom: '12px',
             }}>
-              {"\u2696\ufe0f"}
+              <SvgIcon svg={SVG.chart48} />
             </div>
             <div style={{
-              fontSize: '15px',
+              fontSize: '16px',
               color: '#666',
               maxWidth: '400px',
             }}>
@@ -903,32 +958,34 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             marginBottom: '24px',
           }}>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>{"What\u2019s your priority?"}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>What's your priority?</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
               {priorities.map((p, i) => (
                 <button
                   key={i}
                   onClick={() => setPriority(priority === i ? null : i)}
                   style={{
-                    padding: '12px',
+                    padding: '14px',
                     backgroundColor: priority === i ? '#6c5ce7' : '#f0f0f0',
                     color: priority === i ? '#fff' : '#1a1a1a',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
-                    fontSize: '12px',
+                    fontSize: '14px',
                     fontWeight: 600,
                     transition: 'all 0.2s',
                   }}
                 >
-                  <div style={{ fontSize: '16px', marginBottom: '4px' }}>{p.icon}</div>
+                  <div style={{ marginBottom: '4px' }}>
+                    <SvgIcon svg={priorityIcons[i]} style={{ color: priority === i ? '#fff' : '#6c5ce7' }} />
+                  </div>
                   {p.name}
                   {priority === i && (
-                    <div style={{ fontSize: '10px', marginTop: '6px', opacity: 0.9 }}>
-                      {"\u2192"} {p.rec}
+                    <div style={{ fontSize: '12px', marginTop: '6px', opacity: 0.9 }}>
+                      > {p.rec}
                     </div>
                   )}
                 </button>
@@ -938,13 +995,13 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '520px',
+            maxWidth: '620px',
             marginBottom: '20px',
             overflowX: 'auto',
           }}>
             <table style={{
               width: '100%',
-              fontSize: '11px',
+              fontSize: '14px',
               borderCollapse: 'collapse',
               backgroundColor: '#f8f8f8',
               borderRadius: '6px',
@@ -952,19 +1009,19 @@
             }}>
               <thead>
                 <tr style={{ backgroundColor: '#e8e8e8' }}>
-                  <th style={{ padding: '8px', textAlign: 'left', fontWeight: 600 }}>Aspect</th>
-                  <th style={{ padding: '8px', textAlign: 'center', fontWeight: 600 }}>Proprietary</th>
-                  <th style={{ padding: '8px', textAlign: 'center', fontWeight: 600 }}>Open Source</th>
-                  <th style={{ padding: '8px', textAlign: 'center', fontWeight: 600 }}>App Layer</th>
+                  <th style={{ padding: '10px', textAlign: 'left', fontWeight: 600 }}>Aspect</th>
+                  <th style={{ padding: '10px', textAlign: 'center', fontWeight: 600 }}>Proprietary</th>
+                  <th style={{ padding: '10px', textAlign: 'center', fontWeight: 600 }}>Open Source</th>
+                  <th style={{ padding: '10px', textAlign: 'center', fontWeight: 600 }}>App Layer</th>
                 </tr>
               </thead>
               <tbody>
                 {comparison.map((row, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '8px', fontWeight: 500 }}>{row.label}</td>
-                    <td style={{ padding: '8px', textAlign: 'center', color: '#666' }}>{row.prop}</td>
-                    <td style={{ padding: '8px', textAlign: 'center', color: '#666' }}>{row.os}</td>
-                    <td style={{ padding: '8px', textAlign: 'center', color: '#666' }}>{row.app}</td>
+                    <td style={{ padding: '10px', fontWeight: 500 }}>{row.label}</td>
+                    <td style={{ padding: '10px', textAlign: 'center', color: '#666' }}>{row.prop}</td>
+                    <td style={{ padding: '10px', textAlign: 'center', color: '#666' }}>{row.os}</td>
+                    <td style={{ padding: '10px', textAlign: 'center', color: '#666' }}>{row.app}</td>
                   </tr>
                 ))}
               </tbody>
@@ -973,28 +1030,28 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '500px',
+            maxWidth: '600px',
             padding: '16px',
             backgroundColor: '#f0f7ff',
             borderRadius: '8px',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#444',
             lineHeight: '1.6',
           }}>
             <div style={{ fontWeight: 600, marginBottom: '8px', color: '#2c5aa0' }}>Decision Tree</div>
             <div style={{ marginBottom: '8px' }}>
               <strong>Do you need full control?</strong>
-              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
-                {"YES \u2192"} <span style={{ color: '#2ecc71', fontWeight: 600 }}>Open Source</span>
+              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '14px' }}>
+                YES > <span style={{ color: '#2ecc71', fontWeight: 600 }}>Open Source</span>
               </div>
             </div>
             <div>
               <strong>No. Is ease of use priority?</strong>
-              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
-                {"YES \u2192"} <span style={{ color: '#3498db', fontWeight: 600 }}>App Layer</span>
+              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '14px' }}>
+                YES > <span style={{ color: '#3498db', fontWeight: 600 }}>App Layer</span>
               </div>
-              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '11px' }}>
-                {"NO \u2192"} <span style={{ color: '#6c5ce7', fontWeight: 600 }}>Proprietary</span>
+              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '14px' }}>
+                NO > <span style={{ color: '#6c5ce7', fontWeight: 600 }}>Proprietary</span>
               </div>
             </div>
           </div>
@@ -1020,15 +1077,15 @@
       const getInsight = () => {
         switch (stage) {
           case 0:
-            return "Think of foundational models as Toyota engines \u2014 they power many different cars, from taxis to race cars.";
+            return "Think of foundational models as Toyota engines -- they power many different cars, from taxis to race cars.";
           case 1:
-            return "You can buy the drink but can\u2019t see how it\u2019s made \u2014 highest quality, but you\u2019re dependent on the provider.";
+            return "You can buy the drink but can't see how it's made -- highest quality, but you're dependent on the provider.";
           case 2:
-            return "Like a recipe posted online \u2014 make it at home, modify it, or sell your own version. Full freedom.";
+            return "Like a recipe posted online -- make it at home, modify it, or sell your own version. Full freedom.";
           case 3:
-            return "Uber doesn\u2019t manufacture engines \u2014 they build a service using cars with existing engines. Same with Perplexity using GPT-4.";
+            return "Uber doesn't manufacture engines -- they build a service using cars with existing engines. Same with Perplexity using GPT-4.";
           case 4:
-            return "There\u2019s no single \u2018best\u2019 model \u2014 match the model type to your specific needs: performance, privacy, cost, or ease of use.";
+            return "There's no single 'best' model -- match the model type to your specific needs: performance, privacy, cost, or ease of use.";
           default:
             return "";
         }
@@ -1037,15 +1094,15 @@
       const getExplanation = () => {
         switch (stage) {
           case 0:
-            return "Foundational models are the \u2018engines\u2019 of AI \u2014 large pre-trained models trained on massive data that serve as the base intelligence. You don\u2019t build an engine from scratch to make a taxi service \u2014 you buy one and build around it.";
+            return "Foundational models are the 'engines' of AI -- large pre-trained models trained on massive data that serve as the base intelligence. You don't build an engine from scratch to make a taxi service -- you buy one and build around it.";
           case 1:
-            return "Proprietary models keep their weights, training data, and code secret. You access them via API only \u2014 like Coca-Cola\u2019s secret recipe.";
+            return "Proprietary models keep their weights, training data, and code secret. You access them via API only -- like Coca-Cola's secret recipe.";
           case 2:
-            return "Open source models make weights (and sometimes code/data) publicly available. Download and run yourself \u2014 like a recipe posted online that you can modify.";
+            return "Open source models make weights (and sometimes code/data) publicly available. Download and run yourself -- like a recipe posted online that you can modify.";
           case 3:
-            return "Products like Perplexity, Gamma, and Cursor don\u2019t build foundational models \u2014 they build products ON TOP of them. Like Uber doesn\u2019t manufacture engines.";
+            return "Products like Perplexity, Gamma, and Cursor don't build foundational models -- they build products ON TOP of them. Like Uber doesn't manufacture engines.";
           case 4:
-            return "The right choice depends on your priorities: performance, cost, privacy, and customization. Here\u2019s how to decide.";
+            return "The right choice depends on your priorities: performance, cost, privacy, and customization. Here's how to decide.";
           default:
             return "";
         }
@@ -1056,7 +1113,7 @@
           {/* Sidebar */}
           <div style={P.sidebar}>
             <a href="../../index.html" style={{...P.backLink, textDecoration: 'none', display: 'block', cursor: 'pointer' }}>
-              {"\u2190 Back to All Guides"}
+              Back to All Guides
             </a>
 
             <div style={P.stepContainer}>
@@ -1071,7 +1128,7 @@
                   }}
                 >
                   <div style={stage === i ? P.stepCircleActive : P.stepCircle}>
-                    {stage === i ? i + 1 : s.icon}
+                    {stage === i ? (i + 1) : <SvgIcon svg={SIDEBAR_ICONS[i]} />}
                   </div>
                   <div style={{ textAlign: 'left', flex: 1 }}>
                     <div style={{ fontSize: '12px' }}>{s.label}</div>
@@ -1099,8 +1156,9 @@
                     ...(stage === 0 ? P.navBtnDisabled : {}),
                   }}
                 >
-                  {"\u2190 Prev"}
+                  Prev
                 </button>
+                <ProgressIndicator current={stage} total={STAGES.length} />
                 <span style={P.navP}>{stage + 1} / {STAGES.length}</span>
                 <button
                   onClick={() => setStage(Math.min(STAGES.length - 1, stage + 1))}
@@ -1110,7 +1168,7 @@
                     ...(stage === STAGES.length - 1 ? P.navBtnDisabled : {}),
                   }}
                 >
-                  {"Next \u2192"}
+                  Next
                 </button>
               </div>
             </div>
@@ -1122,7 +1180,9 @@
               </div>
               {getScene()}
               <div style={P.insight}>
-                <div style={P.insightLabel}>{"💡"} INSIGHT</div>
+                <div style={P.insightLabel}>
+                  <SvgIcon svg={SVG.lightbulb} /> INSIGHT
+                </div>
                 <div>{getInsight()}</div>
               </div>
             </div>
