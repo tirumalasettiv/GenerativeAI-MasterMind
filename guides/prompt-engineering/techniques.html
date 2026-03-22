@@ -1,949 +1,1023 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master 12 Prompt Engineering Techniques</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
-
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #f8f9fa;
-            color: #2c3e50;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        #root {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 24px 32px;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
-            flex-shrink: 0;
-        }
-
-        .top-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .back-link {
-            background: none;
-            border: none;
-            color: #6c5ce7;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            padding: 8px;
-        }
-
-        .back-link:hover {
-            color: #5a4cb8;
-        }
-
-        .badge {
-            background: #f0f0f0;
-            color: #666;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .top-title {
-            font-family: 'Fraunces', serif;
-            font-size: 28px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-        .nav-arrows {
-            display: flex;
-            gap: 12px;
-        }
-
-        .nav-btn {
-            background: #f0f0f0;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            color: #2c3e50;
-        }
-
-        .nav-btn:hover:not(:disabled) {
-            background: #6c5ce7;
-            color: white;
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
-        }
-
-        .nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 180px;
-            background: white;
-            border-right: 1px solid #e0e0e0;
-            overflow-y: auto;
-            padding: 16px 0;
-            flex-shrink: 0;
-        }
-
-        .steps-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 8px 16px;
-        }
-
-        .step-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            width: 100%;
-        }
-
-        .step-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: #e9ecef;
-            color: #666;
-        }
-
-        .step-item.active .step-circle {
-            background: #6c5ce7;
-            color: white;
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
-        }
-
-        .step-item.complete .step-circle {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .step-label {
-            font-size: 11px;
-            text-align: center;
-            color: #666;
-            width: 100%;
-            max-width: 140px;
-            line-height: 1.3;
-        }
-
-        .connector {
-            width: 2px;
-            height: 20px;
-            background: #e9ecef;
-            margin: -4px 0;
-        }
-
-        .step-item.complete ~ .connector {
-            background: #2ecc71;
-        }
-
-        .content-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 40px 48px;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-        }
-
-        .explain-row {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .explain {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #555;
-        }
-
-        .scene {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 16px;
-            padding: 32px;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .insight {
-            background: #f0faf0;
-            border-left: 4px solid #2ecc71;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #2d5016;
-        }
-
-        .insight-label {
-            font-weight: 600;
-            color: #1a9456;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 12px;
-            border-bottom: 1px solid #e9ecef;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #999;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .tab.active {
-            color: #6c5ce7;
-            border-bottom-color: #6c5ce7;
-        }
-
-        .code-block {
-            background: #2c3e50;
-            color: #ecf0f1;
-            padding: 16px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            overflow-x: auto;
-            margin: 12px 0;
-        }
-
-        .code-output {
-            background: #ecf0f1;
-            color: #2c3e50;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            margin-top: 8px;
-            border-left: 3px solid #6c5ce7;
-        }
-
-        .interactive-demo {
-            display: flex;
-            gap: 20px;
-            flex-direction: column;
-        }
-
-        .demo-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .demo-label {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 14px;
-        }
-
-        .constraint-builder {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .constraint-input {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .constraint-box {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            background: white;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .add-btn {
-            background: #6c5ce7;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .add-btn:hover {
-            background: #5a4cb8;
-        }
-
-        .remove-btn {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .remove-btn:hover {
-            background: #ee5a52;
-        }
-
-        .pipeline-viz {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .pipeline-box {
-            background: #e0d4ff;
-            border: 2px solid #6c5ce7;
-            padding: 16px 20px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #6c5ce7;
-            text-align: center;
-            min-width: 120px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .pipeline-box:hover {
-            background: #6c5ce7;
-            color: white;
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
-        }
-
-        .pipeline-arrow {
-            font-size: 20px;
-            color: #999;
-        }
-
-        .role-selector {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin: 12px 0;
-        }
-
-        .role-btn {
-            padding: 10px 16px;
-            border: 1px solid #e9ecef;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s ease;
-        }
-
-        .role-btn.selected {
-            background: #6c5ce7;
-            color: white;
-            border-color: #6c5ce7;
-        }
-
-        .response-box {
-            background: white;
-            border: 1px solid #e9ecef;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #555;
-        }
-
-        .analysis-paths {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin: 12px 0;
-        }
-
-        .analysis-path {
-            background: white;
-            border: 1px solid #e9ecef;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .consensus-panel {
-            background: #f0faf0;
-            border: 2px solid #2ecc71;
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 12px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #2d5016;
-        }
-
-        .key-takeaways {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 12px;
-        }
-
-        .takeaway-card {
-            background: white;
-            border: 1px solid #e9ecef;
-            padding: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .takeaway-card:hover {
-            border-color: #6c5ce7;
-            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.15);
-        }
-
-        .takeaway-title {
-            font-weight: 600;
-            color: #6c5ce7;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .takeaway-content {
-            font-size: 13px;
-            line-height: 1.5;
-            color: #666;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master 12 Prompt Engineering Techniques</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 40px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Technique-specific styles */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid #e9ecef;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #999;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .tab.active {
+      color: #6c5ce7;
+      border-bottom-color: #6c5ce7;
+    }
+
+    .code-block {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    .code-output {
+      background: #ecf0f1;
+      color: #2c3e50;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 8px;
+      border-left: 3px solid #6c5ce7;
+    }
+
+    .interactive-demo {
+      display: flex;
+      gap: 20px;
+      flex-direction: column;
+    }
+
+    .demo-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .demo-label {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 14px;
+    }
+
+    .constraint-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .constraint-input {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .constraint-box {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      background: white;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .add-btn {
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .add-btn:hover {
+      background: #5a4cb8;
+    }
+
+    .remove-btn {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .remove-btn:hover {
+      background: #ee5a52;
+    }
+
+    .pipeline-viz {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .pipeline-box {
+      background: #e0d4ff;
+      border: 2px solid #6c5ce7;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      text-align: center;
+      min-width: 120px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .pipeline-box:hover {
+      background: #6c5ce7;
+      color: white;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .pipeline-arrow {
+      font-size: 20px;
+      color: #999;
+    }
+
+    .role-selector {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+
+    .role-btn {
+      padding: 10px 16px;
+      border: 1px solid #e9ecef;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .role-btn.selected {
+      background: #6c5ce7;
+      color: white;
+      border-color: #6c5ce7;
+    }
+
+    .response-box {
+      background: white;
+      border: 1px solid #e9ecef;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    .analysis-paths {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 12px 0;
+    }
+
+    .analysis-path {
+      background: white;
+      border: 1px solid #e9ecef;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .consensus-panel {
+      background: #f0faf0;
+      border: 2px solid #2ecc71;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #2d5016;
+    }
+
+    .key-takeaways {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .takeaway-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      padding: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .takeaway-card:hover {
+      border-color: #6c5ce7;
+      box-shadow: 0 2px 8px rgba(108, 92, 231, 0.15);
+    }
+
+    .takeaway-title {
+      font-weight: 600;
+      color: #6c5ce7;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .takeaway-content {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #666;
+    }
+  </style>
 </head>
 <body>
-    <div id="root"></div>
+  <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
 
-        const P = {
-            root: { display: 'flex', flexDirection: 'column', height: '100vh' },
-            sidebar: { width: '180px', background: 'white', borderRight: '1px solid #e0e0e0', overflowY: 'auto', padding: '16px 0', flexShrink: 0 },
-            stepCircle: { width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '600', fontSize: '14px' },
-            stepLabel: { fontSize: '11px', textAlign: 'center', color: '#666', width: '100%', maxWidth: '140px', lineHeight: 1.3 },
-            connector: { width: '2px', height: '20px', background: '#e9ecef', margin: '-4px 0' },
-            main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
-            topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px', background: 'white', borderBottom: '1px solid #e0e0e0', flexShrink: 0 },
-            leftSection: { display: 'flex', alignItems: 'center', gap: '20px' },
-            backLink: { background: 'none', border: 'none', color: '#6c5ce7', cursor: 'pointer', fontSize: '24px', padding: '8px' },
-            badge: { background: '#f0f0f0', color: '#666', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' },
-            title: { fontFamily: "'Fraunces', serif", fontSize: '28px', fontWeight: '700', color: '#2c3e50' },
-            navRow: { display: 'flex', gap: '12px' },
-            navBtn: { background: '#f0f0f0', border: 'none', width: '36px', height: '36px', borderRadius: '8px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' },
-            navP: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px', background: 'white', borderBottom: '1px solid #e0e0e0', flexShrink: 0 },
-            content: { flex: 1, overflowY: 'auto', padding: '40px 48px', display: 'flex', flexDirection: 'column', gap: '32px' },
-            explainRow: { display: 'flex', flexDirection: 'column', gap: '12px' },
-            explain: { fontSize: '16px', lineHeight: 1.6, color: '#555' },
-            scene: { background: '#f8f9fa', border: '1px solid #e9ecef', borderRadius: '16px', padding: '32px', minHeight: '300px', display: 'flex', flexDirection: 'column', gap: '20px' },
-            insightLabel: { fontWeight: '600', color: '#1a9456', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' },
-            insight: { background: '#f0faf0', borderLeft: '4px solid #2ecc71', padding: '20px', borderRadius: '8px', fontSize: '14px', lineHeight: 1.6, color: '#2d5016' }
-        };
+    const A = "#6c5ce7", G = "#2ecc71", GD = "#1a9456";
 
-        const A = "#6c5ce7", G = "#2ecc71", GD = "#1a9456";
-
-        // Stage 1: Zero-Shot & Few-Shot
-        const S1 = ({ }) => {
-            const [mode, setMode] = useState('zero');
-            return (
-                <div style={P.scene}>
-                    <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid #e9ecef', marginBottom: '20px' }}>
-                        <button style={{ ...style.tab, borderBottomColor: mode === 'zero' ? A : 'transparent', color: mode === 'zero' ? A : '#999' }} onClick={() => setMode('zero')}>Zero-Shot</button>
-                        <button style={{ ...style.tab, borderBottomColor: mode === 'few' ? A : 'transparent', color: mode === 'few' ? A : '#999' }} onClick={() => setMode('few')}>Few-Shot</button>
-                    </div>
-                    {mode === 'zero' ? (
-                        <div>
-                            <div style={{ marginBottom: '16px' }}>
-                                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Prompt:</div>
-                                <div style={{ background: '#2c3e50', color: '#ecf0f1', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '12px' }}>Explain Python\u2019s try-except-finally in 3 sentences</div>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>AI Response:</div>
-                                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>try-except-finally is Python\u2019s error handling mechanism where try runs code that might fail, except catches specific errors, and finally runs cleanup code regardless of success or failure. The try block attempts execution, except blocks define what happens when specific exceptions occur, and the finally block guarantees execution for resource cleanup. This structure prevents crashes and ensures proper cleanup.</div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div>
-                            <div style={{ marginBottom: '16px' }}>
-                                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Examples (showing context):</div>
-                                <div style={{ background: '#2c3e50', color: '#ecf0f1', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '11px', marginBottom: '8px' }}>{`Input: "Book flight to NYC"
+    // Stage 1: Zero-Shot & Few-Shot
+    const S1 = () => {
+      const [mode, setMode] = useState('zero');
+      return (
+        <>
+          <div className="explanation">
+            Zero-Shot and Few-Shot prompting are foundational techniques that control how much context and examples you provide to the AI.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div className="tabs">
+              <button className={`tab ${mode === 'zero' ? 'active' : ''}`} onClick={() => setMode('zero')}>Zero-Shot</button>
+              <button className={`tab ${mode === 'few' ? 'active' : ''}`} onClick={() => setMode('few')}>Few-Shot</button>
+            </div>
+            {mode === 'zero' ? (
+              <div style={{ width: '100%' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Prompt:</div>
+                  <div className="code-block">Explain Python's try-except-finally in 3 sentences</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>AI Response:</div>
+                  <div className="code-output">try-except-finally is Python's error handling mechanism where try runs code that might fail, except catches specific errors, and finally runs cleanup code regardless of success or failure. The try block attempts execution, except blocks define what happens when specific exceptions occur, and the finally block guarantees execution for resource cleanup. This structure prevents crashes and ensures proper cleanup.</div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ width: '100%' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Examples (showing context):</div>
+                  <div className="code-block">{`Input: "Book flight to NYC"
 Output: {"type": "flight", "destination": "NYC"}`}</div>
-                                <div style={{ background: '#2c3e50', color: '#ecf0f1', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '11px' }}>{`Input: "Reserve hotel in Paris"
+                  <div className="code-block" style={{ marginTop: '8px' }}>{`Input: "Reserve hotel in Paris"
 Output: {"type": "hotel", "location": "Paris"}`}</div>
-                            </div>
-                            <div style={{ marginBottom: '16px' }}>
-                                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Your Task:</div>
-                                <div style={{ background: '#2c3e50', color: '#ecf0f1', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '12px' }}>Extract booking details from: "Reserve 2 hotel rooms in Tokyo for 5 nights"</div>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Expected Output:</div>
-                                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', fontFamily: "'Courier New', monospace", lineHeight: 1.5, color: '#2c3e50' }}>{`{"type": "hotel", "location": "Tokyo", "quantity": 2, "nights": 5}`}</div>
-                            </div>
-                        </div>
-                    )}
                 </div>
-            );
-        };
-
-        // Stage 2: Chain-of-Thought & ReAct
-        const S2 = ({ }) => {
-            const [mode, setMode] = useState('cot');
-            return (
-                <div style={P.scene}>
-                    <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid #e9ecef', marginBottom: '20px' }}>
-                        <button style={{ ...style.tab, borderBottomColor: mode === 'cot' ? A : 'transparent', color: mode === 'cot' ? A : '#999' }} onClick={() => setMode('cot')}>Chain-of-Thought</button>
-                        <button style={{ ...style.tab, borderBottomColor: mode === 'react' ? A : 'transparent', color: mode === 'react' ? A : '#999' }} onClick={() => setMode('react')}>ReAct</button>
-                    </div>
-                    {mode === 'cot' ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Marketing ROI Calculation (Step by Step):</div>
-                            <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                                <strong>Step 1:</strong> Revenue from campaign = $45,000
-                            </div>
-                            <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                                <strong>Step 2:</strong> Attribute to marketing: 60% = $45,000 \u00d7 0.60 = $27,000
-                            </div>
-                            <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                                <strong>Step 3:</strong> Marketing cost = $10,000
-                            </div>
-                            <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                                <strong>Step 4:</strong> ROI = (Profit / Cost) \u00d7 100 = ($27,000 - $10,000) / $10,000 \u00d7 100 = 170%
-                            </div>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Web Search Loop:</div>
-                            <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6', color: '#2c3e50' }}>
-                                <strong style={{ color: A }}>Thought:</strong> I need current weather for NYC. Let me search.
-                            </div>
-                            <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
-                                <strong style={{ color: A }}>Action:</strong> search("NYC weather today")
-                            </div>
-                            <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6', color: '#2d5016' }}>
-                                <strong style={{ color: GD }}>Observation:</strong> Weather API returned: 72\u00b0F, partly cloudy, 15mph wind
-                            </div>
-                            <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6', color: '#2c3e50' }}>
-                                <strong style={{ color: A }}>Thought:</strong> I have the weather. User might want activity recommendations.
-                            </div>
-                            <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6', color: '#2c3e50' }}>
-                                <strong style={{ color: A }}>Action:</strong> search("outdoor activities NYC pleasant weather")
-                            </div>
-                            <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6', color: '#2d5016' }}>
-                                <strong style={{ color: GD }}>Observation:</strong> Central Park, Brooklyn Bridge walk, outdoor cafes recommended
-                            </div>
-                        </div>
-                    )}
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Your Task:</div>
+                  <div className="code-block">Extract booking details from: "Reserve 2 hotel rooms in Tokyo for 5 nights"</div>
                 </div>
-            );
-        };
-
-        // Stage 3: Role-Based & Prompt Chaining
-        const S3 = ({ }) => {
-            const [role, setRole] = useState('engineer');
-            const roles = {
-                engineer: { title: 'Data Engineer', response: 'Design a scalable pipeline using Apache Spark for batch processing, Kafka for streaming, and PostgreSQL for the warehouse. Implement incremental loading with change data capture to minimize load times and ensure data consistency across systems.' },
-                legal: { title: 'Legal Expert', response: 'Review data governance policies for compliance with GDPR, CCPA, and local regulations. Establish clear data retention policies, access controls, and audit trails. Ensure contracts include proper data processing agreements with third parties.' },
-                product: { title: 'Product Manager', response: 'Focus on data that drives user engagement metrics and revenue. Prioritize analytics for A/B testing, user funnel analysis, and retention cohorts. Ensure dashboards surface insights that directly impact product decisions.' }
-            };
-
-            return (
-                <div style={P.scene}>
-                    <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                        {Object.entries(roles).map(([key, val]) => (
-                            <button key={key} style={{ padding: '10px 16px', border: role === key ? `2px solid ${A}` : '1px solid #e9ecef', background: role === key ? A : 'white', color: role === key ? 'white' : '#2c3e50', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s ease' }} onClick={() => setRole(key)}>
-                                {val.title}
-                            </button>
-                        ))}
-                    </div>
-                    <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>Question: How should we build our data infrastructure?</div>
-                    <div style={{ background: '#ecf0f1', padding: '16px', borderRadius: '8px', fontSize: '14px', lineHeight: 1.6, color: '#2c3e50' }}>
-                        {roles[role].response}
-                    </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Expected Output:</div>
+                  <div className="code-output">{`{"type": "hotel", "location": "Tokyo", "quantity": 2, "nights": 5}`}</div>
                 </div>
-            );
-        };
+              </div>
+            )}
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Zero-shot works for simple tasks, but Few-Shot dramatically improves accuracy by showing the AI the exact format and patterns you want.
+          </div>
+        </>
+      );
+    };
 
-        // Stage 4: Constraints & Negative Prompting
-        const S4 = ({ }) => {
-            const [constraints, setConstraints] = useState([
-                'Must include quantified metrics (numbers, percentages)',
-                'No marketing fluff or hype language'
-            ]);
-            const [negatives, setNegatives] = useState([
-                'DO NOT include apologies or disclaimers',
-                'DO NOT use print statements'
-            ]);
-
-            const addConstraint = () => setConstraints([...constraints, 'New constraint...']);
-            const removeConstraint = (i) => setConstraints(constraints.filter((_, idx) => idx !== i));
-
-            return (
-                <div style={P.scene}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div>
-                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>MUST Include:</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {constraints.map((c, i) => (
-                                    <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                        <div style={{ flex: 1, background: 'white', border: '1px solid #e9ecef', padding: '10px', borderRadius: '6px', fontSize: '13px' }}>✓ {c}</div>
-                                        <button style={{ background: '#ff6b6b', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }} onClick={() => removeConstraint(i)}>Remove</button>
-                                    </div>
-                                ))}
-                            </div>
-                            <button style={{ marginTop: '12px', background: A, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }} onClick={addConstraint}>+ Add Constraint</button>
-                        </div>
-
-                        <div>
-                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>MUST NOT Include:</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {negatives.map((n, i) => (
-                                    <div key={i} style={{ background: '#fff5f5', border: '1px solid #ff6b6b30', padding: '10px', borderRadius: '6px', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                                        <span style={{ marginRight: '8px' }}>✗</span>
-                                        <span>{n}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div style={{ background: '#f0faf0', border: '1px solid #2ecc71', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                            <strong>Example Output:</strong> "Product X delivers 3x faster processing, reduces costs by 42%, and integrates with 50+ tools. Proven by 500+ enterprises."
-                        </div>
-                    </div>
+    // Stage 2: Chain-of-Thought & ReAct
+    const S2 = () => {
+      const [mode, setMode] = useState('cot');
+      return (
+        <>
+          <div className="explanation">
+            Chain-of-Thought reasoning breaks complex problems into steps. ReAct extends this by adding actions and observations for tool use.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div className="tabs">
+              <button className={`tab ${mode === 'cot' ? 'active' : ''}`} onClick={() => setMode('cot')}>Chain-of-Thought</button>
+              <button className={`tab ${mode === 'react' ? 'active' : ''}`} onClick={() => setMode('react')}>ReAct</button>
+            </div>
+            {mode === 'cot' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Marketing ROI Calculation (Step by Step):</div>
+                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
+                  <strong>Step 1:</strong> Revenue from campaign = $45,000
                 </div>
-            );
-        };
-
-        // Stage 5: Self-Consistency & Iterative Refinement
-        const S5 = ({ }) => {
-            const [mode, setMode] = useState('self');
-            return (
-                <div style={P.scene}>
-                    <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid #e9ecef', marginBottom: '20px' }}>
-                        <button style={{ ...style.tab, borderBottomColor: mode === 'self' ? A : 'transparent', color: mode === 'self' ? A : '#999' }} onClick={() => setMode('self')}>Self-Consistency</button>
-                        <button style={{ ...style.tab, borderBottomColor: mode === 'iter' ? A : 'transparent', color: mode === 'iter' ? A : '#999' }} onClick={() => setMode('iter')}>Iterative</button>
-                    </div>
-                    {mode === 'self' ? (
-                        <div>
-                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>Startup Funding Decision ($500K received):</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
-                                <div style={{ background: 'white', border: '1px solid #e9ecef', padding: '12px', borderRadius: '6px', fontSize: '12px', lineHeight: 1.5 }}>
-                                    <strong style={{ color: A }}>Path 1 (Conservative):</strong> Allocate 60% to R&D, focus on product. Choose Option A for stability.
-                                </div>
-                                <div style={{ background: 'white', border: '1px solid #e9ecef', padding: '12px', borderRadius: '6px', fontSize: '12px', lineHeight: 1.5 }}>
-                                    <strong style={{ color: A }}>Path 2 (Aggressive):</strong> 40% R&D, 40% marketing. High risk, high reward. Choose Option B.
-                                </div>
-                                <div style={{ background: 'white', border: '1px solid #e9ecef', padding: '12px', borderRadius: '6px', fontSize: '12px', lineHeight: 1.5 }}>
-                                    <strong style={{ color: A }}>Path 3 (Balanced):</strong> 50/50 split, strategic partnerships. Mixed signals suggest Option A + B hybrid.
-                                </div>
-                            </div>
-                            <div style={{ background: '#f0faf0', border: '2px solid #2ecc71', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                                <strong style={{ color: GD }}>Consensus:</strong> 2 of 3 paths recommend Option A as primary with selective Option B experiments. Confidence: High
-                            </div>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ background: '#fff8f0', border: '1px solid #ffd699', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6 }}>
-                                <strong style={{ color: '#cc6600' }}>Draft 1:</strong> RAG retrieves documents using vector similarity and ranks them by relevance before synthesis.
-                            </div>
-                            <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
-                                <strong style={{ color: A }}>Critique:</strong> Missing implementation details about chunking, embedding model, and quality metrics.
-                            </div>
-                            <div style={{ background: '#f0faf0', border: '1px solid #2ecc71', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                                <strong style={{ color: GD }}>Draft 2 (Refined):</strong> RAG splits documents into 512-token chunks, embeds with OpenAI 3-small, uses cosine similarity for retrieval, reranks with cross-encoder, then generates synthesis. Quality measured by BLEU and human eval.
-                            </div>
-                        </div>
-                    )}
+                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
+                  <strong>Step 2:</strong> Attribute to marketing: 60% = $45,000 × 0.60 = $27,000
                 </div>
-            );
-        };
-
-        // Stage 6: Meta-Prompting & Output Structuring
-        const S6 = ({ }) => {
-            const [tab, setTab] = useState('meta');
-            return (
-                <div style={P.scene}>
-                    <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid #e9ecef', marginBottom: '20px' }}>
-                        <button style={{ ...style.tab, borderBottomColor: tab === 'meta' ? A : 'transparent', color: tab === 'meta' ? A : '#999' }} onClick={() => setTab('meta')}>Meta-Prompting</button>
-                        <button style={{ ...style.tab, borderBottomColor: tab === 'struct' ? A : 'transparent', color: tab === 'struct' ? A : '#999' }} onClick={() => setTab('struct')}>Output Structuring</button>
-                    </div>
-                    {tab === 'meta' ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Generating N8N Workflow Template:</div>
-                            <div style={{ background: '#2c3e50', color: '#ecf0f1', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '11px', lineHeight: 1.5 }}>
-                                Generate a prompt template for creating N8N workflows. The template should include: trigger type, condition logic, action node, data transform, and error handling. Output as JSON.
-                            </div>
-                            <div style={{ background: '#f0faf0', border: '1px solid #2ecc71', padding: '12px', borderRadius: '6px', fontSize: '12px', lineHeight: 1.6, color: '#2d5016', marginTop: '12px' }}>
-                                <strong style={{ color: GD }}>AI Output (Template):</strong> A complete prompt template structure for generating diverse N8N workflows with all required fields and examples.
-                            </div>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Meeting Details Extraction:</div>
-                            <div style={{ background: '#2c3e50', color: '#ecf0f1', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '11px', lineHeight: 1.5, marginBottom: '12px' }}>
-{`Extract meeting from email and output JSON with fields: attendees (array), date (ISO), time (HH:MM), duration_mins (number), topic (string), action_items (array of strings)`}
-                            </div>
-                            <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '11px', lineHeight: 1.5, color: '#2c3e50' }}>
-{`Input: "Team sync tomorrow 2pm for 1hr to discuss Q2 roadmap. John, Sarah, Mike attending. Action: update Jira, send RFP."`}
-                            </div>
-                            <div style={{ background: '#f0faf0', border: '1px solid #2ecc71', padding: '12px', borderRadius: '6px', fontFamily: "'Courier New', monospace", fontSize: '11px', lineHeight: 1.5, color: '#2d5016' }}>
-{`{"attendees": ["John", "Sarah", "Mike"], "date": "2024-03-16", "time": "14:00", "duration_mins": 60, "topic": "Q2 roadmap", "action_items": ["update Jira", "send RFP"]}`}
-                            </div>
-                        </div>
-                    )}
+                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
+                  <strong>Step 3:</strong> Marketing cost = $10,000
                 </div>
-            );
-        };
-
-        // Stage 7: Combining Techniques
-        const S7 = ({ }) => {
-            const [expanded, setExpanded] = useState(null);
-            const stages = [
-                { name: 'Few-Shot + Output Structuring', prompt: 'Show examples of RAG queries → extracted metadata JSON' },
-                { name: 'Constraint-Based', prompt: 'MUST: retrieve top-5, rank by relevance score. MUST NOT: hallucinate sources' },
-                { name: 'Chain-of-Thought', prompt: 'Think step-by-step: find chunks → rerank → generate → cite sources' },
-                { name: 'Role-Based + Negative', prompt: 'As retrieval expert: avoid outdated docs, DO NOT ignore recency' },
-                { name: 'Output Structuring', prompt: 'Final answer as: {answer, sources[], confidence_score, limitations}' }
-            ];
-
-            return (
-                <div style={P.scene}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '16px', color: '#2c3e50' }}>Production RAG Pipeline (5 Techniques Combined):</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '20px' }}>
-                        {stages.map((s, i) => (
-                            <React.Fragment key={i}>
-                                <div style={{ background: '#e0d4ff', border: `2px solid ${A}`, padding: '10px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: A, cursor: 'pointer', transition: 'all 0.3s ease' }} onClick={() => setExpanded(expanded === i ? null : i)}>
-                                    {s.name}
-                                </div>
-                                {i < stages.length - 1 && <span style={{ fontSize: '18px', color: '#999' }}>→</span>}
-                            </React.Fragment>
-                        ))}
-                    </div>
-
-                    {expanded !== null && (
-                        <div style={{ background: 'white', border: '1px solid #e9ecef', padding: '16px', borderRadius: '8px', marginBottom: '16px', animation: 'slideInRight 0.3s ease' }}>
-                            <div style={{ fontWeight: '600', color: A, marginBottom: '8px', fontSize: '13px' }}>{stages[expanded].name}</div>
-                            <div style={{ fontSize: '13px', lineHeight: 1.6, color: '#555' }}>{stages[expanded].prompt}</div>
-                        </div>
-                    )}
-
-                    <div style={{ background: '#f0faf0', border: '1px solid #2ecc71', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
-                        <div style={{ fontWeight: '600', color: GD, marginBottom: '12px', fontSize: '13px' }}>Key Takeaways:</div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-                            <div style={{ background: 'white', padding: '12px', borderRadius: '6px', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer', transition: 'all 0.2s ease' }}>
-                                <div style={{ fontWeight: '600', color: A, marginBottom: '6px' }}>Composability</div>
-                                <div>Techniques stack like Lego blocks. Master individually, combine strategically.</div>
-                            </div>
-                            <div style={{ background: 'white', padding: '12px', borderRadius: '6px', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer', transition: 'all 0.2s ease' }}>
-                                <div style={{ fontWeight: '600', color: A, marginBottom: '6px' }}>Iteration</div>
-                                <div>Start simple (zero-shot), add techniques when needed. Avoid over-engineering.</div>
-                            </div>
-                            <div style={{ background: 'white', padding: '12px', borderRadius: '6px', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer', transition: 'all 0.2s ease' }}>
-                                <div style={{ fontWeight: '600', color: A, marginBottom: '6px' }}>Production</div>
-                                <div>Real systems use 3-5 techniques. Test each change systematically.</div>
-                            </div>
-                        </div>
-                    </div>
+                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
+                  <strong>Step 4:</strong> ROI = (Profit / Cost) × 100 = ($27,000 - $10,000) / $10,000 × 100 = 170%
                 </div>
-            );
-        };
-
-        const stageData = [
-            { num: 1, label: 'The Basics', techniques: 'Zero-Shot & Few-Shot', component: S1, explain: 'Two foundational techniques form the foundation of prompt engineering: Zero-Shot asks the AI to respond directly without examples, while Few-Shot provides exemplars to guide behavior. Combining them strategically creates a spectrum from flexibility to precision.' },
-            { num: 2, label: 'Reasoning', techniques: 'CoT & ReAct', component: S2, explain: 'Chain-of-Thought (CoT) makes the AI show its reasoning step-by-step, improving accuracy for complex tasks. ReAct (Reason + Act) extends this by having the AI think, perform actions (like web searches), observe results, and iterate. Essential for multi-step problems and tool usage.' },
-            { num: 3, label: 'Persona & Flow', techniques: 'Role-Based & Chaining', component: S3, explain: 'Role-Based prompting assigns expertise to the AI (engineer, lawyer, marketer), eliciting specialized knowledge. Prompt Chaining breaks complex workflows into sequential steps where each output feeds into the next, enabling sophisticated multi-stage processing.' },
-            { num: 4, label: 'Guardrails', techniques: 'Constraints & Negative', component: S4, explain: 'Constraint-Based prompting explicitly lists MUST HAVE requirements (quantified, specific formats). Negative Prompting specifies what to AVOID (no jargon, no apologies). Together they create boundaries that guide output quality and consistency.' },
-            { num: 5, label: 'Quality', techniques: 'Self-Consistency & Iterative', component: S5, explain: 'Self-Consistency generates multiple diverse answers and finds consensus, reducing hallucination. Iterative Refinement repeatedly critiques and improves outputs. Both ensure high-quality results for critical decisions.' },
-            { num: 6, label: 'Structure', techniques: 'Meta-Prompting & Output', component: S6, explain: 'Meta-Prompting has the AI generate prompts itself (teaching it to fish). Output Structuring enforces exact JSON/XML formats for automation. Together they bridge human intent and machine-readable results.' },
-            { num: 7, label: 'Combining', techniques: 'Practice Exercise', component: S7, explain: 'Production systems combine multiple techniques strategically. This stage shows a real RAG pipeline using all 6 major techniques in concert, demonstrating how professionals compose these building blocks.' }
-        ];
-
-        const style = {
-            tab: { padding: '12px 20px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#999', borderBottom: '2px solid transparent', transition: 'all 0.3s ease' }
-        };
-
-        function App() {
-            const [stage, setStage] = useState(0);
-            const current = stageData[stage];
-            const StageComponent = current.component;
-
-            return (
-                <div style={P.root}>
-                    <div style={P.topBar}>
-                        <div style={P.leftSection}>
-                            <button style={P.backLink} onClick={() => window.location.href = '../../index.html'}>←</button>
-                            <span style={P.badge}>DEEP DIVE</span>
-                            <h1 style={P.title}>12 Prompt Engineering Techniques</h1>
-                        </div>
-                        <div style={P.navRow}>
-                            <button style={{ ...P.navBtn, background: stage > 0 ? '#f0f0f0' : '#e9ecef', opacity: stage > 0 ? 1 : 0.4, cursor: stage > 0 ? 'pointer' : 'not-allowed' }} onClick={() => stage > 0 && setStage(stage - 1)}>←</button>
-                            <button style={{ ...P.navBtn, background: stage < stageData.length - 1 ? '#f0f0f0' : '#e9ecef', opacity: stage < stageData.length - 1 ? 1 : 0.4, cursor: stage < stageData.length - 1 ? 'pointer' : 'not-allowed' }} onClick={() => stage < stageData.length - 1 && setStage(stage + 1)}>→</button>
-                        </div>
-                    </div>
-
-                    <div style={P.main}>
-                        <div style={P.sidebar}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '8px 16px' }}>
-                                {stageData.map((s, i) => (
-                                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', width: '100%' }} onClick={() => setStage(i)}>
-                                        <div style={{
-                                            ...P.stepCircle,
-                                            background: stage === i ? A : stage > i ? G : '#e9ecef',
-                                            color: (stage === i || stage > i) ? 'white' : '#666',
-                                            boxShadow: stage === i ? `0 4px 12px rgba(108, 92, 231, 0.3)` : 'none',
-                                            transition: 'all 0.3s ease'
-                                        }}>
-                                            {stage > i ? '✓' : s.num}
-                                        </div>
-                                        <div style={P.stepLabel}>{s.label}</div>
-                                        {i < stageData.length - 1 && <div style={P.connector}></div>}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div style={P.contentArea}>
-                            <div style={P.content}>
-                                <div style={P.explainRow}>
-                                    <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#2c3e50' }}>Stage {current.num}: {current.label}</h2>
-                                    <div style={{ fontSize: '13px', fontWeight: '600', color: A, marginBottom: '8px' }}>Techniques: {current.techniques}</div>
-                                    <p style={P.explain}>{current.explain}</p>
-                                </div>
-
-                                <StageComponent />
-
-                                <div style={P.insight}>
-                                    <div style={P.insightLabel}>💡 Key Insight</div>
-                                    <div>
-                                        {current.num === 1 && 'Zero-Shot = trust the AI\'s knowledge. Few-Shot = teach by showing examples. Start zero-shot, add examples when output isn\'t right.'}
-                                        {current.num === 2 && 'CoT = show your math. ReAct = think, act, observe, repeat. Use CoT for reasoning tasks, ReAct for multi-step workflows with tools.'}
-                                        {current.num === 3 && 'Role-Based = wear the right hat for specialized expertise. Chaining = assembly-line processing. Combine for sophisticated multi-step workflows.'}
-                                        {current.num === 4 && 'Constraints = guardrails on a highway preventing wrong turns. Negative prompting = "no photos with red eye." Both prevent unwanted outputs.'}
-                                        {current.num === 5 && 'Self-Consistency = jury deliberation finding consensus. Iterative = sculpting from rough block to finished piece. Use for high-stakes decisions.'}
-                                        {current.num === 6 && 'Meta-Prompting = teaching AI to fish (write prompts). Output Structuring = the mold that shapes output. Essential for automation pipelines.'}
-                                        {current.num === 7 && 'Production AI systems combine 3-5 techniques strategically. Master each individually, then compose them like Lego blocks. Always test and iterate.'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Web Search Loop:</div>
+                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
+                  <strong style={{ color: A }}>Thought:</strong> I need current weather for NYC. Let me search.
                 </div>
-            );
+                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
+                  <strong style={{ color: A }}>Action:</strong> search("NYC weather today")
+                </div>
+                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
+                  <strong style={{ color: GD }}>Observation:</strong> Weather API returned: 72°F, partly cloudy, 15mph wind
+                </div>
+                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
+                  <strong style={{ color: A }}>Thought:</strong> I have the weather. User might want activity recommendations.
+                </div>
+                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
+                  <strong style={{ color: A }}>Action:</strong> search("outdoor activities NYC pleasant weather")
+                </div>
+                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
+                  <strong style={{ color: GD }}>Observation:</strong> Central Park, Brooklyn Bridge walk, outdoor cafes recommended
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Explicit step-by-step reasoning dramatically improves accuracy on math, logic, and multi-step problems. ReAct adds tool integration for real-world actions.
+          </div>
+        </>
+      );
+    };
+
+    // Stage 3: Role-Based & Prompt Chaining
+    const S3 = () => {
+      const [role, setRole] = useState('engineer');
+      const roles = {
+        engineer: { title: 'Data Engineer', response: 'Design a scalable pipeline using Apache Spark for batch processing, Kafka for streaming, and PostgreSQL for the warehouse. Implement incremental loading with change data capture to minimize load times and ensure data consistency across systems.' },
+        legal: { title: 'Legal Expert', response: 'Review data governance policies for compliance with GDPR, CCPA, and local regulations. Establish clear data retention policies, access controls, and audit trails. Ensure contracts include proper data processing agreements with third parties.' },
+        product: { title: 'Product Manager', response: 'Focus on data that drives user engagement metrics and revenue. Prioritize analytics for A/B testing, user funnel analysis, and retention cohorts. Ensure dashboards surface insights that directly impact product decisions.' }
+      };
+
+      return (
+        <>
+          <div className="explanation">
+            Role-based prompting gives the AI a persona to adopt. Prompt chaining breaks complex tasks into sequential prompts, each building on the previous.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+            <div className="role-selector">
+              {Object.entries(roles).map(([key, val]) => (
+                <button
+                  key={key}
+                  className={`role-btn ${role === key ? 'selected' : ''}`}
+                  onClick={() => setRole(key)}
+                >
+                  {val.title}
+                </button>
+              ))}
+            </div>
+            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50', width: '100%' }}>Question: How should we build our data infrastructure?</div>
+            <div className="response-box">
+              {roles[role].response}
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Assign specific personas and constraints to get highly tailored responses. Chaining prompts helps break down complex projects into manageable steps.
+          </div>
+        </>
+      );
+    };
+
+    // Stage 4: Constraints & Negative Prompting
+    const S4 = () => {
+      const [constraints, setConstraints] = useState([
+        'Must include quantified metrics (numbers, percentages)',
+        'No marketing fluff or hype language'
+      ]);
+      const [negatives, setNegatives] = useState([
+        'DO NOT include apologies or disclaimers',
+        'DO NOT use print statements'
+      ]);
+
+      const addConstraint = () => setConstraints([...constraints, 'New constraint...']);
+      const removeConstraint = (i) => setConstraints(constraints.filter((_, idx) => idx !== i));
+      const addNegative = () => setNegatives([...negatives, 'New negative constraint...']);
+      const removeNegative = (i) => setNegatives(negatives.filter((_, idx) => idx !== i));
+
+      return (
+        <>
+          <div className="explanation">
+            Constraints and negative prompting narrow the solution space by explicitly defining what you DO want and what you DON'T want.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>MUST Include:</div>
+                <div className="constraint-builder">
+                  {constraints.map((c, i) => (
+                    <div key={i} className="constraint-input">
+                      <input type="text" value={c} readOnly className="constraint-box" />
+                      <button className="remove-btn" onClick={() => removeConstraint(i)}>×</button>
+                    </div>
+                  ))}
+                  <button className="add-btn" onClick={addConstraint}>+ Add Constraint</button>
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>MUST NOT Do:</div>
+                <div className="constraint-builder">
+                  {negatives.map((n, i) => (
+                    <div key={i} className="constraint-input">
+                      <input type="text" value={n} readOnly className="constraint-box" />
+                      <button className="remove-btn" onClick={() => removeNegative(i)}>×</button>
+                    </div>
+                  ))}
+                  <button className="add-btn" onClick={addNegative}>+ Add Negative</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Clear constraints prevent bad outputs. Negative prompting ("don't apologize") often works better than hoping the AI infers your preferences.
+          </div>
+        </>
+      );
+    };
+
+    // Stage 5: Recursive Reasoning
+    const S5 = () => {
+      const [activeTab, setActiveTab] = useState('decompose');
+      return (
+        <>
+          <div className="explanation">
+            Recursive reasoning breaks a complex problem into smaller sub-problems, solves each independently, then combines results. Multi-path analysis evaluates multiple solution routes.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+            <div className="tabs">
+              <button className={`tab ${activeTab === 'decompose' ? 'active' : ''}`} onClick={() => setActiveTab('decompose')}>Decomposition</button>
+              <button className={`tab ${activeTab === 'multipath' ? 'active' : ''}`} onClick={() => setActiveTab('multipath')}>Multi-Path</button>
+            </div>
+            {activeTab === 'decompose' ? (
+              <div style={{ width: '100%' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>Problem: Design a recommendation engine</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2c3e50' }}>
+                    <strong style={{ color: A }}>Sub-problem 1:</strong> How do we collect user preferences?
+                  </div>
+                  <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2c3e50' }}>
+                    <strong style={{ color: A }}>Sub-problem 2:</strong> What algorithm ranks items by relevance?
+                  </div>
+                  <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2c3e50' }}>
+                    <strong style={{ color: A }}>Sub-problem 3:</strong> How do we handle cold-start users?
+                  </div>
+                  <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2d5016', marginTop: '12px' }}>
+                    <strong style={{ color: GD }}>Integration:</strong> Combine collaborative filtering + content-based + cold-start strategy
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ width: '100%' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>Problem: Improve user retention</div>
+                <div className="analysis-paths">
+                  <div className="analysis-path">
+                    <strong style={{ color: A, display: 'block', marginBottom: '8px' }}>Path A: Engagement Focus</strong>
+                    Increase feature usage through notifications and tutorials. Measurable by daily active users.
+                  </div>
+                  <div className="analysis-path">
+                    <strong style={{ color: A, display: 'block', marginBottom: '8px' }}>Path B: Community Focus</strong>
+                    Build social connections. Measurable by referral rate and group activity.
+                  </div>
+                  <div className="analysis-path">
+                    <strong style={{ color: A, display: 'block', marginBottom: '8px' }}>Path C: Value Focus</strong>
+                    Improve core product value. Measurable by Net Promoter Score.
+                  </div>
+                </div>
+                <div className="consensus-panel">
+                  <strong>Consensus:</strong> Combine all three. Path B (community) creates stickiness that enables Path A (engagement). Path C ensures there's actual value to engage with.
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Breaking hard problems into pieces reveals missing assumptions. Exploring multiple paths prevents tunnel vision and finds better integrated solutions.
+          </div>
+        </>
+      );
+    };
+
+    // Stage 6: Output Formatting & Structure
+    const S6 = () => {
+      const [format, setFormat] = useState('json');
+      const examples = {
+        json: { label: 'JSON', code: '{"name": "Alice", "department": "Engineering", "yearsAtCompany": 3}' },
+        csv: { label: 'CSV', code: 'Name,Department,Years\nAlice,Engineering,3' },
+        markdown: { label: 'Markdown', code: '### Alice\n- Department: Engineering\n- Tenure: 3 years' }
+      };
+
+      return (
+        <>
+          <div className="explanation">
+            Specifying output format ensures the AI responds in a way your downstream code can easily parse and process.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+            <div className="tabs">
+              {Object.entries(examples).map(([key, val]) => (
+                <button
+                  key={key}
+                  className={`tab ${format === key ? 'active' : ''}`}
+                  onClick={() => setFormat(key)}
+                >
+                  {val.label}
+                </button>
+              ))}
+            </div>
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Prompt:</div>
+              <div className="code-block">Extract employee information into {examples[format].label} format</div>
+              <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '12px', marginBottom: '8px', color: '#2c3e50' }}>Expected Output:</div>
+              <div className="code-output">{examples[format].code}</div>
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Specify format explicitly: JSON, CSV, Markdown, XML. The AI will structure output correctly, saving you parsing headaches downstream.
+          </div>
+        </>
+      );
+    };
+
+    // Stage 7: Few-Shot Examples & Guardrails
+    const S7 = () => {
+      return (
+        <>
+          <div className="explanation">
+            Few-shot examples show the AI the exact style and quality bar you expect. This is more powerful than lengthy instructions.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Example 1 (Good):</div>
+              <div className="code-block" style={{ background: '#f0faf0', color: '#2d5016', fontFamily: 'inherit' }}>
+                "The report shows 15% growth in Q2 revenue, driven by a 22% increase in enterprise customers."
+              </div>
+              <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '12px', marginBottom: '8px', color: '#2c3e50' }}>Example 2 (Good):</div>
+              <div className="code-block" style={{ background: '#f0faf0', color: '#2d5016', fontFamily: 'inherit' }}>
+                "Marketing spend was $450K, generating $1.2M in attributed revenue (2.7x ROI)."
+              </div>
+              <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '12px', marginBottom: '8px', color: '#2c3e50' }}>Example 3 (Avoid):</div>
+              <div style={{ background: '#fef5f5', color: '#8b3a3a', padding: '12px', borderRadius: '6px', fontFamily: 'inherit', fontSize: '13px', border: '1px solid #e9b0b0' }}>
+                "Our amazing product absolutely crushed it this quarter with incredible results!" (vague, no metrics)
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Show 2-3 high-quality examples of what you want, plus 1 example of what to avoid. The AI learns your style and quality bar from examples better than instructions.
+          </div>
+        </>
+      );
+    };
+
+    // Stage 8: Summary
+    const S8 = () => {
+      const takeaways = [
+        { title: 'Few-Shot > Zero-Shot', content: 'Always provide examples for consistent, high-quality output.' },
+        { title: 'Chain Your Thinking', content: 'Explicit step-by-step reasoning beats hoping for the right answer.' },
+        { title: 'Assign a Role', content: 'Give the AI a persona to get domain-specific, tailored responses.' },
+        { title: 'Be Explicit', content: 'Constraints, format specs, and negative prompts prevent bad outputs.' },
+        { title: 'Break It Down', content: 'Decompose complex problems into sub-problems to improve accuracy.' },
+        { title: 'Test Multiple Paths', content: 'Explore alternative solutions and combine the best parts.' }
+      ];
+
+      return (
+        <>
+          <div className="explanation">
+            Mastering prompt engineering means combining these techniques strategically. The best prompts use multiple methods together.
+          </div>
+          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+            <div className="key-takeaways">
+              {takeaways.map((takeaway, idx) => (
+                <div key={idx} className="takeaway-card">
+                  <div className="takeaway-title">{takeaway.title}</div>
+                  <div className="takeaway-content">{takeaway.content}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
+            Prompt engineering is iterative. Test your prompts, measure results, and refine. Small tweaks often yield dramatic improvements in output quality.
+          </div>
+        </>
+      );
+    };
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stageIcons = [
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h10z"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/><circle cx="12" cy="12" r="3"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 7l-5-5-5 5M7 17l5 5 5-5"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"/></svg>'
+      ];
+
+      const stages = [
+        { icon: stageIcons[0], label: 'Zero vs Few-Shot', component: S1 },
+        { icon: stageIcons[1], label: 'Chain-of-Thought', component: S2 },
+        { icon: stageIcons[2], label: 'Role-Based', component: S3 },
+        { icon: stageIcons[3], label: 'Constraints', component: S4 },
+        { icon: stageIcons[4], label: 'Recursive', component: S5 },
+        { icon: stageIcons[5], label: 'Formatting', component: S6 },
+        { icon: stageIcons[6], label: 'Few-Shot', component: S7 },
+        { icon: stageIcons[7], label: 'Summary', component: S8 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) {
+          setCurrentStage(currentStage + 1);
         }
+      };
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
+      const handlePrev = () => {
+        if (currentStage > 0) {
+          setCurrentStage(currentStage - 1);
+        }
+      };
+
+      const handleStageClick = (idx) => {
+        setCurrentStage(idx);
+      };
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => (
+              <React.Fragment key={idx}>
+                <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                  <button
+                    className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                    onClick={() => handleStageClick(idx)}
+                    dangerouslySetInnerHTML={{__html: stage.icon}}
+                  />
+                  <div className="step-btn-label">{stage.label}</div>
+                </div>
+                {idx < stages.length - 1 && (
+                  <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">← Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">2.2</span>
+                  <div className="title">Prompt Techniques Toolkit</div>
+                </div>
+                <div style={{ marginLeft: '16px' }}>
+                  <div className="badge">DEEP DIVE</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of {stages.length}</span>
+                <div className="nav-arrows">
+                  <button
+                    className="arrow-btn"
+                    onClick={handlePrev}
+                    disabled={currentStage === 0}
+                    title="Previous stage"
+                  >
+                    &#8592;
+                  </button>
+                  <button
+                    className="arrow-btn"
+                    onClick={handleNext}
+                    disabled={currentStage === stages.length - 1}
+                    title="Next stage"
+                  >
+                    &#8594;
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
 </body>
 </html>
