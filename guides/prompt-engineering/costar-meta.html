@@ -20,7 +20,6 @@
       background: #ffffff;
       color: #1a1a1a;
       height: 100vh;
-      overflow: hidden;
     }
 
     #root {
@@ -65,6 +64,7 @@
       justify-content: center;
       font-size: 26px;
       transition: all 0.3s ease;
+      position: relative;
       flex-shrink: 0;
     }
 
@@ -231,6 +231,7 @@
       border-radius: 16px;
       padding: 40px;
       border: 1px solid #e8e3f8;
+      min-height: auto;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -246,6 +247,7 @@
       font-size: 17px;
       line-height: 1.7;
       margin-top: 24px;
+      position: relative;
     }
 
     .insight-label {
@@ -602,27 +604,27 @@
       return (
         <>
           <div className="explanation">
-            Prompt engineering is about structuring your instructions to get the best possible outputs from AI. Think of it like giving directions — \u201cgo somewhere nice\u201d gets you lost, but \u201ctake I-95 North to Exit 12, turn left at the light\u201d gets you exactly where you want to go.
+            Prompt engineering is about structuring your instructions to get the best possible outputs from AI. Think of it like giving directions &mdash; &ldquo;go somewhere nice&rdquo; gets you lost, but &ldquo;take I-95 North to Exit 12, turn left at the light&rdquo; gets you exactly where you want to go.
           </div>
           <div className="scene-card">
             <div className="comparison-box">
               <div className="comparison-item bad fade-in">
-                <div className="comparison-title">\u274c Vague Prompt</div>
+                <div className="comparison-title">&#10060; Vague Prompt</div>
                 <div className="comparison-content">
-                  \u201cWrite an email\u201d
+                  &ldquo;Write an email&rdquo;
                 </div>
               </div>
               <div className="comparison-item good fade-in" style={{ animationDelay: '0.2s' }}>
-                <div className="comparison-title">\u2713 Structured Prompt</div>
+                <div className="comparison-title">&#10003; Structured Prompt</div>
                 <div className="comparison-content">
-                  \u201cWrite a professional rejection email to a candidate, emphasizing their strengths and offering feedback\u201d
+                  &ldquo;Write a professional rejection email to a candidate, emphasizing their strengths and offering feedback&rdquo;
                 </div>
               </div>
             </div>
           </div>
           <div className="insight-box">
             <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            More detail in your prompt = better, more targeted outputs. You\u2019re essentially teaching the AI what \u201cgood\u201d looks like for your specific need.
+            More detail in your prompt = better, more targeted outputs. You&rsquo;re essentially teaching the AI what &ldquo;good&rdquo; looks like for your specific need.
           </div>
         </>
       );
@@ -676,7 +678,7 @@
                   border: '2px solid #6c5ce7'
                 }}
               >
-                {showPrompt ? '\u270d\ufe0f Optimized Prompt' : '\u2728 Generate Optimized Prompt'}
+                {showPrompt ? '✍️ Optimized Prompt' : '✨ Generate Optimized Prompt'}
               </button>
               <div className={`generated-prompt ${showPrompt ? 'show' : ''}`} style={{ animationDelay: '0.2s' }}>
                 <strong>AI-Generated Optimized Prompt:</strong>
@@ -701,7 +703,7 @@
           id: 'C',
           label: 'Context',
           description: 'Background information and situation',
-          example: 'We\u2019re rejecting a high-potential candidate due to cultural fit concerns.'
+          example: "We're rejecting a high-potential candidate due to cultural fit concerns."
         },
         {
           id: 'O',
@@ -776,8 +778,8 @@
           output: 'Dear Candidate,\n\nWe have decided to move forward with other candidates. Thank you for your interest.\n\nBest regards'
         },
         good: {
-          prompt: 'Context: We\u2019re rejecting a talented engineer who fit our technical needs but not our fast-paced culture. Objective: Write a rejection email that preserves the relationship and offers constructive feedback. Style: Professional yet warm. Tone: Empathetic and encouraging. Audience: An experienced senior engineer. Response: Email format, 3-4 paragraphs.',
-          output: 'Dear [Name],\n\nThank you for the time and effort you invested in our interview process. Your technical skills are genuinely impressive, and we were impressed by your portfolio.\n\nAfter careful consideration, we\u2019ve decided to move in a different direction. This wasn\u2019t about your qualifications — it\u2019s about finding the right cultural fit for our high-velocity environment. Your thoughtful, methodical approach is a strength; it may simply align better with teams that value that style.\n\nWe\u2019d love to stay connected. Companies like ours often hire great people years later, and we see potential collaboration ahead.\n\nBest regards'
+          prompt: "Context: We're rejecting a talented engineer who fit our technical needs but not our fast-paced culture. Objective: Write a rejection email that preserves the relationship and offers constructive feedback. Style: Professional yet warm. Tone: Empathetic and encouraging. Audience: An experienced senior engineer. Response: Email format, 3-4 paragraphs.",
+          output: "Dear [Name],\n\nThank you for the time and effort you invested in our interview process. Your technical skills are genuinely impressive, and we were impressed by your portfolio.\n\nAfter careful consideration, we've decided to move in a different direction. This wasn't about your qualifications — it's about finding the right cultural fit for our high-velocity environment. Your thoughtful, methodical approach is a strength; it may simply align better with teams that value that style.\n\nWe'd love to stay connected. Companies like ours often hire great people years later, and we see potential collaboration ahead.\n\nBest regards"
         }
       };
 
@@ -798,7 +800,7 @@
                     border: '2px solid #2ecc71'
                   }}
                 >
-                  {compare ? '\u2713 COSTAR Version' : '\u274c Vague Version'}
+                  {compare ? '✓ COSTAR Version' : '✗ Vague Version'}
                 </button>
               </div>
               <div className={compare ? 'slide-in-right' : 'slide-in-left'}>
@@ -853,27 +855,27 @@
         {
           id: 1,
           question: 'Do you know exactly what you want?',
-          answer: 'YES \u2192 Use COSTAR\nYou have a clear goal and just need to structure it perfectly. COSTAR gives you the exact framework to deliver all 6 dimensions.',
-          example: 'Scenario A: "I need a JSON response with specific fields" \u2192 COSTAR is your tool.'
+          answer: "YES → Use COSTAR\nYou have a clear goal and just need to structure it perfectly. COSTAR gives you the exact framework to deliver all 6 dimensions.",
+          example: "Scenario A: 'I need a JSON response with specific fields' → COSTAR is your tool."
         },
         {
           id: 2,
           question: 'Are you unsure how to ask?',
-          answer: 'YES \u2192 Use Meta Prompting\nYour goal is clear, but you don\'t know how to structure the request. Let the AI craft the perfect prompt.',
-          example: 'Scenario B: "I want to automate something but don\'t know how to ask" \u2192 Start with Meta Prompting.'
+          answer: "YES → Use Meta Prompting\nYour goal is clear, but you don't know how to structure the request. Let the AI craft the perfect prompt.",
+          example: "Scenario B: 'I want to automate something but don't know how to ask' → Start with Meta Prompting."
         },
         {
           id: 3,
           question: 'Is this complex and multi-step?',
-          answer: 'YES \u2192 Meta Prompting First, Then COSTAR\nUse Meta Prompting to break down the problem, then COSTAR to execute each piece with precision.',
-          example: 'Scenario C: "Build a complete customer onboarding flow" \u2192 Meta Prompt for structure, then COSTAR for each step.'
+          answer: "YES → Meta Prompting First, Then COSTAR\nUse Meta Prompting to break down the problem, then COSTAR to execute each piece with precision.",
+          example: "Scenario C: 'Build a complete customer onboarding flow' → Meta Prompt for structure, then COSTAR for each step."
         }
       ];
 
       return (
         <>
           <div className="explanation">
-            Neither meta prompting nor COSTAR is universally better. Choose based on your situation: when you know your destination, use COSTAR; when you\u2019re lost, use Meta Prompting.
+            Neither meta prompting nor COSTAR is universally better. Choose based on your situation: when you know your destination, use COSTAR; when you&rsquo;re lost, use Meta Prompting.
           </div>
           <div className="scene-card">
             <div className="decision-tree">
@@ -908,12 +910,20 @@
     function Guide() {
       const [currentStage, setCurrentStage] = useState(0);
 
+      const stageIcons = [
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/><circle cx="12" cy="12" r="3"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+      ];
+
       const stages = [
-        { icon: String.fromCodePoint(0x1F4A1), label: 'What is Prompt\nEngineering?', component: S1 },
-        { icon: String.fromCodePoint(0x1F916), label: 'Meta\nPrompting', component: S2 },
-        { icon: String.fromCodePoint(0x1F387), label: 'COSTAR\nFramework', component: S3 },
-        { icon: String.fromCodePoint(0x1F3AF), label: 'Before vs\nAfter', component: S4 },
-        { icon: String.fromCodePoint(0x1F333), label: 'Which to\nUse?', component: S5 },
+        { icon: stageIcons[0], label: 'Prompt Eng', component: S1 },
+        { icon: stageIcons[1], label: 'Meta Prompt', component: S2 },
+        { icon: stageIcons[2], label: 'COSTAR', component: S3 },
+        { icon: stageIcons[3], label: 'Before/After', component: S4 },
+        { icon: stageIcons[4], label: 'Which to Use', component: S5 },
       ];
 
       const CurrentComponent = stages[currentStage].component;
@@ -936,16 +946,15 @@
 
       return (
         <div className="container">
-          <div className="sidebar">
+          <div className="sidebar scrollbar-hide">
             {stages.map((stage, idx) => (
               <React.Fragment key={idx}>
                 <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
                   <button
                     className={`step-btn ${currentStage === idx ? 'active' : ''}`}
                     onClick={() => handleStageClick(idx)}
-                  >
-                    {stage.icon}
-                  </button>
+                    dangerouslySetInnerHTML={{__html: stage.icon}}
+                  />
                   <div className="step-btn-label">{stage.label}</div>
                 </div>
                 {idx < stages.length - 1 && (
@@ -958,7 +967,7 @@
           <div className="main-content">
             <div className="top-bar">
               <div className="left-section">
-                <a href="../../index.html" className="back-link">\u2190 Back to All Guides</a>
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
                 <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                 <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                   <span className="guide-number">2.1</span>
@@ -969,7 +978,7 @@
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span className="progress-indicator">Page {currentStage + 1} of 5</span>
                 <div className="nav-arrows">
                   <button
@@ -978,7 +987,7 @@
                     disabled={currentStage === 0}
                     title="Previous stage"
                   >
-                    \u2190
+                    &#8592;
                   </button>
                   <button
                     className="arrow-btn"
@@ -986,7 +995,7 @@
                     disabled={currentStage === stages.length - 1}
                     title="Next stage"
                   >
-                    \u2192
+                    &#8594;
                   </button>
                 </div>
               </div>
