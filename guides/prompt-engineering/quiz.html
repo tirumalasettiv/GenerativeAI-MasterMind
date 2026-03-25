@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2 Quiz &mdash; Prompt Engineering</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
+    #root { height: 100vh; overflow: hidden; }
+    .container { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 120px; background: #f8f9fa; border-right: 1px solid #e0e0e0; padding: 40px 12px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .step-btn { width: 64px; height: 64px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.3s ease; position: relative; flex-shrink: 0; }
+    .step-btn.active { background: #6c5ce7; border-color: #6c5ce7; color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
+    .step-btn.correct { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .step-btn.incorrect { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+    .step-btn-label { font-size: 11px; font-weight: 600; color: #999; margin-top: 4px; text-align: center; letter-spacing: 0.3px; transition: color 0.3s ease; }
+    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
+    .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
+    .step-connector.active { background: #6c5ce7; }
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid #e0e0e0; background: white; flex-shrink: 0; }
+    .left-section { display: flex; align-items: center; gap: 20px; }
+    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .back-link:hover { color: #2ecc71; }
+    .badge { display: inline-block; background: #e8e3f8; color: #6c5ce7; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
+    .title { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; color: #1a1a1a; }
+    .nav-arrows { display: flex; gap: 12px; }
+    .arrow-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
+    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; padding: 32px 48px; gap: 30px; }
+    .explanation { font-size: 22px; line-height: 1.7; color: #2a2a2a; }
+    .scene-card { background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%); border-radius: 16px; padding: 40px; border: 1px solid #e8e3f8; min-height: auto; box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08); }
+    .insight-box { background: #f0faf0; border-left: 4px solid #2ecc71; padding: 24px; border-radius: 8px; color: #1a5e3a; font-size: 17px; line-height: 1.7; margin-top: 24px; position: relative; }
+    .insight-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #2ecc71; margin-bottom: 8px; text-transform: uppercase; }
+    .progress-indicator { font-size: 13px; font-weight: 600; color: #6c5ce7; background: #f5f3ff; padding: 4px 12px; border-radius: 12px; margin-right: 12px; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.6s ease forwards; }
+    .option-card { padding: 18px 24px; background: white; border: 2px solid #e0e0e0; border-radius: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 16px; font-size: 16px; line-height: 1.5; }
+    .option-card:hover { border-color: #6c5ce7; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108, 92, 231, 0.1); }
+    .option-card.selected { border-color: #6c5ce7; background: #f5f3ff; }
+    .option-card.correct { border-color: #2ecc71; background: #f0faf0; }
+    .option-card.incorrect { border-color: #e74c3c; background: #fef5f5; }
+    .option-card.disabled { cursor: default; opacity: 0.7; }
+    .option-card.disabled:hover { transform: none; box-shadow: none; }
+    .option-letter { width: 36px; height: 36px; border-radius: 50%; background: #f5f3ff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #6c5ce7; flex-shrink: 0; transition: all 0.3s ease; }
+    .option-card.selected .option-letter { background: #6c5ce7; border-color: #6c5ce7; color: white; }
+    .option-card.correct .option-letter { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .option-card.incorrect .option-letter { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .submit-btn { padding: 14px 40px; background: #6c5ce7; color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; letter-spacing: 0.3px; }
+    .submit-btn:hover { background: #5a4bd1; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3); }
+    .submit-btn:disabled { background: #c4bce8; cursor: not-allowed; transform: none; box-shadow: none; }
+    .section-tag { display: inline-block; background: #eee9fd; color: #6c5ce7; padding: 4px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 12px; }
+    .score-ring { width: 180px; height: 180px; position: relative; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .score-number { font-family: 'Fraunces', serif; font-size: 48px; font-weight: 700; color: #1a1a1a; line-height: 1; }
+    .score-label { font-size: 14px; color: #999; font-weight: 500; }
+    .result-card { padding: 20px 24px; background: white; border-radius: 14px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 16px; transition: all 0.3s ease; }
+    .result-card:hover { border-color: #6c5ce7; box-shadow: 0 4px 16px rgba(108, 92, 231, 0.08); }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .scale-in { animation: scaleIn 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    const QUESTIONS = [
+      { id: 1, section: "2.1 Prompt Engineering Basics", question: "What is the primary goal of prompt engineering?", options: ["Making AI responses longer and more detailed", "Structuring your instructions to get the best possible outputs from AI", "Teaching AI new information it doesn't already know", "Bypassing AI safety filters"], correct: 1, explanation: "Prompt engineering is about structuring your instructions to get the best possible outputs. Like giving directions, specificity gets you where you want to go." },
+      { id: 2, section: "2.1 Meta Prompting", question: "What is meta prompting?", options: ["Writing extremely long and detailed prompts", "Using multiple AI models simultaneously", "Asking the AI to write the prompt for you", "Copying prompts from a template library"], correct: 2, explanation: "Meta prompting is asking the AI to write the prompt for you. Instead of struggling to structure a complex request, you tell the AI your goal and let it be your prompt engineer." },
+      { id: 3, section: "2.1 Meta Prompting", question: "When should you use meta prompting instead of writing the prompt yourself?", options: ["When you want the shortest possible response", "When you know the exact format you need", "When you're unsure how to structure a complex request", "When working with image generation only"], correct: 2, explanation: "Meta prompting is ideal when you're unsure how to ask. Your goal is clear, but you don't know how to structure the request. Let the AI craft the perfect prompt for you." },
+      { id: 4, section: "2.1 COSTAR Framework", question: "What does the 'S' in the COSTAR framework stand for?", options: ["Structure", "Summary", "Style", "Scope"], correct: 2, explanation: "The 'S' in COSTAR stands for Style \u2014 how the output should be written. COSTAR covers Context, Objective, Style, Tone, Audience, and Response." },
+      { id: 5, section: "2.1 COSTAR Framework", question: "What happens when you use all 6 COSTAR components in a prompt?", options: ["The AI responds faster", "The AI uses less computing power", "The AI understands not just WHAT to do, but HOW, for WHOM, and in what FORMAT", "The AI bypasses its content filters"], correct: 2, explanation: "When you fill all 6 COSTAR components, the AI understands the full picture. Missing even one component often results in generic, off-target outputs." },
+      { id: 6, section: "2.1 When to Use What", question: "For a complex, multi-step project, what is the recommended approach?", options: ["Use only COSTAR for every step", "Use only meta prompting for the entire project", "Use meta prompting first to break it down, then COSTAR for each piece", "Avoid frameworks entirely and write freeform prompts"], correct: 2, explanation: "For complex tasks, use meta prompting first to break down the problem into steps, then apply COSTAR to execute each piece with precision. The best prompt engineers use both." },
+      { id: 7, section: "2.2 Zero-Shot vs Few-Shot", question: "What is the key difference between zero-shot and few-shot prompting?", options: ["Zero-shot is faster; few-shot is slower", "Zero-shot provides no examples; few-shot provides examples of the expected output", "Zero-shot works only with text; few-shot works with images too", "Zero-shot requires a larger model; few-shot works on any model"], correct: 1, explanation: "Zero-shot gives the AI a task with no examples. Few-shot provides 2-3 examples of the exact format and pattern you want, dramatically improving accuracy and consistency." },
+      { id: 8, section: "2.2 Chain-of-Thought", question: "What does Chain-of-Thought (CoT) prompting do?", options: ["Chains multiple AI models together", "Breaks complex problems into explicit step-by-step reasoning", "Links multiple conversations into one thread", "Creates a chain of automated prompts"], correct: 1, explanation: "Chain-of-Thought prompting breaks complex problems into explicit steps. This dramatically improves accuracy on math, logic, and multi-step problems by making the reasoning visible." },
+      { id: 9, section: "2.2 ReAct Pattern", question: "How does ReAct extend Chain-of-Thought reasoning?", options: ["By making responses shorter and more concise", "By adding actions and observations for real-world tool use", "By removing the need for step-by-step reasoning", "By using emotional prompts to improve output quality"], correct: 1, explanation: "ReAct extends Chain-of-Thought by adding a Thought-Action-Observation loop. The AI thinks about what to do, takes an action (like searching), observes the result, then continues reasoning." },
+      { id: 10, section: "2.2 Role-Based Prompting", question: "Why is role-based prompting effective?", options: ["It forces the AI to use a specific programming language", "It gives the AI a persona to adopt, producing domain-specific, tailored responses", "It reduces the cost of API calls", "It makes the AI respond in a different language"], correct: 1, explanation: "Assigning a specific persona gives the AI context to produce highly tailored, domain-specific responses instead of generic answers." },
+      { id: 11, section: "2.2 Negative Prompting", question: "What is negative prompting?", options: ["Giving the AI feedback when it produces wrong answers", "Using negative sentiment in your prompts", "Explicitly telling the AI what NOT to do in its response", "Asking the AI to find problems in existing content"], correct: 2, explanation: "Negative prompting explicitly defines what you DON'T want. It often works better than hoping the AI infers your preferences." },
+      { id: 12, section: "2.2 Recursive Reasoning", question: "What is the main benefit of recursive reasoning in prompting?", options: ["It makes the AI respond faster", "It breaks complex problems into smaller sub-problems, solving each independently", "It automatically retries failed prompts", "It memorizes solutions for future use"], correct: 1, explanation: "Recursive reasoning decomposes a hard problem into manageable sub-problems, solves each independently, then combines the results. This reveals missing assumptions and improves accuracy." },
+      { id: 13, section: "2.2 Output Formatting", question: "Why should you specify the output format explicitly in your prompt?", options: ["It makes the AI use less memory", "It ensures the AI responds in a way your downstream code can parse and process", "It forces the AI to be more creative", "It is required by all AI models"], correct: 1, explanation: "Specifying format (JSON, CSV, Markdown, XML) ensures the AI structures output correctly, saving you parsing headaches downstream and making the output immediately usable." },
+      { id: 14, section: "2.2 Few-Shot Examples", question: "What is the recommended approach for using few-shot examples?", options: ["Provide 10+ examples for maximum accuracy", "Show only examples of what you want, never what to avoid", "Show 2-3 good examples plus 1 example of what to avoid", "Use examples only for code generation tasks"], correct: 2, explanation: "Show 2-3 high-quality examples of what you want, plus 1 example of what to avoid. The AI learns your style and quality bar from examples better than from lengthy instructions." },
+      { id: 15, section: "2.2 Combining Techniques", question: "What is the key takeaway about mastering prompt engineering?", options: ["Always use the most complex technique available", "Stick to one technique and master it completely", "Combine multiple techniques strategically and iterate based on results", "The specific technique doesn't matter as long as prompts are long enough"], correct: 2, explanation: "Prompt engineering is iterative. The best prompts use multiple methods together. Test your prompts, measure results, and refine. Small tweaks often yield dramatic improvements." },
+    ];
+
+    const SECTION_ICONS = {
+      "2.1": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+      "2.2": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h10z"/></svg>',
+    };
+
+    const INSIGHT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>';
+
+    function QuestionView({ question, questionIndex, totalQuestions, selectedAnswer, answered, onSelect, onSubmit, onNext }) {
+      const letters = ['A', 'B', 'C', 'D'];
+      return (
+        <div className="fade-in" key={question.id}>
+          <div className="section-tag">{question.section}</div>
+          <div className="explanation">{question.question}</div>
+          <div className="scene-card">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+              {question.options.map((option, idx) => {
+                let cardClass = 'option-card';
+                if (answered) { cardClass += ' disabled'; if (idx === question.correct) { cardClass += ' correct'; } else if (idx === selectedAnswer && idx !== question.correct) { cardClass += ' incorrect'; } } else if (selectedAnswer === idx) { cardClass += ' selected'; }
+                return (
+                  <div key={idx} className={cardClass} onClick={() => !answered && onSelect(idx)} style={{ animationDelay: `${idx * 0.08}s` }}>
+                    <div className="option-letter">{letters[idx]}</div>
+                    <div style={{ flex: 1 }}>{option}</div>
+                    {answered && idx === question.correct && (<span style={{ fontSize: 20, flexShrink: 0 }}>&#10003;</span>)}
+                    {answered && idx === selectedAnswer && idx !== question.correct && (<span style={{ fontSize: 20, flexShrink: 0 }}>&#10007;</span>)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {!answered && (<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}><button className="submit-btn" disabled={selectedAnswer === null} onClick={onSubmit}>Check Answer</button></div>)}
+          {answered && (<div className="insight-box fade-in"><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> {selectedAnswer === question.correct ? 'CORRECT!' : 'EXPLANATION'}</div>{question.explanation}</div>)}
+          {answered && (<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }} className="fade-in"><button className="submit-btn" onClick={onNext}>{questionIndex < totalQuestions - 1 ? 'Next Question →' : 'See Results'}</button></div>)}
+        </div>
+      );
+    }
+
+    function ResultsView({ questions, answers }) {
+      const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      const circumference = 2 * Math.PI * 75;
+      const strokeDashoffset = circumference - (percentage / 100) * circumference;
+      const getGrade = () => {
+        if (percentage >= 90) return { label: 'Outstanding!', color: '#2ecc71', emoji: '\uD83C\uDF1F' };
+        if (percentage >= 70) return { label: 'Great Job!', color: '#6c5ce7', emoji: '\uD83D\uDCAA' };
+        if (percentage >= 50) return { label: 'Good Effort!', color: '#f39c12', emoji: '\uD83D\uDC4D' };
+        return { label: 'Keep Learning!', color: '#e74c3c', emoji: '\uD83D\uDCDA' };
+      };
+      const grade = getGrade();
+      const sectionScores = {};
+      questions.forEach((q, i) => { const sec = q.section.split(' ')[0]; if (!sectionScores[sec]) sectionScores[sec] = { correct: 0, total: 0, name: q.section }; sectionScores[sec].total++; if (answers[i] === q.correct) sectionScores[sec].correct++; });
+
+      return (
+        <div className="scale-in">
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>{grade.emoji}</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 32, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>{grade.label}</div>
+            <div style={{ fontSize: 16, color: '#999' }}>Module 2: Prompt Engineering</div>
+          </div>
+          <div className="scene-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 48, flexWrap: 'wrap' }}>
+            <div className="score-ring">
+              <svg width="180" height="180" viewBox="0 0 180 180">
+                <circle cx="90" cy="90" r="75" fill="none" stroke="#e8e8f0" strokeWidth="10" />
+                <circle cx="90" cy="90" r="75" fill="none" stroke={grade.color} strokeWidth="10" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} style={{ transition: 'stroke-dashoffset 1s ease' }} />
+              </svg>
+              <div className="score-text"><div className="score-number">{percentage}%</div><div className="score-label">{correctCount}/{questions.length}</div></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 280 }}>
+              {Object.entries(sectionScores).map(([sec, data]) => (
+                <div key={sec} className="result-card">
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: data.correct === data.total ? '#f0faf0' : '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }} dangerouslySetInnerHTML={{__html: SECTION_ICONS[sec] || ''}} />
+                  <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{data.name}</div><div style={{ fontSize: 12, color: '#999' }}>{data.correct}/{data.total} correct</div></div>
+                  <div style={{ padding: '4px 12px', borderRadius: 10, fontSize: 12, fontWeight: 700, background: data.correct === data.total ? '#f0faf0' : '#fef5f5', color: data.correct === data.total ? '#2ecc71' : '#e74c3c' }}>{Math.round((data.correct / data.total) * 100)}%</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box" style={{ marginTop: 24 }}><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> RECOMMENDATION</div>{percentage >= 90 ? "Excellent mastery of prompt engineering! You're ready to move on to Module 3: Context Engineering and RAG." : percentage >= 70 ? "Strong understanding! Review the sections you missed, then advance to Context Engineering." : "Consider revisiting the guide sections where you scored below 100% before moving to the next module."}</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
+            <a href="../../index.html" className="submit-btn" style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}>Back to Guides</a>
+            <button className="submit-btn" onClick={() => window.location.reload()}>Retake Quiz</button>
+          </div>
+        </div>
+      );
+    }
+
+    function Quiz() {
+      const [currentQuestion, setCurrentQuestion] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+      const [answered, setAnswered] = useState(false);
+      const [answers, setAnswers] = useState([]);
+      const [showResults, setShowResults] = useState(false);
+      const contentRef = useRef(null);
+
+      const handleSelect = (idx) => setSelectedAnswer(idx);
+      const handleSubmit = () => { setAnswered(true); const na = [...answers]; na[currentQuestion] = selectedAnswer; setAnswers(na); };
+      const handleNext = () => { if (currentQuestion < QUESTIONS.length - 1) { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(null); setAnswered(false); if (contentRef.current) contentRef.current.scrollTop = 0; } else { setShowResults(true); } };
+      const handlePrev = () => { if (currentQuestion > 0 && !showResults) { setCurrentQuestion(currentQuestion - 1); setSelectedAnswer(answers[currentQuestion - 1] ?? null); setAnswered(answers[currentQuestion - 1] !== undefined); if (contentRef.current) contentRef.current.scrollTop = 0; } };
+      const handleStageClick = (idx) => { if (showResults) return; if (idx <= answers.length) { setCurrentQuestion(idx); setSelectedAnswer(answers[idx] ?? null); setAnswered(answers[idx] !== undefined); if (contentRef.current) contentRef.current.scrollTop = 0; } };
+      const getStepStatus = (idx) => { if (answers[idx] !== undefined) { return answers[idx] === QUESTIONS[idx].correct ? 'correct' : 'incorrect'; } return ''; };
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {QUESTIONS.map((q, idx) => (
+              <React.Fragment key={idx}>
+                <div className={`step-wrapper ${currentQuestion === idx && !showResults ? 'active' : ''}`}>
+                  <button className={`step-btn ${currentQuestion === idx && !showResults ? 'active' : ''} ${getStepStatus(idx)}`} onClick={() => handleStageClick(idx)} style={{ fontSize: 16, fontWeight: 700 }}>
+                    {answers[idx] !== undefined ? (answers[idx] === QUESTIONS[idx].correct ? '\u2713' : '\u2717') : idx + 1}
+                  </button>
+                  <div className="step-btn-label">Q{idx + 1}</div>
+                </div>
+                {idx < QUESTIONS.length - 1 && (<div className={`step-connector ${answers[idx] !== undefined ? 'active' : ''}`} />)}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
+                <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">2.3</span>
+                  <div className="title">Module 2 Quiz</div>
+                </div>
+                <div style={{ marginLeft: 16 }}><div className="badge">QUIZ</div></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {!showResults && <span className="progress-indicator">Question {currentQuestion + 1} of {QUESTIONS.length}</span>}
+                {showResults && <span className="progress-indicator">Results</span>}
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentQuestion === 0 || showResults} title="Previous question">&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={!answered || showResults} title="Next question">&#8594;</button>
+                </div>
+              </div>
+            </div>
+            <div className="content-area scrollbar-hide" ref={contentRef}>
+              {showResults ? <ResultsView questions={QUESTIONS} answers={answers} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Quiz />);
+  </script>
+</body>
+</html>
