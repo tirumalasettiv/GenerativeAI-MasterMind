@@ -37,7 +37,7 @@
       width: 120px;
       background: #f8f9fa;
       border-right: 1px solid #e0e0e0;
-      padding: 40px 12px;
+      padding: 80px 12px 40px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -165,9 +165,26 @@
 
     .title {
       font-family: 'Fraunces', serif;
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 700;
       color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
     }
 
     .nav-arrows {
@@ -537,6 +554,7 @@
       const [mode, setMode] = useState('zero');
       return (
         <>
+          <div><div className="stage-number">Stage 1</div><div className="stage-header">Zero-Shot &amp; Few-Shot</div></div>
           <div className="explanation">
             Zero-Shot and Few-Shot prompting are foundational techniques that control how much context and examples you provide to the AI.
           </div>
@@ -589,6 +607,7 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
       const [mode, setMode] = useState('cot');
       return (
         <>
+          <div><div className="stage-number">Stage 2</div><div className="stage-header">Chain-of-Thought &amp; ReAct</div></div>
           <div className="explanation">
             Chain-of-Thought reasoning breaks complex problems into steps. ReAct extends this by adding actions and observations for tool use.
           </div>
@@ -656,6 +675,7 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
 
       return (
         <>
+          <div><div className="stage-number">Stage 3</div><div className="stage-header">Role-Based &amp; Prompt Chaining</div></div>
           <div className="explanation">
             Role-based prompting gives the AI a persona to adopt. Prompt chaining breaks complex tasks into sequential prompts, each building on the previous.
           </div>
@@ -702,6 +722,7 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
 
       return (
         <>
+          <div><div className="stage-number">Stage 4</div><div className="stage-header">Constraints &amp; Negative Prompting</div></div>
           <div className="explanation">
             Constraints and negative prompting narrow the solution space by explicitly defining what you DO want and what you DON'T want.
           </div>
@@ -746,6 +767,7 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
       const [activeTab, setActiveTab] = useState('decompose');
       return (
         <>
+          <div><div className="stage-number">Stage 5</div><div className="stage-header">Recursive Reasoning</div></div>
           <div className="explanation">
             Recursive reasoning breaks a complex problem into smaller sub-problems, solves each independently, then combines results. Multi-path analysis evaluates multiple solution routes.
           </div>
@@ -814,6 +836,7 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
 
       return (
         <>
+          <div><div className="stage-number">Stage 6</div><div className="stage-header">Output Formatting</div></div>
           <div className="explanation">
             Specifying output format ensures the AI responds in a way your downstream code can easily parse and process.
           </div>
@@ -848,6 +871,7 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
     const S7 = () => {
       return (
         <>
+          <div><div className="stage-number">Stage 7</div><div className="stage-header">Few-Shot Examples &amp; Guardrails</div></div>
           <div className="explanation">
             Few-shot examples show the AI the exact style and quality bar you expect. This is more powerful than lengthy instructions.
           </div>
@@ -888,6 +912,7 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
 
       return (
         <>
+          <div><div className="stage-number">Stage 8</div><div className="stage-header">Key Takeaways</div></div>
           <div className="explanation">
             Mastering prompt engineering means combining these techniques strategically. The best prompts use multiple methods together.
           </div>
