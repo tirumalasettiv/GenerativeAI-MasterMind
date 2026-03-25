@@ -81,12 +81,31 @@
 
         .title {
             font-family: 'Fraunces', serif;
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 700;
             color: #1a1a1a;
         }
 
-        .nav-arrows {
+        
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .nav-arrows {
             display: flex;
             gap: 10px;
             align-items: center;
@@ -133,7 +152,7 @@
             width: 120px;
             background: #f8f9fa;
             border-right: 1px solid #e0e0e0;
-            padding: 40px 12px;
+            padding: 80px 12px 40px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -221,7 +240,7 @@
 
         .stage-title {
             font-family: 'Fraunces', serif;
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 16px;
             color: #2c3e50;
@@ -782,6 +801,7 @@
 
             return (
                 <div className="content-wrapper">
+                    <div><div className="stage-number">Stage 1</div><div className="stage-header">The Training Process</div></div>
                     <h2 className="stage-title">Training</h2>
                     <div className="analogy-text">
                         "A student who reads every library book but memorizes how sentences flow, not specific facts"
@@ -869,6 +889,7 @@
 
             return (
                 <div className="content-wrapper">
+                    <div><div className="stage-number">Stage 2</div><div className="stage-header">Parameters &amp; Knowledge</div></div>
                     <h2 className="stage-title">Parameters</h2>
                     <div className="analogy-text">
                         "Like muscle memory — you can't explain how you ride a bike, but your body knows"
@@ -951,6 +972,7 @@
 
             return (
                 <div className="content-wrapper">
+                    <div><div className="stage-number">Stage 3</div><div className="stage-header">Tokens &amp; Processing</div></div>
                     <h2 className="stage-title">Tokens</h2>
                     <div className="analogy-text">
                         "Lego bricks — smaller pieces AI can mix and match"
@@ -1040,6 +1062,7 @@
 
             return (
                 <div className="content-wrapper">
+                    <div><div className="stage-number">Stage 4</div><div className="stage-header">The Transformer Architecture</div></div>
                     <h2 className="stage-title">Attention (Transformers)</h2>
                     <div className="analogy-text">
                         "Highlighting key words in a sentence — deciding what matters most"
@@ -1120,6 +1143,7 @@
 
             return (
                 <div className="content-wrapper">
+                    <div><div className="stage-number">Stage 5</div><div className="stage-header">Temperature &amp; Creativity</div></div>
                     <h2 className="stage-title">Prediction (Next Token)</h2>
                     <div className="analogy-text">
                         "Super-autocomplete — predicting the most likely next word"

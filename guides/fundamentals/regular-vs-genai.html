@@ -36,7 +36,7 @@
             width: 120px;
             background: #f8f9fa;
             border-right: 1px solid #e0e0e0;
-            padding: 40px 12px;
+            padding: 80px 12px 40px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -162,12 +162,31 @@
 
         .title {
             font-family: 'Fraunces', serif;
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 700;
             color: #1a1a1a;
         }
 
-        .nav-arrows {
+        
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .nav-arrows {
             display: flex;
             gap: 10px;
             align-items: center;
@@ -477,7 +496,7 @@
         }
 
         .card-icon {
-            font-size: 36px;
+            font-size: 28px;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
@@ -644,6 +663,7 @@
         function Stage1() {
             return (
                 <>
+                    <div><div className="stage-number">Stage 1</div><div className="stage-header">The Core Difference</div></div>
                     <p className="explanation">
                         Regular AI finds, sorts, or decides — Generative AI creates something new. One is a Picker, the other is a Maker.
                     </p>
@@ -678,6 +698,7 @@
 
             return (
                 <>
+                    <div><div className="stage-number">Stage 2</div><div className="stage-header">Picker vs Maker</div></div>
                     <p className="explanation">
                         Regular AI is like a librarian — finds existing books. Generative AI is like an author — writes new ones.
                     </p>
@@ -768,6 +789,7 @@
 
             return (
                 <>
+                    <div><div className="stage-number">Stage 3</div><div className="stage-header">Real-World Examples</div></div>
                     <p className="explanation">
                         See how the same task is handled differently by Regular AI vs Generative AI
                     </p>
@@ -854,6 +876,7 @@
 
             return (
                 <>
+                    <div><div className="stage-number">Stage 4</div><div className="stage-header">Types of AI Tasks</div></div>
                     <p className="explanation">
                         Before GenAI, these 5 types of AI were (and still are) everywhere — none of them create, they all analyze, sort, or choose.
                     </p>
@@ -921,6 +944,7 @@
 
             return (
                 <>
+                    <div><div className="stage-number">Stage 5</div><div className="stage-header">When to Use Which</div></div>
                     <p className="explanation">
                         Understanding when to use Regular AI vs GenAI is key — use the right tool for the right job
                     </p>

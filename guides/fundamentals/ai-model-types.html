@@ -105,9 +105,28 @@
 
     .title {
       font-family: 'Fraunces', serif;
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 700;
       color: #1a1a1a;
+    }
+
+    
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
     }
 
     .nav-arrows {
@@ -151,7 +170,7 @@
       width: 120px;
       background: #f8f9fa;
       border-right: 1px solid #e0e0e0;
-      padding: 40px 12px;
+      padding: 80px 12px 40px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -528,6 +547,7 @@
 
       return (
         <div style={P.scene}>
+          <div><div className="stage-number">Stage 1</div><div className="stage-header">The AI Model Landscape</div></div>
           <div style={{
             textAlign: 'center',
             marginBottom: '32px',
@@ -641,6 +661,7 @@
 
       return (
         <div style={P.scene}>
+          <div><div className="stage-number">Stage 2</div><div className="stage-header">Foundational Models</div></div>
           <div style={{
             textAlign: 'center',
             marginBottom: '24px',
@@ -754,6 +775,7 @@
 
       return (
         <div style={P.scene}>
+          <div><div className="stage-number">Stage 3</div><div className="stage-header">Proprietary vs Open Source</div></div>
           <div style={{
             textAlign: 'center',
             marginBottom: '24px',
@@ -908,6 +930,7 @@
 
       return (
         <div style={P.scene}>
+          <div><div className="stage-number">Stage 4</div><div className="stage-header">The App Layer</div></div>
           <div style={{
             textAlign: 'center',
             marginBottom: '28px',
@@ -1102,6 +1125,7 @@
 
       return (
         <div style={P.scene}>
+          <div><div className="stage-number">Stage 5</div><div className="stage-header">Choosing the Right Model</div></div>
           <div style={{
             textAlign: 'center',
             marginBottom: '24px',

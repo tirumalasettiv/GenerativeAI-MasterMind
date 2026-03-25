@@ -160,9 +160,28 @@
 
     .title {
       font-family: 'Fraunces', serif;
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 700;
       color: #1a1a1a;
+    }
+
+    
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
     }
 
     .nav-arrows {
@@ -206,7 +225,7 @@
       width: 120px;
       background: #f8f9fa;
       border-right: 1px solid #e0e0e0;
-      padding: 40px 12px;
+      padding: 80px 12px 40px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -743,6 +762,7 @@
 
       return (
         <div style={P.content}>
+          <div><div className="stage-number">Stage 1</div><div className="stage-header">V &mdash; Validate Sources</div></div>
           <div style={P.explainRow}>
             <div style={P.explain}>
               Like double-checking Wikipedia with textbooks. Always validate AI outputs against trusted, authoritative sources before using them. Don't rely on a single source.
@@ -855,6 +875,7 @@
 
       return (
         <div style={P.content}>
+          <div><div className="stage-number">Stage 2</div><div className="stage-header">E &mdash; Exclude Sensitive Data</div></div>
           <div style={P.explainRow}>
             <div style={P.explain}>
               Like not sharing passwords on social media. Never include sensitive personal data, company secrets, or confidential information in AI prompts. What you share is never truly private.
@@ -987,6 +1008,7 @@
 
       return (
         <div style={P.content}>
+          <div><div className="stage-number">Stage 3</div><div className="stage-header">R &mdash; Review for Bias</div></div>
           <div style={P.explainRow}>
             <div style={P.explain}>
               Like getting a second opinion from a friend. Review AI outputs for bias, stereotypes, factual errors, and assumptions before accepting them. AI learns from biased data.
@@ -1102,6 +1124,7 @@
 
       return (
         <div style={P.content}>
+          <div><div className="stage-number">Stage 4</div><div className="stage-header">I &mdash; Iterate Your Prompts</div></div>
           <div style={P.explainRow}>
             <div style={P.explain}>
               Like asking follow-up questions until you understand. Don't accept the first response -- refine your prompts to get progressively better results. The magic happens in iterations 2, 3, and 4.
@@ -1263,6 +1286,7 @@
 
       return (
         <div style={P.content}>
+          <div><div className="stage-number">Stage 5</div><div className="stage-header">F &mdash; Flag Uncertainty</div></div>
           <div style={P.explainRow}>
             <div style={P.explain}>
               Like putting a '?' next to anything you're not sure about. When AI gives uncertain or hedging responses, flag those sections for extra verification. Watch for qualifier words.
@@ -1422,6 +1446,7 @@
 
       return (
         <div style={P.content}>
+          <div><div className="stage-number">Stage 6</div><div className="stage-header">Y &mdash; Your Judgment is Final</div></div>
           <div style={P.explainRow}>
             <div style={P.explain}>
               You're the driver, AI is just GPS. GPS suggests a route, but you decide whether to follow it, take a detour, or go a completely different way. Your judgment is always final.
