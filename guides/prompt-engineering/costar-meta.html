@@ -175,9 +175,26 @@
 
     .title {
       font-family: 'Fraunces', serif;
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 700;
       color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
     }
 
     .nav-arrows {
@@ -341,14 +358,13 @@
     .comparison-box {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 24px;
       width: 100%;
-      max-width: 700px;
     }
 
     .comparison-item {
-      padding: 20px;
-      border-radius: 10px;
+      padding: 24px;
+      border-radius: 12px;
       border: 2px solid #e0e0e0;
     }
 
@@ -365,7 +381,7 @@
     .comparison-title {
       font-weight: 700;
       margin-bottom: 12px;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .comparison-item.bad .comparison-title {
@@ -377,7 +393,7 @@
     }
 
     .comparison-content {
-      font-size: 14px;
+      font-size: 15px;
       line-height: 1.6;
       color: #333;
     }
@@ -415,11 +431,10 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       width: 100%;
-      max-width: 700px;
     }
 
     .costar-box {
-      padding: 16px;
+      padding: 20px;
       background: white;
       border: 2px solid #e0e0e0;
       border-radius: 10px;
@@ -440,23 +455,35 @@
 
     .costar-label {
       font-weight: 700;
-      font-size: 16px;
+      font-size: 20px;
       color: #6c5ce7;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .costar-description {
-      font-size: 12px;
-      color: #666;
-      line-height: 1.4;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .costar-hint {
+      font-size: 11px;
+      color: #b0a6e8;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .costar-box.expanded .costar-hint {
+      display: none;
     }
 
     .costar-example {
       max-height: 0;
       overflow: hidden;
       transition: all 0.3s ease;
-      font-size: 12px;
+      font-size: 14px;
       color: #333;
+      line-height: 1.6;
       margin-top: 0;
       padding-top: 0;
     }
@@ -471,17 +498,16 @@
     /* Meta Prompt demo */
     .meta-demo {
       width: 100%;
-      max-width: 700px;
     }
 
     .demo-input {
       width: 100%;
-      padding: 12px;
+      padding: 14px 16px;
       background: white;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
+      font-size: 15px;
       margin-bottom: 16px;
       transition: all 0.2s ease;
     }
@@ -500,13 +526,14 @@
     }
 
     .preset-btn {
-      padding: 8px 12px;
+      padding: 10px 16px;
       background: white;
       border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      font-size: 12px;
+      border-radius: 8px;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s ease;
+      font-family: 'DM Sans', sans-serif;
     }
 
     .preset-btn:hover {
@@ -521,33 +548,35 @@
     }
 
     .generated-prompt {
-      padding: 16px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      font-size: 13px;
-      line-height: 1.6;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.7;
       color: #333;
       font-family: 'DM Sans', sans-serif;
       max-height: 0;
       overflow: hidden;
       transition: all 0.4s ease;
+      border: 1px solid #e9ecef;
+      margin-top: 16px;
     }
 
     .generated-prompt.show {
       max-height: 400px;
+      padding: 20px;
     }
 
     /* Decision tree */
     .decision-tree {
       width: 100%;
-      max-width: 700px;
     }
 
     .decision-node {
-      padding: 20px;
+      padding: 24px;
       background: white;
       border: 2px solid #e0e0e0;
-      border-radius: 10px;
+      border-radius: 12px;
       margin-bottom: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -560,9 +589,22 @@
 
     .decision-question {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 16px;
       color: #1a1a1a;
-      margin-bottom: 12px;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .expand-hint {
+      font-size: 18px;
+      color: #b0a6e8;
+      transition: transform 0.3s ease;
+    }
+
+    .decision-node.expanded .expand-hint {
+      transform: rotate(180deg);
     }
 
     .decision-answer {
@@ -579,9 +621,9 @@
     }
 
     .answer-text {
-      font-size: 14px;
+      font-size: 15px;
       color: #333;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     .scrollbar-hide {
@@ -603,6 +645,10 @@
     function S1() {
       return (
         <>
+          <div>
+            <div className="stage-number">Stage 1</div>
+            <div className="stage-header">What is Prompt Engineering?</div>
+          </div>
           <div className="explanation">
             Prompt engineering is about structuring your instructions to get the best possible outputs from AI. Think of it like giving directions &mdash; &ldquo;go somewhere nice&rdquo; gets you lost, but &ldquo;take I-95 North to Exit 12, turn left at the light&rdquo; gets you exactly where you want to go.
           </div>
@@ -647,6 +693,10 @@
 
       return (
         <>
+          <div>
+            <div className="stage-number">Stage 2</div>
+            <div className="stage-header">Meta Prompting</div>
+          </div>
           <div className="explanation">
             Meta prompting is asking the AI to write the prompt for you. Instead of struggling to structure a complex request, you tell the AI your goal and let it be your prompt engineer.
           </div>
@@ -739,6 +789,10 @@
 
       return (
         <>
+          <div>
+            <div className="stage-number">Stage 3</div>
+            <div className="stage-header">The COSTAR Framework</div>
+          </div>
           <div className="explanation">
             COSTAR breaks prompts into 6 key components: Context, Objective, Style, Tone, Audience, Response. When you fill all 6, the AI understands not just WHAT to do, but HOW, for WHOM, and in what FORMAT.
           </div>
@@ -752,6 +806,7 @@
                 >
                   <div className="costar-label">{comp.id}</div>
                   <div className="costar-description">{comp.label}</div>
+                  <div className="costar-hint">Click to explore</div>
                   <div className="costar-example">
                     <strong>{comp.label}:</strong> {comp.description}
                     <br /><br />
@@ -785,8 +840,12 @@
 
       return (
         <>
+          <div>
+            <div className="stage-number">Stage 4</div>
+            <div className="stage-header">Before vs After COSTAR</div>
+          </div>
           <div className="explanation">
-            See the dramatic difference COSTAR makes. The same task — write a rejection email — produces completely different results.
+            See the dramatic difference COSTAR makes. The same task &mdash; write a rejection email &mdash; produces completely different results.
           </div>
           <div className="scene-card">
             <div style={{ width: '100%', maxWidth: '700px' }}>
@@ -874,6 +933,10 @@
 
       return (
         <>
+          <div>
+            <div className="stage-number">Stage 5</div>
+            <div className="stage-header">Which Should You Use?</div>
+          </div>
           <div className="explanation">
             Neither meta prompting nor COSTAR is universally better. Choose based on your situation: when you know your destination, use COSTAR; when you&rsquo;re lost, use Meta Prompting.
           </div>
@@ -885,7 +948,7 @@
                   className={`decision-node ${expandedNode === decision.id ? 'expanded' : ''}`}
                   onClick={() => setExpandedNode(expandedNode === decision.id ? null : decision.id)}
                 >
-                  <div className="decision-question">{decision.question}</div>
+                  <div className="decision-question"><span>{decision.question}</span><span className="expand-hint">&#9662;</span></div>
                   <div className="decision-answer">
                     <div className="answer-text">
                       {decision.answer.split('\n').map((line, i) => (
