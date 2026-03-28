@@ -117,15 +117,6 @@
       margin-bottom: 8px;
     }
 
-    .stage-number {
-      font-size: 13px;
-      font-weight: 700;
-      color: #6c5ce7;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
     .nav-arrows {
       display: flex;
       gap: 10px;
@@ -558,7 +549,7 @@
 
       return (
         <>
-          <div><div className="stage-number">Stage 1</div><div className="stage-header">Hallucinations</div></div>
+          <div><div className="stage-header">Hallucinations</div></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               It's like a confident friend who never admits they don't know something. Instead of saying "I don't know," GenAI will confidently make up an answer that sounds completely plausible but is totally wrong.
@@ -664,7 +655,7 @@
 
       return (
         <>
-          <div><div className="stage-number">Stage 2</div><div className="stage-header">Knowledge Cutoff</div></div>
+          <div><div className="stage-header">Knowledge Cutoff</div></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               It's like talking to someone who's been in a coma since a certain date. GenAI was trained on data up to a specific point. It has no idea what happened after that.
@@ -775,7 +766,7 @@
 
       return (
         <>
-          <div><div className="stage-number">Stage 3</div><div className="stage-header">Context Window</div></div>
+          <div><div className="stage-header">Context Window</div></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               It's like talking to someone with short-term memory loss. GenAI can only 'remember' a certain amount of your conversation. Share a 100-page document? It might forget the beginning by the time it reaches the end.
@@ -914,7 +905,7 @@
 
       return (
         <>
-          <div><div className="stage-number">Stage 4</div><div className="stage-header">Mitigation Strategies</div></div>
+          <div><div className="stage-header">Mitigation Strategies</div></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               Every limitation has a workaround. Here's how to mitigate each weakness and use AI more effectively. Notice that RAG (Retrieval-Augmented Generation) appears in all three solutions -- a powerful pattern covered in Module 3.
