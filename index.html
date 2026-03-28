@@ -40,11 +40,12 @@
       },
       {
         id: 3,
-        name: "Context Engineering (RAG)",
+        name: "Context Engineering",
         category: "context-engineering",
         guides: [
-          { id: "3.1", title: "RAG Explainer", path: "docs/rag-explainer.html", badge: "BEGINNER", available: true, emoji: "📚", desc: "Introduction to Retrieval Augmented Generation" },
-          { id: "3.2", title: "RAG Under the Hood", path: "docs/rag-internals.html", badge: "DEEP DIVE", available: true, emoji: "⚙️", desc: "Deep technical dive into RAG systems" },
+          { id: "3.1", title: "Context Engineering Foundations", path: "guides/context-engineering/foundations.html", badge: "BEGINNER", available: true, emoji: "🧠", desc: "Understanding context engineering and why it matters" },
+          { id: "3.2", title: "Mastering Context", path: "guides/context-engineering/mastering-context.html", badge: "DEEP DIVE", available: true, emoji: "🏗️", desc: "Memory architecture, management strategies, and system prompts" },
+          { id: "3.3", title: "Module 3 Quiz", path: "guides/context-engineering/quiz.html", badge: "QUIZ", available: true, emoji: "📝", desc: "Test your context engineering knowledge" },
         ]
       },
       {
@@ -66,6 +67,8 @@
           { id: "5.4", title: "AI Workflows", path: "guides/architectures/workflows.html", badge: "INTERACTIVE", available: true, emoji: "🔄", desc: "Orchestrating multi-step AI processes" },
           { id: "5.5", title: "AI Agents", path: "guides/architectures/agents.html", badge: "DEEP DIVE", available: true, emoji: "🤖", desc: "Autonomous AI agents and decision-making" },
           { id: "5.6", title: "Agentic AI (Multi-Agent)", path: "guides/architectures/agentic-ai.html", badge: "DEEP DIVE", available: true, emoji: "👥", desc: "Multi-agent systems and collaboration" },
+          { id: "5.7", title: "RAG Explainer", path: "docs/rag-explainer.html", badge: "BEGINNER", available: true, emoji: "📚", desc: "Introduction to Retrieval Augmented Generation" },
+          { id: "5.8", title: "RAG Under the Hood", path: "docs/rag-internals.html", badge: "DEEP DIVE", available: true, emoji: "⚙️", desc: "Deep technical dive into RAG systems" },
         ]
       },
     ];
@@ -75,6 +78,7 @@
       "INTERACTIVE": "#2ecc71",
       "DEEP DIVE": "#e17055",
       "USE CASE": "#f39c12",
+      "QUIZ": "#3498db",
     };
 
     const BADGE_BG = {
@@ -82,6 +86,7 @@
       "INTERACTIVE": "#eefaf2",
       "DEEP DIVE": "#fde8e0",
       "USE CASE": "#fef9f3",
+      "QUIZ": "#eaf4fd",
     };
 
     function TypingEffect({ text, speed = 30 }) {

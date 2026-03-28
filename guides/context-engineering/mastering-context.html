@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastering Context - Deep Dive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes blink {
+      0%, 50%, 100% {
+        opacity: 1;
+      }
+      25%, 75% {
+        opacity: 0;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .typing {
+      display: inline-block;
+      overflow: hidden;
+      border-right: 2px solid #6c5ce7;
+      white-space: nowrap;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    /* Comparison styles */
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .comparison-item {
+      padding: 24px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .comparison-item.bad {
+      background: #fef5f5;
+      border-color: #e74c3c;
+    }
+
+    .comparison-item.good {
+      background: #f0f8f0;
+      border-color: #2ecc71;
+    }
+
+    .comparison-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    .comparison-item.bad .comparison-title {
+      color: #c0392b;
+    }
+
+    .comparison-item.good .comparison-title {
+      color: #27ae60;
+    }
+
+    .comparison-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* COSTAR grid */
+    .costar-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+    }
+
+    .costar-box {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .costar-box:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .costar-box.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .costar-label {
+      font-weight: 700;
+      font-size: 20px;
+      color: #6c5ce7;
+      margin-bottom: 4px;
+    }
+
+    .costar-description {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .costar-hint {
+      font-size: 11px;
+      color: #b0a6e8;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .costar-box.expanded .costar-hint {
+      display: none;
+    }
+
+    .costar-example {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .costar-box.expanded .costar-example {
+      max-height: 400px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Decision tree */
+    .decision-tree {
+      width: 100%;
+    }
+
+    .decision-node {
+      padding: 24px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .decision-node:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .decision-question {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .expand-hint {
+      font-size: 18px;
+      color: #b0a6e8;
+      transition: transform 0.3s ease;
+    }
+
+    .decision-node.expanded .expand-hint {
+      transform: rotate(180deg);
+    }
+
+    .decision-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .decision-node.expanded .decision-answer {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .answer-text {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.7;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* ========== Custom styles for Mastering Context guide ========== */
+
+    .tier-card {
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      border-left: 4px solid #6c5ce7;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .tier-card-emoji {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .tier-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+    }
+
+    .tier-card-subtitle {
+      font-size: 12px;
+      color: #6c5ce7;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .tier-card-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .code-block {
+      background: #1a1a2e;
+      color: #a78bfa;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 12px;
+      white-space: pre-wrap;
+    }
+
+    .tier-diagram {
+      width: 100%;
+      max-width: 500px;
+      margin: 24px auto 0;
+    }
+
+    .tier-diagram-box {
+      padding: 14px 20px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 0;
+    }
+
+    .tier-diagram-box:first-child {
+      border-radius: 10px 10px 0 0;
+    }
+
+    .tier-diagram-box:last-child {
+      border-radius: 0 0 10px 10px;
+    }
+
+    .tier-diagram-arrow {
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      color: #6c5ce7;
+      font-weight: 600;
+    }
+
+    .llm-box {
+      background: linear-gradient(135deg, #6c5ce7, #2ecc71);
+      color: white;
+      padding: 14px 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .retrieval-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .retrieval-table th, .retrieval-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border: 1px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    .retrieval-table th {
+      background: #f5f3ff;
+      font-weight: 700;
+      color: #6c5ce7;
+    }
+
+    .retrieval-table td {
+      background: white;
+      color: #333;
+    }
+
+    .mechanism-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e8e3f8;
+      margin-bottom: 8px;
+    }
+
+    .org-chart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin-top: 20px;
+    }
+
+    .org-top {
+      padding: 16px 24px;
+      background: #6c5ce7;
+      color: white;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .org-connector {
+      width: 2px;
+      height: 24px;
+      background: #6c5ce7;
+    }
+
+    .org-branches {
+      display: flex;
+      gap: 16px;
+      position: relative;
+    }
+
+    .org-branches::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: #6c5ce7;
+    }
+
+    .org-agent {
+      padding: 12px 16px;
+      background: white;
+      border: 2px solid #6c5ce7;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      min-width: 100px;
+      position: relative;
+    }
+
+    .org-agent::before {
+      content: '';
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      width: 2px;
+      height: 24px;
+      background: #6c5ce7;
+    }
+
+    .summary-card {
+      padding: 20px 24px;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .summary-card-emoji { font-size: 24px; flex-shrink: 0; }
+    .summary-card-title { font-weight: 700; font-size: 16px; color: #1a1a1a; margin-bottom: 4px; }
+    .summary-card-desc { font-size: 14px; color: #555; line-height: 1.6; }
+
+    .benefits-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .benefit-check {
+      color: #2ecc71;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const insightSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>';
+
+    function InsightLabel() {
+      return React.createElement('div', { className: 'insight-label' },
+        React.createElement('span', { dangerouslySetInnerHTML: { __html: insightSvg } }),
+        ' INSIGHT'
+      );
+    }
+
+    function SidebarIcon({ html }) {
+      return React.createElement('span', { dangerouslySetInnerHTML: { __html: html } });
+    }
+
+    function S1() {
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 1</div>
+            <div className="stage-header">Architecting Memory: The Three-Tier Hierarchy</div>
+          </div>
+          <div className="explanation">
+            Effective context engineering uses a layered memory system &mdash; shared project knowledge, personal preferences, and dynamic imports &mdash; so the right context is always available.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <p style={{ fontSize: '16px', color: '#444', marginBottom: '20px', fontWeight: 500 }}>
+                Think of it like how a company organizes knowledge:
+              </p>
+              <div className="tier-card fade-in">
+                <div className="tier-card-emoji">&#128218;</div>
+                <div>
+                  <div className="tier-card-subtitle">Project Memory</div>
+                  <div className="tier-card-title">Company Wiki</div>
+                  <div className="tier-card-desc">Shared standards everyone follows</div>
+                </div>
+              </div>
+              <div className="tier-card fade-in" style={{ animationDelay: '0.15s' }}>
+                <div className="tier-card-emoji">&#128211;</div>
+                <div>
+                  <div className="tier-card-subtitle">User Memory</div>
+                  <div className="tier-card-title">Personal Notebook</div>
+                  <div className="tier-card-desc">Your shortcuts, preferences, notes</div>
+                </div>
+              </div>
+              <div className="tier-card fade-in" style={{ animationDelay: '0.3s' }}>
+                <div className="tier-card-emoji">&#128214;</div>
+                <div>
+                  <div className="tier-card-subtitle">Dynamic Imports</div>
+                  <div className="tier-card-title">Reference Library</div>
+                  <div className="tier-card-desc">Specialized docs you pull in when needed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Think of memory tiers like how a company organizes knowledge &mdash; shared standards, personal shortcuts, and on-demand references.
+          </div>
+        </>
+      );
+    }
+
+    function S2() {
+      const [expandedTier, setExpandedTier] = useState(null);
+
+      const tiers = [
+        {
+          id: 'project',
+          title: 'Tier 1: Project Memory',
+          subtitle: 'Shared context about architecture, standards, and conventions',
+          details: [
+            'Version-controlled (lives in the repo)',
+            'Available to all team members',
+            'Defines how the project works'
+          ],
+          code: '// Example: CLAUDE.md at project root\n"This project uses TypeScript, Jest for testing,\nand follows the repository pattern for data access."'
+        },
+        {
+          id: 'user',
+          title: 'Tier 2: User Memory',
+          subtitle: 'Personal preferences specific to an individual',
+          details: [
+            'Stored locally (e.g., ~/.claude/claude.md)',
+            'Not committed to the repository',
+            'Persists across sessions'
+          ],
+          code: '// Example: ~/.claude/claude.md\n"I prefer concise responses. Always use dark mode\nexamples. I\'m experienced with React but new to Python."'
+        },
+        {
+          id: 'dynamic',
+          title: 'Tier 3: Dynamic Memory Imports',
+          subtitle: 'On-demand context pulled in for specific tasks',
+          details: [
+            'Imported using @ syntax or automatic scanning',
+            'Dedicated files for specific topics',
+            'Dynamically updated based on task or branch'
+          ],
+          code: '// Example: @api-standards.md\nTyping @api-standards.md in a prompt pulls in\nyour team\'s API naming conventions.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 2</div>
+            <div className="stage-header">The Three Memory Tiers in Detail</div>
+          </div>
+          <div className="explanation">
+            Each tier serves a different purpose and operates at a different scope.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              {tiers.map((tier, idx) => (
+                <div
+                  key={tier.id}
+                  className={`costar-box ${expandedTier === tier.id ? 'expanded' : ''}`}
+                  onClick={() => setExpandedTier(expandedTier === tier.id ? null : tier.id)}
+                  style={{ marginBottom: '16px', gridColumn: 'auto' }}
+                >
+                  <div className="costar-label" style={{ fontSize: '16px' }}>{tier.title}</div>
+                  <div className="costar-description">{tier.subtitle}</div>
+                  <div className="costar-hint">Click to explore</div>
+                  <div className="costar-example">
+                    <ul style={{ paddingLeft: '18px', marginBottom: '12px' }}>
+                      {tier.details.map((d, i) => (
+                        <li key={i} style={{ marginBottom: '4px' }}>{d}</li>
+                      ))}
+                    </ul>
+                    <div className="code-block">{tier.code}</div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="tier-diagram">
+                <div className="tier-diagram-box" style={{ background: '#f5f3ff', border: '2px solid #6c5ce7', color: '#6c5ce7' }}>
+                  Dynamic Imports (Tier 3) &nbsp;&larr; Pulled in on demand
+                </div>
+                <div className="tier-diagram-box" style={{ background: '#eef2ff', border: '2px solid #818cf8', borderTop: 'none', color: '#818cf8' }}>
+                  User Memory (Tier 2) &nbsp;&larr; Personal preferences
+                </div>
+                <div className="tier-diagram-box" style={{ background: '#e8f5e9', border: '2px solid #2ecc71', borderTop: 'none', color: '#2ecc71' }}>
+                  Project Memory (Tier 1) &nbsp;&larr; Shared team standards
+                </div>
+                <div className="tier-diagram-arrow">&darr; All layers feed into &darr;</div>
+                <div className="llm-box">LLM Context Window</div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            All three tiers feed into the LLM&rsquo;s context window. The right architecture ensures the model always has what it needs, without drowning in what it doesn&rsquo;t.
+          </div>
+        </>
+      );
+    }
+
+    function S3() {
+      const mechanisms = [
+        { emoji: '\uD83D\uDCC2', title: 'Automatic folder scanning', desc: 'discovers helpful context files nearby' },
+        { emoji: '\uD83D\uDD17', title: 'Inheritance', desc: 'inherits context from parent folders (project \u2192 folder \u2192 file)' },
+        { emoji: '\uD83D\uDD50', title: 'Recency prioritization', desc: 'recently used information ranks higher' },
+        { emoji: '\uD83D\uDD27', title: 'Tool-aware retrieval', desc: 'different tools trigger different context lookups' }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 3</div>
+            <div className="stage-header">Strategy 1: Intelligent Context Retrieval</div>
+          </div>
+          <div className="explanation">
+            Instead of dumping everything into the context, the system selectively retrieves what&rsquo;s most relevant &mdash; like a smart assistant who knows what to put on your desk before you ask.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              {mechanisms.map((m, idx) => (
+                <div className="mechanism-card fade-in" key={idx} style={{ animationDelay: `${idx * 0.1}s` }}>
+                  <span style={{ fontSize: '20px', flexShrink: 0 }}>{m.emoji}</span>
+                  <div>
+                    <strong style={{ fontSize: '14px', color: '#1a1a1a' }}>{m.title}</strong>
+                    <span style={{ fontSize: '14px', color: '#555' }}> &mdash; {m.desc}</span>
+                  </div>
+                </div>
+              ))}
+
+              <table className="retrieval-table" style={{ marginTop: '24px' }}>
+                <thead>
+                  <tr>
+                    <th>Tool</th>
+                    <th>What Context Gets Retrieved</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ fontWeight: 600 }}>Code editor</td>
+                    <td>Existing code style, similar functions, imports</td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 600 }}>Terminal</td>
+                    <td>Available npm scripts, file paths, environment info</td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 600 }}>Search</td>
+                    <td>Relevant docs, previous similar queries</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Smart retrieval means the right context appears automatically. Instead of manually providing everything, the system brings relevant information to the forefront.
+          </div>
+        </>
+      );
+    }
+
+    function S4() {
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 4</div>
+            <div className="stage-header">Strategies 2 &amp; 3: Compression &amp; Isolation</div>
+          </div>
+          <div className="explanation">
+            As conversations grow, you need ways to keep the essential information without the bloat, and to keep different tasks from contaminating each other&rsquo;s context.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <p style={{ fontSize: '16px', color: '#444', marginBottom: '20px', fontWeight: 500 }}>
+                It&rsquo;s like writing a summary of a long meeting.
+              </p>
+              <div className="comparison-box">
+                <div className="comparison-item" style={{ background: '#eaf4fd', borderColor: '#3498db' }}>
+                  <div className="comparison-title" style={{ color: '#2980b9' }}>Reset</div>
+                  <div className="comparison-content">
+                    Removes conversation history entirely while preserving memory files.
+                    <br /><br />
+                    <strong>Use when:</strong> Switching to a completely different task.
+                  </div>
+                </div>
+                <div className="comparison-item" style={{ background: '#f5f3ff', borderColor: '#6c5ce7' }}>
+                  <div className="comparison-title" style={{ color: '#6c5ce7' }}>Compact</div>
+                  <div className="comparison-content">
+                    Compresses the conversation into its essential information.
+                    <br /><br />
+                    <strong>Use when:</strong> Continuing the same task but the conversation is getting long.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ height: '2px', background: '#e8e3f8', margin: '32px 0', borderRadius: '1px' }}></div>
+
+              <p style={{ fontSize: '16px', color: '#444', marginBottom: '20px', fontWeight: 500 }}>
+                It&rsquo;s like assigning specialists instead of asking one person to do everything.
+              </p>
+
+              <div className="org-chart">
+                <div className="org-top">
+                  Main Agent<br />
+                  <span style={{ fontSize: '12px', fontWeight: 400, opacity: 0.85 }}>orchestrator</span>
+                </div>
+                <div className="org-connector"></div>
+                <div className="org-branches">
+                  <div className="org-agent">Code Review<br />Agent</div>
+                  <div className="org-agent">Test<br />Agent</div>
+                  <div className="org-agent">Research<br />Agent</div>
+                </div>
+              </div>
+
+              <div className="benefits-list" style={{ marginTop: '24px' }}>
+                <div className="benefit-item">
+                  <span className="benefit-check">&#10003;</span>
+                  Reduces context confusion (each agent only sees what it needs)
+                </div>
+                <div className="benefit-item">
+                  <span className="benefit-check">&#10003;</span>
+                  Improves focus and task execution
+                </div>
+                <div className="benefit-item">
+                  <span className="benefit-check">&#10003;</span>
+                  Prevents context clash between unrelated tasks
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Reset for fresh starts, Compact for continuations. Isolation means focused sub-agents that each see only what they need &mdash; preventing the confusion that comes from context overload.
+          </div>
+        </>
+      );
+    }
+
+    function S5() {
+      const [expandedComponent, setExpandedComponent] = useState(null);
+
+      const components = [
+        {
+          id: 1,
+          title: 'Clear Identity and Scope',
+          desc: 'Establishes what the agent is and what domain it operates in. Defines the boundary between basic and complex operations.'
+        },
+        {
+          id: 2,
+          title: 'Empowerment Over Constraint',
+          desc: 'Sets goals instead of prescribing specific tools. Trusts the agent\u2019s selection and reasoning. Provides frameworks, not flowcharts.'
+        },
+        {
+          id: 3,
+          title: 'Reasoning Framework',
+          desc: 'Identify the core issue \u2192 Gather necessary context \u2192 Provide clear resolution \u2192 Confirm satisfaction.'
+        },
+        {
+          id: 4,
+          title: 'Clear Boundaries as Heuristics',
+          desc: 'Example: "Always choose the simplest solution." Acts like a greedy algorithm \u2014 a general rule applied to specific situations.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 5</div>
+            <div className="stage-header">System Prompts: The Goldilocks Zone</div>
+          </div>
+          <div className="explanation">
+            The best system prompts are &ldquo;not too specific, not too vague, but just right&rdquo; &mdash; they provide principles and reasoning frameworks rather than rigid flowcharts. It&rsquo;s like training a new employee.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="comparison-box" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                <div className="comparison-item bad fade-in">
+                  <div className="comparison-title">Too Specific</div>
+                  <div className="comparison-content">
+                    <ul style={{ paddingLeft: '16px', listStyle: 'none' }}>
+                      <li style={{ marginBottom: '6px' }}>&bull; 200-page script for every interaction</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; &ldquo;Always ask exactly 3 follow-up questions&rdquo;</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; &ldquo;If user says X, respond with Y&rdquo;</li>
+                      <li>&bull; Maintenance nightmare</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="comparison-item bad fade-in" style={{ animationDelay: '0.15s' }}>
+                  <div className="comparison-title">Too Vague</div>
+                  <div className="comparison-content">
+                    <ul style={{ paddingLeft: '16px', listStyle: 'none' }}>
+                      <li style={{ marginBottom: '6px' }}>&bull; &ldquo;Just be helpful&rdquo; with no guidance</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; Assumes shared context</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; Undefined boundaries</li>
+                      <li>&bull; Inconsistent behavior</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="comparison-item good fade-in" style={{ animationDelay: '0.3s' }}>
+                  <div className="comparison-title">Just Right &#10003;</div>
+                  <div className="comparison-content">
+                    <ul style={{ paddingLeft: '16px', listStyle: 'none' }}>
+                      <li style={{ marginBottom: '6px' }}>&bull; Company values + reasoning framework</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; Principles over prescriptions</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; Clear identity and scope</li>
+                      <li>&bull; Handles novel situations</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '32px' }}>
+                <p style={{ fontSize: '15px', fontWeight: 600, color: '#6c5ce7', marginBottom: '16px' }}>4 Components of Optimal System Prompts</p>
+                <div className="decision-tree">
+                  {components.map((comp) => (
+                    <div
+                      key={comp.id}
+                      className={`decision-node ${expandedComponent === comp.id ? 'expanded' : ''}`}
+                      onClick={() => setExpandedComponent(expandedComponent === comp.id ? null : comp.id)}
+                    >
+                      <div className="decision-question">
+                        <span>{comp.id}. {comp.title}</span>
+                        <span className="expand-hint">&#9662;</span>
+                      </div>
+                      <div className="decision-answer">
+                        <div className="answer-text">{comp.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Write system prompts that teach your AI how to think, not what to say. Compressed principles beat exhaustive scripts every time.
+          </div>
+        </>
+      );
+    }
+
+    function S6() {
+      const takeaways = [
+        {
+          emoji: '\uD83C\uDFD7\uFE0F',
+          title: 'Architect Memory',
+          desc: 'Use a three-tier hierarchy: project, user, and dynamic imports. Each tier serves a different purpose and scope.',
+          color: '#6c5ce7'
+        },
+        {
+          emoji: '\u26A1',
+          title: 'Manage Actively',
+          desc: 'Retrieve intelligently, compress regularly, isolate by task. Don\u2019t let context grow unchecked \u2014 manage it like a finite resource.',
+          color: '#2ecc71'
+        },
+        {
+          emoji: '\u2696\uFE0F',
+          title: 'Goldilocks Prompts',
+          desc: 'System prompts should teach principles, not prescribe scripts. The best prompts give your AI a reasoning framework, not a decision tree.',
+          color: '#f39c12'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 6</div>
+            <div className="stage-header">Key Takeaways</div>
+          </div>
+          <div className="explanation">
+            Three advanced principles to master context engineering.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              {takeaways.map((t, idx) => (
+                <div className="summary-card fade-in" key={idx} style={{ borderLeftColor: t.color, animationDelay: `${idx * 0.15}s` }}>
+                  <div className="summary-card-emoji">{t.emoji}</div>
+                  <div>
+                    <div className="summary-card-title">{t.title}</div>
+                    <div className="summary-card-desc">{t.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Context engineering is a discipline, not a one-time task. Build the systems, architect the memory, and refine your prompts continuously.
+          </div>
+        </>
+      );
+    }
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stageIcons = [
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>',
+      ];
+
+      const stages = [
+        { icon: stageIcons[0], label: 'Memory', component: S1 },
+        { icon: stageIcons[1], label: '3 Tiers', component: S2 },
+        { icon: stageIcons[2], label: 'Retrieval', component: S3 },
+        { icon: stageIcons[3], label: 'Compress', component: S4 },
+        { icon: stageIcons[4], label: 'Prompts', component: S5 },
+        { icon: stageIcons[5], label: 'Summary', component: S6 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) {
+          setCurrentStage(currentStage + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) {
+          setCurrentStage(currentStage - 1);
+        }
+      };
+
+      const handleStageClick = (idx) => {
+        setCurrentStage(idx);
+      };
+
+      return (
+        React.createElement('div', { className: 'container' },
+          React.createElement('div', { className: 'sidebar scrollbar-hide' },
+            stages.map((stage, idx) =>
+              React.createElement(React.Fragment, { key: idx },
+                React.createElement('div', { className: `step-wrapper ${currentStage === idx ? 'active' : ''}` },
+                  React.createElement('button', {
+                    className: `step-btn ${currentStage === idx ? 'active' : ''}`,
+                    onClick: () => handleStageClick(idx),
+                    dangerouslySetInnerHTML: { __html: stage.icon }
+                  }),
+                  React.createElement('div', { className: 'step-btn-label' }, stage.label)
+                ),
+                idx < stages.length - 1 &&
+                  React.createElement('div', { className: `step-connector ${currentStage > idx ? 'active' : ''}` })
+              )
+            )
+          ),
+          React.createElement('div', { className: 'main-content' },
+            React.createElement('div', { className: 'top-bar' },
+              React.createElement('div', { className: 'left-section' },
+                React.createElement('a', { href: '../../index.html', className: 'back-link' }, '\u2190 Back to All Guides'),
+                React.createElement('span', { style: { marginLeft: '20px', fontSize: '14px', color: '#999' } }, '|'),
+                React.createElement('div', { style: { marginLeft: '12px', display: 'flex', alignItems: 'center' } },
+                  React.createElement('span', { className: 'guide-number' }, '3.2'),
+                  React.createElement('div', { className: 'title' }, 'Mastering Context')
+                ),
+                React.createElement('div', { style: { marginLeft: '20px' } },
+                  React.createElement('div', { className: 'badge' }, 'DEEP DIVE')
+                )
+              ),
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center' } },
+                React.createElement('span', { className: 'progress-indicator' }, `Page ${currentStage + 1} of 6`),
+                React.createElement('div', { className: 'nav-arrows' },
+                  React.createElement('button', {
+                    className: 'arrow-btn',
+                    onClick: handlePrev,
+                    disabled: currentStage === 0,
+                    title: 'Previous stage'
+                  }, '\u2190'),
+                  React.createElement('button', {
+                    className: 'arrow-btn',
+                    onClick: handleNext,
+                    disabled: currentStage === stages.length - 1,
+                    title: 'Next stage'
+                  }, '\u2192')
+                )
+              )
+            ),
+            React.createElement('div', { className: 'content-area scrollbar-hide' },
+              React.createElement(CurrentComponent)
+            )
+          )
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(Guide));
+  </script>
+</body>
+</html>

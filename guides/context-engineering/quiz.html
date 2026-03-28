@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 3 Quiz &mdash; Context Engineering</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
+    #root { height: 100vh; overflow: hidden; }
+    .container { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 120px; background: #f8f9fa; border-right: 1px solid #e0e0e0; padding: 80px 12px 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .step-btn { width: 64px; height: 64px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.3s ease; position: relative; flex-shrink: 0; }
+    .step-btn.active { background: #6c5ce7; border-color: #6c5ce7; color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
+    .step-btn.correct { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .step-btn.incorrect { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+    .step-btn-label { font-size: 11px; font-weight: 600; color: #999; margin-top: 4px; text-align: center; letter-spacing: 0.3px; transition: color 0.3s ease; }
+    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
+    .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
+    .step-connector.active { background: #6c5ce7; }
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid #e0e0e0; background: white; flex-shrink: 0; }
+    .left-section { display: flex; align-items: center; gap: 20px; }
+    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .back-link:hover { color: #2ecc71; }
+    .badge { display: inline-block; background: #e8e3f8; color: #6c5ce7; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
+    .title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .nav-arrows { display: flex; gap: 12px; }
+    .arrow-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
+    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; padding: 32px 48px; gap: 30px; }
+    .explanation { font-size: 22px; line-height: 1.7; color: #2a2a2a; }
+    .scene-card { background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%); border-radius: 16px; padding: 40px; border: 1px solid #e8e3f8; min-height: auto; box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08); }
+    .insight-box { background: #f0faf0; border-left: 4px solid #2ecc71; padding: 24px; border-radius: 8px; color: #1a5e3a; font-size: 17px; line-height: 1.7; margin-top: 24px; position: relative; }
+    .insight-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #2ecc71; margin-bottom: 8px; text-transform: uppercase; }
+    .progress-indicator { font-size: 13px; font-weight: 600; color: #6c5ce7; background: #f5f3ff; padding: 4px 12px; border-radius: 12px; margin-right: 12px; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.6s ease forwards; }
+    .option-card { padding: 18px 24px; background: white; border: 2px solid #e0e0e0; border-radius: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 16px; font-size: 16px; line-height: 1.5; }
+    .option-card:hover { border-color: #6c5ce7; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108, 92, 231, 0.1); }
+    .option-card.selected { border-color: #6c5ce7; background: #f5f3ff; }
+    .option-card.correct { border-color: #2ecc71; background: #f0faf0; }
+    .option-card.incorrect { border-color: #e74c3c; background: #fef5f5; }
+    .option-card.disabled { cursor: default; opacity: 0.7; }
+    .option-card.disabled:hover { transform: none; box-shadow: none; }
+    .option-letter { width: 36px; height: 36px; border-radius: 50%; background: #f5f3ff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #6c5ce7; flex-shrink: 0; transition: all 0.3s ease; }
+    .option-card.selected .option-letter { background: #6c5ce7; border-color: #6c5ce7; color: white; }
+    .option-card.correct .option-letter { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .option-card.incorrect .option-letter { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .submit-btn { padding: 14px 40px; background: #6c5ce7; color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; letter-spacing: 0.3px; }
+    .submit-btn:hover { background: #5a4bd1; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3); }
+    .submit-btn:disabled { background: #c4bce8; cursor: not-allowed; transform: none; box-shadow: none; }
+    .section-tag { display: inline-block; background: #eee9fd; color: #6c5ce7; padding: 4px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 12px; }
+    .score-ring { width: 180px; height: 180px; position: relative; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .score-number { font-family: 'Fraunces', serif; font-size: 48px; font-weight: 700; color: #1a1a1a; line-height: 1; }
+    .score-label { font-size: 14px; color: #999; font-weight: 500; }
+    .result-card { padding: 20px 24px; background: white; border-radius: 14px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 16px; transition: all 0.3s ease; }
+    .result-card:hover { border-color: #6c5ce7; box-shadow: 0 4px 16px rgba(108, 92, 231, 0.08); }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .scale-in { animation: scaleIn 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Note: dangerouslySetInnerHTML below is used only with hardcoded SVG icon strings (SECTION_ICONS, INSIGHT_ICON), not user input -->
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    const QUESTIONS = [
+      { id: 1, section: "3.1 What is Context Engineering?", question: "What is the best definition of context engineering?", options: ["Crafting a single, perfect prompt for every situation", "Designing dynamic systems that provide the right information at the right time to an LLM", "Fine-tuning AI models on custom datasets", "Writing detailed documentation for AI projects"], correct: 1, explanation: "Context engineering is the discipline of designing dynamic systems that provide the right information, at the right time, to an LLM \u2014 so it can produce the best possible output. It goes beyond static prompts." },
+      { id: 2, section: "3.1 What is Context Engineering?", question: "How does context engineering differ from prompt engineering?", options: ["They are the same thing with different names", "Context engineering is about static prompts; prompt engineering is about dynamic systems", "Prompt engineering is writing a recipe card; context engineering is running a kitchen", "Context engineering only applies to developers, not users"], correct: 2, explanation: "Prompt engineering is about crafting a single, static instruction. Context engineering is the next evolution \u2014 building systems that dynamically assemble all the pieces an LLM needs to succeed, like running a kitchen vs writing a recipe card." },
+      { id: 3, section: "3.1 What is Context Engineering?", question: "Which of these is NOT one of the five sources of context for an LLM?", options: ["Developer-provided context (system prompts)", "Model training parameters and weights", "Tool call results from APIs and databases", "Previous conversation history"], correct: 1, explanation: "The five context sources are: developer-provided context, user input, previous interactions, tool call results, and external data. Model parameters and weights are part of the model itself, not the context provided to it." },
+      { id: 4, section: "3.1 Why Context Engineering Matters", question: "In the 'open-book exam' analogy, what determines success?", options: ["The intelligence of the student taking the exam", "Having the right book, open to the right page, with the right notes highlighted", "The number of textbooks available during the exam", "How fast the student can read through materials"], correct: 1, explanation: "Context engineering is like preparing for an open-book exam. Having the right textbook, opened to the right page, with the right notes highlighted \u2014 that's what determines your score. Even the smartest student fails with the wrong materials." },
+      { id: 5, section: "3.1 Why Context Engineering Matters", question: "Context engineering applies to which groups?", options: ["Only developers building AI agents", "Only AI researchers at large companies", "Developers, users, and teams \u2014 anyone interacting with AI", "Only enterprise companies with large budgets"], correct: 2, explanation: "Context engineering matters for developers building tools, users interacting with AI assistants (how you structure requests IS context engineering), and teams setting up shared AI workflows and memory systems." },
+      { id: 6, section: "3.1 The Context Problem", question: "What is 'context poisoning'?", options: ["When the context window becomes too large to process", "When tool calls introduce hallucinated or incorrect data into the context", "When the user provides contradictory instructions", "When the AI model runs out of memory"], correct: 1, explanation: "Context poisoning occurs when tool calls introduce hallucinated or incorrect data into the context. It's like eating spoiled food \u2014 one bad ingredient ruins the whole meal." },
+      { id: 7, section: "3.1 The Context Problem", question: "What is the difference between context confusion and context clash?", options: ["They are the same type of failure", "Confusion is caused by irrelevant context; clash is caused by contradictory context", "Confusion means too little context; clash means too much context", "Confusion is a user error; clash is a system error"], correct: 1, explanation: "Context confusion happens when unnecessary or irrelevant context influences the response (like studying the wrong chapter). Context clash occurs when contradictory context segments pull the model in different directions (like getting opposite advice from two doctors)." },
+      { id: 8, section: "3.1 The Context Problem", question: "As an AI agent works on longer tasks, what happens?", options: ["Performance always improves with more context", "Context grows, costs increase, and performance can degrade", "The model automatically manages context perfectly", "Nothing changes \u2014 context is unlimited"], correct: 1, explanation: "When an AI agent works on a long task, its context window grows continuously. Eventually: context exceeds window limits, cost and latency increase, and performance degrades as the model gets 'lost' in the noise." },
+      { id: 9, section: "3.2 Memory Architecture", question: "In the three-tier memory hierarchy, what is Tier 1 (Project Memory)?", options: ["Personal user preferences stored locally", "Dynamic file imports triggered by @ syntax", "Shared project standards and conventions in version control", "The conversation history from previous sessions"], correct: 2, explanation: "Tier 1 (Project Memory) is shared context about architecture, standards, and conventions. It's version-controlled, available to all team members, and defines how the project works \u2014 like a CLAUDE.md file at the project root." },
+      { id: 10, section: "3.2 Memory Architecture", question: "What is the purpose of Tier 3 (Dynamic Memory Imports)?", options: ["To store the entire conversation history permanently", "To pull in on-demand context for specific tasks using references or triggers", "To replace system prompts with dynamic alternatives", "To compress long conversations into summaries"], correct: 1, explanation: "Tier 3 (Dynamic Memory Imports) provides on-demand context pulled in for specific tasks. It uses @ syntax or automatic scanning, with dedicated files for specific topics that can be dynamically updated based on the current task." },
+      { id: 11, section: "3.2 Memory Architecture", question: "How do the three memory tiers work together?", options: ["Only one tier is active at a time based on the task", "All three layers feed into the LLM's context window simultaneously", "They replace each other in priority order", "User memory always overrides project memory"], correct: 1, explanation: "All three tiers feed into the LLM's context window together. Project memory provides shared standards, user memory adds personal preferences, and dynamic imports bring in task-specific context \u2014 all combining to give the LLM comprehensive context." },
+      { id: 12, section: "3.2 Context Management", question: "When should you use 'Reset' versus 'Compact'?", options: ["Reset for continuing the same task; Compact for switching tasks", "Reset when switching to a completely different task; Compact when the same conversation is getting long", "Both do exactly the same thing", "Reset is for developers; Compact is for end users"], correct: 1, explanation: "Reset removes conversation history entirely (for switching tasks), while Compact compresses the conversation into essential information (for continuing a long task). Reset starts fresh; Compact keeps the key facts while discarding the back-and-forth." },
+      { id: 13, section: "3.2 Context Management", question: "What is the main benefit of context isolation using sub-agents?", options: ["It makes API calls cheaper", "Each agent only sees the context it needs, reducing confusion and clash", "It allows using multiple AI models simultaneously", "It eliminates the need for system prompts"], correct: 1, explanation: "Context isolation means creating focused sub-agents with only the context they need. This reduces context confusion (each agent only sees relevant information), improves focus, and prevents context clash between unrelated tasks." },
+      { id: 14, section: "3.2 System Prompts", question: "What is the 'Goldilocks Zone' for system prompts?", options: ["The longest possible set of detailed instructions", "No instructions at all \u2014 let the AI figure it out", "Principles and reasoning frameworks rather than rigid scripts or flowcharts", "Exact step-by-step flowcharts for every possible scenario"], correct: 2, explanation: "The Goldilocks Zone means 'not too specific, not too vague, but just right.' The best system prompts provide principles and reasoning frameworks rather than rigid flowcharts, teaching the AI how to think rather than what to say." },
+      { id: 15, section: "3.2 System Prompts", question: "What are the four components of an optimal system prompt?", options: ["Length, format, tone, and audience", "Clear identity and scope, empowerment over constraint, reasoning framework, and clear boundaries", "Speed, accuracy, creativity, and safety", "Context, objective, style, and response format"], correct: 1, explanation: "The four components are: (1) Clear Identity and Scope, (2) Empowerment Over Constraint, (3) Reasoning Framework, and (4) Clear Boundaries as Heuristics. These principles leverage what LLMs do best \u2014 recognizing patterns and applying general rules." },
+    ];
+
+    const SECTION_ICONS = {
+      "3.1": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+      "3.2": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+    };
+
+    const INSIGHT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>';
+
+    function QuestionView({ question, questionIndex, totalQuestions, selectedAnswer, answered, onSelect, onSubmit, onNext }) {
+      const letters = ['A', 'B', 'C', 'D'];
+      return (
+        <div className="fade-in" key={question.id}>
+          <div className="section-tag">{question.section}</div>
+          <div className="explanation">{question.question}</div>
+          <div className="scene-card">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+              {question.options.map((option, idx) => {
+                let cardClass = 'option-card';
+                if (answered) { cardClass += ' disabled'; if (idx === question.correct) { cardClass += ' correct'; } else if (idx === selectedAnswer && idx !== question.correct) { cardClass += ' incorrect'; } } else if (selectedAnswer === idx) { cardClass += ' selected'; }
+                return (
+                  <div key={idx} className={cardClass} onClick={() => !answered && onSelect(idx)} style={{ animationDelay: `${idx * 0.08}s` }}>
+                    <div className="option-letter">{letters[idx]}</div>
+                    <div style={{ flex: 1 }}>{option}</div>
+                    {answered && idx === question.correct && (<span style={{ fontSize: 20, flexShrink: 0 }}>&#10003;</span>)}
+                    {answered && idx === selectedAnswer && idx !== question.correct && (<span style={{ fontSize: 20, flexShrink: 0 }}>&#10007;</span>)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {!answered && (<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}><button className="submit-btn" disabled={selectedAnswer === null} onClick={onSubmit}>Check Answer</button></div>)}
+          {answered && (<div className="insight-box fade-in"><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> {selectedAnswer === question.correct ? 'CORRECT!' : 'EXPLANATION'}</div>{question.explanation}</div>)}
+          {answered && (<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }} className="fade-in"><button className="submit-btn" onClick={onNext}>{questionIndex < totalQuestions - 1 ? 'Next Question \u2192' : 'See Results'}</button></div>)}
+        </div>
+      );
+    }
+
+    function ResultsView({ questions, answers }) {
+      const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      const circumference = 2 * Math.PI * 75;
+      const strokeDashoffset = circumference - (percentage / 100) * circumference;
+      const getGrade = () => {
+        if (percentage >= 90) return { label: 'Outstanding!', color: '#2ecc71', emoji: '\uD83C\uDF1F' };
+        if (percentage >= 70) return { label: 'Great Job!', color: '#6c5ce7', emoji: '\uD83D\uDCAA' };
+        if (percentage >= 50) return { label: 'Good Effort!', color: '#f39c12', emoji: '\uD83D\uDC4D' };
+        return { label: 'Keep Learning!', color: '#e74c3c', emoji: '\uD83D\uDCDA' };
+      };
+      const grade = getGrade();
+      const sectionScores = {};
+      questions.forEach((q, i) => { const sec = q.section.split(' ')[0]; if (!sectionScores[sec]) sectionScores[sec] = { correct: 0, total: 0, name: q.section }; sectionScores[sec].total++; if (answers[i] === q.correct) sectionScores[sec].correct++; });
+
+      return (
+        <div className="scale-in">
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>{grade.emoji}</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 32, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>{grade.label}</div>
+            <div style={{ fontSize: 16, color: '#999' }}>Module 3: Context Engineering</div>
+          </div>
+          <div className="scene-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 48, flexWrap: 'wrap' }}>
+            <div className="score-ring">
+              <svg width="180" height="180" viewBox="0 0 180 180">
+                <circle cx="90" cy="90" r="75" fill="none" stroke="#e8e8f0" strokeWidth="10" />
+                <circle cx="90" cy="90" r="75" fill="none" stroke={grade.color} strokeWidth="10" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} style={{ transition: 'stroke-dashoffset 1s ease' }} />
+              </svg>
+              <div className="score-text"><div className="score-number">{percentage}%</div><div className="score-label">{correctCount}/{questions.length}</div></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 280 }}>
+              {Object.entries(sectionScores).map(([sec, data]) => (
+                <div key={sec} className="result-card">
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: data.correct === data.total ? '#f0faf0' : '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }} dangerouslySetInnerHTML={{__html: SECTION_ICONS[sec] || ''}} />
+                  <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{data.name}</div><div style={{ fontSize: 12, color: '#999' }}>{data.correct}/{data.total} correct</div></div>
+                  <div style={{ padding: '4px 12px', borderRadius: 10, fontSize: 12, fontWeight: 700, background: data.correct === data.total ? '#f0faf0' : '#fef5f5', color: data.correct === data.total ? '#2ecc71' : '#e74c3c' }}>{Math.round((data.correct / data.total) * 100)}%</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box" style={{ marginTop: 24 }}><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> RECOMMENDATION</div>{percentage >= 90 ? "Excellent mastery of context engineering! You're ready to move on to Module 4: Model Context Protocol." : percentage >= 70 ? "Strong understanding! Review the sections you missed, then advance to Model Context Protocol." : "Consider revisiting the guide sections where you scored below 100% before moving to the next module."}</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
+            <a href="../../index.html" className="submit-btn" style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}>Back to Guides</a>
+            <button className="submit-btn" onClick={() => window.location.reload()}>Retake Quiz</button>
+          </div>
+        </div>
+      );
+    }
+
+    function Quiz() {
+      const [currentQuestion, setCurrentQuestion] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+      const [answered, setAnswered] = useState(false);
+      const [answers, setAnswers] = useState([]);
+      const [showResults, setShowResults] = useState(false);
+      const contentRef = useRef(null);
+
+      const handleSelect = (idx) => setSelectedAnswer(idx);
+      const handleSubmit = () => { setAnswered(true); const na = [...answers]; na[currentQuestion] = selectedAnswer; setAnswers(na); };
+      const handleNext = () => { if (currentQuestion < QUESTIONS.length - 1) { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(null); setAnswered(false); if (contentRef.current) contentRef.current.scrollTop = 0; } else { setShowResults(true); } };
+      const handlePrev = () => { if (currentQuestion > 0 && !showResults) { setCurrentQuestion(currentQuestion - 1); setSelectedAnswer(answers[currentQuestion - 1] ?? null); setAnswered(answers[currentQuestion - 1] !== undefined); if (contentRef.current) contentRef.current.scrollTop = 0; } };
+      const handleStageClick = (idx) => { if (showResults) return; if (idx <= answers.length) { setCurrentQuestion(idx); setSelectedAnswer(answers[idx] ?? null); setAnswered(answers[idx] !== undefined); if (contentRef.current) contentRef.current.scrollTop = 0; } };
+      const getStepStatus = (idx) => { if (answers[idx] !== undefined) { return answers[idx] === QUESTIONS[idx].correct ? 'correct' : 'incorrect'; } return ''; };
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {QUESTIONS.map((q, idx) => (
+              <React.Fragment key={idx}>
+                <div className={`step-wrapper ${currentQuestion === idx && !showResults ? 'active' : ''}`}>
+                  <button className={`step-btn ${currentQuestion === idx && !showResults ? 'active' : ''} ${getStepStatus(idx)}`} onClick={() => handleStageClick(idx)} style={{ fontSize: 16, fontWeight: 700 }}>
+                    {answers[idx] !== undefined ? (answers[idx] === QUESTIONS[idx].correct ? '\u2713' : '\u2717') : idx + 1}
+                  </button>
+                  <div className="step-btn-label">Q{idx + 1}</div>
+                </div>
+                {idx < QUESTIONS.length - 1 && (<div className={`step-connector ${answers[idx] !== undefined ? 'active' : ''}`} />)}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
+                <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">3.3</span>
+                  <div className="title">Module 3 Quiz</div>
+                </div>
+                <div style={{ marginLeft: 16 }}><div className="badge">QUIZ</div></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {!showResults && <span className="progress-indicator">Question {currentQuestion + 1} of {QUESTIONS.length}</span>}
+                {showResults && <span className="progress-indicator">Results</span>}
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentQuestion === 0 || showResults} title="Previous question">&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={!answered || showResults} title="Next question">&#8594;</button>
+                </div>
+              </div>
+            </div>
+            <div className="content-area scrollbar-hide" ref={contentRef}>
+              {showResults ? <ResultsView questions={QUESTIONS} answers={answers} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Quiz />);
+  </script>
+</body>
+</html>

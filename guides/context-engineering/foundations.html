@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Context Engineering Foundations - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .stage-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes blink {
+      0%, 50%, 100% {
+        opacity: 1;
+      }
+      25%, 75% {
+        opacity: 0;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .typing {
+      display: inline-block;
+      overflow: hidden;
+      border-right: 2px solid #6c5ce7;
+      white-space: nowrap;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    /* Comparison styles */
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .comparison-item {
+      padding: 24px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .comparison-item.bad {
+      background: #fef5f5;
+      border-color: #e74c3c;
+    }
+
+    .comparison-item.good {
+      background: #f0f8f0;
+      border-color: #2ecc71;
+    }
+
+    .comparison-item.neutral {
+      background: #f8f9fa;
+      border-color: #bbb;
+    }
+
+    .comparison-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    .comparison-item.bad .comparison-title {
+      color: #c0392b;
+    }
+
+    .comparison-item.good .comparison-title {
+      color: #27ae60;
+    }
+
+    .comparison-item.neutral .comparison-title {
+      color: #555;
+    }
+
+    .comparison-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* COSTAR grid and boxes */
+    .costar-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+    }
+
+    .costar-box {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .costar-box:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .costar-box.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .costar-label {
+      font-weight: 700;
+      font-size: 20px;
+      color: #6c5ce7;
+      margin-bottom: 4px;
+    }
+
+    .costar-description {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .costar-hint {
+      font-size: 11px;
+      color: #b0a6e8;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .costar-box.expanded .costar-hint {
+      display: none;
+    }
+
+    .costar-example {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .costar-box.expanded .costar-example {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Decision tree */
+    .decision-tree {
+      width: 100%;
+    }
+
+    .decision-node {
+      padding: 24px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .decision-node:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .decision-question {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .expand-hint {
+      font-size: 18px;
+      color: #b0a6e8;
+      transition: transform 0.3s ease;
+    }
+
+    .decision-node.expanded .expand-hint {
+      transform: rotate(180deg);
+    }
+
+    .decision-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .decision-node.expanded .decision-answer {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .answer-text {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.7;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Context source rows */
+    .context-source-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e8e3f8;
+      margin-bottom: 8px;
+    }
+
+    .context-source-emoji {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .context-source-label {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1a1a1a;
+    }
+
+    .context-source-desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    /* Failure cards */
+    .failure-card {
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .failure-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .failure-card.expanded {
+      border-color: inherit;
+    }
+
+    .failure-card-title {
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .failure-card-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .failure-card.expanded .failure-card-content {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Summary cards */
+    .summary-card {
+      padding: 20px 24px;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .summary-card-emoji {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .summary-card-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .summary-card-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* Static SVG string for the insight icon - only used with hardcoded trusted content */
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
+
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
+        </div>
+      );
+    }
+
+    /* Sidebar icon components rendered as React elements */
+    function LightbulbIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 18h6" />
+          <path d="M10 22h4" />
+          <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+        </svg>
+      );
+    }
+
+    function TargetIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
+        </svg>
+      );
+    }
+
+    function AlertIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      );
+    }
+
+    function UsersIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 00-3-3.87" />
+          <path d="M16 3.13a4 4 0 010 7.75" />
+        </svg>
+      );
+    }
+
+    function BookIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+        </svg>
+      );
+    }
+
+    function S1() {
+      const contextSources = [
+        { emoji: "\uD83D\uDD27", label: "Developer-provided context", desc: "System prompts, instructions, rules" },
+        { emoji: "\uD83D\uDCAC", label: "User input", desc: "The current question or request" },
+        { emoji: "\uD83D\uDCDC", label: "Previous interactions", desc: "Conversation history" },
+        { emoji: "\uD83D\uDD0C", label: "Tool call results", desc: "Data retrieved from APIs, databases, files" },
+        { emoji: "\uD83D\uDCC4", label: "External data", desc: "Documents, search results, memory files" }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 1</div>
+            <div className="stage-header">What is Context Engineering?</div>
+          </div>
+          <div className="explanation">
+            Context engineering is the discipline of designing dynamic systems that provide the right information, at the right time, to an LLM &mdash; so it can produce the best possible output. It&rsquo;s the next evolution beyond prompt engineering.
+          </div>
+          <div className="scene-card">
+            <div className="comparison-box">
+              <div className="comparison-item neutral fade-in">
+                <div className="comparison-title">Prompt Engineering</div>
+                <div className="comparison-content">
+                  Like writing a recipe card &mdash; a single, static instruction that tells the AI what to do.
+                </div>
+              </div>
+              <div className="comparison-item good fade-in" style={{ animationDelay: '0.2s' }}>
+                <div className="comparison-title">&#10003; Context Engineering</div>
+                <div className="comparison-content">
+                  Like running a kitchen &mdash; making sure the right ingredients are prepped, the right tools are on the counter, and the right reference books are open before the chef starts cooking.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ width: '100%', marginTop: '32px' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>
+                Where Context Comes From:
+              </div>
+              {contextSources.map((source, idx) => (
+                <div className="context-source-row fade-in" key={idx} style={{ animationDelay: `${0.1 * idx}s` }}>
+                  <div className="context-source-emoji">{source.emoji}</div>
+                  <div>
+                    <div className="context-source-label">{source.label}</div>
+                    <div className="context-source-desc">{source.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <InsightBlock>
+            Prompts are static. But context is extremely dynamic &mdash; and if the context is dynamic, then the system that constructs it must be dynamic too.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    function S2() {
+      const failures = [
+        { title: "Missing Chapters", desc: "Lacks necessary information \u2014 like asking someone to fix a bug without showing them the code" },
+        { title: "Wrong Page", desc: "Has too much irrelevant information \u2014 like handing someone a 500-page manual when they need one paragraph" },
+        { title: "Contradictory Notes", desc: "Receives contradictory instructions \u2014 like telling someone \u2018be concise\u2019 and \u2018be thorough\u2019 at the same time" }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 2</div>
+            <div className="stage-header">Why Context Engineering Matters</div>
+          </div>
+          <div className="explanation">
+            Garbage in, garbage out &mdash; an LLM can only be as good as the context it receives. Context engineering is like preparing for an open-book exam.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '15px', lineHeight: '1.7', color: '#333', marginBottom: '24px' }}>
+                <strong>The &ldquo;Open-Book Exam&rdquo; analogy:</strong> Having the right textbook, opened to the right page, with the right notes highlighted &mdash; that determines your score. The smartest student will fail if their book is:
+              </div>
+              {failures.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="comparison-item bad fade-in"
+                  style={{ marginBottom: '12px', animationDelay: `${0.15 * idx}s` }}
+                >
+                  <div className="comparison-title">{item.title}</div>
+                  <div className="comparison-content">{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <InsightBlock>
+            Even the most powerful model will underperform with bad context. The quality of your context determines the quality of your outputs.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    function S3() {
+      const [expandedFailure, setExpandedFailure] = useState(null);
+
+      const failureTypes = [
+        {
+          id: 'poisoning',
+          title: 'Context Poisoning',
+          desc: 'Tool calls introduce hallucinated or incorrect data into the context.',
+          analogy: 'Eating spoiled food \u2014 one bad ingredient ruins the whole meal.',
+          bg: '#fef5f5',
+          border: '#e74c3c'
+        },
+        {
+          id: 'confusion',
+          title: 'Context Confusion',
+          desc: 'Unnecessary or irrelevant context influences the response.',
+          analogy: 'Studying the wrong textbook chapter before an exam.',
+          bg: '#fef9f3',
+          border: '#f39c12'
+        },
+        {
+          id: 'clash',
+          title: 'Context Clash',
+          desc: 'Contradictory context segments pull the model in different directions.',
+          analogy: 'Getting opposite advice from two doctors at the same time.',
+          bg: '#fef5f5',
+          border: '#e74c3c'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 3</div>
+            <div className="stage-header">The Context Problem: When Things Go Wrong</div>
+          </div>
+          <div className="explanation">
+            As AI agents work on longer tasks, three types of context failure can degrade their performance &mdash; poisoning, confusion, and clash.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{
+                padding: '16px 20px',
+                background: 'white',
+                borderRadius: '10px',
+                border: '1px solid #e8e3f8',
+                marginBottom: '24px',
+                fontSize: '14px',
+                lineHeight: '1.7',
+                color: '#555'
+              }}>
+                <strong style={{ color: '#1a1a1a' }}>The Growing Context Problem:</strong> When an AI agent works on a long task, its context window grows continuously &mdash; tool call results accumulate, conversation history expands. Eventually: context exceeds window limits, cost and latency increase, and performance degrades.
+              </div>
+
+              {failureTypes.map((failure, idx) => (
+                <div
+                  key={failure.id}
+                  className={`failure-card fade-in ${expandedFailure === failure.id ? 'expanded' : ''}`}
+                  style={{
+                    background: failure.bg,
+                    borderColor: expandedFailure === failure.id ? failure.border : '#e0e0e0',
+                    animationDelay: `${0.1 * idx}s`
+                  }}
+                  onClick={() => setExpandedFailure(expandedFailure === failure.id ? null : failure.id)}
+                >
+                  <div className="failure-card-title">
+                    <span>{failure.title}</span>
+                    <span className="expand-hint" style={{
+                      transform: expandedFailure === failure.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s ease'
+                    }}>&#9662;</span>
+                  </div>
+                  <div className="failure-card-content">
+                    <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7' }}>
+                      {failure.desc}
+                    </div>
+                    <div style={{ marginTop: '10px', fontSize: '13px', color: '#666', fontStyle: 'italic' }}>
+                      <strong>Analogy:</strong> {failure.analogy}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <InsightBlock>
+            Context engineering isn&rsquo;t just about adding information &mdash; it&rsquo;s equally about filtering, organizing, and managing what the LLM sees.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    function S4() {
+      const [expandedRole, setExpandedRole] = useState(null);
+
+      const roles = [
+        {
+          id: 'developers',
+          emoji: "\uD83D\uDD27",
+          title: 'Developers',
+          desc: 'Building tools like Cursor, Claude Code, or custom AI agents.',
+          detail: 'Developers design the systems that dynamically assemble context. They choose what tools are available, how memory is structured, and when context is retrieved or compressed.'
+        },
+        {
+          id: 'users',
+          emoji: "\uD83D\uDCAC",
+          title: 'Users',
+          desc: 'Interacting with AI assistants.',
+          detail: 'Every time you structure a request to an AI, you\u2019re doing context engineering. How you phrase your question, what background you provide, and what examples you include all determine the quality of the response.'
+        },
+        {
+          id: 'teams',
+          emoji: "\uD83D\uDC65",
+          title: 'Teams',
+          desc: 'Setting up shared AI workflows and memory systems.',
+          detail: 'Teams establish shared context \u2014 project documentation, coding standards, workflow templates \u2014 that ensures consistent AI outputs across all team members.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 4</div>
+            <div className="stage-header">Who Needs Context Engineering?</div>
+          </div>
+          <div className="explanation">
+            Context engineering isn&rsquo;t just for developers building AI agents. It matters for everyone interacting with AI.
+          </div>
+          <div className="scene-card">
+            <div className="costar-grid">
+              {roles.map((role, idx) => (
+                <div
+                  key={role.id}
+                  className={`costar-box ${expandedRole === role.id ? 'expanded' : ''}`}
+                  style={idx === 2 && expandedRole !== role.id ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
+                  onClick={() => setExpandedRole(expandedRole === role.id ? null : role.id)}
+                >
+                  <div className="costar-label">{role.emoji} {role.title}</div>
+                  <div className="costar-description">{role.desc}</div>
+                  <div className="costar-hint">Click to explore</div>
+                  <div className="costar-example">
+                    {role.detail}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <InsightBlock>
+            Whether you&rsquo;re building AI agents or just chatting with one, you&rsquo;re already doing context engineering. The question is whether you&rsquo;re doing it well.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    function S5() {
+      const summaries = [
+        {
+          emoji: "\uD83C\uDFAF",
+          title: "Context > Prompts",
+          desc: "Dynamic context systems matter more than static prompt text. A well-engineered context system will outperform the most carefully crafted single prompt.",
+          color: "#6c5ce7"
+        },
+        {
+          emoji: "\u26A0\uFE0F",
+          title: "Garbage In, Garbage Out",
+          desc: "LLMs can only be as good as the context they receive. Missing information, irrelevant noise, or contradictory instructions all degrade output quality.",
+          color: "#f39c12"
+        },
+        {
+          emoji: "\uD83D\uDEE1\uFE0F",
+          title: "Watch for Failures",
+          desc: "Context poisoning, confusion, and clash are the three ways context goes wrong. Awareness of these failure modes is the first step to preventing them.",
+          color: "#e74c3c"
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-number">Stage 5</div>
+            <div className="stage-header">Key Foundations</div>
+          </div>
+          <div className="explanation">
+            Three foundational principles to remember about context engineering.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              {summaries.map((item, idx) => (
+                <div
+                  className="summary-card fade-in"
+                  key={idx}
+                  style={{ borderLeftColor: item.color, animationDelay: `${0.15 * idx}s` }}
+                >
+                  <div className="summary-card-emoji">{item.emoji}</div>
+                  <div>
+                    <div className="summary-card-title">{item.title}</div>
+                    <div className="summary-card-desc">{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <InsightBlock>
+            Context engineering is the evolution of prompt engineering. Once you understand this, you&rsquo;ll never look at AI interactions the same way.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stageIconComponents = [LightbulbIcon, TargetIcon, AlertIcon, UsersIcon, BookIcon];
+
+      const stages = [
+        { icon: LightbulbIcon, label: 'What is CE', component: S1 },
+        { icon: TargetIcon, label: 'Why It Matters', component: S2 },
+        { icon: AlertIcon, label: 'Failures', component: S3 },
+        { icon: UsersIcon, label: 'Everyone', component: S4 },
+        { icon: BookIcon, label: 'Takeaways', component: S5 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) {
+          setCurrentStage(currentStage + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) {
+          setCurrentStage(currentStage - 1);
+        }
+      };
+
+      const handleStageClick = (idx) => {
+        setCurrentStage(idx);
+      };
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => {
+              const IconComp = stage.icon;
+              return (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button
+                      className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                      onClick={() => handleStageClick(idx)}
+                    >
+                      <IconComp />
+                    </button>
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">3.1</span>
+                  <div className="title">Context Engineering Foundations</div>
+                </div>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">BEGINNER GUIDE</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of 5</span>
+                <div className="nav-arrows">
+                  <button
+                    className="arrow-btn"
+                    onClick={handlePrev}
+                    disabled={currentStage === 0}
+                    title="Previous stage"
+                  >
+                    &#8592;
+                  </button>
+                  <button
+                    className="arrow-btn"
+                    onClick={handleNext}
+                    disabled={currentStage === stages.length - 1}
+                    title="Next stage"
+                  >
+                    &#8594;
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>
