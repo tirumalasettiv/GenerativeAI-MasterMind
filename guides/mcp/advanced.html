@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced MCP - Deep Dive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
+    #root { height: 100vh; overflow: hidden; }
+    .container { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 120px; background: #f8f9fa; border-right: 1px solid #e0e0e0; padding: 80px 12px 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .step-btn { width: 64px; height: 64px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.3s ease; position: relative; flex-shrink: 0; }
+    .step-btn.active { background: #6c5ce7; border-color: #6c5ce7; color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
+    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+    .step-btn-label { font-size: 11px; font-weight: 600; color: #999; margin-top: 4px; text-align: center; letter-spacing: 0.3px; transition: color 0.3s ease; }
+    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
+    .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
+    .step-connector.active { background: #6c5ce7; }
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid #e0e0e0; background: white; flex-shrink: 0; }
+    .left-section { display: flex; align-items: center; gap: 20px; }
+    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .back-link:hover { color: #2ecc71; }
+    .badge { display: inline-block; background: #e8e3f8; color: #6c5ce7; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .progress-indicator { font-size: 13px; font-weight: 600; color: #6c5ce7; background: #f5f3ff; padding: 4px 12px; border-radius: 12px; margin-right: 12px; }
+    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
+    .title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .stage-header { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .nav-arrows { display: flex; gap: 12px; }
+    .arrow-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
+    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; padding: 32px 48px; gap: 30px; }
+    .explanation { font-size: 22px; line-height: 1.7; color: #2a2a2a; }
+    .scene-card { background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%); border-radius: 16px; padding: 40px; border: 1px solid #e8e3f8; min-height: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08); }
+    .insight-box { background: #f0faf0; border-left: 4px solid #2ecc71; padding: 24px; border-radius: 8px; color: #1a5e3a; font-size: 17px; line-height: 1.7; margin-top: 24px; position: relative; }
+    .insight-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #2ecc71; margin-bottom: 8px; text-transform: uppercase; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.6s ease forwards; }
+    .comparison-box { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
+    .comparison-item { padding: 24px; border-radius: 12px; border: 2px solid #e0e0e0; }
+    .comparison-item.bad { background: #fef5f5; border-color: #e74c3c; }
+    .comparison-item.good { background: #f0f8f0; border-color: #2ecc71; }
+    .comparison-item.neutral { background: #f8f9fa; border-color: #bbb; }
+    .comparison-title { font-weight: 700; margin-bottom: 12px; font-size: 15px; }
+    .comparison-item.bad .comparison-title { color: #c0392b; }
+    .comparison-item.good .comparison-title { color: #27ae60; }
+    .comparison-item.neutral .comparison-title { color: #555; }
+    .comparison-content { font-size: 15px; line-height: 1.6; color: #333; }
+    .context-source-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: white; border-radius: 8px; border: 1px solid #e8e3f8; margin-bottom: 8px; }
+    .context-source-emoji { font-size: 20px; flex-shrink: 0; }
+    .context-source-label { font-weight: 700; font-size: 14px; color: #1a1a1a; }
+    .context-source-desc { font-size: 13px; color: #666; margin-top: 2px; }
+    .decision-tree { width: 100%; }
+    .decision-node { padding: 24px; background: white; border: 2px solid #e0e0e0; border-radius: 12px; margin-bottom: 16px; cursor: pointer; transition: all 0.3s ease; }
+    .decision-node:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+    .decision-question { font-weight: 700; font-size: 16px; color: #1a1a1a; margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; }
+    .expand-hint { font-size: 18px; color: #b0a6e8; transition: transform 0.3s ease; }
+    .decision-node.expanded .expand-hint { transform: rotate(180deg); }
+    .decision-answer { max-height: 0; overflow: hidden; transition: all 0.3s ease; }
+    .decision-node.expanded .decision-answer { max-height: 300px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd; }
+    .answer-text { font-size: 15px; color: #333; line-height: 1.7; }
+    .code-block { background: #1a1a2e; color: #a78bfa; padding: 16px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6; margin-top: 12px; white-space: pre-wrap; width: 100%; }
+    .summary-card { padding: 20px 24px; background: white; border-radius: 12px; border-left: 4px solid; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px; }
+    .summary-card-emoji { font-size: 24px; flex-shrink: 0; }
+    .summary-card-title { font-weight: 700; font-size: 16px; color: #1a1a1a; margin-bottom: 4px; }
+    .summary-card-desc { font-size: 14px; color: #555; line-height: 1.6; }
+    .bar-chart { width: 100%; max-width: 480px; }
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .bar-label { font-size: 13px; font-weight: 600; width: 120px; text-align: right; color: #555; }
+    .bar-track { flex: 1; height: 24px; background: #f0f0f0; border-radius: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: 700; color: white; transition: width 0.8s ease; }
+    .plugin-row { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: white; border-radius: 10px; border: 1px solid #e8e3f8; margin-bottom: 8px; }
+    .plugin-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Note: dangerouslySetInnerHTML below is used only with hardcoded SVG icon strings (stageIcons), not user input -->
+  <script type="text/babel">
+    const { useState } = React;
+
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
+
+    function InsightLabel() {
+      return React.createElement('div', { className: 'insight-label' }, insightSvg, ' INSIGHT');
+    }
+
+    function S1() {
+      return (
+        <>
+          <div><div className="stage-header">The Context Bloat Problem</div></div>
+          <div className="explanation">
+            Context is the most expensive and limited resource in agentic systems. Loading unnecessary MCP tool definitions bloats the context window and degrades agent performance.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ padding: '16px 20px', background: 'white', borderRadius: '10px', border: '1px solid #e8e3f8', marginBottom: '24px', fontSize: '14px', lineHeight: '1.7', color: '#555' }}>
+                <strong style={{ color: '#1a1a1a' }}>The Problem:</strong> Project-level MCP config loads <em>all</em> configured servers simultaneously. All tools from every server are present in the context window &mdash; consuming tens of thousands of tokens before the user even asks a question.
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>Context Window Usage (Before Optimization):</div>
+              <div className="bar-chart">
+                <div className="bar-row fade-in">
+                  <div className="bar-label">System prompt</div>
+                  <div className="bar-track"><div className="bar-fill" style={{ width: '8%', background: '#6c5ce7' }}>~2K</div></div>
+                </div>
+                <div className="bar-row fade-in" style={{ animationDelay: '0.1s' }}>
+                  <div className="bar-label">Built-in tools</div>
+                  <div className="bar-track"><div className="bar-fill" style={{ width: '12%', background: '#3498db' }}>6%</div></div>
+                </div>
+                <div className="bar-row fade-in" style={{ animationDelay: '0.2s' }}>
+                  <div className="bar-label">MCP tools</div>
+                  <div className="bar-track"><div className="bar-fill" style={{ width: '40%', background: '#e74c3c' }}>20%</div></div>
+                </div>
+                <div className="bar-row fade-in" style={{ animationDelay: '0.3s' }}>
+                  <div className="bar-label">User messages</div>
+                  <div className="bar-track"><div className="bar-fill" style={{ width: '2%', background: '#2ecc71' }}>0</div></div>
+                </div>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '14px', fontWeight: 600, color: '#e74c3c' }}>
+                Nearly 50% consumed before the first question!
+              </div>
+
+              <div style={{ marginTop: '24px', fontSize: '14px', lineHeight: '1.7', color: '#555' }}>
+                <strong style={{ color: '#1a1a1a' }}>Real-world example:</strong> 58 tools across GitHub, Slack, and other MCP servers consuming <strong>55,000 tokens</strong> before the conversation begins. A simple front-end task carries the weight of unrelated database and PDF tools.
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Context engineering in MCP means matching available tools to the specific task &mdash; not loading everything &ldquo;just in case.&rdquo; Think toolbox, not hardware store.
+          </div>
+        </>
+      );
+    }
+
+    function S2() {
+      return (
+        <>
+          <div><div className="stage-header">Optimization Strategies</div></div>
+          <div className="explanation">
+            Two strategies to tame context bloat: configuration-level control and session-level control. Both dramatically reduce wasted tokens.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="comparison-box">
+                <div className="comparison-item good fade-in">
+                  <div className="comparison-title">Strategy 1: Configuration-Level</div>
+                  <div className="comparison-content">
+                    <p style={{ marginBottom: '12px' }}>Load only the MCP servers you need using strict config:</p>
+                    <div className="code-block" style={{ marginTop: '0' }}>
+{`claude code --mcp-config ./my-config.json \\
+  --strict-mcp-config`}
+                    </div>
+                    <div style={{ marginTop: '12px' }}>
+                      <strong>Result:</strong> MCP tools drop from ~20% to ~2.4% of context
+                    </div>
+                  </div>
+                </div>
+                <div className="comparison-item good fade-in" style={{ animationDelay: '0.2s' }}>
+                  <div className="comparison-title">Strategy 2: Session-Level</div>
+                  <div className="comparison-content">
+                    <p style={{ marginBottom: '12px' }}>Toggle servers on/off within the Claude interface:</p>
+                    <ul style={{ paddingLeft: '16px', listStyle: 'none' }}>
+                      <li style={{ marginBottom: '6px' }}>&bull; Access MCP servers in settings</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; Disable servers not needed for current task</li>
+                      <li style={{ marginBottom: '6px' }}>&bull; Toggle individual servers on/off</li>
+                      <li>&bull; Changes take effect immediately</li>
+                    </ul>
+                    <div style={{ marginTop: '12px' }}>
+                      <strong>Result:</strong> Context reduced to ~3.2% for focused toolset
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '32px' }}>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>Impact Comparison:</div>
+                <div className="bar-chart">
+                  <div className="bar-row fade-in">
+                    <div className="bar-label">All servers</div>
+                    <div className="bar-track"><div className="bar-fill" style={{ width: '40%', background: '#e74c3c' }}>~20%</div></div>
+                  </div>
+                  <div className="bar-row fade-in" style={{ animationDelay: '0.1s' }}>
+                    <div className="bar-label">Strict config</div>
+                    <div className="bar-track"><div className="bar-fill" style={{ width: '5%', background: '#2ecc71' }}>2.4%</div></div>
+                  </div>
+                  <div className="bar-row fade-in" style={{ animationDelay: '0.2s' }}>
+                    <div className="bar-label">Session toggle</div>
+                    <div className="bar-track"><div className="bar-fill" style={{ width: '7%', background: '#2ecc71' }}>3.2%</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            A professional brings a curated toolbox to each job &mdash; not the entire store inventory. Match tools to the task.
+          </div>
+        </>
+      );
+    }
+
+    function S3() {
+      const pluginComponents = [
+        { emoji: "\u2F", label: "Slash Commands", desc: "Custom commands triggered with /", example: "/feature-dev for feature implementation", bg: '#f5f3ff' },
+        { emoji: "\uD83E\uDD16", label: "Subagents", desc: "Specialized AI agents for specific tasks", example: "Code Reviewer, Code Architect", bg: '#f0f8f0' },
+        { emoji: "\uD83D\uDD0C", label: "MCP Servers", desc: "Tool integrations bundled in", example: "Database access, API connections", bg: '#fef9f3' },
+        { emoji: "\u2699\uFE0F", label: "Hooks", desc: "Automated triggers and behaviors", example: "Pre-commit checks, auto-formatting", bg: '#eaf4fd' }
+      ];
+
+      return (
+        <>
+          <div><div className="stage-header">Claude Code Plugins</div></div>
+          <div className="explanation">
+            Plugins bundle slash commands, subagents, MCP servers, and hooks into shareable packages &mdash; enabling teams and communities to share complete AI workflows with a single install.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>What Plugins Bundle:</div>
+              {pluginComponents.map((p, idx) => (
+                <div className="plugin-row fade-in" key={idx} style={{ animationDelay: `${0.1 * idx}s` }}>
+                  <div className="plugin-icon" style={{ background: p.bg }}>{p.emoji}</div>
+                  <div style={{ flex: 1 }}>
+                    <div className="context-source-label">{p.label}</div>
+                    <div className="context-source-desc">{p.desc} &mdash; e.g., {p.example}</div>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ marginTop: '32px' }}>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>Installation Flow:</div>
+                {[
+                  { step: '1', text: 'Run /plugin command in Claude Code' },
+                  { step: '2', text: 'Add marketplace URL (GitHub repository or marketplace.json)' },
+                  { step: '3', text: 'Browse available plugins with descriptions' },
+                  { step: '4', text: 'Select and install with fine-grained component control' }
+                ].map((item, idx) => (
+                  <div className="context-source-row fade-in" key={idx} style={{ animationDelay: `${0.1 * idx}s` }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#6c5ce7', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>{item.step}</div>
+                    <div><div className="context-source-label">{item.text}</div></div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginTop: '24px', padding: '16px 20px', background: 'white', borderRadius: '10px', border: '1px solid #e8e3f8', fontSize: '14px', lineHeight: '1.7', color: '#555' }}>
+                <strong style={{ color: '#1a1a1a' }}>Enterprise Use:</strong> Organizations can host private marketplaces with role-specific tools, team-dedicated agents, and department-level commands &mdash; ensuring consistent development environments across the company.
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Plugins solve the &ldquo;IKEA without instructions&rdquo; problem. Instead of manually assembling tools from scattered sources, everything comes in one shareable package.
+          </div>
+        </>
+      );
+    }
+
+    function S4() {
+      const [expandedDrawback, setExpandedDrawback] = useState(null);
+
+      const drawbacks = [
+        {
+          id: 'pollution',
+          title: '1. Context Pollution (Most Significant)',
+          desc: 'All tool definitions loaded upfront into the system prompt, whether relevant or not.',
+          detail: 'Real-world example: 58 tools across GitHub, Slack, and other servers consuming 55,000 tokens before conversation begins. Models struggle finding relevant information in oversized context \u2014 increased hallucinations, wrong tool selection, and difficulty following instructions.',
+          color: '#e74c3c'
+        },
+        {
+          id: 'pingpong',
+          title: '2. Inefficient Ping-Pong Execution',
+          desc: 'Each tool call requires a full round-trip: model requests \u2192 tool runs \u2192 result added to history \u2192 entire history sent to model.',
+          detail: 'Multiple tool calls multiply latency, cost, and context pollution. Intermediate results accumulate and persist even when they don\u2019t contribute to the final answer. Each cycle requires a full LLM inference pass with growing context.',
+          color: '#f39c12'
+        },
+        {
+          id: 'unnatural',
+          title: '3. Unnatural Language for LLMs',
+          desc: 'MCP forces LLMs to work with JSON tool-call schemas, contrary to their primary training on text and code.',
+          detail: 'It\u2019s like asking Shakespeare to write a play in Mandarin after a crash course. LLMs excel with text and code (trillions of training tokens) but tool-call tokens are synthetic with limited training data. Code is the LLM\u2019s native language; tool calls are learned behavior.',
+          color: '#e74c3c'
+        },
+        {
+          id: 'schema',
+          title: '4. Schema Definition Limitations',
+          desc: 'JSON schemas define what a tool looks like but fail to capture how and when to use it.',
+          detail: 'Schemas tell you function names and parameters but not usage patterns, best practices, or \u2014 critically \u2014 when NOT to use a tool. The gap between definition and real-world usage represents deeper concepts than tool definitions can capture.',
+          color: '#f39c12'
+        }
+      ];
+
+      return (
+        <>
+          <div><div className="stage-header">The Drawbacks of MCP</div></div>
+          <div className="explanation">
+            MCP&rsquo;s drawbacks stem from context management and task execution approach &mdash; resulting in agents that can be slower, more expensive, and less capable than they could be.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="decision-tree">
+                {drawbacks.map((d) => (
+                  <div
+                    key={d.id}
+                    className={`decision-node ${expandedDrawback === d.id ? 'expanded' : ''}`}
+                    onClick={() => setExpandedDrawback(expandedDrawback === d.id ? null : d.id)}
+                    style={{ borderColor: expandedDrawback === d.id ? d.color : '#e0e0e0' }}
+                  >
+                    <div className="decision-question">
+                      <span>{d.title}</span>
+                      <span className="expand-hint" style={{ transform: expandedDrawback === d.id ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>&#9662;</span>
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>{d.desc}</div>
+                    <div className="decision-answer">
+                      <div className="answer-text">{d.detail}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            Understanding these drawbacks is essential for making informed architectural decisions. MCP is powerful but not perfect &mdash; the right approach depends on your use case.
+          </div>
+        </>
+      );
+    }
+
+    function S5() {
+      return (
+        <>
+          <div><div className="stage-header">Code Mode: An Emerging Alternative</div></div>
+          <div className="explanation">
+            Code mode converts MCP tool definitions into a TypeScript API, letting the LLM generate and execute code instead of making individual tool calls &mdash; leveraging what LLMs do best.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="comparison-box">
+                <div className="comparison-item bad fade-in">
+                  <div className="comparison-title">Traditional MCP</div>
+                  <div className="comparison-content">
+                    <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
+                      LLM &rarr; tool call &rarr; result &rarr; LLM &rarr; tool call &rarr; result &rarr; LLM &rarr; answer
+                    </div>
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#c0392b' }}>Multiple round trips, growing context each time</div>
+                  </div>
+                </div>
+                <div className="comparison-item good fade-in" style={{ animationDelay: '0.2s' }}>
+                  <div className="comparison-title">&#10003; Code Mode</div>
+                  <div className="comparison-content">
+                    <div style={{ fontSize: '13px', lineHeight: '1.8' }}>
+                      LLM &rarr; generates TypeScript &rarr; single sandbox execution &rarr; answer
+                    </div>
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#27ae60' }}>One round trip, single code execution</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '32px', fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>How It Works:</div>
+              {[
+                { step: '1', label: 'Convert', text: 'Fetch MCP schema \u2192 convert to TypeScript API with doc comments' },
+                { step: '2', label: 'Present', text: 'Give the agent a single tool: "execute TypeScript code"' },
+                { step: '3', label: 'Generate', text: 'LLM writes code that calls the TypeScript API' },
+                { step: '4', label: 'Execute', text: 'Code runs in a secure sandbox isolated from the internet' },
+                { step: '5', label: 'Return', text: 'Output logs passed back to the agent' }
+              ].map((item, idx) => (
+                <div className="context-source-row fade-in" key={idx} style={{ animationDelay: `${0.08 * idx}s` }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#2ecc71', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>{item.step}</div>
+                  <div>
+                    <div className="context-source-label">{item.label}</div>
+                    <div className="context-source-desc">{item.text}</div>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ marginTop: '24px', padding: '16px 20px', background: 'white', borderRadius: '10px', border: '1px solid #e8e3f8', fontSize: '14px', lineHeight: '1.7', color: '#555' }}>
+                <strong style={{ color: '#1a1a1a' }}>MCP Still Has Value:</strong> Despite code mode, MCP remains useful as a uniform connection mechanism and standardized RPC interface. Code mode just changes how the LLM <em>interacts</em> with it &mdash; generating code instead of tool calls.
+              </div>
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            LLMs are trained on millions of real-world code examples. Making them generate code (their native language) instead of synthetic tool-call tokens aligns with their strengths.
+          </div>
+        </>
+      );
+    }
+
+    function S6() {
+      const takeaways = [
+        { emoji: '\uD83C\uDFAF', title: 'Context Is the Bottleneck', desc: 'Loading all MCP tools upfront consumes tokens and degrades performance. Be selective \u2014 use strict configs and session-level toggles.', color: '#e74c3c' },
+        { emoji: '\uD83D\uDCE6', title: 'Plugins Scale Teams', desc: 'Bundle commands, agents, servers, and hooks into shareable packages for consistent setups across teams and organizations.', color: '#6c5ce7' },
+        { emoji: '\u26A0\uFE0F', title: 'Know the Tradeoffs', desc: 'Context pollution, ping-pong execution, and unnatural tool interfaces are real limitations. The right approach depends on your use case.', color: '#f39c12' },
+        { emoji: '\uD83D\uDCBB', title: 'Code Mode Is Promising', desc: 'Generating TypeScript instead of tool calls aligns with LLM strengths, reduces round trips, and may represent the future of MCP interaction.', color: '#2ecc71' }
+      ];
+
+      return (
+        <>
+          <div><div className="stage-header">Key Takeaways</div></div>
+          <div className="explanation">
+            Four advanced principles for mastering MCP in production.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              {takeaways.map((t, idx) => (
+                <div className="summary-card fade-in" key={idx} style={{ borderLeftColor: t.color, animationDelay: `${idx * 0.15}s` }}>
+                  <div className="summary-card-emoji">{t.emoji}</div>
+                  <div>
+                    <div className="summary-card-title">{t.title}</div>
+                    <div className="summary-card-desc">{t.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box">
+            {React.createElement(InsightLabel)}
+            MCP is a powerful standardization layer, but using it well requires context engineering discipline. Optimize aggressively, know the tradeoffs, and watch for emerging alternatives like code mode.
+          </div>
+        </>
+      );
+    }
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      /* Hardcoded SVG icon strings for sidebar - these are static trusted content, not user input */
+      const stageIcons = [
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>',
+      ];
+
+      const stages = [
+        { icon: stageIcons[0], label: 'Bloat', component: S1 },
+        { icon: stageIcons[1], label: 'Optimize', component: S2 },
+        { icon: stageIcons[2], label: 'Plugins', component: S3 },
+        { icon: stageIcons[3], label: 'Drawbacks', component: S4 },
+        { icon: stageIcons[4], label: 'Code Mode', component: S5 },
+        { icon: stageIcons[5], label: 'Summary', component: S6 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => { if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
+      const handleStageClick = (idx) => setCurrentStage(idx);
+
+      return (
+        React.createElement('div', { className: 'container' },
+          React.createElement('div', { className: 'sidebar scrollbar-hide' },
+            stages.map((stage, idx) =>
+              React.createElement(React.Fragment, { key: idx },
+                React.createElement('div', { className: `step-wrapper ${currentStage === idx ? 'active' : ''}` },
+                  React.createElement('button', {
+                    className: `step-btn ${currentStage === idx ? 'active' : ''}`,
+                    onClick: () => handleStageClick(idx),
+                    dangerouslySetInnerHTML: { __html: stage.icon }
+                  }),
+                  React.createElement('div', { className: 'step-btn-label' }, stage.label)
+                ),
+                idx < stages.length - 1 &&
+                  React.createElement('div', { className: `step-connector ${currentStage > idx ? 'active' : ''}` })
+              )
+            )
+          ),
+          React.createElement('div', { className: 'main-content' },
+            React.createElement('div', { className: 'top-bar' },
+              React.createElement('div', { className: 'left-section' },
+                React.createElement('a', { href: '../../index.html', className: 'back-link' }, '\u2190 Back to All Guides'),
+                React.createElement('span', { style: { marginLeft: '20px', fontSize: '14px', color: '#999' } }, '|'),
+                React.createElement('div', { style: { marginLeft: '12px', display: 'flex', alignItems: 'center' } },
+                  React.createElement('span', { className: 'guide-number' }, '4.2'),
+                  React.createElement('div', { className: 'title' }, 'Advanced MCP')
+                ),
+                React.createElement('div', { style: { marginLeft: '20px' } },
+                  React.createElement('div', { className: 'badge' }, 'DEEP DIVE')
+                )
+              ),
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center' } },
+                React.createElement('span', { className: 'progress-indicator' }, `Page ${currentStage + 1} of 6`),
+                React.createElement('div', { className: 'nav-arrows' },
+                  React.createElement('button', {
+                    className: 'arrow-btn', onClick: handlePrev, disabled: currentStage === 0, title: 'Previous stage'
+                  }, '\u2190'),
+                  React.createElement('button', {
+                    className: 'arrow-btn', onClick: handleNext, disabled: currentStage === stages.length - 1, title: 'Next stage'
+                  }, '\u2192')
+                )
+              )
+            ),
+            React.createElement('div', { className: 'content-area scrollbar-hide' },
+              React.createElement(CurrentComponent)
+            )
+          )
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(Guide));
+  </script>
+</body>
+</html>
