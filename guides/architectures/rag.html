@@ -1112,8 +1112,10 @@
         while (i < words.length) {
           const end = Math.min(i + wpc, words.length);
           chunks.push(words.slice(i, end).join(' '));
-          i = end - ow;
-          if (i >= words.length - 2) break;
+          if (end >= words.length) break;
+          const next = end - ow;
+          if (next <= i) break;
+          i = next;
         }
         return chunks;
       };
