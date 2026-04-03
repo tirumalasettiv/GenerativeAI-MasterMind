@@ -3,726 +3,1548 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RAG Architecture Deep Dive</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <title>RAG Architecture - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'DM Sans', sans-serif; overflow: hidden; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    @keyframes blink { 0%, 49%, 100% { opacity: 1; } 50%, 99% { opacity: 0; } }
-    @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Toggle button group */
+    .toggle-group {
+      display: flex;
+      gap: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #e0e0e0;
+      margin-bottom: 24px;
+    }
+
+    .toggle-btn {
+      padding: 12px 28px;
+      border: none;
+      background: white;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      color: #666;
+    }
+
+    .toggle-btn.active {
+      background: #6c5ce7;
+      color: white;
+    }
+
+    /* Component cards */
+    .component-card {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .component-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .component-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .component-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-top: 8px;
+    }
+
+    .component-card-desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .component-card-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .component-card.expanded .component-card-detail {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Pipeline flow */
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .pipeline-step {
+      background: white;
+      border: 2px solid #e8e3f8;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+    }
+
+    .pipeline-arrow {
+      color: #b0a6e8;
+      font-size: 18px;
+    }
+
+    /* Step progression cards */
+    .step-card {
+      padding: 20px 24px;
+      background: white;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .step-card.active-step {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .step-card.completed-step {
+      border-color: #2ecc71;
+      background: #f0faf0;
+    }
+
+    .step-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-card.active-step .step-number {
+      background: #6c5ce7;
+    }
+
+    .step-card.completed-step .step-number {
+      background: #2ecc71;
+    }
+
+    .step-card-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .step-card.active-step .step-card-content {
+      max-height: 400px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e8e3f8;
+    }
+
+    /* Slider controls */
+    .slider-control {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .slider-input {
+      width: 100%;
+      accent-color: #6c5ce7;
+      height: 6px;
+    }
+
+    /* Strategy cards */
+    .strategy-card {
+      padding: 16px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .strategy-card:hover {
+      border-color: #6c5ce7;
+    }
+
+    .strategy-card.selected {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    /* Warning cards */
+    .warning-card {
+      padding: 16px 20px;
+      background: #fff8f0;
+      border: 1px solid #f0c050;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .warning-card-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #b8860b;
+      margin-bottom: 4px;
+    }
+
+    .warning-card-desc {
+      font-size: 13px;
+      color: #8b6914;
+      line-height: 1.5;
+    }
+
+    /* Result cards */
+    .result-card {
+      padding: 16px 20px;
+      background: white;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .result-score {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    .result-score.high {
+      background: #e8f8e8;
+      color: #27ae60;
+    }
+
+    .result-score.medium {
+      background: #fef9e7;
+      color: #b8860b;
+    }
+
+    .result-score.low {
+      background: #fef5f5;
+      color: #c0392b;
+    }
+
+    /* Pattern cards */
+    .pattern-card {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+    }
+
+    .pattern-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .pattern-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .pattern-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pattern-card-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+    }
+
+    .expand-hint {
+      font-size: 18px;
+      color: #b0a6e8;
+      transition: transform 0.3s ease;
+    }
+
+    .pattern-card.expanded .expand-hint {
+      transform: rotate(180deg);
+    }
+
+    .pattern-card-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .pattern-card.expanded .pattern-card-content {
+      max-height: 500px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Prompt block */
+    .prompt-block {
+      background: #1a1a2e;
+      color: #e8e8f0;
+      padding: 20px 24px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .prompt-label {
+      color: #6c5ce7;
+      font-weight: 700;
+    }
+
+    .prompt-context {
+      color: #2ecc71;
+    }
+
+    .prompt-user {
+      color: #f39c12;
+    }
+
+    /* Tag pills */
+    .tag-pill {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin: 3px;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState } = React;
 
-    const P = {
-      root: {
-        display: 'flex',
-        flexDirection: 'row',
-        width: '100%',
-        height: '100vh',
-        backgroundColor: 'white',
-        overflow: 'hidden'
-      },
-      sidebar: {
-        width: 180,
-        backgroundColor: '#f8f9fa',
-        borderRight: '1px solid #e9ecef',
-        padding: '24px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 16
-      },
-      stepCircle: (stage, current) => ({
-        width: 60,
-        height: 60,
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 600,
-        color: 'white',
-        cursor: 'pointer',
-        backgroundColor: stage < current ? '#2ecc71' : stage === current ? '#6c5ce7' : '#e9ecef',
-        color: stage < current || stage === current ? 'white' : '#666',
-        transition: 'all 0.3s ease',
-        fontSize: 14
-      }),
-      stepLabel: {
-        fontSize: 11,
-        color: '#666',
-        textAlign: 'center',
-        width: 140
-      },
-      connector: (isActive) => ({
-        width: 2,
-        height: 20,
-        backgroundColor: isActive ? '#2ecc71' : '#e9ecef',
-        transition: 'background-color 0.3s ease'
-      }),
-      main: {
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      },
-      topBar: {
-        height: 64,
-        backgroundColor: '#f8f9fa',
-        borderBottom: '1px solid #e9ecef',
-        padding: '12px 32px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      },
-      leftSection: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16
-      },
-      backLink: {
-        color: '#6c5ce7',
-        textDecoration: 'none',
-        fontSize: 14,
-        fontWeight: 500,
-        cursor: 'pointer'
-      },
-      badge: {
-        backgroundColor: '#e8f0fe',
-        color: '#6c5ce7',
-        padding: '4px 12px',
-        borderRadius: 4,
-        fontSize: 12,
-        fontWeight: 600
-      },
-      title: {
-        fontFamily: 'Fraunces, serif',
-        fontSize: 28,
-        fontWeight: 700,
-        color: '#1a1a1a'
-      },
-      navRow: {
-        display: 'flex',
-        gap: 12
-      },
-      navBtn: (active) => ({
-        padding: '8px 16px',
-        border: 'none',
-        backgroundColor: active ? '#6c5ce7' : 'transparent',
-        color: active ? 'white' : '#666',
-        borderRadius: 6,
-        cursor: 'pointer',
-        fontSize: 13,
-        fontWeight: 500,
-        transition: 'all 0.2s ease'
-      }),
-      navP: {
-        color: '#999',
-        fontSize: 13
-      },
-      content: {
-        flex: 1,
-        padding: '40px 48px',
-        overflowY: 'auto',
-        animation: 'fadeIn 0.5s ease'
-      },
-      explainRow: {
-        marginBottom: 32,
-        padding: '20px',
-        backgroundColor: '#f8f9fa',
-        borderRadius: 12,
-        animation: 'slideInLeft 0.5s ease'
-      },
-      explain: {
-        fontSize: 16,
-        color: '#333',
-        lineHeight: 1.6
-      },
-      scene: {
-        backgroundColor: '#f8f9fa',
-        borderRadius: 16,
-        padding: 32,
-        border: '1px solid #e9ecef',
-        marginBottom: 32,
-        animation: 'slideInRight 0.5s ease',
-        minHeight: 400
-      },
-      insightLabel: {
-        fontSize: 13,
-        fontWeight: 600,
-        color: '#1a9456',
-        textTransform: 'uppercase',
-        letterSpacing: 1,
-        marginBottom: 8
-      },
-      insight: {
-        backgroundColor: '#f0faf0',
-        borderLeft: '4px solid #2ecc71',
-        padding: 20,
-        borderRadius: 8,
-        fontSize: 15,
-        color: '#2d5016',
-        lineHeight: 1.7,
-        animation: 'slideInLeft 0.6s ease'
-      }
-    };
+    /* Insight icon as React element */
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
 
-    function S1() {
-      const [showRAG, setShowRAG] = useState(true);
-
+    function InsightBlock({ children }) {
       return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>
-              AI that first searches your documents to find relevant information, then generates answers based on what it found. Think of it as a librarian who checks your files before answering your question, ensuring every response is grounded in your actual data.
-            </p>
-          </div>
-
-          <div style={P.scene}>
-            <h3 style={{ marginBottom: 20, color: '#1a1a1a' }}>Question: "What does our policy say about remote work?"</h3>
-
-            <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-              <button
-                onClick={() => setShowRAG(true)}
-                style={P.navBtn(showRAG)}
-              >
-                With RAG
-              </button>
-              <button
-                onClick={() => setShowRAG(false)}
-                style={P.navBtn(!showRAG)}
-              >
-                Without RAG
-              </button>
-            </div>
-
-            {showRAG ? (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#e8f0fe', borderRadius: 8 }}>
-                  <strong style={{ color: '#6c5ce7' }}>Step 1: Query Search</strong>
-                  <p style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Searching documents for "remote work policy"...</p>
-                </div>
-                <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#f0faf0', borderRadius: 8 }}>
-                  <strong style={{ color: '#2ecc71' }}>Step 2: Chunks Found</strong>
-                  <p style={{ fontSize: 13, color: '#2d5016', marginTop: 4 }}>✓ Found 3 relevant sections from Company Handbook 2024</p>
-                </div>
-                <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#e8f0fe', borderRadius: 8 }}>
-                  <strong style={{ color: '#6c5ce7' }}>Step 3: LLM Synthesis</strong>
-                  <p style={{ fontSize: 13, color: '#666', marginTop: 4 }}>Reading question + retrieved chunks together...</p>
-                </div>
-                <div style={{ padding: 12, backgroundColor: '#f0faf0', borderRadius: 8, borderLeft: '4px solid #2ecc71' }}>
-                  <strong style={{ color: '#2ecc71' }}>Answer (Grounded)</strong>
-                  <p style={{ fontSize: 13, color: '#2d5016', marginTop: 4 }}>
-                    "Remote work is allowed 2 days per week for eligible employees. See Section 4.2 of Company Handbook 2024 and Policy DRL-2024-08."
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                <div style={{ padding: 12, backgroundColor: '#ffe8e8', borderRadius: 8, borderLeft: '4px solid #e74c3c' }}>
-                  <strong style={{ color: '#c0392b' }}>Answer (Hallucinated)</strong>
-                  <p style={{ fontSize: 13, color: '#922b21', marginTop: 4 }}>
-                    "Most companies offer flexible remote work options. Some allow full-time remote, while others prefer 3 days in office..."
-                  </p>
-                  <p style={{ fontSize: 12, color: '#a93226', marginTop: 8, fontStyle: 'italic' }}>⚠ No sources. Generic. Could be wrong about YOUR policy.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div style={P.insight}>
-            <p style={P.insightLabel}>Key Insight</p>
-            RAG = AI that checks YOUR documents before answering. It reduces hallucinations and gives sourced answers. Think of it as giving AI an open-book exam instead of a closed-book exam.
-          </div>
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
         </div>
       );
     }
 
+    /* Sidebar SVG icon components */
+    function SearchIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      );
+    }
+
+    function LayersIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+      );
+    }
+
+    function MicroscopeIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M6 18h8" />
+          <path d="M3 22h18" />
+          <path d="M14 22a7 7 0 100-14h-1" />
+          <path d="M9 14h2" />
+          <path d="M9 12a2 2 0 01-2-2V6h6v4a2 2 0 01-2 2" />
+          <path d="M12 6V3a1 1 0 00-1-1H9a1 1 0 00-1 1v3" />
+        </svg>
+      );
+    }
+
+    function ScissorsIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="6" cy="6" r="3" />
+          <circle cx="6" cy="18" r="3" />
+          <line x1="20" y1="4" x2="8.12" y2="15.88" />
+          <line x1="14.47" y1="14.48" x2="20" y2="20" />
+          <line x1="8.12" y1="8.12" x2="12" y2="12" />
+        </svg>
+      );
+    }
+
+    function TargetIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
+        </svg>
+      );
+    }
+
+    function RocketIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z" />
+          <path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z" />
+          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+        </svg>
+      );
+    }
+
+    /* Stage 1: What is RAG? */
+    function S1() {
+      const [mode, setMode] = useState('with');
+
+      const data = {
+        with: {
+          answer: 'According to our company policy (updated March 2024), employees may work remotely up to 3 days per week after completing their 90-day onboarding period. Remote work requires manager approval and a signed home-office safety checklist.',
+          sources: ['HR Policy Handbook v4.2, Section 7.3', 'Remote Work Amendment, March 2024'],
+          label: '\u2713 Grounded, sourced answer',
+          color: '#2ecc71',
+          bg: '#f0f8f0',
+          titleColor: '#27ae60'
+        },
+        without: {
+          answer: 'Most companies allow some form of remote work these days. Typically, you can work from home a few days a week, but you should check with your manager for the specific details. Many organizations have adopted hybrid models since 2020.',
+          sources: [],
+          label: '\u2717 Hallucinated generic answer',
+          color: '#e74c3c',
+          bg: '#fef5f5',
+          titleColor: '#c0392b'
+        }
+      };
+
+      const cur = data[mode];
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">What is RAG?</div>
+          </div>
+          <div className="explanation">
+            Retrieval-Augmented Generation (RAG) is an AI pattern where the model first searches your documents to find relevant information, then generates answers grounded in what it found. Think of it as a reference librarian who understands your question, walks to the right shelf, reads the relevant pages, and gives you a cited answer.
+          </div>
+          <div className="scene-card">
+            <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
+              Question: &ldquo;What does our policy say about remote work?&rdquo;
+            </div>
+            <div className="toggle-group">
+              <button
+                className={`toggle-btn ${mode === 'with' ? 'active' : ''}`}
+                onClick={() => setMode('with')}
+              >
+                With RAG
+              </button>
+              <button
+                className={`toggle-btn ${mode === 'without' ? 'active' : ''}`}
+                onClick={() => setMode('without')}
+              >
+                Without RAG
+              </button>
+            </div>
+            <div style={{ width: '100%' }}>
+              <div
+                className="fade-in"
+                key={mode}
+                style={{
+                  padding: '24px',
+                  borderRadius: '12px',
+                  border: `2px solid ${cur.color}`,
+                  background: cur.bg
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: '14px', color: cur.titleColor, marginBottom: '12px' }}>
+                  {cur.label}
+                </div>
+                <div style={{ fontSize: '15px', lineHeight: '1.7', color: '#333' }}>
+                  {cur.answer}
+                </div>
+                {cur.sources.length > 0 && (
+                  <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #c8e6c9' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#27ae60', marginBottom: '6px' }}>
+                      SOURCES:
+                    </div>
+                    {cur.sources.map((s, i) => (
+                      <div key={i} style={{ fontSize: '13px', color: '#2e7d32' }}>{s}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div style={{ marginTop: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {['1. Understand question', '2. Search documents', '3. Read relevant pages', '4. Cite and answer'].map((step, i) => (
+                <div
+                  key={i}
+                  className="fade-in"
+                  style={{
+                    animationDelay: `${i * 0.15}s`,
+                    padding: '10px 18px',
+                    background: 'white',
+                    border: '2px solid #e8e3f8',
+                    borderRadius: '10px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#6c5ce7'
+                  }}
+                >
+                  {step}
+                </div>
+              ))}
+            </div>
+          </div>
+          <InsightBlock>
+            RAG reduces hallucinations by 70&ndash;90% by grounding the LLM&rsquo;s response in actual retrieved documents rather than relying solely on training data. It transforms AI from an unreliable oracle into a trustworthy research assistant.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 2: The Five Components */
     function S2() {
       const [expanded, setExpanded] = useState(null);
 
       const components = [
         {
-          id: 1,
-          icon: '\u{1F4E4}',
-          name: 'Document Loader',
-          desc: 'Reads your files',
-          detail: 'Scans PDFs, docs, web pages, databases, and more. Extracts raw text and metadata from any source.'
+          icon: '\uD83D\uDCC4', title: 'Document Loader', desc: 'Reads your files',
+          detail: 'Ingests documents from multiple formats: PDFs, Word docs, HTML pages, Markdown files, spreadsheets, and more. Handles encoding, metadata extraction, and format normalization so all content is ready for processing.',
+          examples: 'PDF reports, Confluence pages, Slack exports, code repos'
         },
         {
-          id: 2,
-          icon: '\u{2702}',
-          name: 'Chunker',
-          desc: 'Splits into pieces',
-          detail: 'Divides docs into searchable chunks (like cutting a book into paragraphs). Size matters: too big = noise, too small = lost context.'
+          icon: '\u2702\uFE0F', title: 'Chunker', desc: 'Splits into pieces',
+          detail: 'Breaks documents into 256\u2013512 token chunks with 10\u201320% overlap between consecutive pieces. Overlap ensures that sentences split across boundaries are still captured. Chunk size directly impacts retrieval quality.',
+          examples: '256\u2013512 tokens per chunk, 10\u201320% overlap'
         },
         {
-          id: 3,
-          icon: '\u{2328}',
-          name: 'Embeddings',
-          desc: 'Converts to vectors',
-          detail: 'Transforms text chunks into numeric vectors that capture meaning. Similar concepts have similar vectors. Models: OpenAI, Cohere, Sentence Transformers.'
+          icon: '\uD83E\uDDEE', title: 'Embeddings', desc: 'Converts to vectors',
+          detail: 'Transforms text into high-dimensional vectors (768\u20131536 dimensions) capturing semantic meaning. "Work from home" and "telecommuting" end up close in vector space despite sharing no words.',
+          examples: 'OpenAI ada-002, Cohere embed, sentence-transformers'
         },
         {
-          id: 4,
-          icon: '\u{1F4BE}',
-          name: 'Vector Database',
-          desc: 'Stores & retrieves',
-          detail: 'Stores vectors and finds similar ones fast using similarity search. Like a card catalog that understands meaning. Examples: Pinecone, ChromaDB, Weaviate.'
+          icon: '\uD83D\uDDC3\uFE0F', title: 'Vector Database', desc: 'Stores and searches',
+          detail: 'Specialized database optimized for similarity search across millions of vectors. Uses approximate nearest neighbor (ANN) algorithms for sub-second retrieval. Stores vectors alongside metadata (source, page, date).',
+          examples: 'ChromaDB, Pinecone, Weaviate, Qdrant, Milvus'
         },
         {
-          id: 5,
-          icon: '\u{1F9E0}',
-          name: 'LLM',
-          desc: 'Generates answer',
-          detail: 'Reads the user question + retrieved chunks and synthesizes a final answer with citations. Uses GPT-4, Claude, Llama, etc.'
+          icon: '\uD83E\uDD16', title: 'LLM Synthesis', desc: 'Generates the answer',
+          detail: 'Takes the retrieved context chunks and the user query, then generates a coherent, grounded answer with citations. The LLM is instructed to only use information from the provided context, reducing hallucination.',
+          examples: 'GPT-4, Claude, Llama, Mistral'
         }
       ];
 
       return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>
-              RAG has 5 key components working together in a pipeline. Understanding each one helps you design and optimize RAG systems. Think of it as an assembly line where each station adds value.
-            </p>
+        <>
+          <div>
+            <div className="stage-header">The Five Components</div>
           </div>
-
-          <div style={P.scene}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 24 }}>
+          <div className="explanation">
+            Every RAG system is built from five core components that form a pipeline. Documents flow in one end, and grounded answers come out the other. Click each component to explore its role.
+          </div>
+          <div className="scene-card">
+            <div style={{ display: 'flex', gap: '12px', width: '100%', flexWrap: 'wrap' }}>
               {components.map((comp, idx) => (
-                <div key={comp.id}>
-                  <div
-                    onClick={() => setExpanded(expanded === comp.id ? null : comp.id)}
-                    style={{
-                      padding: 12,
-                      backgroundColor: expanded === comp.id ? '#e8f0fe' : '#f8f9fa',
-                      border: `2px solid ${expanded === comp.id ? '#6c5ce7' : '#e9ecef'}`,
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    <div style={{ fontSize: 28, marginBottom: 8 }}>{comp.icon}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 4 }}>{comp.name}</div>
-                    <div style={{ fontSize: 11, color: '#666' }}>{comp.desc}</div>
-                  </div>
-                  {expanded === comp.id && (
-                    <div style={{
-                      marginTop: 8,
-                      padding: 12,
-                      backgroundColor: '#f0faf0',
-                      borderRadius: 8,
-                      fontSize: 12,
-                      color: '#2d5016',
-                      animation: 'slideInLeft 0.3s ease'
-                    }}>
+                <div
+                  key={idx}
+                  className={`component-card fade-in ${expanded === idx ? 'expanded' : ''}`}
+                  style={{
+                    animationDelay: `${idx * 0.1}s`,
+                    minWidth: expanded === idx ? '100%' : '140px',
+                    flex: expanded === idx ? '1 1 100%' : '1 1 140px'
+                  }}
+                  onClick={() => setExpanded(expanded === idx ? null : idx)}
+                >
+                  <div style={{ fontSize: '28px' }}>{comp.icon}</div>
+                  <div className="component-card-title">{comp.title}</div>
+                  <div className="component-card-desc">{comp.desc}</div>
+                  <div className="component-card-detail">
+                    <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7', marginBottom: '12px' }}>
                       {comp.detail}
                     </div>
-                  )}
+                    <div style={{ fontSize: '12px', color: '#6c5ce7', fontWeight: 600 }}>
+                      Examples: {comp.examples}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-
-            <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #e9ecef' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#666', marginBottom: 12 }}>Pipeline Flow:</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#666' }}>
-                <span>Load</span>
-                <span style={{ color: '#6c5ce7' }}>→</span>
-                <span>Chunk</span>
-                <span style={{ color: '#6c5ce7' }}>→</span>
-                <span>Embed</span>
-                <span style={{ color: '#6c5ce7' }}>→</span>
-                <span>Store</span>
-                <span style={{ color: '#6c5ce7' }}>→</span>
-                <span>Retrieve</span>
-                <span style={{ color: '#6c5ce7' }}>→</span>
-                <span>Generate</span>
-              </div>
+            <div className="pipeline-flow">
+              {['Load', 'Chunk', 'Embed', 'Store', 'Retrieve', 'Generate'].map((step, i) => (
+                <React.Fragment key={i}>
+                  <div className="pipeline-step">{step}</div>
+                  {i < 5 && <span className="pipeline-arrow">&rarr;</span>}
+                </React.Fragment>
+              ))}
             </div>
           </div>
-
-          <div style={P.insight}>
-            <p style={P.insightLabel}>Key Insight</p>
-            RAG pipeline: Load → Chunk → Embed → Store → Retrieve → Generate. Each component can be optimized independently. Start simple, then tune the weakest link in your chain.
-          </div>
-        </div>
+          <InsightBlock>
+            The pipeline has two phases: <strong>indexing</strong> (Load &rarr; Chunk &rarr; Embed &rarr; Store) happens offline when you ingest documents, while <strong>querying</strong> (Retrieve &rarr; Generate) happens in real time when users ask questions. Indexing is a one-time cost; querying is where latency matters.
+          </InsightBlock>
+        </>
       );
     }
 
+    /* Stage 3: Under the Hood */
     function S3() {
-      const [chunkSize, setChunkSize] = useState(500);
-      const [overlap, setOverlap] = useState(10);
-      const [strategy, setStrategy] = useState('fixed');
+      const [activeStep, setActiveStep] = useState(0);
 
-      const sample = "RAG systems work by first retrieving relevant document chunks and then passing them to an LLM. The retrieval quality is paramount. If you retrieve irrelevant chunks, the LLM will struggle to generate accurate answers. Chunking strategy directly impacts retrieval quality.";
-
-      const strategies = [
-        { id: 'fixed', name: 'Fixed-Size', desc: 'Chunks of exactly N tokens. Simple but misses semantic boundaries.' },
-        { id: 'sentence', name: 'Sentence-Based', desc: 'Chunks by sentence boundaries. Better semantic units. Handles structure well.' },
-        { id: 'semantic', name: 'Semantic', desc: 'Chunks based on topic shifts. Requires more computation but highest quality.' }
+      const steps = [
+        {
+          title: 'Embed the Query',
+          desc: 'Convert the user question into a vector using the same embedding model used during indexing.',
+          visual: (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>User query:</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px' }}>
+                &ldquo;What&rsquo;s our remote work policy?&rdquo;
+              </div>
+              <div style={{ fontSize: '24px', color: '#6c5ce7', margin: '8px 0' }}>&darr;</div>
+              <div style={{
+                background: '#1a1a2e', color: '#2ecc71', padding: '12px 20px',
+                borderRadius: '8px', fontFamily: 'monospace', fontSize: '13px'
+              }}>
+                [0.023, -0.118, 0.847, 0.331, ..., 0.094]
+              </div>
+              <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>768-dimensional vector</div>
+            </div>
+          )
+        },
+        {
+          title: 'Vector Search',
+          desc: 'Find the most similar document chunks using cosine similarity. The vector database returns the top-K nearest neighbors.',
+          visual: (
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', textAlign: 'center' }}>
+                Cosine similarity scores:
+              </div>
+              {[
+                { text: 'HR Policy Section 7.3: Remote Work Guidelines', score: 0.94 },
+                { text: 'Remote Work Amendment, March 2024', score: 0.89 },
+                { text: 'Employee Handbook: Office Hours', score: 0.72 },
+                { text: 'Q3 Revenue Report Summary', score: 0.21 }
+              ].map((r, i) => (
+                <div key={i} className="result-card fade-in" style={{ animationDelay: `${i * 0.15}s` }}>
+                  <span className={`result-score ${r.score > 0.8 ? 'high' : r.score > 0.5 ? 'medium' : 'low'}`}>
+                    {r.score.toFixed(2)}
+                  </span>
+                  <div style={{ fontSize: '14px', color: '#333', marginTop: '6px' }}>{r.text}</div>
+                </div>
+              ))}
+            </div>
+          )
+        },
+        {
+          title: 'Context Assembly',
+          desc: 'Format the retrieved chunks with source metadata into a structured context block for the LLM.',
+          visual: (
+            <div className="prompt-block">
+              <div><span className="prompt-label">[System]</span> Answer based only on the provided context. Cite sources.</div>
+              <br />
+              <div><span className="prompt-context">[Context Chunk 1 - HR Policy 7.3]</span></div>
+              <div style={{ color: '#aaa' }}>Employees may work remotely up to 3 days per week...</div>
+              <br />
+              <div><span className="prompt-context">[Context Chunk 2 - Amendment Mar 2024]</span></div>
+              <div style={{ color: '#aaa' }}>Remote work requires manager approval and safety checklist...</div>
+              <br />
+              <div><span className="prompt-user">[User]</span> What&rsquo;s our remote work policy?</div>
+            </div>
+          )
+        },
+        {
+          title: 'LLM Synthesis',
+          desc: 'The LLM generates a coherent answer grounded in the retrieved context, citing specific sources.',
+          visual: (
+            <div style={{ width: '100%' }}>
+              <div style={{
+                padding: '20px 24px', background: '#f0f8f0', border: '2px solid #2ecc71',
+                borderRadius: '12px', fontSize: '15px', lineHeight: '1.7', color: '#333'
+              }}>
+                <div style={{ fontWeight: 700, color: '#27ae60', marginBottom: '8px' }}>Generated Answer:</div>
+                According to our HR Policy (Section 7.3), employees may work remotely up to <strong>3 days per week</strong> after completing their 90-day onboarding period. As updated in the March 2024 amendment, remote work requires <strong>manager approval</strong> and a signed home-office safety checklist.
+                <div style={{
+                  marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #c8e6c9',
+                  fontSize: '12px', color: '#2e7d32'
+                }}>
+                  <strong>Sources:</strong> HR Policy Handbook v4.2 Section 7.3 | Remote Work Amendment, March 2024
+                </div>
+              </div>
+            </div>
+          )
+        }
       ];
 
       return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>
-              The quality of your RAG system depends critically on how you split documents and convert text to searchable vectors. Small changes here cascade into big quality differences downstream.
-            </p>
+        <>
+          <div>
+            <div className="stage-header">Under the Hood</div>
           </div>
-
-          <div style={P.scene}>
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>Chunk Size: {chunkSize} tokens</label>
-              <input
-                type="range"
-                min="100"
-                max="1000"
-                step="100"
-                value={chunkSize}
-                onChange={(e) => setChunkSize(Number(e.target.value))}
-                style={{ width: '100%', marginTop: 8 }}
-              />
+          <div className="explanation">
+            Walk through exactly what happens when you ask a RAG system a question. Click each step to follow the journey from query to grounded answer.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              {steps.map((step, idx) => (
+                <div
+                  key={idx}
+                  className={`step-card fade-in ${activeStep === idx ? 'active-step' : idx < activeStep ? 'completed-step' : ''}`}
+                  style={{ animationDelay: `${idx * 0.1}s` }}
+                  onClick={() => setActiveStep(idx)}
+                >
+                  <div className="step-card-header">
+                    <div className="step-number">{idx < activeStep ? '\u2713' : idx + 1}</div>
+                    <div style={{ color: '#1a1a1a' }}>{step.title}</div>
+                  </div>
+                  <div className="step-card-content">
+                    <div style={{ fontSize: '14px', color: '#555', lineHeight: '1.7', marginBottom: '16px' }}>
+                      {step.desc}
+                    </div>
+                    {step.visual}
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+          <InsightBlock>
+            The entire retrieval + generation cycle typically completes in 1&ndash;3 seconds. Most of that time is the LLM synthesis step. Vector search itself is blazingly fast &mdash; usually under 50ms even across millions of chunks.
+          </InsightBlock>
+        </>
+      );
+    }
 
-            <div style={{
-              padding: 12,
-              backgroundColor: '#f0faf0',
-              borderRadius: 8,
-              marginBottom: 24,
-              fontSize: 13,
-              color: '#2d5016',
-              lineHeight: 1.6
-            }}>
-              <strong>Sample Chunking:</strong>
-              <p style={{ marginTop: 8, fontStyle: 'italic' }}>"{sample.substring(0, chunkSize / 2)}..."</p>
-            </div>
+    /* Stage 4: Chunking Deep Dive */
+    function S4() {
+      const [chunkSize, setChunkSize] = useState(400);
+      const [overlap, setOverlap] = useState(15);
+      const [strategy, setStrategy] = useState(0);
 
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>Chunk Overlap: {overlap}%</label>
-              <input
-                type="range"
-                min="0"
-                max="30"
-                step="5"
-                value={overlap}
-                onChange={(e) => setOverlap(Number(e.target.value))}
-                style={{ width: '100%', marginTop: 8 }}
-              />
-            </div>
+      const strategies = [
+        { name: 'Fixed-Size', desc: 'Splits text at exact token boundaries regardless of content structure. Simple and predictable.', pros: 'Easy to implement, consistent chunk sizes', cons: 'May split sentences or paragraphs mid-thought' },
+        { name: 'Sentence-Based', desc: 'Splits at sentence boundaries, grouping sentences until reaching the target chunk size.', pros: 'Preserves complete thoughts, better coherence', cons: 'Variable chunk sizes, slightly more complex' },
+        { name: 'Semantic', desc: 'Uses embeddings to detect topic shifts and splits at natural semantic boundaries.', pros: 'Best retrieval quality, topic-aware chunks', cons: 'Computationally expensive, requires embedding calls' }
+      ];
 
-            <div style={{ marginBottom: 24 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 12 }}>Chunking Strategy:</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                {strategies.map((s) => (
+      const pitfalls = [
+        { title: '\u26A0 Chunks too large', desc: 'Precision drops because retrieved chunks contain too much irrelevant text mixed with relevant content.' },
+        { title: '\u26A0 Chunks too small', desc: 'Context is lost because individual chunks lack enough surrounding information to be meaningful.' },
+        { title: '\u26A0 No source tracking', desc: 'Cannot cite where answers came from, destroying user trust and making debugging impossible.' },
+        { title: '\u26A0 Too many retrieved chunks', desc: 'Floods the LLM context window with noise, causing it to miss the most relevant information.' },
+        { title: '\u26A0 Wrong embedding model', desc: 'Using a general-purpose model for domain-specific content produces poor similarity matches.' }
+      ];
+
+      const sampleText = 'Our company offers flexible remote work arrangements. Employees who have completed their 90-day onboarding period may work from home up to three days per week. Remote work requires prior manager approval. All remote workers must complete a home-office safety checklist annually. Equipment provided includes a laptop, monitor, and ergonomic keyboard.';
+
+      const getChunks = () => {
+        const words = sampleText.split(' ');
+        const wpc = Math.max(4, Math.round(chunkSize / 8));
+        const ow = Math.round(wpc * overlap / 100);
+        const chunks = [];
+        let i = 0;
+        while (i < words.length) {
+          const end = Math.min(i + wpc, words.length);
+          chunks.push(words.slice(i, end).join(' '));
+          i = end - ow;
+          if (i >= words.length - 2) break;
+        }
+        return chunks;
+      };
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">Chunking Deep Dive</div>
+          </div>
+          <div className="explanation">
+            How you split documents determines what gets retrieved. Too large and you lose precision; too small and you lose context. Adjust the sliders to see how chunk size and overlap affect the output.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="slider-control">
+                <div className="slider-label">
+                  <span>Chunk Size</span>
+                  <span style={{ color: '#6c5ce7', fontWeight: 700 }}>{chunkSize} tokens</span>
+                </div>
+                <input type="range" className="slider-input" min="100" max="1000" step="50"
+                  value={chunkSize} onChange={e => setChunkSize(Number(e.target.value))} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#999' }}>
+                  <span>100</span><span>1000</span>
+                </div>
+              </div>
+              <div className="slider-control">
+                <div className="slider-label">
+                  <span>Overlap</span>
+                  <span style={{ color: '#6c5ce7', fontWeight: 700 }}>{overlap}%</span>
+                </div>
+                <input type="range" className="slider-input" min="0" max="30" step="5"
+                  value={overlap} onChange={e => setOverlap(Number(e.target.value))} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#999' }}>
+                  <span>0%</span><span>30%</span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '16px', marginBottom: '20px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '10px' }}>
+                  Preview ({getChunks().length} chunks):
+                </div>
+                {getChunks().map((chunk, i) => (
                   <div
-                    key={s.id}
-                    onClick={() => setStrategy(s.id)}
+                    key={`${chunkSize}-${overlap}-${i}`}
+                    className="fade-in"
                     style={{
-                      padding: 12,
-                      backgroundColor: strategy === s.id ? '#e8f0fe' : '#f8f9fa',
-                      border: `2px solid ${strategy === s.id ? '#6c5ce7' : '#e9ecef'}`,
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
+                      animationDelay: `${i * 0.1}s`,
+                      padding: '12px 16px',
+                      background: i % 2 === 0 ? '#f5f3ff' : '#f0f8ff',
+                      border: '1px solid #e8e3f8',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      color: '#333',
+                      lineHeight: '1.6',
+                      marginBottom: '6px'
                     }}
                   >
-                    <div style={{ fontWeight: 600, color: '#1a1a1a', fontSize: 13, marginBottom: 4 }}>{s.name}</div>
-                    <div style={{ fontSize: 12, color: '#666' }}>{s.desc}</div>
+                    <span style={{ fontWeight: 700, color: '#6c5ce7', fontSize: '11px' }}>CHUNK {i + 1}: </span>
+                    {chunk}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: '15px', marginBottom: '12px' }}>
+                Chunking Strategies:
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', width: '100%' }}>
+                {strategies.map((s, idx) => (
+                  <div
+                    key={idx}
+                    className={`strategy-card ${strategy === idx ? 'selected' : ''}`}
+                    style={{ flex: '1 1 180px' }}
+                    onClick={() => setStrategy(idx)}
+                  >
+                    <div style={{
+                      fontWeight: 700, fontSize: '14px',
+                      color: strategy === idx ? '#6c5ce7' : '#1a1a1a', marginBottom: '6px'
+                    }}>
+                      {s.name}
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#555', lineHeight: '1.5' }}>{s.desc}</div>
+                    {strategy === idx && (
+                      <div className="fade-in" style={{ marginTop: '10px', fontSize: '12px', lineHeight: '1.6' }}>
+                        <div style={{ color: '#27ae60' }}><strong>Pros:</strong> {s.pros}</div>
+                        <div style={{ color: '#c0392b', marginTop: '4px' }}><strong>Cons:</strong> {s.cons}</div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
-          </div>
 
-          <div style={P.insight}>
-            <p style={P.insightLabel}>Key Insight</p>
-            Chunking is the #1 factor in RAG quality. Too big chunks → noise drowns the signal. Too small chunks → context is lost. Aim for semantic boundaries (paragraphs, sections) with 10-20% overlap for best results.
-          </div>
-        </div>
-      );
-    }
-
-    function S4() {
-      const [topK, setTopK] = useState(3);
-
-      const results = [
-        { score: 0.95, color: '#2ecc71', text: 'Remote work is allowed 2 days per week for eligible employees.' },
-        { score: 0.87, color: '#f0ad4e', text: 'Employees must coordinate with their manager before choosing remote days.' },
-        { score: 0.72, color: '#f0ad4e', text: 'All team meetings are held on Tuesdays and Thursdays in the office.' },
-        { score: 0.45, color: '#e74c3c', text: 'The company has offices in New York, San Francisco, and London.' },
-        { score: 0.31, color: '#e74c3c', text: 'IT support is available 24/7 for all technical issues.' }
-      ];
-
-      return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>
-              Once chunks are stored as vectors, retrieval finds the most relevant ones using similarity search. The LLM then reads the question + retrieved chunks together to synthesize a grounded answer with citations.
-            </p>
-          </div>
-
-          <div style={P.scene}>
-            <input
-              type="text"
-              placeholder="Search: What's our remote work policy?"
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '1px solid #e9ecef',
-                borderRadius: 8,
-                marginBottom: 24,
-                fontSize: 14
-              }}
-            />
-
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>Top-K Results: {topK}</label>
-              <input
-                type="range"
-                min="1"
-                max="5"
-                value={topK}
-                onChange={(e) => setTopK(Number(e.target.value))}
-                style={{ width: '100%', marginTop: 8 }}
-              />
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 12 }}>Retrieved Chunks:</p>
-              {results.slice(0, topK).map((r, idx) => (
-                <div key={idx} style={{
-                  padding: 12,
-                  marginBottom: 8,
-                  backgroundColor: '#f8f9fa',
-                  borderLeft: `4px solid ${r.color}`,
-                  borderRadius: 4,
-                  animation: 'slideInRight 0.3s ease'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                    <p style={{ fontSize: 13, color: '#333', flex: 1 }}>{r.text}</p>
-                    <span style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: r.color,
-                      marginLeft: 12,
-                      whiteSpace: 'nowrap'
-                    }}>Score: {r.score}</span>
-                  </div>
+            <div style={{ width: '100%', marginTop: '24px' }}>
+              <div style={{ fontWeight: 700, fontSize: '15px', color: '#b8860b', marginBottom: '12px' }}>
+                Common RAG Pitfalls:
+              </div>
+              {pitfalls.map((p, i) => (
+                <div key={i} className="warning-card fade-in" style={{ animationDelay: `${i * 0.08}s` }}>
+                  <div className="warning-card-title">{p.title}</div>
+                  <div className="warning-card-desc">{p.desc}</div>
                 </div>
               ))}
             </div>
-
-            <div style={{
-              padding: 12,
-              backgroundColor: '#e8f0fe',
-              borderRadius: 8,
-              marginBottom: 24
-            }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: '#6c5ce7', marginBottom: 8 }}>Assembled Prompt:</p>
-              <p style={{ fontSize: 12, color: '#333', lineHeight: 1.5 }}>
-                <strong>System:</strong> "You are an AI assistant. Answer questions using only the provided context. Cite sources."<br/>
-                <strong>Context:</strong> [Top {topK} retrieved chunks]<br/>
-                <strong>User:</strong> "What's our remote work policy?"
-              </p>
-            </div>
-
-            <div style={{
-              padding: 12,
-              backgroundColor: '#f0faf0',
-              borderRadius: 8,
-              borderLeft: '4px solid #2ecc71'
-            }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: '#2ecc71', marginBottom: 8 }}>Generated Answer:</p>
-              <p style={{ fontSize: 13, color: '#2d5016', lineHeight: 1.6 }}>
-                "Remote work is allowed 2 days per week for eligible employees, coordinated with your manager. All team meetings are held on Tuesdays and Thursdays in the office."
-              </p>
-            </div>
           </div>
-
-          <div style={P.insight}>
-            <p style={P.insightLabel}>Key Insight</p>
-            Retrieval quality > model quality. A perfect LLM with bad retrieval gives bad answers. A good LLM with great retrieval gives great answers. Invest heavily in your retrieval pipeline.
-          </div>
-        </div>
+          <InsightBlock>
+            There is no universally &ldquo;best&rdquo; chunk size. Start with 400&ndash;500 tokens and 10&ndash;15% overlap, then evaluate retrieval quality on your actual queries. Domain-specific content (legal, medical) often benefits from smaller, more precise chunks.
+          </InsightBlock>
+        </>
       );
     }
 
+    /* Stage 5: Retrieval & Generation */
     function S5() {
-      const [expandedPattern, setExpandedPattern] = useState(null);
+      const [topK, setTopK] = useState(3);
+      const query = "What's our remote work policy?";
+
+      const allResults = [
+        { text: 'HR Policy Section 7.3: Employees may work remotely up to 3 days per week after completing their 90-day onboarding period.', source: 'HR Handbook v4.2', score: 0.94 },
+        { text: 'Remote Work Amendment (Mar 2024): Remote work requires manager approval and a signed home-office safety checklist.', source: 'Policy Amendment', score: 0.89 },
+        { text: 'Equipment Policy: Remote workers are provided a laptop, external monitor, and ergonomic keyboard at company expense.', source: 'IT Policy 3.1', score: 0.76 },
+        { text: 'Office Hours: Core collaboration hours are 10am-3pm ET. All meetings should be scheduled within this window.', source: 'Office Guidelines', score: 0.52 },
+        { text: 'Q3 Performance Review: Team productivity increased 12% following adoption of hybrid work model.', source: 'Q3 Report', score: 0.38 }
+      ];
+
+      const results = allResults.slice(0, topK);
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">Retrieval &amp; Generation</div>
+          </div>
+          <div className="explanation">
+            The retrieval step finds the most relevant chunks, and the generation step synthesizes them into a coherent answer. Adjust the Top-K slider to control how many chunks feed into the LLM.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Search Query:</div>
+                <div style={{
+                  padding: '12px 16px', background: 'white', border: '2px solid #e8e3f8',
+                  borderRadius: '10px', fontSize: '15px'
+                }}>
+                  {query}
+                </div>
+              </div>
+
+              <div className="slider-control">
+                <div className="slider-label">
+                  <span>Top-K Results</span>
+                  <span style={{ color: '#6c5ce7', fontWeight: 700 }}>{topK}</span>
+                </div>
+                <input type="range" className="slider-input" min="1" max="5" step="1"
+                  value={topK} onChange={e => setTopK(Number(e.target.value))} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#999' }}>
+                  <span>1</span><span>5</span>
+                </div>
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px' }}>
+                Retrieved Results (Top {topK}):
+              </div>
+              {results.map((r, i) => (
+                <div key={i} className="result-card fade-in" style={{ animationDelay: `${i * 0.12}s` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                    <span className={`result-score ${r.score > 0.8 ? 'high' : r.score > 0.5 ? 'medium' : 'low'}`}>
+                      {r.score.toFixed(2)}
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#999' }}>{r.source}</span>
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.6' }}>{r.text}</div>
+                </div>
+              ))}
+
+              <div style={{ marginTop: '24px', fontWeight: 700, fontSize: '14px', marginBottom: '10px' }}>
+                Assembled Prompt:
+              </div>
+              <div className="prompt-block">
+                <div>
+                  <span className="prompt-label">[System]</span> You are a helpful assistant. Answer using ONLY the provided context. Cite your sources.
+                </div>
+                <br />
+                {results.map((r, i) => (
+                  <React.Fragment key={i}>
+                    <div><span className="prompt-context">[Context {i + 1} - {r.source}]</span></div>
+                    <div style={{ color: '#aaa' }}>{r.text}</div>
+                    <br />
+                  </React.Fragment>
+                ))}
+                <div><span className="prompt-user">[User]</span> {query}</div>
+              </div>
+
+              <div style={{
+                marginTop: '20px', padding: '20px 24px', background: '#f0f8f0',
+                border: '2px solid #2ecc71', borderRadius: '12px', fontSize: '14px',
+                lineHeight: '1.7', color: '#333'
+              }}>
+                <div style={{ fontWeight: 700, color: '#27ae60', marginBottom: '8px', fontSize: '13px' }}>
+                  GENERATED ANSWER:
+                </div>
+                {topK >= 2
+                  ? 'According to our HR Policy (Section 7.3), employees may work remotely up to 3 days per week after completing their 90-day onboarding period. The March 2024 amendment specifies that remote work requires manager approval and a signed home-office safety checklist.'
+                  : 'According to our HR Policy (Section 7.3), employees may work remotely up to 3 days per week after completing their 90-day onboarding period.'
+                }
+                {topK >= 3 && ' Remote workers are provided a laptop, external monitor, and ergonomic keyboard at company expense.'}
+                <div style={{
+                  marginTop: '10px', fontSize: '12px', color: '#2e7d32',
+                  paddingTop: '8px', borderTop: '1px solid #c8e6c9'
+                }}>
+                  <strong>Sources:</strong> {results.map(r => r.source).join(' | ')}
+                </div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            The Top-K value is a precision vs. recall tradeoff. K=1&ndash;3 gives focused answers; K=4&ndash;5 provides more comprehensive coverage but risks injecting irrelevant content. For most use cases, K=3 is a strong default.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 6: Production Patterns */
+    function S6() {
+      const [expanded, setExpanded] = useState(null);
 
       const patterns = [
         {
-          id: 'rewrite',
-          name: 'Query Rewriting',
-          icon: '\u{270D}',
+          icon: '\uD83D\uDD04', title: 'Query Rewriting',
           desc: 'Rewrites user queries into optimized search queries',
-          detail: 'User query: "How do I work from home?" → [Search: "remote work policy", "work from home", "remote work approval process"]'
+          detail: 'User queries are often conversational and vague. A query rewriter (itself an LLM call) transforms them into precise search queries. For example, "how do I WFH?" becomes "remote work policy employee eligibility requirements". This dramatically improves retrieval quality.',
+          example: 'User: "how do I WFH?" \u2192 Rewritten: "remote work policy employee eligibility requirements home office"'
         },
         {
-          id: 'hybrid',
-          name: 'Hybrid Search',
-          icon: '\u{1F50D}',
-          desc: 'Combines keyword + semantic search results',
-          detail: 'Uses both BM25 (keyword) and vector (semantic) search, then fuses results with RRF. Catches both exact phrase matches and semantic matches.'
+          icon: '\uD83D\uDD00', title: 'Hybrid Search',
+          desc: 'Combines keyword BM25 + semantic vector search',
+          detail: 'Pure semantic search can miss exact keyword matches (product IDs, error codes). Pure keyword search misses synonyms. Hybrid search runs both in parallel and fuses the results using Reciprocal Rank Fusion (RRF), getting the best of both worlds.',
+          example: 'Keyword BM25 finds "error code E-4021" exactly. Semantic finds related "authentication failure troubleshooting". Fusion combines both.'
         },
         {
-          id: 'rerank',
-          name: 'Re-ranking',
-          icon: '\u{1F4C4}',
-          desc: 'Re-orders initial results by relevance',
-          detail: 'Uses a cross-encoder model to score all retrieved chunks and re-order them. Improves top-K quality significantly. Models: ms-marco-MiniLM, mmarco-mMiniLMv2.'
+          icon: '\uD83C\uDFAF', title: 'Re-ranking',
+          desc: 'Cross-encoder model re-orders initial results',
+          detail: 'Initial retrieval uses fast bi-encoder embeddings. Re-ranking applies a more powerful (but slower) cross-encoder model that looks at query-document pairs together, dramatically improving precision. Typically re-ranks the top 20\u201350 results down to top 3\u20135.',
+          example: 'Initial Top-3 (bi-encoder) \u2192 Fetch Top-20 \u2192 Cross-encoder re-rank \u2192 New Top-3 (much more relevant)'
         },
         {
-          id: 'eval',
-          name: 'Evaluation',
-          icon: '\u{1F4CA}',
-          desc: 'Measures RAG system quality',
-          detail: 'Metrics: Faithfulness (answer matches context), Answer Relevance (answers user question), Context Precision (top-K is relevant). Use with RAGAS or custom evaluation.'
+          icon: '\uD83D\uDCCA', title: 'Evaluation (RAGAS)',
+          desc: 'Measures faithfulness, relevance, and context precision',
+          detail: 'Production RAG systems need continuous evaluation. RAGAS framework measures: Faithfulness (does the answer match retrieved context?), Answer Relevance (does the answer address the question?), Context Precision (are the right chunks retrieved?), and Context Recall (were any relevant chunks missed?).',
+          example: 'Faithfulness: 0.95 | Relevance: 0.88 | Context Precision: 0.91 | Context Recall: 0.82'
         }
       ];
 
-      return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>
-              Production RAG systems use advanced patterns to improve accuracy, handle edge cases, and scale reliably. These patterns layer on top of the basic RAG pipeline to achieve enterprise-grade performance.
-            </p>
-          </div>
+      const frameworks = ['LangChain', 'LlamaIndex', 'Semantic Kernel', 'Haystack'];
+      const vectorDBs = ['Pinecone', 'Weaviate', 'ChromaDB', 'Milvus', 'Qdrant'];
 
-          <div style={P.scene}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 24 }}>
-              {patterns.map((p) => (
-                <div key={p.id}>
-                  <div
-                    onClick={() => setExpandedPattern(expandedPattern === p.id ? null : p.id)}
-                    style={{
-                      padding: 16,
-                      backgroundColor: expandedPattern === p.id ? '#e8f0fe' : '#f8f9fa',
-                      border: `2px solid ${expandedPattern === p.id ? '#6c5ce7' : '#e9ecef'}`,
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                      <div style={{ fontSize: 24 }}>{p.icon}</div>
-                      <div style={{ fontWeight: 600, color: '#1a1a1a' }}>{p.name}</div>
+      return (
+        <>
+          <div>
+            <div className="stage-header">Production Patterns</div>
+          </div>
+          <div className="explanation">
+            Moving from a prototype RAG to a production system requires advanced patterns for query optimization, retrieval quality, and continuous evaluation. Click each pattern to explore how it works.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              {patterns.map((p, idx) => (
+                <div
+                  key={idx}
+                  className={`pattern-card fade-in ${expanded === idx ? 'expanded' : ''}`}
+                  style={{ animationDelay: `${idx * 0.1}s` }}
+                  onClick={() => setExpanded(expanded === idx ? null : idx)}
+                >
+                  <div className="pattern-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '24px' }}>{p.icon}</span>
+                      <div>
+                        <div className="pattern-card-title">{p.title}</div>
+                        <div style={{ fontSize: '13px', color: '#666', marginTop: '2px' }}>{p.desc}</div>
+                      </div>
                     </div>
-                    <p style={{ fontSize: 12, color: '#666' }}>{p.desc}</p>
+                    <span className="expand-hint">{'\u25BC'}</span>
                   </div>
-                  {expandedPattern === p.id && (
-                    <div style={{
-                      marginTop: 8,
-                      padding: 12,
-                      backgroundColor: '#f0faf0',
-                      borderRadius: 8,
-                      fontSize: 12,
-                      color: '#2d5016',
-                      animation: 'slideInLeft 0.3s ease'
-                    }}>
+                  <div className="pattern-card-content">
+                    <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7', marginBottom: '12px' }}>
                       {p.detail}
                     </div>
-                  )}
+                    <div style={{
+                      padding: '10px 16px', background: '#f0f8ff', border: '1px solid #d0e8ff',
+                      borderRadius: '8px', fontSize: '13px', color: '#1a5e8a', fontFamily: 'monospace'
+                    }}>
+                      {p.example}
+                    </div>
+                  </div>
                 </div>
               ))}
-            </div>
 
-            <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #e9ecef' }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 16 }}>Production RAG Architecture:</p>
-              <div style={{
-                padding: 16,
-                backgroundColor: '#f8f9fa',
-                borderRadius: 8,
-                fontSize: 12,
-                color: '#666',
-                lineHeight: 1.8
-              }}>
-                User Query → Query Rewriter → [Keyword Search + Semantic Search] → Fusion → Re-ranker → Top-K Chunks → LLM → Evaluate Answer → Output
+              <div style={{ marginTop: '24px' }}>
+                <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '12px' }}>
+                  Production Pipeline:
+                </div>
+                <div className="pipeline-flow" style={{ flexWrap: 'wrap' }}>
+                  {['User Query', 'Query Rewriter', 'Keyword Search', 'Semantic Search', 'Fusion', 'Re-ranker', 'Top-K', 'LLM', 'Evaluate', 'Output'].map((step, i) => (
+                    <React.Fragment key={i}>
+                      <div className="pipeline-step" style={{ fontSize: '12px' }}>{step}</div>
+                      {i < 9 && <span className="pipeline-arrow">&rarr;</span>}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '24px', display: 'flex', gap: '24px', width: '100%', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 200px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px' }}>
+                    Orchestration Frameworks:
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {frameworks.map((f, i) => (
+                      <span key={i} className="tag-pill">{f}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ flex: '1 1 200px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px' }}>
+                    Vector Databases:
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {vectorDBs.map((db, i) => (
+                      <span key={i} className="tag-pill">{db}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e9ecef' }}>
-              <p style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>Popular Frameworks: LangChain, LlamaIndex, Semantic Kernel, Haystack</p>
-              <p style={{ fontSize: 12, color: '#999' }}>Vector Databases: Pinecone, Weaviate, ChromaDB, Milvus, Qdrant</p>
-            </div>
           </div>
-
-          <div style={P.insight}>
-            <p style={P.insightLabel}>Key Insight</p>
-            Production RAG = basic RAG + query rewriting + hybrid search + re-ranking. Start with basic RAG, measure quality, then add patterns where you see gaps. Don't over-engineer from day one.
-          </div>
-        </div>
+          <InsightBlock>
+            Start simple: a basic RAG pipeline with fixed-size chunks and semantic search covers 80% of use cases. Add query rewriting, hybrid search, and re-ranking incrementally as you identify specific retrieval failures. Premature optimization leads to complexity without measurable gain.
+          </InsightBlock>
+        </>
       );
     }
 
-    function App() {
-      const [stage, setStage] = useState(1);
+    /* Main Guide Component */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
 
       const stages = [
-        { num: 1, label: 'What is RAG?', component: S1 },
-        { num: 2, label: '5 Components', component: S2 },
-        { num: 3, label: 'Chunking', component: S3 },
-        { num: 4, label: 'Retrieval', component: S4 },
-        { num: 5, label: 'Production', component: S5 }
+        { icon: SearchIcon, label: 'What is RAG', component: S1 },
+        { icon: LayersIcon, label: 'Components', component: S2 },
+        { icon: MicroscopeIcon, label: 'Under Hood', component: S3 },
+        { icon: ScissorsIcon, label: 'Chunking', component: S4 },
+        { icon: TargetIcon, label: 'Retrieval', component: S5 },
+        { icon: RocketIcon, label: 'Production', component: S6 },
       ];
 
-      const CurrentScene = stages.find(s => s.num === stage).component;
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1);
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) setCurrentStage(currentStage - 1);
+      };
 
       return (
-        <div style={P.root}>
-          <div style={P.sidebar}>
-            {stages.map((s, idx) => (
-              <div key={s.num}>
-                <div
-                  onClick={() => setStage(s.num)}
-                  style={P.stepCircle(s.num, stage)}
-                >
-                  {s.num < stage ? '\u2713' : s.num}
-                </div>
-                <div style={P.stepLabel}>{s.label}</div>
-                {idx < stages.length - 1 && <div style={P.connector(s.num < stage)} />}
-              </div>
-            ))}
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => {
+              const IconComp = stage.icon;
+              return (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button
+                      className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                      onClick={() => setCurrentStage(idx)}
+                    >
+                      <IconComp />
+                    </button>
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
 
-          <div style={P.main}>
-            <div style={P.topBar}>
-              <div style={P.leftSection}>
-                <a href="../../index.html" style={P.backLink}>← Back</a>
-                <div style={P.badge}>DEEP DIVE</div>
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">5.3</span>
+                  <div className="title">RAG Architecture</div>
+                </div>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">DEEP DIVE</div>
+                </div>
               </div>
-              <h1 style={P.title}>RAG Architecture Deep Dive</h1>
-              <div style={P.navRow}>
-                {stages.map((s) => (
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of 6</span>
+                <div className="nav-arrows">
                   <button
-                    key={s.num}
-                    onClick={() => setStage(s.num)}
-                    style={P.navBtn(stage === s.num)}
+                    className="arrow-btn"
+                    onClick={handlePrev}
+                    disabled={currentStage === 0}
+                    title="Previous stage"
                   >
-                    {s.num}
+                    &#8592;
                   </button>
-                ))}
+                  <button
+                    className="arrow-btn"
+                    onClick={handleNext}
+                    disabled={currentStage === stages.length - 1}
+                    title="Next stage"
+                  >
+                    &#8594;
+                  </button>
+                </div>
               </div>
             </div>
 
-            <CurrentScene />
+            <div className="content-area scrollbar-hide" key={currentStage}>
+              <CurrentComponent />
+            </div>
           </div>
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
   </script>
 </body>
 </html>

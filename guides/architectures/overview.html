@@ -3,324 +3,1331 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Five AI Architectures: Overview</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@6..72,600&display=swap" rel="stylesheet">
+  <title>Architecture Overview - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { width:100%; height:100%; font-family:'DM Sans',sans-serif; background:#fff; color:#1a1a1a; overflow:hidden; }
-    #root { width:100%; height:100%; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-    @keyframes slideInRight { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
-    @keyframes slideInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Spectrum cards */
+    .spectrum-row {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .spectrum-card {
+      flex: 1;
+      min-width: 140px;
+      max-width: 180px;
+      padding: 20px 14px;
+      border-radius: 14px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+
+    .spectrum-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 24px rgba(108, 92, 231, 0.15);
+    }
+
+    .spectrum-card.selected {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.2);
+    }
+
+    .spectrum-emoji {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .spectrum-label {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .spectrum-analogy {
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+    }
+
+    .spectrum-detail {
+      margin-top: 20px;
+      padding: 20px 24px;
+      background: white;
+      border: 2px solid #6c5ce7;
+      border-radius: 12px;
+      width: 100%;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .spectrum-detail-title {
+      font-weight: 700;
+      font-size: 18px;
+      color: #6c5ce7;
+      margin-bottom: 8px;
+    }
+
+    .spectrum-detail-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #333;
+    }
+
+    /* Comparison panels */
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .comparison-item {
+      padding: 24px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .comparison-item.left-panel {
+      background: #f8f0ff;
+      border-color: #6c5ce7;
+    }
+
+    .comparison-item.right-panel {
+      background: #f0f8ff;
+      border-color: #3498db;
+    }
+
+    .comparison-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-size: 17px;
+      color: #1a1a1a;
+    }
+
+    .comparison-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* Flow pipeline */
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .flow-step {
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      min-width: 100px;
+    }
+
+    .flow-arrow {
+      font-size: 18px;
+      color: #6c5ce7;
+      font-weight: 700;
+    }
+
+    /* Clickable expandable grid cards */
+    .click-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      width: 100%;
+    }
+
+    .click-card {
+      padding: 18px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .click-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-3px);
+    }
+
+    .click-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .click-card-emoji {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .click-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .click-card-sub {
+      font-size: 13px;
+      color: #6c5ce7;
+      font-style: italic;
+    }
+
+    .click-card-hint {
+      font-size: 11px;
+      color: #b0a6e8;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .click-card.expanded .click-card-hint {
+      display: none;
+    }
+
+    .click-card-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .click-card.expanded .click-card-detail {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Decision gates */
+    .gate-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .gate-card {
+      padding: 18px 22px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .gate-card:hover {
+      border-color: #6c5ce7;
+      transform: translateX(4px);
+    }
+
+    .gate-card.active-gate {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .gate-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .gate-question {
+      font-weight: 600;
+      font-size: 15px;
+      color: #1a1a1a;
+      flex: 1;
+    }
+
+    .gate-answer {
+      font-weight: 700;
+      font-size: 14px;
+      color: #6c5ce7;
+      white-space: nowrap;
+    }
+
+    /* Cost table */
+    .cost-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      margin-top: 16px;
+    }
+
+    .cost-table th {
+      background: #6c5ce7;
+      color: white;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      letter-spacing: 0.3px;
+    }
+
+    .cost-table td {
+      padding: 10px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .cost-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .cost-table tr:nth-child(even) {
+      background: #fafafe;
+    }
+
+    .cost-table tr:hover td {
+      background: #f5f3ff;
+    }
+
+    .cost-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #6c5ce7, #e056a0);
+      transition: width 0.6s ease;
+    }
+
+    /* Stat badge */
+    .stat-badge {
+      display: inline-block;
+      background: #f5f3ff;
+      border: 1px solid #e8e3f8;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #6c5ce7;
+      margin: 8px 4px;
+    }
+
+    /* ReAct loop */
+    .react-loop {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+
+    .react-step {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .react-arrow {
+      font-size: 18px;
+      color: #6c5ce7;
+      font-weight: 700;
+    }
+
+    /* Golden rule */
+    .golden-rule {
+      background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+      border: 2px solid #f0c040;
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .golden-rule-title {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 8px;
+    }
+
+    .golden-rule-text {
+      font-size: 16px;
+      color: #664d03;
+      line-height: 1.6;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
+
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState } = React;
 
-    const P = {
-      root: { display:'flex', flexDirection:'row', width:'100%', height:'100%', backgroundColor:'#fff', overflow:'hidden' },
-      sidebar: { width:'180px', backgroundColor:'#f8f9fa', borderRight:'1px solid #e9ecef', padding:'24px 16px', overflowY:'auto', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', position:'relative' },
-      stepCircle: (isActive, isComplete) => ({ width:'60px', height:'60px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', transition:'all 0.3s ease', backgroundColor: isActive ? '#6c5ce7' : isComplete ? '#2ecc71' : '#e9ecef', color: isActive || isComplete ? '#fff' : '#666', fontSize:'24px', fontWeight:'700', position:'relative', zIndex:2, border: isActive ? '3px solid #6c5ce7' : 'none', boxShadow: isActive ? '0 4px 12px rgba(108,92,231,0.3)' : 'none' }),
-      stepLabel: { fontSize:'11px', fontWeight:'500', marginTop:'8px', textAlign:'center', color:'#666', width:'80px', lineHeight:'1.2' },
-      connector: (isComplete) => ({ width:'2px', height:'28px', backgroundColor: isComplete ? '#2ecc71' : '#d0d0d0', margin:'4px 0', transition:'background-color 0.3s ease' }),
-      main: { flex:1, display:'flex', flexDirection:'column', overflow:'hidden', backgroundColor:'#fff' },
-      topBar: { height:'64px', borderBottom:'1px solid #e9ecef', padding:'12px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', backgroundColor:'#f8f9fa' },
-      leftSection: { display:'flex', alignItems:'center', gap:'16px' },
-      backLink: { fontSize:'13px', color:'#6c5ce7', textDecoration:'none', fontWeight:'500' },
-      badge: { display:'inline-block', backgroundColor:'#e8f0fe', color:'#6c5ce7', padding:'6px 12px', borderRadius:'20px', fontSize:'11px', fontWeight:'600', textTransform:'uppercase', letterSpacing:'0.5px' },
-      title: { fontSize:'20px', fontWeight:'600', color:'#1a1a1a', fontFamily:"'Fraunces', serif" },
-      navRow: { display:'flex', alignItems:'center', gap:'24px' },
-      navBtn: (disabled) => ({ width:'36px', height:'36px', borderRadius:'12px', border:'1px solid #d0d0d0', backgroundColor: disabled ? '#f0f0f0' : '#fff', color: disabled ? '#bbb' : '#1a1a1a', cursor: disabled ? 'default' : 'pointer', fontSize:'18px', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'600' }),
-      navP: { fontSize:'12px', color:'#666', fontWeight:'500', minWidth:'60px', textAlign:'right' },
-      content: { flex:1, padding:'40px 48px', overflowY:'auto', scrollBehavior:'smooth', display:'flex', flexDirection:'column', gap:'32px' },
-      explainRow: { display:'flex', flexDirection:'column', gap:'16px' },
-      explain: { fontSize:'18px', lineHeight:'1.6', color:'#333', maxWidth:'600px' },
-      scene: { backgroundColor:'#f8f9fa', borderRadius:'16px', padding:'32px', border:'1px solid #e9ecef', boxShadow:'0 2px 8px rgba(0,0,0,0.04)', minHeight:'280px', display:'flex', alignItems:'center', justifyContent:'center', animation:'fadeIn 0.5s ease-out', flexDirection:'column', gap:'24px' },
-      insightLabel: { fontSize:'11px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.5px', color:'#1a9456', marginBottom:'8px' },
-      insight: { backgroundColor:'#f0faf0', borderLeft:'4px solid #2ecc71', borderRadius:'8px', padding:'20px', fontSize:'16px', lineHeight:'1.6', color:'#333' }
-    };
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
 
-    function S1() {
-      const [selectedArch, setSelectedArch] = useState(0);
-      const architectures = [
-        { num: 1, name: 'LLM Chat', emoji: '\ud83d\udcac', desc: 'Direct Q&A, no custom data' },
-        { num: 2, name: 'RAG', emoji: '\ud83d\udd0d', desc: 'Search + Answer with your data' },
-        { num: 3, name: 'Workflow', emoji: '\ud83d\udd04', desc: 'Fixed steps, reliable sequence' },
-        { num: 4, name: 'Agent', emoji: '\ud83e\udd16', desc: 'Smart steps, goal-focused' },
-        { num: 5, name: 'Agentic AI', emoji: '\ud83d\udc65', desc: 'Multi-agent teams' }
-      ];
+    function InsightBlock({ children }) {
       return (
-        <div style={P.scene}>
-          <div style={{display:'flex', justifyContent:'center', gap:'8px', width:'100%', flexWrap:'wrap'}}>
-            {architectures.map((arch, idx) => {
-              const progress = idx / 4;
-              const basePurple = 108;
-              const r = Math.floor(basePurple + (150 - basePurple) * progress);
-              const g = Math.floor(92 + (60 - 92) * progress);
-              const b = Math.floor(231 + (160 - 231) * progress);
-              const color = `rgb(${r},${g},${b})`;
-              return (
-                <div key={idx} style={{display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', cursor:'pointer', opacity: selectedArch === idx ? 1 : 0.6, transition:'opacity 0.2s'}} onClick={() => setSelectedArch(idx)}>
-                  <div style={{width:'64px', height:'64px', borderRadius:'50%', backgroundColor:color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'28px', color:'#fff', fontWeight:'700', boxShadow: selectedArch === idx ? `0 4px 12px ${color}80` : 'none', transform: selectedArch === idx ? 'scale(1.1)' : 'scale(1)', transition:'all 0.2s'}}>
-                    {arch.num}
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
+        </div>
+      );
+    }
+
+    /* Sidebar icon components */
+
+    function SpectrumIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 20h20" />
+          <path d="M4 16l4-8 4 4 4-10 4 6" />
+        </svg>
+      );
+    }
+
+    function CompareIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="4" width="8" height="16" rx="2" />
+          <rect x="14" y="4" width="8" height="16" rx="2" />
+          <path d="M12 2v20" strokeDasharray="2 2" />
+        </svg>
+      );
+    }
+
+    function PipelineIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="9" width="5" height="6" rx="1" />
+          <rect x="10" y="9" width="5" height="6" rx="1" />
+          <rect x="18" y="9" width="5" height="6" rx="1" />
+          <path d="M7 12h3" />
+          <path d="M15 12h3" />
+        </svg>
+      );
+    }
+
+    function BrainIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a5 5 0 015 5c0 1.5-.7 2.8-1.7 3.7L12 14l-3.3-3.3A5 5 0 0112 2z" />
+          <circle cx="8" cy="18" r="3" />
+          <circle cx="16" cy="18" r="3" />
+          <path d="M12 14v1" />
+          <path d="M10.5 15.5L8.5 15.5" />
+          <path d="M13.5 15.5L15.5 15.5" />
+        </svg>
+      );
+    }
+
+    function DecisionIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3l9 5v8l-9 5-9-5V8z" />
+          <path d="M12 3v10" />
+          <path d="M12 13l9-5" />
+          <path d="M12 13l-9-5" />
+        </svg>
+      );
+    }
+
+    /* Stage 1: The Spectrum */
+    function S1() {
+      const [selected, setSelected] = useState(null);
+
+      const archs = [
+        {
+          id: 'llm', emoji: '\uD83D\uDEB2', label: 'LLM Chat', analogy: 'Bicycle', color: '#6c5ce7',
+          desc: 'Direct conversation with an AI model. Like a bicycle for short trips: simple, fast, no infrastructure needed. Best for brainstorming, summarizing, and creative tasks where the model\'s training data is sufficient.'
+        },
+        {
+          id: 'rag', emoji: '\uD83D\uDE97', label: 'RAG', analogy: 'Car', color: '#7c55d4',
+          desc: 'Retrieval-Augmented Generation searches your documents first, then answers. Like a car for daily commutes: more capable, takes you to specific destinations. Best when you need answers grounded in your own data.'
+        },
+        {
+          id: 'workflow', emoji: '\uD83D\uDE8C', label: 'Workflow', analogy: 'Bus', color: '#9050c0',
+          desc: 'Multiple AI steps chained in a fixed sequence. Like a bus on a fixed route: reliable, predictable, handles many passengers. Best for repeatable business processes with well-defined steps.'
+        },
+        {
+          id: 'agent', emoji: '\uD83D\uDE95', label: 'Agent', analogy: 'Taxi', color: '#a84aaf',
+          desc: 'A single autonomous AI that reasons and uses tools dynamically. Like a taxi: flexible routing, adapts to conditions. Best when tasks require dynamic decisions and real-time tool use.'
+        },
+        {
+          id: 'agentic', emoji: '\uD83D\uDE9A', label: 'Agentic AI', analogy: 'Fleet', color: '#e056a0',
+          desc: 'Teams of specialized agents collaborating. Like a logistics fleet: multiple vehicles coordinated for complex operations. Best for multi-domain problems requiring diverse expertise working together.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">The Spectrum</div>
+          </div>
+          <div className="explanation">
+            There are 5 ways to build AI-powered solutions, ranging from simple to complex. Each architecture adds capabilities &mdash; and cost. Click any card to explore.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#6c5ce7', marginBottom: '16px', textAlign: 'center', letterSpacing: '0.5px' }}>
+                SIMPLE &rarr; COMPLEX
+              </div>
+              <div style={{ height: '6px', borderRadius: '3px', background: 'linear-gradient(90deg, #6c5ce7, #9050c0, #e056a0)', marginBottom: '24px' }} />
+              <div className="spectrum-row">
+                {archs.map((a, idx) => (
+                  <div
+                    key={a.id}
+                    className={`spectrum-card ${selected === a.id ? 'selected' : ''}`}
+                    style={{ borderColor: selected === a.id ? a.color : undefined }}
+                    onClick={() => setSelected(selected === a.id ? null : a.id)}
+                  >
+                    <div className="spectrum-emoji">{a.emoji}</div>
+                    <div className="spectrum-label">{a.label}</div>
+                    <div className="spectrum-analogy">{a.analogy}</div>
                   </div>
-                  <div style={{fontSize:'12px', fontWeight:'600', textAlign:'center', width:'70px'}}>{arch.name}</div>
+                ))}
+              </div>
+              {selected && (() => {
+                const a = archs.find(x => x.id === selected);
+                return (
+                  <div className="spectrum-detail" style={{ borderColor: a.color }}>
+                    <div className="spectrum-detail-title" style={{ color: a.color }}>
+                      {a.emoji} {a.label}
+                    </div>
+                    <div className="spectrum-detail-text">{a.desc}</div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+          <InsightBlock>
+            Think of these five architectures as a toolbox, not a ladder. You don&rsquo;t always need the most advanced option. A bicycle is perfect for a trip around the block &mdash; you wouldn&rsquo;t call a logistics fleet.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 2: Simple Architectures */
+    function S2() {
+      const [activeTab, setActiveTab] = useState('llm');
+
+      const tabBtn = (id, label, color) => (
+        <button
+          onClick={() => setActiveTab(id)}
+          style={{
+            padding: '10px 24px',
+            borderRadius: '10px',
+            border: '2px solid',
+            borderColor: activeTab === id ? color : '#e0e0e0',
+            background: activeTab === id ? color : 'white',
+            color: activeTab === id ? 'white' : '#333',
+            fontWeight: 700,
+            fontSize: '14px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          {label}
+        </button>
+      );
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">Simple Architectures</div>
+          </div>
+          <div className="explanation">
+            LLM Chat and RAG are the foundation of most AI applications today. Understanding the difference between these two is the first step in choosing the right architecture.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', justifyContent: 'center' }}>
+                {tabBtn('llm', 'LLM Chat', '#6c5ce7')}
+                {tabBtn('rag', 'RAG', '#3498db')}
+                {tabBtn('both', 'Compare', '#2ecc71')}
+              </div>
+
+              {activeTab === 'llm' && (
+                <div className="fade-in">
+                  <div style={{ fontWeight: 700, fontSize: '18px', color: '#6c5ce7', marginBottom: '12px' }}>
+                    LLM Chat &mdash; Direct Conversation
+                  </div>
+                  <div style={{ fontSize: '15px', lineHeight: 1.7, color: '#333', marginBottom: '20px' }}>
+                    The simplest architecture: you ask a question, the model answers using only its training data.
+                    No external lookups, no document search &mdash; just the model&rsquo;s memorized knowledge.
+                  </div>
+                  <div className="flow-row">
+                    <div className="flow-step" style={{ background: '#e8e3f8', color: '#6c5ce7' }}>User Question</div>
+                    <div className="flow-arrow">&rarr;</div>
+                    <div className="flow-step" style={{ background: '#6c5ce7', color: 'white' }}>LLM Model</div>
+                    <div className="flow-arrow">&rarr;</div>
+                    <div className="flow-step" style={{ background: '#e8e3f8', color: '#6c5ce7' }}>Answer</div>
+                  </div>
+                  <div style={{ marginTop: '16px', fontSize: '14px', color: '#888', textAlign: 'center' }}>
+                    Best for: brainstorming, creative writing, general knowledge, code generation
+                  </div>
                 </div>
+              )}
+
+              {activeTab === 'rag' && (
+                <div className="fade-in">
+                  <div style={{ fontWeight: 700, fontSize: '18px', color: '#3498db', marginBottom: '12px' }}>
+                    RAG &mdash; Retrieval-Augmented Generation
+                  </div>
+                  <div style={{ fontSize: '15px', lineHeight: 1.7, color: '#333', marginBottom: '20px' }}>
+                    Before answering, the system searches your documents, retrieves relevant chunks, and feeds them
+                    to the model as context. The model answers based on your actual data, not just what it memorized.
+                  </div>
+                  <div className="flow-row">
+                    <div className="flow-step" style={{ background: '#e0f0ff', color: '#3498db' }}>Question</div>
+                    <div className="flow-arrow">&rarr;</div>
+                    <div className="flow-step" style={{ background: '#3498db', color: 'white' }}>Search</div>
+                    <div className="flow-arrow">&rarr;</div>
+                    <div className="flow-step" style={{ background: '#e0f0ff', color: '#3498db' }}>Chunks</div>
+                    <div className="flow-arrow">&rarr;</div>
+                    <div className="flow-step" style={{ background: '#3498db', color: 'white' }}>Model</div>
+                    <div className="flow-arrow">&rarr;</div>
+                    <div className="flow-step" style={{ background: '#e0f0ff', color: '#3498db' }}>Answer</div>
+                  </div>
+                  <div style={{ marginTop: '16px', fontSize: '14px', color: '#888', textAlign: 'center' }}>
+                    Best for: company knowledge bases, document Q&amp;A, customer support, legal/medical research
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'both' && (
+                <div className="comparison-box fade-in">
+                  <div className="comparison-item left-panel">
+                    <div className="comparison-title" style={{ color: '#6c5ce7' }}>LLM Chat</div>
+                    <div className="comparison-content">
+                      <div style={{ marginBottom: '8px' }}><strong>Data source:</strong> Training data only</div>
+                      <div style={{ marginBottom: '8px' }}><strong>Freshness:</strong> Frozen at training cutoff</div>
+                      <div style={{ marginBottom: '8px' }}><strong>Accuracy:</strong> Can hallucinate freely</div>
+                      <div style={{ marginBottom: '8px' }}><strong>Cost:</strong> ~1,500 tokens/query</div>
+                      <div><strong>Setup:</strong> Zero &mdash; just call the API</div>
+                    </div>
+                  </div>
+                  <div className="comparison-item right-panel">
+                    <div className="comparison-title" style={{ color: '#3498db' }}>RAG</div>
+                    <div className="comparison-content">
+                      <div style={{ marginBottom: '8px' }}><strong>Data source:</strong> Your documents + training</div>
+                      <div style={{ marginBottom: '8px' }}><strong>Freshness:</strong> As current as your index</div>
+                      <div style={{ marginBottom: '8px' }}><strong>Accuracy:</strong> Reduces hallucinations 70-90%</div>
+                      <div style={{ marginBottom: '8px' }}><strong>Cost:</strong> ~3,000 tokens/query</div>
+                      <div><strong>Setup:</strong> Embed + index your documents</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <InsightBlock>
+            RAG reduces hallucinations by 70-90% because the model generates answers from retrieved evidence
+            rather than relying solely on memorized patterns. If your use case needs factual accuracy about
+            specific data, RAG is almost always the right next step above plain LLM Chat.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 3: Orchestrated Pipelines */
+    function S3() {
+      const [expanded, setExpanded] = useState(null);
+
+      const patterns = [
+        {
+          id: 'chaining', emoji: '\uD83C\uDFED', title: 'Prompt Chaining', sub: 'Assembly Line',
+          detail: 'Each step transforms the output of the previous step. Example: Outline an article, then write each section, then edit for tone. Each step is a separate LLM call with a focused instruction.'
+        },
+        {
+          id: 'routing', emoji: '\uD83C\uDFA9', title: 'Routing', sub: 'Sorting Hat',
+          detail: 'A classifier examines the input and sends it to the right specialized handler. Example: A support system routes billing questions to one prompt, technical issues to another, and feedback to a third.'
+        },
+        {
+          id: 'parallel', emoji: '\uD83D\uDEE3\uFE0F', title: 'Parallelization', sub: 'Multi-Lane Highway',
+          detail: 'Multiple LLM calls run simultaneously on different aspects of the same task. Example: Analyze a document for sentiment, extract entities, and summarize key points all at once, then merge results.'
+        },
+        {
+          id: 'orchestrator', emoji: '\uD83D\uDCCB', title: 'Orchestrator-Workers', sub: 'Project Manager',
+          detail: 'A central LLM breaks a task into subtasks and delegates to specialized workers. Example: A coding assistant decomposes "build a web app" into frontend, backend, and database tasks, assigns each to a worker, then integrates.'
+        },
+        {
+          id: 'evaluator', emoji: '\uD83D\uDD0D', title: 'Evaluator-Optimizer', sub: 'QA Inspector',
+          detail: 'One LLM generates output, another evaluates it, and the cycle repeats until quality thresholds are met. Example: Generate marketing copy, evaluate for brand voice, regenerate if needed.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">Orchestrated Pipelines</div>
+          </div>
+          <div className="explanation">
+            AI Workflows chain multiple AI steps in a fixed sequence &mdash; like a factory assembly line
+            where each station performs one specialized task. The path is predetermined and predictable.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '15px', lineHeight: 1.7, color: '#333', marginBottom: '20px' }}>
+                <strong>5 Workflow Patterns</strong> &mdash; click any pattern to see how it works:
+              </div>
+              <div className="click-grid">
+                {patterns.map((p, idx) => (
+                  <div
+                    key={p.id}
+                    className={`click-card ${expanded === p.id ? 'expanded' : ''}`}
+                    style={idx === 4 && expanded !== p.id ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
+                    onClick={() => setExpanded(expanded === p.id ? null : p.id)}
+                  >
+                    <div className="click-card-emoji">{p.emoji}</div>
+                    <div className="click-card-title">{p.title}</div>
+                    <div className="click-card-sub">{p.sub}</div>
+                    <div className="click-card-hint">Click to explore</div>
+                    <div className="click-card-detail">{p.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '24px', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#888' }}>Common tools:</span>
+                {['N8N', 'Make', 'Zapier', 'LangChain', 'Prefect'].map(tool => (
+                  <span key={tool} className="stat-badge" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                    {tool}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Workflows trade flexibility for reliability. Because each step is predefined, you can test,
+            debug, and optimize each stage independently. This makes workflows ideal for production systems
+            where predictability matters more than adaptability.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 4: Autonomous Agents */
+    function S4() {
+      const [expanded, setExpanded] = useState(null);
+
+      const collabs = [
+        {
+          id: 'pipeline', emoji: '\u27A1\uFE0F', title: 'Pipeline', sub: 'Sequential handoff',
+          detail: 'Agent A finishes its work and hands results to Agent B, who hands to Agent C. Like an assembly line where each specialist adds their expertise in order. Example: Researcher gathers data, Analyst interprets it, Writer creates the report.'
+        },
+        {
+          id: 'supervisor', emoji: '\uD83D\uDC51', title: 'Supervisor', sub: 'Boss delegates tasks',
+          detail: 'A manager agent breaks down work and assigns tasks to specialized worker agents, then synthesizes their outputs. Example: A lead agent assigns code review, testing, and documentation to three separate agents and combines results.'
+        },
+        {
+          id: 'debate', emoji: '\uD83E\uDD3C', title: 'Debate', sub: 'Adversarial refinement',
+          detail: 'Multiple agents argue different perspectives, and a judge agent selects the best answer or synthesizes a consensus. Example: A legal analysis where one agent argues for and another against, and a judge writes the balanced opinion.'
+        },
+        {
+          id: 'swarm', emoji: '\uD83D\uDC1D', title: 'Swarm', sub: 'Self-organizing team',
+          detail: 'Agents dynamically claim tasks and coordinate without a central controller, like a bee colony. Example: A customer service swarm where available agents pick up tickets based on their expertise and current load.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">Autonomous Agents</div>
+          </div>
+          <div className="explanation">
+            Agents break free from fixed sequences. A single agent uses a ReAct loop (Reason, Act, Observe)
+            to dynamically decide its next step. Agentic AI takes this further &mdash; teams of specialized
+            agents collaborating on complex problems.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
+                The ReAct Loop (Single Agent)
+              </div>
+              <div className="react-loop">
+                <div className="react-step" style={{ background: '#e8e3f8', color: '#6c5ce7' }}>
+                  Thought
+                </div>
+                <div className="react-arrow">&rarr;</div>
+                <div className="react-step" style={{ background: '#6c5ce7', color: 'white' }}>
+                  Action
+                </div>
+                <div className="react-arrow">&rarr;</div>
+                <div className="react-step" style={{ background: '#e8e3f8', color: '#6c5ce7' }}>
+                  Observation
+                </div>
+                <div className="react-arrow">&circlearrowright;</div>
+                <div style={{ fontSize: '13px', color: '#888', fontStyle: 'italic' }}>
+                  repeat until done
+                </div>
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px', marginTop: '28px' }}>
+                Agentic AI &mdash; 4 Collaboration Patterns
+              </div>
+              <div className="click-grid">
+                {collabs.map(c => (
+                  <div
+                    key={c.id}
+                    className={`click-card ${expanded === c.id ? 'expanded' : ''}`}
+                    onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                  >
+                    <div className="click-card-emoji">{c.emoji}</div>
+                    <div className="click-card-title">{c.title}</div>
+                    <div className="click-card-sub">{c.sub}</div>
+                    <div className="click-card-hint">Click to explore</div>
+                    <div className="click-card-detail">{c.detail}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                <div className="stat-badge">
+                  Cornell Study: 42.68% success (multi-agent) vs 2.92% (single agent) on complex tasks
+                </div>
+              </div>
+              <div style={{ marginTop: '16px', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#888' }}>Frameworks:</span>
+                {['CrewAI', 'LangGraph', 'AutoGen', 'OpenAI Swarm'].map(fw => (
+                  <span key={fw} className="stat-badge" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                    {fw}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Multi-agent systems dramatically outperform single agents on complex tasks. A Cornell study
+            found multi-agent collaboration achieved a 42.68% success rate compared to just 2.92% for a
+            single agent &mdash; but they come with higher cost, latency, and debugging complexity.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 5: Choosing Right */
+    function S5() {
+      const [activeGate, setActiveGate] = useState(null);
+
+      const gates = [
+        { num: 1, question: 'Does a single prompt solve it?', answer: 'LLM Chat', emoji: '\uD83D\uDEB2' },
+        { num: 2, question: 'Need your specific data?', answer: 'RAG', emoji: '\uD83D\uDE97' },
+        { num: 3, question: 'Repeatable, well-defined process?', answer: 'Workflow', emoji: '\uD83D\uDE8C' },
+        { num: 4, question: 'Dynamic decisions and tool use?', answer: 'Agent', emoji: '\uD83D\uDE95' },
+        { num: 5, question: 'Multiple expertise domains?', answer: 'Agentic AI', emoji: '\uD83D\uDE9A' }
+      ];
+
+      const costs = [
+        { arch: 'LLM Chat', tokens: '~1,500', pct: 4 },
+        { arch: 'RAG', tokens: '~3,000', pct: 8 },
+        { arch: 'Workflow', tokens: '~5,000', pct: 13 },
+        { arch: 'Agent', tokens: '~12,000', pct: 30 },
+        { arch: 'Agentic AI', tokens: '~40,000', pct: 100 }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">Choosing the Right Architecture</div>
+          </div>
+          <div className="explanation">
+            Walk through 5 decision gates to find the simplest architecture that meets your needs.
+            Each gate asks one question &mdash; the first &ldquo;yes&rdquo; is your answer.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
+                Decision Flowchart &mdash; click any gate:
+              </div>
+              <div className="gate-list">
+                {gates.map(g => (
+                  <div
+                    key={g.num}
+                    className={`gate-card ${activeGate === g.num ? 'active-gate' : ''}`}
+                    onClick={() => setActiveGate(activeGate === g.num ? null : g.num)}
+                  >
+                    <div className="gate-number">{g.num}</div>
+                    <div className="gate-question">{g.question}</div>
+                    <div className="gate-answer">{g.emoji} {g.answer}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginTop: '28px', marginBottom: '12px' }}>
+                Cost Comparison (tokens per query)
+              </div>
+              <table className="cost-table">
+                <thead>
+                  <tr>
+                    <th>Architecture</th>
+                    <th>Tokens / Query</th>
+                    <th style={{ width: '40%' }}>Relative Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {costs.map(c => (
+                    <tr key={c.arch}>
+                      <td style={{ fontWeight: 600 }}>{c.arch}</td>
+                      <td>{c.tokens}</td>
+                      <td>
+                        <div className="cost-bar" style={{ width: `${c.pct}%` }} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="golden-rule">
+                <div className="golden-rule-title">The Golden Rule</div>
+                <div className="golden-rule-text">
+                  Start simple, measure results, and upgrade only when data tells you to.
+                  The best architecture is the simplest one that solves your problem.
+                </div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Agentic AI can cost 25x more per query than plain LLM Chat. Before reaching for agents,
+            ask: can a well-crafted prompt or a simple RAG pipeline solve this? Over-engineering with
+            agents is the most common (and most expensive) mistake in AI architecture.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Main Guide Component */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stages = [
+        { icon: SpectrumIcon, label: 'Spectrum', component: S1 },
+        { icon: CompareIcon, label: 'Simple', component: S2 },
+        { icon: PipelineIcon, label: 'Pipelines', component: S3 },
+        { icon: BrainIcon, label: 'Agents', component: S4 },
+        { icon: DecisionIcon, label: 'Choosing', component: S5 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1);
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) setCurrentStage(currentStage - 1);
+      };
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => {
+              const IconComp = stage.icon;
+              return (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button
+                      className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                      onClick={() => setCurrentStage(idx)}
+                    >
+                      <IconComp />
+                    </button>
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
               );
             })}
           </div>
-          <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'12px', padding:'20px', textAlign:'center', minWidth:'350px'}}>
-            <div style={{fontSize:'32px', marginBottom:'12px'}}>{architectures[selectedArch].emoji}</div>
-            <div style={{fontSize:'18px', fontWeight:'600', marginBottom:'8px'}}>{architectures[selectedArch].name}</div>
-            <div style={{fontSize:'14px', color:'#666'}}>{architectures[selectedArch].desc}</div>
-          </div>
-        </div>
-      );
-    }
 
-    function S2() {
-      const [highlight, setHighlight] = useState(null);
-      return (
-        <div style={P.scene}>
-          <div style={{display:'flex', gap:'32px', width:'100%', justifyContent:'center', padding:'0 32px'}}>
-            <div style={{flex:1, backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'12px', padding:'24px', opacity: highlight === 'rag' ? 1 : 0.7, transition:'opacity 0.2s', cursor:'pointer'}} onMouseEnter={() => setHighlight('rag')} onMouseLeave={() => setHighlight(null)}>
-              <div style={{fontSize:'13px', fontWeight:'600', color:'#6c5ce7', marginBottom:'12px'}}>BASIC LLM CHAT</div>
-              <div style={{display:'flex', alignItems:'center', gap:'12px', marginBottom:'16px'}}>
-                <span style={{fontSize:'18px'}}>User Q</span>
-                <span style={{fontSize:'18px', color:'#999'}}>→</span>
-                <span style={{fontSize:'20px'}}>🧠</span>
-                <span style={{fontSize:'18px', color:'#999'}}>→</span>
-                <span style={{fontSize:'18px'}}>Answer</span>
-              </div>
-              <div style={{backgroundColor:'#ffe8e8', borderLeft:'3px solid #ff6b6b', padding:'12px', borderRadius:'6px', fontSize:'13px', color:'#a00', fontWeight:'500'}}>No custom data</div>
-              <div style={{marginTop:'16px', fontSize:'12px', color:'#666', lineHeight:'1.5'}}>
-                <strong>Best For:</strong> General Q&A, chat, brainstorming, no proprietary data needed
-              </div>
-            </div>
-            <div style={{flex:1, backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'12px', padding:'24px', opacity: highlight === 'llm' ? 1 : 0.7, transition:'opacity 0.2s', cursor:'pointer'}} onMouseEnter={() => setHighlight('llm')} onMouseLeave={() => setHighlight(null)}>
-              <div style={{fontSize:'13px', fontWeight:'600', color:'#2ecc71', marginBottom:'12px'}}>RAG (RETRIEVAL-AUGMENTED)</div>
-              <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'16px', flexWrap:'wrap'}}>
-                <span style={{fontSize:'16px'}}>Q</span>
-                <span style={{fontSize:'14px', color:'#999'}}>→</span>
-                <span style={{fontSize:'16px'}}>🔍</span>
-                <span style={{fontSize:'14px', color:'#999'}}>→</span>
-                <span style={{fontSize:'16px'}}>Chunks</span>
-                <span style={{fontSize:'14px', color:'#999'}}>→</span>
-                <span style={{fontSize:'16px'}}>🧠</span>
-                <span style={{fontSize:'14px', color:'#999'}}>→</span>
-                <span style={{fontSize:'16px'}}>Answer</span>
-              </div>
-              <div style={{backgroundColor:'#e8f8f0', borderLeft:'3px solid #2ecc71', padding:'12px', borderRadius:'6px', fontSize:'13px', color:'#1a9456', fontWeight:'500'}}>Your data ✓</div>
-              <div style={{marginTop:'16px', fontSize:'12px', color:'#666', lineHeight:'1.5'}}>
-                <strong>Best For:</strong> Q&A from docs, company knowledge, customer service, grounded answers
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function S3() {
-      const [step, setStep] = useState(0);
-      const steps = ['Timer ⏱', 'Fetch Website 🌐', 'Extract Changes 🤖', 'Compare to Last Week 📊', 'Format Report 📋', 'Send to Slack 📬'];
-      useEffect(() => {
-        const timer = setInterval(() => setStep(s => (s + 1) % steps.length), 1200);
-        return () => clearInterval(timer);
-      }, []);
-      return (
-        <div style={P.scene}>
-          <div style={{display:'flex', gap:'8px', justifyContent:'center', flexWrap:'wrap', marginBottom:'24px'}}>
-            {steps.map((s, idx) => (
-              <div key={idx} style={{display:'flex', alignItems:'center', gap:'8px'}}>
-                <div style={{backgroundColor: idx <= step ? '#6c5ce7' : '#e9ecef', color: idx <= step ? '#fff' : '#999', padding:'10px 16px', borderRadius:'8px', fontSize:'12px', fontWeight:'600', transition:'all 0.3s', transform: idx === step ? 'scale(1.05)' : 'scale(1)'}}>{s}</div>
-                {idx < steps.length - 1 && <span style={{fontSize:'16px', color: idx < step ? '#6c5ce7' : '#ccc', transition:'color 0.3s'}}>→</span>}
-              </div>
-            ))}
-          </div>
-          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'24px', width:'100%'}}>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'12px', padding:'16px'}}>
-              <div style={{fontSize:'12px', fontWeight:'600', color:'#666', marginBottom:'8px'}}>CHARACTERISTIC</div>
-              <div style={{fontSize:'13px', color:'#333'}}>Fixed flow</div>
-            </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'12px', padding:'16px'}}>
-              <div style={{fontSize:'12px', fontWeight:'600', color:'#666', marginBottom:'8px'}}>YOU DESIGN</div>
-              <div style={{fontSize:'13px', color:'#333'}}>Every step & order</div>
-            </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'12px', padding:'16px'}}>
-              <div style={{fontSize:'12px', fontWeight:'600', color:'#666', marginBottom:'8px'}}>RELIABILITY</div>
-              <div style={{fontSize:'13px', color:'#333'}}>Very high (predictable)</div>
-            </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'12px', padding:'16px'}}>
-              <div style={{fontSize:'12px', fontWeight:'600', color:'#666', marginBottom:'8px'}}>FLEXIBILITY</div>
-              <div style={{fontSize:'13px', color:'#333'}}>Low (same order always)</div>
-            </div>
-          </div>
-          <div style={{fontSize:'12px', color:'#666', textAlign:'center', marginTop:'12px'}}>Tools: N8N, Make, Zapier</div>
-        </div>
-      );
-    }
-
-    function S4() {
-      const [selectedAgent, setSelectedAgent] = useState(0);
-      const agents = [
-        { name: 'Researcher', role: 'Gathers facts and data' },
-        { name: 'Writer', role: 'Creates content from research' },
-        { name: 'Editor', role: 'Reviews and refines' },
-        { name: 'Publisher', role: 'Formats and distributes' }
-      ];
-      return (
-        <div style={P.scene}>
-          <div style={{width:'100%'}}>
-            <div style={{fontSize:'13px', fontWeight:'600', color:'#666', marginBottom:'16px'}}>SINGLE AGENT (ReAct Loop)</div>
-            <div style={{display:'flex', gap:'12px', justifyContent:'center', marginBottom:'32px', flexWrap:'wrap'}}>
-              <div style={{backgroundColor:'#e8f0fe', padding:'12px 16px', borderRadius:'8px', fontSize:'12px', fontWeight:'600', color:'#6c5ce7'}}>Goal</div>
-              <span style={{color:'#ccc'}}>→</span>
-              <div style={{backgroundColor:'#e8f0fe', padding:'12px 16px', borderRadius:'8px', fontSize:'12px', fontWeight:'600', color:'#6c5ce7'}}>Thought</div>
-              <span style={{color:'#ccc'}}>→</span>
-              <div style={{backgroundColor:'#e8f0fe', padding:'12px 16px', borderRadius:'8px', fontSize:'12px', fontWeight:'600', color:'#6c5ce7'}}>Action</div>
-              <span style={{color:'#ccc'}}>→</span>
-              <div style={{backgroundColor:'#e8f0fe', padding:'12px 16px', borderRadius:'8px', fontSize:'12px', fontWeight:'600', color:'#6c5ce7'}}>Observe</div>
-              <span style={{color:'#ccc'}}>↻</span>
-            </div>
-          </div>
-          <div style={{width:'100%'}}>
-            <div style={{fontSize:'13px', fontWeight:'600', color:'#666', marginBottom:'16px'}}>AGENTIC AI (Multi-Agent Team)</div>
-            <div style={{display:'flex', justifyContent:'center', gap:'32px', marginBottom:'16px'}}>
-              {agents.map((agent, idx) => (
-                <div key={idx} style={{textAlign:'center', cursor:'pointer', opacity: selectedAgent === idx ? 1 : 0.6, transition:'opacity 0.2s'}} onClick={() => setSelectedAgent(idx)}>
-                  <div style={{width:'64px', height:'64px', borderRadius:'50%', backgroundColor: selectedAgent === idx ? '#6c5ce7' : '#f0f0f0', color: selectedAgent === idx ? '#fff' : '#666', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'28px', fontWeight:'700', margin:'0 auto 8px', transition:'all 0.2s', boxShadow: selectedAgent === idx ? '0 4px 12px rgba(108,92,231,0.3)' : 'none'}}>
-                    {idx + 1}
-                  </div>
-                  <div style={{fontSize:'12px', fontWeight:'600'}}>{agent.name}</div>
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">5.1</span>
+                  <div className="title">Architecture Overview</div>
                 </div>
-              ))}
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">INTERACTIVE</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of 5</span>
+                <div className="nav-arrows">
+                  <button
+                    className="arrow-btn"
+                    onClick={handlePrev}
+                    disabled={currentStage === 0}
+                    title="Previous stage"
+                  >
+                    &#8592;
+                  </button>
+                  <button
+                    className="arrow-btn"
+                    onClick={handleNext}
+                    disabled={currentStage === stages.length - 1}
+                    title="Next stage"
+                  >
+                    &#8594;
+                  </button>
+                </div>
+              </div>
             </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'8px', padding:'12px 16px', textAlign:'center', fontSize:'12px', color:'#666'}}>
-              {agents[selectedAgent].role}
+
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
             </div>
           </div>
         </div>
       );
     }
 
-    function S5() {
-      const [selected, setSelected] = useState(null);
-      const decisions = [
-        { id: 'need_data', q: 'Need custom data?', yes: 'next1', no: 'llm' },
-        { id: 'next1', q: 'Fixed steps?', yes: 'workflow', no: 'next2' },
-        { id: 'next2', q: 'Simple Q&A?', yes: 'rag', no: 'next3' },
-        { id: 'next3', q: 'Multiple expertise?', yes: 'agentic', no: 'agent' },
-        { id: 'llm', name: 'LLM Chat', color: '#6c5ce7' },
-        { id: 'rag', name: 'RAG', color: '#3498db' },
-        { id: 'workflow', name: 'Workflow', color: '#9b59b6' },
-        { id: 'agent', name: 'AI Agent', color: '#e74c3c' },
-        { id: 'agentic', name: 'Agentic AI', color: '#27ae60' }
-      ];
-      const decisionTree = [
-        { id: 'need_data', x: 50, y: 10, w: 120, h: 60 },
-        { id: 'next1', x: 20, y: 30, w: 120, h: 60 },
-        { id: 'next2', x: 80, y: 30, w: 120, h: 60 },
-        { id: 'next3', x: 80, y: 50, w: 120, h: 60 },
-        { id: 'llm', x: 5, y: 50, w: 100, h: 50 },
-        { id: 'workflow', x: 20, y: 50, w: 100, h: 50 },
-        { id: 'rag', x: 80, y: 50, w: 100, h: 50 },
-        { id: 'agent', x: 90, y: 70, w: 100, h: 50 },
-        { id: 'agentic', x: 100, y: 70, w: 100, h: 50 }
-      ];
-      return (
-        <div style={P.scene}>
-          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'24px', width:'100%', fontSize:'13px'}}>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'8px', padding:'16px'}}>
-              <div style={{fontWeight:'600', color:'#6c5ce7', marginBottom:'8px'}}>LLM Chat</div>
-              <div style={{fontSize:'12px', color:'#666', lineHeight:'1.5'}}>Direct Q&A, general knowledge, no proprietary data</div>
-            </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'8px', padding:'16px'}}>
-              <div style={{fontWeight:'600', color:'#3498db', marginBottom:'8px'}}>RAG</div>
-              <div style={{fontSize:'12px', color:'#666', lineHeight:'1.5'}}>Question answering from documents, company knowledge</div>
-            </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'8px', padding:'16px'}}>
-              <div style={{fontWeight:'600', color:'#9b59b6', marginBottom:'8px'}}>Workflow</div>
-              <div style={{fontSize:'12px', color:'#666', lineHeight:'1.5'}}>Fixed sequences, automation, scheduled tasks, monitoring</div>
-            </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'8px', padding:'16px'}}>
-              <div style={{fontWeight:'600', color:'#e74c3c', marginBottom:'8px'}}>AI Agent</div>
-              <div style={{fontSize:'12px', color:'#666', lineHeight:'1.5'}}>Goal-oriented, flexible steps, reasoning, one area of expertise</div>
-            </div>
-            <div style={{backgroundColor:'#fff', border:'1px solid #e9ecef', borderRadius:'8px', padding:'16px', gridColumn:'1 / -1'}}>
-              <div style={{fontWeight:'600', color:'#27ae60', marginBottom:'8px'}}>Agentic AI</div>
-              <div style={{fontSize:'12px', color:'#666', lineHeight:'1.5'}}>Complex projects, multiple specialized agents, research → write → edit → publish teams</div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function App() {
-      const [stage, setStage] = useState(0);
-      const stages = [
-        { num: 1, label: 'Big Picture', component: S1 },
-        { num: 2, label: 'Simple Ones', component: S2 },
-        { num: 3, label: 'Workflows', component: S3 },
-        { num: 4, label: 'Smart Ones', component: S4 },
-        { num: 5, label: 'Choose', component: S5 }
-      ];
-      const stageData = [
-        { explain: 'There are 5 ways to build AI solutions, from simple chat to autonomous AI teams. Choosing the right one depends on task complexity.', insight: 'Think of it as choosing the right vehicle: bicycle (LLM Chat) for short trips, car (RAG) for daily commutes, bus (Workflow) for fixed routes, taxi (Agent) for flexible trips, fleet (Agentic) for logistics.' },
-        { explain: 'Basic LLM Chat is like texting a smart friend. RAG adds a library search before answering—it retrieves relevant documents first, then answers based on both the question and your data.', insight: 'LLM Chat = encyclopedia. RAG = librarian who checks your files first. If you need answers from YOUR data, you need RAG.' },
-        { explain: 'Multiple AI steps chained in a fixed sequence, like a factory assembly line where each station does one job. You design every step in advance, and they execute in the same order every time.', insight: 'Workflows = assembly line. Same steps, same order, every time. Use when you know EXACTLY what needs to happen.' },
-        { explain: 'Agents decide their own next steps using tools. An Agent figures out how to reach a goal. Agentic AI means teams of specialized agents collaborating on complex projects—like a research, writing, editing, publishing pipeline.', insight: 'Agent = personal assistant who figures it out. Agentic = specialized team. Use Agents when you know the GOAL but not the steps. Use Agentic for complex projects needing multiple expertise areas.' },
-        { explain: 'Use the simplest architecture that solves your problem. Start with LLM Chat or RAG. Only reach for Agents or Agentic AI when simpler approaches fail or you need sophisticated reasoning and planning.', insight: 'Start simple, upgrade when needed. Most use cases are solved by LLM Chat or RAG. Only reach for Agents/Agentic when simpler approaches fail.' }
-      ];
-      const CurrentScene = stages[stage].component;
-      return (
-        <div style={P.root}>
-          <div style={P.sidebar}>
-            {stages.map((s, idx) => (
-              <div key={idx}>
-                <div style={P.stepCircle(stage === idx, stage > idx)} onClick={() => setStage(idx)}>{s.num}</div>
-                <div style={P.stepLabel}>{s.label}</div>
-                {idx < stages.length - 1 && <div style={P.connector(stage > idx)}></div>}
-              </div>
-            ))}
-          </div>
-          <div style={P.main}>
-            <div style={P.topBar}>
-              <div style={P.leftSection}>
-                <a href="../../index.html" style={P.backLink}>← Back</a>
-                <div style={P.badge}>INTERACTIVE</div>
-              </div>
-              <div style={P.title}>The Five AI Architectures</div>
-              <div style={P.navRow}>
-                <button style={P.navBtn(stage === 0)} onClick={() => stage > 0 && setStage(stage - 1)}>←</button>
-                <div style={P.navP}>{stage + 1} / 5</div>
-                <button style={P.navBtn(stage === 4)} onClick={() => stage < 4 && setStage(stage + 1)}>→</button>
-              </div>
-            </div>
-            <div style={P.content}>
-              <div style={P.explainRow}>
-                <p style={P.explain}>{stageData[stage].explain}</p>
-              </div>
-              <CurrentScene />
-              <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
-                <div style={P.insightLabel}>Key Insight</div>
-                <div style={P.insight}>{stageData[stage].insight}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
   </script>
 </body>
 </html>

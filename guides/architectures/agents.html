@@ -3,361 +3,1264 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Agents: Autonomous Decision-Making</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <title>AI Agents - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; overflow: hidden; }
-    #root { height: 100%; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-    @keyframes blink { 0%, 49%, 100% { opacity: 1; } 50%, 99% { opacity: 0; } }
-    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .capability-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+    }
+
+    .capability-card {
+      padding: 24px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .capability-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .capability-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .capability-emoji { font-size: 32px; margin-bottom: 12px; }
+    .capability-title { font-weight: 700; font-size: 18px; color: #1a1a1a; margin-bottom: 6px; }
+    .capability-subtitle { font-size: 14px; color: #666; line-height: 1.5; }
+    .capability-hint { font-size: 11px; color: #b0a6e8; margin-top: 8px; font-style: italic; }
+    .capability-card.expanded .capability-hint { display: none; }
+
+    .capability-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .capability-card.expanded .capability-detail {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .react-cycle {
+      width: 100%;
+      padding: 24px;
+      background: white;
+      border: 2px solid #e8e3f8;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .react-step {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .react-step.thought { background: #f5f3ff; border-left: 4px solid #6c5ce7; }
+    .react-step.action { background: #fff8e1; border-left: 4px solid #f39c12; }
+    .react-step.observation { background: #e8f5e9; border-left: 4px solid #2ecc71; }
+
+    .react-step-label {
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .react-step.thought .react-step-label { color: #6c5ce7; }
+    .react-step.action .react-step-label { color: #f39c12; }
+    .react-step.observation .react-step-label { color: #2ecc71; }
+
+    .react-nav {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .react-nav-btn {
+      padding: 8px 20px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .react-nav-btn:hover { border-color: #6c5ce7; color: #6c5ce7; }
+    .react-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .react-nav-btn.active { background: #6c5ce7; color: white; border-color: #6c5ce7; }
+
+    .tool-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tool-tab {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .tool-tab:hover { border-color: #6c5ce7; }
+    .tool-tab.active { background: #6c5ce7; color: white; border-color: #6c5ce7; }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .tool-item {
+      padding: 16px;
+      background: white;
+      border: 1px solid #e8e3f8;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .tool-item-emoji { font-size: 22px; }
+
+    .failure-card {
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .failure-card:hover { transform: translateY(-2px); }
+    .failure-card.expanded { border-color: #e74c3c; background: #fef5f5; }
+
+    .failure-card-title {
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .failure-card-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .failure-card.expanded .failure-card-content {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 16px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e8e3f8;
+      margin-bottom: 8px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .checklist-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: #2ecc71;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .example-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+    }
+
+    .example-card {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .example-card:hover { transform: translateY(-3px); border-color: #6c5ce7; }
+    .example-card.expanded { border-color: #6c5ce7; background: #f5f3ff; grid-column: 1 / -1; }
+
+    .example-card-emoji { font-size: 28px; margin-bottom: 8px; }
+    .example-card-title { font-weight: 700; font-size: 16px; color: #1a1a1a; margin-bottom: 4px; }
+    .example-card-desc { font-size: 13px; color: #666; line-height: 1.5; }
+    .example-card-hint { font-size: 11px; color: #b0a6e8; margin-top: 8px; font-style: italic; }
+    .example-card.expanded .example-card-hint { display: none; }
+
+    .example-card-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.7;
+    }
+
+    .example-card.expanded .example-card-detail {
+      max-height: 400px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .mcp-callout {
+      background: linear-gradient(135deg, #6c5ce7 0%, #a78bfa 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-top: 16px;
+      width: 100%;
+    }
+
+    .mcp-callout-title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+    .mcp-callout-text { font-size: 14px; line-height: 1.6; opacity: 0.95; }
+
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .comparison-item {
+      padding: 24px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .comparison-item.agent { background: #f5f3ff; border-color: #6c5ce7; }
+    .comparison-item.workflow { background: #f8f9fa; border-color: #bbb; }
+
+    .comparison-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .comparison-item.agent .comparison-title { color: #6c5ce7; }
+    .comparison-item.workflow .comparison-title { color: #555; }
+
+    .comparison-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .fade-in { animation: fadeIn 0.6s ease forwards; }
+    .slide-in-right { animation: slideInRight 0.6s ease forwards; }
+    .slide-in-left { animation: slideInLeft 0.6s ease forwards; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState } = React;
 
-    const P = {
-      root: { display: 'flex', height: '100%', width: '100%', backgroundColor: 'white', fontFamily: '"DM Sans", sans-serif', color: '#1a1a1a' },
-      sidebar: { width: '180px', backgroundColor: '#f8f9fa', borderRight: '1px solid #e9ecef', overflowY: 'auto', padding: '24px 16px' },
-      stepCircle: (stage, currentStage) => {
-        let bg = '#e9ecef', color = '#666';
-        if (stage === currentStage) bg = '#6c5ce7', color = 'white';
-        else if (stage < currentStage) bg = '#2ecc71', color = 'white';
-        return { width: '60px', height: '60px', borderRadius: '50%', backgroundColor: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '20px', cursor: 'pointer', transition: 'all 0.3s', margin: '12px auto' };
-      },
-      stepLabel: { fontSize: '11px', textAlign: 'center', marginTop: '8px', color: '#666', lineHeight: '1.2' },
-      connector: (active) => ({ height: '24px', width: '2px', backgroundColor: active ? '#2ecc71' : '#e9ecef', margin: '0 auto' }),
-      main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
-      topBar: { height: '64px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef', display: 'flex', alignItems: 'center', paddingLeft: '32px', gap: '16px' },
-      leftSection: { display: 'flex', alignItems: 'center', gap: '16px', flex: 1 },
-      backLink: { color: '#6c5ce7', textDecoration: 'none', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-      badge: { backgroundColor: '#e8f0fe', color: '#6c5ce7', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' },
-      title: { fontFamily: '"Fraunces", serif', fontSize: '32px', fontWeight: '700', color: '#1a1a1a' },
-      navRow: { display: 'flex', gap: '8px', alignItems: 'center' },
-      navBtn: (active) => ({ width: '36px', height: '36px', backgroundColor: active ? '#6c5ce7' : 'transparent', color: active ? 'white' : '#666', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }),
-      navP: { fontSize: '13px', color: '#666', minWidth: '40px', textAlign: 'center' },
-      content: { flex: 1, overflowY: 'auto', padding: '40px 48px' },
-      explainRow: { marginBottom: '32px' },
-      explain: { fontSize: '18px', lineHeight: '1.6', color: '#444', marginBottom: '12px' },
-      scene: { backgroundColor: '#f8f9fa', borderRadius: '16px', padding: '32px', marginTop: '24px', border: '1px solid #e9ecef', animation: 'fadeIn 0.4s', minHeight: '300px' },
-      insightLabel: { color: '#1a9456', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' },
-      insight: { backgroundColor: '#f0faf0', borderLeft: '4px solid #2ecc71', padding: '16px', borderRadius: '8px', marginTop: '24px', fontSize: '16px', lineHeight: '1.6', color: '#2d5016' }
-    };
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
 
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
+        </div>
+      );
+    }
+
+    /* Sidebar icon components */
+    function RobotIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="11" width="18" height="10" rx="2" />
+          <circle cx="12" cy="5" r="2" />
+          <path d="M12 7v4" />
+          <line x1="8" y1="16" x2="8" y2="16" />
+          <line x1="16" y1="16" x2="16" y2="16" />
+          <circle cx="8" cy="16" r="1" fill="currentColor" />
+          <circle cx="16" cy="16" r="1" fill="currentColor" />
+        </svg>
+      );
+    }
+
+    function BrainIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a5 5 0 015 5c0 .98-.28 1.89-.77 2.66A5 5 0 0119 14a5 5 0 01-3 4.58V22h-4v-3.42A5 5 0 015 14a5 5 0 012.77-4.34A5 5 0 017 7a5 5 0 015-5z" />
+          <path d="M12 2v20" />
+        </svg>
+      );
+    }
+
+    function LoopIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="17 1 21 5 17 9" />
+          <path d="M3 11V9a4 4 0 014-4h14" />
+          <polyline points="7 23 3 19 7 15" />
+          <path d="M21 13v2a4 4 0 01-4 4H3" />
+        </svg>
+      );
+    }
+
+    function WrenchIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    }
+
+    function WarningIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      );
+    }
+
+    function GlobeIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+        </svg>
+      );
+    }
+
+    const STAGES = [
+      { id: 1, label: 'What', icon: RobotIcon },
+      { id: 2, label: 'Skills', icon: BrainIcon },
+      { id: 3, label: 'ReAct', icon: LoopIcon },
+      { id: 4, label: 'Tools', icon: WrenchIcon },
+      { id: 5, label: 'Pitfalls', icon: WarningIcon },
+      { id: 6, label: 'Real', icon: GlobeIcon }
+    ];
+
+    /* Stage 1 -- What is an Agent? */
     function S1() {
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>AI that uses tools and decides its own next steps to complete a task — like giving a goal to an expert who figures out what to do instead of being told every step.</p>
-          <div style={P.scene}>
-            <svg viewBox="0 0 600 400" style={{ width: '100%', maxHeight: '300px' }}>
-              <defs>
-                <filter id="purpleGlow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              <circle cx="300" cy="200" r="60" fill="#6c5ce7" filter="url(#purpleGlow)" opacity="0.8" />
-              <text x="300" y="210" textAnchor="middle" fontSize="16" fontWeight="bold" fill="white">Agent</text>
-              <circle cx="120" cy="100" r="40" fill="#3498db" />
-              <text x="120" y="105" textAnchor="middle" fontSize="12" fontWeight="bold" fill="white">Web</text>
-              <text x="120" y="120" textAnchor="middle" fontSize="12" fontWeight="bold" fill="white">Search</text>
-              <circle cx="480" cy="100" r="40" fill="#e74c3c" />
-              <text x="480" y="110" textAnchor="middle" fontSize="12" fontWeight="bold" fill="white">Calc</text>
-              <circle cx="120" cy="300" r="40" fill="#f39c12" />
-              <text x="120" y="310" textAnchor="middle" fontSize="12" fontWeight="bold" fill="white">Code</text>
-              <circle cx="480" cy="300" r="40" fill="#1abc9c" />
-              <text x="480" y="310" textAnchor="middle" fontSize="12" fontWeight="bold" fill="white">Files</text>
-              <line x1="300" y1="200" x2="150" y2="130" stroke="#6c5ce7" strokeWidth="2" />
-              <line x1="300" y1="200" x2="450" y2="130" stroke="#6c5ce7" strokeWidth="2" />
-              <line x1="300" y1="200" x2="150" y2="270" stroke="#6c5ce7" strokeWidth="2" />
-              <line x1="300" y1="200" x2="450" y2="270" stroke="#6c5ce7" strokeWidth="2" />
+        <>
+          <div><div className="stage-header">What is an Agent?</div></div>
+          <div className="explanation">
+            An AI agent operates in a <strong>reasoning loop</strong> -- it observes the world, thinks about what to do, takes an action, checks the result, and decides the next step. Unlike a chatbot that gives one response and stops, an agent <strong>keeps going until the goal is achieved</strong>.
+          </div>
+          <div className="scene-card">
+            <svg width="480" height="320" viewBox="0 0 480 320">
+              {/* Agent center */}
+              <rect x="170" y="120" width="140" height="80" rx="16" fill="#6c5ce7" />
+              <text x="240" y="155" textAnchor="middle" fill="white" fontWeight="700" fontSize="16" fontFamily="DM Sans">AI Agent</text>
+              <text x="240" y="175" textAnchor="middle" fill="#d4ccff" fontSize="11" fontFamily="DM Sans">Observe - Think - Act</text>
+
+              {/* Web Search */}
+              <rect x="20" y="30" width="110" height="50" rx="10" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="1.5" />
+              <text x="75" y="52" textAnchor="middle" fontSize="18">&#x1F50D;</text>
+              <text x="75" y="70" textAnchor="middle" fill="#333" fontSize="11" fontWeight="600" fontFamily="DM Sans">Web Search</text>
+              <line x1="130" y1="55" x2="170" y2="140" stroke="#6c5ce7" strokeWidth="1.5" strokeDasharray="4,3" />
+
+              {/* Calculator */}
+              <rect x="350" y="30" width="110" height="50" rx="10" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="1.5" />
+              <text x="405" y="52" textAnchor="middle" fontSize="18">&#x1F5A9;</text>
+              <text x="405" y="70" textAnchor="middle" fill="#333" fontSize="11" fontWeight="600" fontFamily="DM Sans">Calculator</text>
+              <line x1="350" y1="55" x2="310" y2="140" stroke="#6c5ce7" strokeWidth="1.5" strokeDasharray="4,3" />
+
+              {/* Code */}
+              <rect x="20" y="240" width="110" height="50" rx="10" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="1.5" />
+              <text x="75" y="262" textAnchor="middle" fontSize="18">&#x1F4BB;</text>
+              <text x="75" y="280" textAnchor="middle" fill="#333" fontSize="11" fontWeight="600" fontFamily="DM Sans">Code Exec</text>
+              <line x1="130" y1="265" x2="170" y2="180" stroke="#6c5ce7" strokeWidth="1.5" strokeDasharray="4,3" />
+
+              {/* Files */}
+              <rect x="350" y="240" width="110" height="50" rx="10" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="1.5" />
+              <text x="405" y="262" textAnchor="middle" fontSize="18">&#x1F4C1;</text>
+              <text x="405" y="280" textAnchor="middle" fill="#333" fontSize="11" fontWeight="600" fontFamily="DM Sans">File System</text>
+              <line x1="350" y1="265" x2="310" y2="180" stroke="#6c5ce7" strokeWidth="1.5" strokeDasharray="4,3" />
             </svg>
+            <div style={{marginTop: '16px', textAlign: 'center', width: '100%'}}>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', maxWidth: '440px', margin: '0 auto'}}>
+                <div style={{padding: '16px', background: '#f8f9fa', borderRadius: '10px', border: '2px solid #bbb'}}>
+                  <div style={{fontSize: '24px', marginBottom: '6px'}}>&#x1F5A9;</div>
+                  <div style={{fontWeight: 700, fontSize: '15px', color: '#555'}}>Calculator</div>
+                  <div style={{fontSize: '13px', color: '#888', marginTop: '4px'}}>Does what you tell it. One operation, done.</div>
+                </div>
+                <div style={{padding: '16px', background: '#f5f3ff', borderRadius: '10px', border: '2px solid #6c5ce7'}}>
+                  <div style={{fontSize: '24px', marginBottom: '6px'}}>&#x1F4BC;</div>
+                  <div style={{fontWeight: 700, fontSize: '15px', color: '#6c5ce7'}}>Accountant</div>
+                  <div style={{fontSize: '13px', color: '#555', marginTop: '4px'}}>Figures out what needs doing, does it, checks, flags issues.</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div style={{ marginTop: '20px', fontSize: '16px', color: '#666' }}>
-            <strong>Travel Booking Analogy:</strong> "Book me a flight to Tokyo" \u2192 agent decides to check prices, compare airlines, check dates, then books. Not step-directed, but goal-directed.
-          </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Key Insight</div>
-            <p style={{ marginTop: '8px' }}>An Agent = LLM + Tools + Decision Loop. You give it a goal, and it figures out the steps. Like hiring an expert vs writing a recipe.</p>
-          </div>
-        </div>
+          <InsightBlock>
+            The AI agent market is projected to grow from <strong>$7.84B in 2025</strong> to <strong>$52.62B by 2030</strong>. Agents represent the shift from AI as a tool you operate to AI as a collaborator that operates alongside you.
+          </InsightBlock>
+        </>
       );
     }
 
+    /* Stage 2 -- Three Capabilities */
     function S2() {
-      const [step, setStep] = useState(0);
-      const steps = [
-        { thought: "I need recent documentation about Python 3.12 async features", action: "web_search(\"Python 3.12 async new features\")" },
-        { thought: "Need official docs for accuracy", action: "web_fetch(\"https://docs.python.org/3.12/whatsnew/\")" },
-        { thought: "Now I can create accurate example", action: "Generate code with TaskGroups" }
-      ];
-      const observations = [
-        "Results show TaskGroups and asyncio improvements",
-        "Full documentation retrieved successfully",
-        "Code example created with TaskGroups example"
+      const [expanded, setExpanded] = useState(null);
+
+      const capabilities = [
+        {
+          id: 'reasoning',
+          emoji: "\uD83E\uDDE0",
+          title: 'Reasoning',
+          subtitle: 'Break complex goals into steps',
+          detail: 'The agent breaks a complex goal into steps, decides the best next action at each point, and adjusts when something unexpected happens. Without reasoning, an agent is just a rigid workflow that cannot adapt.'
+        },
+        {
+          id: 'tools',
+          emoji: "\uD83D\uDD27",
+          title: 'Tool Use',
+          subtitle: 'Call external functions and APIs',
+          detail: 'Agents call external functions -- APIs, databases, file systems, web search. Without tools, an agent can only talk, not act. MCP (Model Context Protocol) makes tool integration universal, so tools built once work everywhere.'
+        },
+        {
+          id: 'memory',
+          emoji: "\uD83E\uDDE9",
+          title: 'Memory & Context',
+          subtitle: 'Maintain state across multi-step work',
+          detail: 'The agent maintains state across a multi-step workflow without losing track of the original goal. It remembers what it tried, what worked, what failed. Without memory, the agent forgets mid-task and loops or contradicts itself.'
+        }
       ];
 
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>Agents use a Thought \u2192 Action \u2192 Observation cycle, repeating until the task is done. This is called ReAct (Reasoning + Acting).</p>
-          <div style={P.scene}>
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <strong style={{ fontSize: '18px' }}>Goal: Find Python 3.12 async features and create code example</strong>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ backgroundColor: '#e8eef7', padding: '12px', borderRadius: '8px' }}>
-                <div style={{ color: '#6c5ce7', fontWeight: '600', fontSize: '12px' }}>THOUGHT</div>
-                <div style={{ marginTop: '8px', fontSize: '14px' }}>{steps[step]?.thought}</div>
-              </div>
-              <div style={{ backgroundColor: '#e3f2fd', padding: '12px', borderRadius: '8px' }}>
-                <div style={{ color: '#3498db', fontWeight: '600', fontSize: '12px' }}>ACTION</div>
-                <div style={{ marginTop: '8px', fontSize: '13px', fontFamily: 'monospace' }}>{steps[step]?.action}</div>
-              </div>
-              <div style={{ backgroundColor: '#e8f5e9', padding: '12px', borderRadius: '8px' }}>
-                <div style={{ color: '#2ecc71', fontWeight: '600', fontSize: '12px' }}>OBSERVATION</div>
-                <div style={{ marginTop: '8px', fontSize: '14px' }}>{observations[step]}</div>
-              </div>
-            </div>
-            <div style={{ textAlign: 'center', marginTop: '24px' }}>
-              <button onClick={() => setStep(Math.max(0, step - 1))} style={{ marginRight: '12px', padding: '8px 16px', backgroundColor: '#e9ecef', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Previous</button>
-              <span style={{ fontWeight: '600', margin: '0 16px' }}>Step {step + 1} of 3</span>
-              <button onClick={() => setStep(Math.min(2, step + 1))} style={{ marginLeft: '12px', padding: '8px 16px', backgroundColor: '#6c5ce7', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Next Step</button>
-            </div>
-            <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#fff9e6', borderRadius: '8px', fontSize: '14px', lineHeight: '1.6' }}>
-              <svg viewBox="0 0 400 100" style={{ width: '100%', marginBottom: '12px' }}>
-                <circle cx="50" cy="50" r="30" fill="#6c5ce7" opacity="0.3" />
-                <text x="50" y="55" textAnchor="middle" fontSize="12" fontWeight="bold">Thought</text>
-                <path d="M 80 50 L 120 50" stroke="#999" strokeWidth="2" markerEnd="url(#arrowhead)" />
-                <circle cx="150" cy="50" r="30" fill="#3498db" opacity="0.3" />
-                <text x="150" y="55" textAnchor="middle" fontSize="12" fontWeight="bold">Action</text>
-                <path d="M 180 50 L 220 50" stroke="#999" strokeWidth="2" />
-                <circle cx="250" cy="50" r="30" fill="#2ecc71" opacity="0.3" />
-                <text x="250" y="55" textAnchor="middle" fontSize="12" fontWeight="bold">Observe</text>
-                <path d="M 280 50 L 320 50" stroke="#999" strokeWidth="2" />
-                <path d="M 320 50 Q 300 80 80 80" stroke="#999" strokeWidth="2" strokeDasharray="4" />
-              </svg>
-              <span>\u2190 Loop continues until goal is achieved</span>
+        <>
+          <div><div className="stage-header">Three Core Capabilities</div></div>
+          <div className="explanation">
+            Every capable AI agent shares three fundamental abilities. Remove any one and the system degrades from "agent" to something lesser -- a chatbot, a workflow, or a confused loop.
+          </div>
+          <div className="scene-card">
+            <div className="capability-grid">
+              {capabilities.map(cap => (
+                <div
+                  key={cap.id}
+                  className={`capability-card ${expanded === cap.id ? 'expanded' : ''}`}
+                  onClick={() => setExpanded(expanded === cap.id ? null : cap.id)}
+                >
+                  <div className="capability-emoji">{cap.emoji}</div>
+                  <div className="capability-title">{cap.title}</div>
+                  <div className="capability-subtitle">{cap.subtitle}</div>
+                  {expanded !== cap.id && <div className="capability-hint">Click to explore</div>}
+                  <div className="capability-detail">{cap.detail}</div>
+                </div>
+              ))}
             </div>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Key Insight</div>
-            <p style={{ marginTop: '8px' }}>ReAct = Think before you act, observe what happened, then think again. This loop is why agents can handle complex, unpredictable tasks. Each cycle narrows in on the answer.</p>
-          </div>
-        </div>
+          <InsightBlock>
+            Think of it this way: <strong>Reasoning</strong> without tools is a thinker that cannot act. <strong>Tools</strong> without reasoning is automation that cannot adapt. <strong>Memory</strong> without either is just a notebook nobody reads. All three must work together.
+          </InsightBlock>
+        </>
       );
     }
 
+    /* Stage 3 -- The ReAct Loop */
     function S3() {
-      const [tab, setTab] = useState('info');
-      const tools = {
+      const [cycle, setCycle] = useState(0);
+
+      const cycles = [
+        {
+          label: 'Cycle 1',
+          thought: 'I need to find documentation about Python 3.12 async features. Let me search the web for recent articles and official docs.',
+          action: 'web_search("Python 3.12 async features new")',
+          observation: 'Results show Python 3.12 introduced improved TaskGroups, ExceptionGroups, and new async iterator features. Multiple sources confirm TaskGroup is the highlight.'
+        },
+        {
+          label: 'Cycle 2',
+          thought: 'The search results mention TaskGroups prominently. I should get the official Python docs for authoritative details and exact syntax.',
+          action: 'web_fetch("https://docs.python.org/3.12/library/asyncio-task.html")',
+          observation: 'Full documentation retrieved. TaskGroup provides structured concurrency -- tasks are created within a group and all must complete before the group exits. Exceptions are gathered into ExceptionGroup.'
+        },
+        {
+          label: 'Cycle 3',
+          thought: 'I now have enough context to create a practical code example demonstrating TaskGroups with real-world patterns.',
+          action: 'generate_code("Python asyncio TaskGroup example with error handling")',
+          observation: 'Created a complete example showing TaskGroup with 3 concurrent tasks, exception handling via ExceptionGroup, and proper cleanup. Goal achieved.'
+        }
+      ];
+
+      return (
+        <>
+          <div><div className="stage-header">The ReAct Loop</div></div>
+          <div className="explanation">
+            <strong>ReAct</strong> (Reasoning + Acting) is the core pattern that makes agents work. The agent cycles through <strong>Thought</strong>, <strong>Action</strong>, and <strong>Observation</strong> until the goal is complete. Each cycle refines the approach.
+          </div>
+          <div className="scene-card">
+            {/* ReAct loop SVG diagram */}
+            <svg width="300" height="120" viewBox="0 0 300 120" style={{marginBottom: '20px'}}>
+              <rect x="10" y="35" width="80" height="50" rx="10" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+              <text x="50" y="55" textAnchor="middle" fontSize="11" fontWeight="700" fill="#6c5ce7" fontFamily="DM Sans">THOUGHT</text>
+              <text x="50" y="72" textAnchor="middle" fontSize="18">&#x1F4AD;</text>
+
+              <rect x="110" y="35" width="80" height="50" rx="10" fill="#fff8e1" stroke="#f39c12" strokeWidth="2" />
+              <text x="150" y="55" textAnchor="middle" fontSize="11" fontWeight="700" fill="#f39c12" fontFamily="DM Sans">ACTION</text>
+              <text x="150" y="72" textAnchor="middle" fontSize="18">&#x26A1;</text>
+
+              <rect x="210" y="35" width="80" height="50" rx="10" fill="#e8f5e9" stroke="#2ecc71" strokeWidth="2" />
+              <text x="250" y="55" textAnchor="middle" fontSize="11" fontWeight="700" fill="#2ecc71" fontFamily="DM Sans">OBSERVE</text>
+              <text x="250" y="72" textAnchor="middle" fontSize="18">&#x1F441;</text>
+
+              {/* Arrows */}
+              <path d="M90 60 L110 60" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              <path d="M190 60 L210 60" stroke="#333" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              <path d="M250 85 Q250 110 150 110 Q50 110 50 85" stroke="#333" strokeWidth="1.5" strokeDasharray="4,3" fill="none" markerEnd="url(#arrowhead)" />
+              <text x="150" y="107" textAnchor="middle" fontSize="10" fill="#999" fontFamily="DM Sans">repeat until done</text>
+
+              <defs>
+                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill="#333" />
+                </marker>
+              </defs>
+            </svg>
+
+            <div style={{width: '100%', marginBottom: '12px', textAlign: 'center'}}>
+              <div style={{fontSize: '13px', color: '#666', fontWeight: 600, marginBottom: '8px'}}>
+                Goal: "Find Python 3.12 async features and create a code example"
+              </div>
+            </div>
+
+            <div className="react-cycle fade-in" key={cycle}>
+              <div style={{fontWeight: 700, fontSize: '14px', color: '#6c5ce7', marginBottom: '12px'}}>{cycles[cycle].label}</div>
+              <div className="react-step thought">
+                <div className="react-step-label">Thought</div>
+                {cycles[cycle].thought}
+              </div>
+              <div className="react-step action">
+                <div className="react-step-label">Action</div>
+                <code style={{fontFamily: 'monospace', background: 'rgba(0,0,0,0.06)', padding: '2px 6px', borderRadius: '4px'}}>{cycles[cycle].action}</code>
+              </div>
+              <div className="react-step observation">
+                <div className="react-step-label">Observation</div>
+                {cycles[cycle].observation}
+              </div>
+            </div>
+
+            <div className="react-nav">
+              <button className="react-nav-btn" disabled={cycle === 0} onClick={() => setCycle(cycle - 1)}>Previous</button>
+              {cycles.map((_, i) => (
+                <button key={i} className={`react-nav-btn ${cycle === i ? 'active' : ''}`} onClick={() => setCycle(i)}>{i + 1}</button>
+              ))}
+              <button className="react-nav-btn" disabled={cycle === cycles.length - 1} onClick={() => setCycle(cycle + 1)}>Next</button>
+            </div>
+          </div>
+          <InsightBlock>
+            The key insight of ReAct: the agent does not plan everything upfront. Each observation <strong>informs the next thought</strong>. This is what makes agents resilient -- they adapt mid-task, just like a human expert would.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 4 -- Tools & MCP */
+    function S4() {
+      const [activeTab, setActiveTab] = useState('info');
+
+      const tabs = [
+        { id: 'info', label: 'Information' },
+        { id: 'action', label: 'Action' },
+        { id: 'compute', label: 'Computation' },
+        { id: 'comm', label: 'Communication' }
+      ];
+
+      const toolsByTab = {
         info: [
-          { name: 'Web Search', desc: 'Find information online' },
-          { name: 'Document Reader', desc: 'Extract text from files' },
-          { name: 'Database Query', desc: 'Access structured data' },
-          { name: 'API Calls', desc: 'Call external services' }
+          { emoji: "\uD83D\uDD0D", name: 'Web Search' },
+          { emoji: "\uD83D\uDCC4", name: 'Doc Reader' },
+          { emoji: "\uD83D\uDDC3\uFE0F", name: 'DB Query' },
+          { emoji: "\uD83D\uDD17", name: 'API Calls' }
         ],
         action: [
-          { name: 'File Operations', desc: 'Create, read, write files' },
-          { name: 'Code Execution', desc: 'Run code and scripts' },
-          { name: 'Browser Automation', desc: 'Control web browser' },
-          { name: 'Form Filling', desc: 'Interact with web forms' }
+          { emoji: "\uD83D\uDCC2", name: 'File Operations' },
+          { emoji: "\u25B6\uFE0F", name: 'Code Execution' },
+          { emoji: "\uD83C\uDF10", name: 'Browser Automation' },
+          { emoji: "\uD83D\uDCDD", name: 'Form Filling' }
         ],
         compute: [
-          { name: 'Calculator', desc: 'Math and computation' },
-          { name: 'Data Analysis', desc: 'Process datasets' },
-          { name: 'Chart Generation', desc: 'Create visualizations' },
-          { name: 'Statistics', desc: 'Statistical analysis' }
+          { emoji: "\uD83E\uDDEE", name: 'Calculator' },
+          { emoji: "\uD83D\uDCCA", name: 'Data Analysis' },
+          { emoji: "\uD83D\uDCC8", name: 'Chart Generation' },
+          { emoji: "\uD83D\uDCCA", name: 'Statistics' }
         ],
         comm: [
-          { name: 'Email Sender', desc: 'Send emails' },
-          { name: 'Slack Poster', desc: 'Post to Slack' },
-          { name: 'Calendar Manager', desc: 'Schedule events' },
-          { name: 'Notifications', desc: 'Send alerts' }
+          { emoji: "\uD83D\uDCE7", name: 'Email' },
+          { emoji: "\uD83D\uDCAC", name: 'Slack' },
+          { emoji: "\uD83D\uDCC5", name: 'Calendar' },
+          { emoji: "\uD83D\uDD14", name: 'Notifications' }
         ]
       };
 
-      const toolData = {
-        info: tools.info, action: tools.action, compute: tools.compute, comm: tools.comm
-      };
-
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>An agent is only as powerful as its tools. The right toolkit determines what tasks your agent can handle.</p>
-          <div style={P.scene}>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-              {['info', 'action', 'compute', 'comm'].map(t => (
-                <button key={t} onClick={() => setTab(t)} style={{ padding: '8px 16px', backgroundColor: tab === t ? '#6c5ce7' : '#e9ecef', color: tab === t ? 'white' : '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
-                  {t === 'info' ? 'Information' : t === 'action' ? 'Action' : t === 'compute' ? 'Computation' : 'Communication'}
+        <>
+          <div><div className="stage-header">Tools & MCP</div></div>
+          <div className="explanation">
+            Tools are what let agents <strong>act on the world</strong> rather than just talk about it. They fall into four categories depending on what they do. Browse the tabs below to explore each category.
+          </div>
+          <div className="scene-card">
+            <div className="tool-tabs">
+              {tabs.map(tab => (
+                <button key={tab.id} className={`tool-tab ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+                  {tab.label}
                 </button>
               ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              {toolData[tab].map((tool, i) => (
-                <div key={i} style={{ backgroundColor: 'white', border: '1px solid #e9ecef', borderRadius: '8px', padding: '16px' }}>
-                  <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px' }}>{tool.name}</div>
-                  <div style={{ fontSize: '13px', color: '#666' }}>{tool.desc}</div>
+            <div className="tool-grid fade-in" key={activeTab}>
+              {toolsByTab[activeTab].map((tool, i) => (
+                <div key={i} className="tool-item slide-in-right" style={{animationDelay: `${i * 0.1}s`}}>
+                  <span className="tool-item-emoji">{tool.emoji}</span>
+                  <span>{tool.name}</span>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f0f4ff', borderRadius: '8px', borderLeft: '4px solid #6c5ce7' }}>
-              <div style={{ fontWeight: '600', color: '#6c5ce7', marginBottom: '8px' }}>MCP (Model Context Protocol)</div>
-              <div style={{ fontSize: '14px', color: '#4a4a4a' }}>Standardized way to connect ANY tool to ANY agent. Makes tool integration universal.</div>
-            </div>
-          </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Key Insight</div>
-            <p style={{ marginTop: '8px' }}>Tools are the agent's hands. Without tools, an agent is just an LLM that talks about doing things. With tools, it can actually DO things. MCP is making tool integration universal.</p>
-          </div>
-        </div>
-      );
-    }
-
-    function S4() {
-      const metrics = [
-        { label: 'Flexibility', value: 95, color: '#2ecc71' },
-        { label: 'Reliability', value: 65, color: '#f39c12' },
-        { label: 'Control', value: 45, color: '#f39c12' },
-        { label: 'Cost', value: 'Variable', color: '#e74c3c' }
-      ];
-
-      return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>Understanding agent properties helps you predict when they'll excel and when they'll struggle.</p>
-          <div style={P.scene}>
-            <div style={{ marginBottom: '32px' }}>
-              <strong style={{ fontSize: '16px' }}>Agent Metrics</strong>
-              {metrics.map((m, i) => (
-                <div key={i} style={{ marginTop: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px', fontWeight: '500' }}>
-                    <span>{m.label}</span>
-                    <span>{m.value}{'%' === m.value ? '' : ' ' + m.value}</span>
-                  </div>
-                  <div style={{ backgroundColor: '#e9ecef', borderRadius: '4px', height: '8px', overflow: 'hidden' }}>
-                    <div style={{ backgroundColor: m.color, height: '100%', width: m.value + '%' }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: '32px' }}>
-              <strong style={{ fontSize: '16px' }}>Agent vs Workflow</strong>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px', fontSize: '13px' }}>
-                <div style={{ padding: '12px', backgroundColor: '#f0faf0', borderRadius: '6px' }}>
-                  <div style={{ fontWeight: '600', color: '#2ecc71', marginBottom: '8px' }}>Workflow</div>
-                  <div style={{ lineHeight: '1.6' }}>Do step 1, then 2, then 3. You plan the steps. Same path every time. Like a recipe.</div>
-                </div>
-                <div style={{ padding: '12px', backgroundColor: '#e8f0fe', borderRadius: '6px' }}>
-                  <div style={{ fontWeight: '600', color: '#6c5ce7', marginBottom: '8px' }}>Agent</div>
-                  <div style={{ lineHeight: '1.6' }}>Achieve this goal. AI plans the steps. Different path based on situation. Like a personal assistant.</div>
-                </div>
+            <div className="mcp-callout">
+              <div className="mcp-callout-title">MCP: The Universal Tool Standard</div>
+              <div className="mcp-callout-text">
+                Model Context Protocol is a standardized way to connect <strong>ANY tool</strong> to <strong>ANY agent</strong>. Build a tool once and it works with Claude, ChatGPT, Cursor, and every other MCP-compatible host. No more N tools x M platforms = NxM integrations. See Module 4 for the full MCP deep dive.
               </div>
             </div>
-            <div style={{ marginTop: '24px', padding: '12px', backgroundColor: '#ffe8e8', borderRadius: '6px', fontSize: '13px', borderLeft: '4px solid #e74c3c' }}>
-              <strong style={{ color: '#c0392b' }}>Common Failure Modes:</strong> Infinite loops, wrong tool selection, context overflow
-            </div>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Key Insight</div>
-            <p style={{ marginTop: '8px' }}>Agents trade reliability for flexibility. Workflows always do the same thing; agents adapt but can surprise you. Use agents for exploration and research — use workflows for production automation.</p>
-          </div>
-        </div>
+          <InsightBlock>
+            The quality of an agent depends heavily on the quality of its tools. A poorly defined tool is like a Swiss Army knife with no labels -- the agent will guess which blade to use and often guess wrong. Great tool definitions include clear names, descriptions, parameter schemas, and examples.
+          </InsightBlock>
+        </>
       );
     }
 
+    /* Stage 5 -- Why Agents Fail */
     function S5() {
-      const [expanded, setExpanded] = useState(null);
-      const examples = [
-        { title: '\ud83d\udd0d Research Agent', goal: 'Analyze competitor pricing strategies', steps: ['search web', 'find pricing pages', 'extract data', 'compare', 'write report'] },
-        { title: '\ud83d\udcbb Coding Agent', goal: 'Fix the authentication bug', steps: ['read error logs', 'find relevant code', 'identify bug', 'write fix', 'run tests'] },
-        { title: '\ud83d\udcc8 Data Agent', goal: 'Summarize Q3 sales trends', steps: ['query database', 'analyze results', 'create visualizations', 'write insights'] },
-        { title: '\ud83c\udf86 Support Agent', goal: 'Resolve billing complaint', steps: ['look up account', 'check billing history', 'identify issue', 'draft resolution', 'escalate if needed'] }
+      const [expandedCard, setExpandedCard] = useState(null);
+
+      const mistakes = [
+        {
+          id: 'overengineering',
+          emoji: "\uD83C\uDFD7\uFE0F",
+          title: 'Over-engineering from Day One',
+          summary: 'Building multi-agent systems before validating a single agent works',
+          detail: 'Companies jump straight to complex multi-agent orchestration before proving a single agent can reliably complete its task. Start with one agent, one loop, minimal tools. Only add complexity when you have evidence the simple version is the bottleneck.'
+        },
+        {
+          id: 'tools',
+          emoji: "\uD83E\uDDF0",
+          title: 'Tool Definitions as Afterthought',
+          summary: 'Poorly defined tools that confuse the agent',
+          detail: 'A tool with a vague name like "process_data" and no parameter descriptions forces the agent to guess. Agents choose tools based on their descriptions. Invest the same care in tool definitions as you would in an API specification -- clear names, typed parameters, usage examples.'
+        },
+        {
+          id: 'recovery',
+          emoji: "\uD83D\uDEA8",
+          title: 'No Error Recovery',
+          summary: 'APIs time out, data comes back malformed, tools fail silently',
+          detail: 'In production, things break constantly. APIs return 500 errors, rate limits trigger, data arrives in unexpected formats. Without error recovery logic, the agent either crashes or hallucinates an answer. Build retry logic, fallback tools, and timeout handling into every tool.'
+        }
+      ];
+
+      const checklist = [
+        { label: 'Guardrails', desc: 'max_turns limits, tool access restrictions, output validation' },
+        { label: 'Observability', desc: 'Log every thought, action, and observation for debugging' },
+        { label: 'Evaluation', desc: '20-30 test tasks with expected outcomes before deployment' },
+        { label: 'Graceful Degradation', desc: 'Fallback tools, partial results, human handoff paths' },
+        { label: 'Cost Controls', desc: 'Cheaper models for routing, token budgets, caching strategies' }
       ];
 
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>Agents shine in research, coding assistance, and complex problem-solving where the steps aren't known upfront.</p>
-          <div style={P.scene}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-              {examples.map((ex, i) => (
-                <div key={i} onClick={() => setExpanded(expanded === i ? null : i)} style={{ backgroundColor: 'white', border: '2px solid #e9ecef', borderRadius: '8px', padding: '16px', cursor: 'pointer', transition: 'all 0.2s' }}>
-                  <div style={{ fontWeight: '600', fontSize: '16px', marginBottom: '4px' }}>{ex.title}</div>
-                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>Goal: {ex.goal}</div>
-                  {expanded === i && (
-                    <div style={{ marginTop: '12px', fontSize: '12px', color: '#666', paddingTop: '12px', borderTop: '1px solid #e9ecef', animation: 'slideInLeft 0.3s' }}>
-                      {ex.steps.map((s, j) => (
-                        <div key={j} style={{ marginTop: '6px', paddingLeft: '12px', borderLeft: '2px solid #6c5ce7' }}>{j + 1}. {s}</div>
-                      ))}
-                    </div>
-                  )}
+        <>
+          <div><div className="stage-header">Why Agents Fail</div></div>
+          <div className="explanation">
+            Only about <strong>1 in 9 enterprises</strong> experimenting with AI agents actually run them in production. Here are the three most common mistakes and a checklist for getting it right.
+          </div>
+          <div className="scene-card">
+            <div style={{width: '100%'}}>
+              <div style={{fontWeight: 700, fontSize: '16px', color: '#c0392b', marginBottom: '16px'}}>Common Mistakes (click to expand)</div>
+              {mistakes.map(m => (
+                <div
+                  key={m.id}
+                  className={`failure-card ${expandedCard === m.id ? 'expanded' : ''}`}
+                  onClick={() => setExpandedCard(expandedCard === m.id ? null : m.id)}
+                >
+                  <div className="failure-card-title">
+                    <span>{m.emoji} {m.title}</span>
+                    <span style={{fontSize: '13px', color: '#999'}}>{expandedCard === m.id ? '\u25B2' : '\u25BC'}</span>
+                  </div>
+                  <div style={{fontSize: '14px', color: '#666', marginTop: '4px'}}>{m.summary}</div>
+                  <div className="failure-card-content">
+                    <div style={{fontSize: '14px', lineHeight: '1.7', color: '#333'}}>{m.detail}</div>
+                  </div>
                 </div>
               ))}
             </div>
-            <div style={{ padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '8px', fontSize: '13px' }}>
-              <strong>Real Tools:</strong> Claude Code, ChatGPT with tools, AutoGPT, CrewAI
+
+            <div style={{width: '100%', marginTop: '24px'}}>
+              <div style={{fontWeight: 700, fontSize: '16px', color: '#2ecc71', marginBottom: '16px'}}>Production Agent Checklist</div>
+              {checklist.map((item, i) => (
+                <div key={i} className="checklist-item">
+                  <div className="checklist-check">{'\u2713'}</div>
+                  <div>
+                    <div style={{fontWeight: 700, fontSize: '15px', color: '#1a1a1a'}}>{item.label}</div>
+                    <div style={{fontSize: '13px', color: '#666', marginTop: '2px'}}>{item.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Key Insight</div>
-            <p style={{ marginTop: '8px' }}>The best agent use cases have 3 properties: the goal is clear, the steps are unpredictable, and tools are available. If all steps are known, use a workflow instead.</p>
-          </div>
-        </div>
+          <InsightBlock>
+            The gap between demo and production is where most agent projects die. A demo can tolerate a 70% success rate. Production cannot. Build evaluation into the process from day one -- not as an afterthought after the architecture is set.
+          </InsightBlock>
+        </>
       );
     }
 
-    function App() {
-      const [current, setCurrent] = useState(0);
-      const stages = [
-        { num: 1, label: 'What is an\nAgent?', comp: S1 },
-        { num: 2, label: 'The ReAct\nLoop', comp: S2 },
-        { num: 3, label: 'Tools &\nCapabilities', comp: S3 },
-        { num: 4, label: 'Agent\nCharacteristics', comp: S4 },
-        { num: 5, label: 'Real-World\nExamples', comp: S5 }
+    /* Stage 6 -- Real-World Examples */
+    function S6() {
+      const [expandedExample, setExpandedExample] = useState(null);
+
+      const examples = [
+        {
+          id: 'research',
+          emoji: "\uD83D\uDD0D",
+          title: 'Research Agent',
+          desc: 'Competitor pricing analysis',
+          steps: [
+            'Goal: Analyze competitor pricing for Q3 report',
+            'Search web for competitor product pages',
+            'Extract pricing data from each source',
+            'Cross-reference with internal pricing database',
+            'Generate comparison table with insights',
+            'Flag significant pricing changes vs last quarter'
+          ]
+        },
+        {
+          id: 'coding',
+          emoji: "\uD83D\uDCBB",
+          title: 'Coding Agent',
+          desc: 'Fix authentication bug',
+          steps: [
+            'Goal: Fix the auth token expiration bug in login flow',
+            'Read error logs to understand the failure pattern',
+            'Search codebase for token refresh logic',
+            'Identify the missing token renewal on 401 responses',
+            'Write fix with automatic retry on token refresh',
+            'Run test suite to verify fix across all auth flows'
+          ]
+        },
+        {
+          id: 'data',
+          emoji: "\uD83D\uDCCA",
+          title: 'Data Agent',
+          desc: 'Q3 sales trend analysis',
+          steps: [
+            'Goal: Analyze Q3 sales trends and prepare executive summary',
+            'Query sales database for Q3 transaction data',
+            'Calculate month-over-month growth metrics',
+            'Segment by region and product category',
+            'Generate charts showing key trends',
+            'Write executive summary highlighting top 3 insights'
+          ]
+        },
+        {
+          id: 'support',
+          emoji: "\uD83C\uDFE2",
+          title: 'Support Agent',
+          desc: 'Billing complaint resolution',
+          steps: [
+            'Goal: Resolve customer billing complaint about double charge',
+            'Look up customer account and recent transactions',
+            'Identify the duplicate charge in billing system',
+            'Check refund policy for automatic eligibility',
+            'Issue refund and update account records',
+            'Send confirmation email with resolution details'
+          ]
+        }
       ];
 
-      const CurrentComp = stages[current].comp;
+      const tools = [
+        { name: 'Claude Code', desc: 'Anthropic\'s agentic coding tool with terminal and file access' },
+        { name: 'ChatGPT + Tools', desc: 'OpenAI\'s agent with browsing, code, and plugin ecosystem' },
+        { name: 'AutoGPT', desc: 'Open-source autonomous agent with goal decomposition' },
+        { name: 'CrewAI', desc: 'Multi-agent framework for role-based collaboration' }
+      ];
 
       return (
-        <div style={P.root}>
-          <div style={P.sidebar}>
-            {stages.map((s, i) => (
-              <div key={i}>
-                <div onClick={() => setCurrent(i)} style={P.stepCircle(i, current)}>
-                  {i < current ? '\u2713' : i + 1}
+        <>
+          <div><div className="stage-header">Real-World Examples</div></div>
+          <div className="explanation">
+            Agents shine when the task requires <strong>multiple steps</strong>, <strong>tool use</strong>, and <strong>adaptive decision-making</strong>. Click each card to see how an agent approaches a real goal.
+          </div>
+          <div className="scene-card">
+            <div className="example-grid">
+              {examples.map(ex => (
+                <div
+                  key={ex.id}
+                  className={`example-card ${expandedExample === ex.id ? 'expanded' : ''}`}
+                  onClick={() => setExpandedExample(expandedExample === ex.id ? null : ex.id)}
+                >
+                  <div className="example-card-emoji">{ex.emoji}</div>
+                  <div className="example-card-title">{ex.title}</div>
+                  <div className="example-card-desc">{ex.desc}</div>
+                  {expandedExample !== ex.id && <div className="example-card-hint">Click to see steps</div>}
+                  <div className="example-card-detail">
+                    {ex.steps.map((step, i) => (
+                      <div key={i} style={{marginBottom: '6px'}}>
+                        <span style={{fontWeight: 700, color: '#6c5ce7'}}>{i === 0 ? '\uD83C\uDFAF' : `${i}.`}</span> {step}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div style={P.stepLabel}>{s.label}</div>
-                {i < stages.length - 1 && <div style={P.connector(i < current)} />}
+              ))}
+            </div>
+
+            <div style={{width: '100%', marginTop: '24px'}}>
+              <div style={{fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px'}}>Popular Agent Tools</div>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+                {tools.map((t, i) => (
+                  <div key={i} style={{padding: '14px', background: 'white', borderRadius: '10px', border: '1px solid #e8e3f8'}}>
+                    <div style={{fontWeight: 700, fontSize: '14px', color: '#6c5ce7'}}>{t.name}</div>
+                    <div style={{fontSize: '12px', color: '#666', marginTop: '4px'}}>{t.desc}</div>
+                  </div>
+                ))}
               </div>
+            </div>
+
+            <div className="comparison-box">
+              <div className="comparison-item agent">
+                <div className="comparison-title">Agent</div>
+                <div className="comparison-content">
+                  Autonomous reasoning loop. Decides next step dynamically. Adapts when things go wrong. Best for open-ended tasks where the path is not fully known in advance.
+                </div>
+              </div>
+              <div className="comparison-item workflow">
+                <div className="comparison-title">Workflow</div>
+                <div className="comparison-content">
+                  Pre-defined sequence of steps. Predictable and reliable. Cannot adapt to surprises. Best for well-understood processes where consistency matters more than flexibility.
+                </div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Not every task needs an agent. If the steps are known and fixed, a workflow is simpler, cheaper, and more predictable. Use agents when the task requires <strong>judgment</strong>, <strong>adaptation</strong>, or <strong>exploration</strong> -- when you cannot hardcode the path in advance.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    const STAGE_COMPONENTS = [S1, S2, S3, S4, S5, S6];
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+      const contentRef = React.useRef(null);
+
+      const goTo = (idx) => {
+        if (idx >= 0 && idx < STAGES.length) {
+          setCurrentStage(idx);
+          if (contentRef.current) contentRef.current.scrollTop = 0;
+        }
+      };
+
+      const StageComponent = STAGE_COMPONENTS[currentStage];
+
+      return (
+        <div className="container">
+          {/* Sidebar */}
+          <div className="sidebar scrollbar-hide">
+            {STAGES.map((stage, idx) => (
+              <React.Fragment key={stage.id}>
+                <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                  <button className={`step-btn ${currentStage === idx ? 'active' : ''}`} onClick={() => goTo(idx)}>
+                    <stage.icon />
+                  </button>
+                  <div className="step-btn-label">{stage.label}</div>
+                </div>
+                {idx < STAGES.length - 1 && (
+                  <div className={`step-connector ${idx < currentStage ? 'active' : ''}`} />
+                )}
+              </React.Fragment>
             ))}
           </div>
-          <div style={P.main}>
-            <div style={P.topBar}>
-              <div style={P.leftSection}>
-                <a href="../../index.html" style={P.backLink}>\u2190 Back</a>
-                <span style={P.badge}>DEEP DIVE</span>
+
+          {/* Main Content */}
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">{'\u2190'} All Modules</a>
+                <span className="guide-number">5.5</span>
+                <span className="title">AI Agents</span>
+                <span className="badge">DEEP DIVE</span>
+              </div>
+              <div style={{display: 'flex', alignItems: 'center'}}>
+                <span className="progress-indicator">Page {currentStage + 1} of {STAGES.length}</span>
+                <div className="nav-arrows">
+                  <button className="arrow-btn" disabled={currentStage === 0} onClick={() => goTo(currentStage - 1)}>{'\u2190'}</button>
+                  <button className="arrow-btn" disabled={currentStage === STAGES.length - 1} onClick={() => goTo(currentStage + 1)}>{'\u2192'}</button>
+                </div>
               </div>
             </div>
-            <div style={P.content}>
-              <div style={{ marginBottom: '24px', animation: 'fadeIn 0.4s' }}>
-                <h1 style={P.title}>AI Agents: Autonomous Decision-Making</h1>
+
+            <div className="content-area scrollbar-hide" ref={contentRef}>
+              <div className="fade-in" key={currentStage}>
+                <StageComponent />
               </div>
-              <CurrentComp />
             </div>
           </div>
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Guide />);
   </script>
 </body>
 </html>

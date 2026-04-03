@@ -1,444 +1,1368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Workflows: Orchestrated Pipelines</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Workflows - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'DM Sans', sans-serif; overflow: hidden; }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.6; }
     }
-    @keyframes slideInRight {
-      from { opacity: 0; transform: translateX(20px); }
-      to { opacity: 1; transform: translateX(0); }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .slide-in-left {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Pattern cards */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .pattern-card {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .pattern-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .pattern-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .pattern-card-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #6c5ce7;
+      margin-bottom: 4px;
+    }
+
+    .pattern-card-subtitle {
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+    }
+
+    .pattern-card-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .pattern-card-hint {
+      font-size: 11px;
+      color: #b0a6e8;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .pattern-card.expanded .pattern-card-hint {
+      display: none;
+    }
+
+    .pattern-card-example {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .pattern-card.expanded .pattern-card-example {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Tab system */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+    }
+
+    .tab-btn:hover {
+      border-color: #6c5ce7;
+    }
+
+    /* Decision tool */
+    .decision-question {
+      padding: 16px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .decision-question:hover {
+      border-color: #6c5ce7;
+    }
+
+    .decision-question.yes {
+      background: #f0faf0;
+      border-color: #2ecc71;
+    }
+
+    .decision-question.no {
+      background: #fef5f5;
+      border-color: #e74c3c;
+    }
+
+    /* Comparison table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .compare-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 2px solid #e0e0e0;
+      color: #1a1a1a;
+    }
+
+    .compare-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #555;
+    }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Expandable steps */
+    .expand-step {
+      padding: 16px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .expand-step:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .expand-step.open {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .expand-step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+    }
+
+    .expand-step-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .expand-step.open .expand-step-body {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .expand-step-content {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    /* Tool grid */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .tool-card {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .tool-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .tool-card-name {
+      font-weight: 700;
+      font-size: 18px;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .tool-card-tag {
+      font-size: 11px;
+      color: #6c5ce7;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .tool-card-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    /* Characteristic chips */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .char-chip {
+      padding: 16px;
+      background: white;
+      border: 1px solid #e8e3f8;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .char-chip-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .char-chip-label {
+      font-weight: 700;
+      font-size: 13px;
+      color: #1a1a1a;
+    }
+
+    .char-chip-desc {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* Mistake cards */
+    .mistake-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .mistake-card {
+      padding: 16px;
+      background: #fef5f5;
+      border: 1px solid #f5c6c6;
+      border-radius: 10px;
+    }
+
+    .mistake-card-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: #c0392b;
+      margin-bottom: 4px;
+    }
+
+    .mistake-card-desc {
+      font-size: 12px;
+      color: #8b3a3a;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
+
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState } = React;
 
-    const P = {
-      root: { display: 'flex', flexDirection: 'row', width: '100%', height: '100vh', backgroundColor: 'white', overflow: 'hidden' },
-      sidebar: { width: '180px', backgroundColor: '#f8f9fa', borderRight: '1px solid #e9ecef', padding: '24px 0', overflowY: 'auto' },
-      stepCircle: (step, active, complete) => ({
-        width: '60px',
-        height: '60px',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 12px',
-        fontSize: '18px',
-        fontWeight: '700',
-        color: 'white',
-        backgroundColor: active ? '#6c5ce7' : (complete ? '#2ecc71' : '#e9ecef'),
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        animation: active ? 'pulse 2s infinite' : 'none'
-      }),
-      stepLabel: { textAlign: 'center', fontSize: '12px', color: '#4a4a4a', padding: '0 8px', marginBottom: '24px', cursor: 'pointer' },
-      connector: (complete) => ({ height: '40px', width: '2px', margin: '-12px auto 0', backgroundColor: complete ? '#2ecc71' : '#e9ecef', transition: 'all 0.3s ease' }),
-      main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
-      topBar: { height: '64px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-      leftSection: { display: 'flex', alignItems: 'center', gap: '16px' },
-      backLink: { color: '#6c5ce7', textDecoration: 'none', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-      badge: { backgroundColor: '#e8f0fe', color: '#6c5ce7', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' },
-      title: { fontFamily: 'Fraunces, serif', fontSize: '28px', fontWeight: '700', color: '#1a1a1a' },
-      navRow: { display: 'flex', gap: '8px', alignItems: 'center' },
-      navBtn: (active) => ({ padding: '8px 12px', backgroundColor: active ? '#6c5ce7' : 'transparent', color: active ? 'white' : '#4a4a4a', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', transition: 'all 0.2s' }),
-      navP: { fontSize: '12px', color: '#7a7a7a' },
-      content: { flex: 1, padding: '40px 48px', overflowY: 'auto', animation: 'fadeIn 0.4s ease' },
-      explainRow: { marginBottom: '32px' },
-      explain: { fontSize: '18px', lineHeight: '1.6', color: '#2a2a2a', marginBottom: '16px' },
-      scene: { backgroundColor: '#f8f9fa', borderRadius: '16px', padding: '32px', marginBottom: '24px', border: '1px solid #e9ecef', minHeight: '400px' },
-      insightLabel: { color: '#1a9456', fontSize: '12px', fontWeight: '700', marginBottom: '8px' },
-      insight: { backgroundColor: '#f0faf0', borderLeft: '4px solid #2ecc71', padding: '16px', borderRadius: '8px', fontSize: '15px', lineHeight: '1.6', color: '#1a4a2a' }
-    };
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
 
-    function S1({ active }) {
-      const [highlight, setHighlight] = useState(null);
-
+    function InsightBlock({ children }) {
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>Multiple AI steps chained together in a fixed sequence — like a factory assembly line where each station does one specific job.</p>
-          <div style={P.scene}>
-            <svg viewBox="0 0 800 280" style={{ width: '100%', maxHeight: '280px' }}>
-              {/* Conveyor belt */}
-              <rect x="50" y="140" width="700" height="20" fill="#d4d4d4" rx="4" />
-              <line x1="50" y1="140" x2="750" y2="140" stroke="#999" strokeWidth="2" strokeDasharray="10,5" />
-              <line x1="50" y1="160" x2="750" y2="160" stroke="#999" strokeWidth="2" strokeDasharray="10,5" />
-
-              {/* Stations */}
-              {[0, 1, 2, 3, 4].map((i) => {
-                const x = 70 + i * 140;
-                const isHighlight = highlight === i;
-                const color = isHighlight ? '#6c5ce7' : '#4a69bd';
-                return (
-                  <g key={i}>
-                    <rect x={x} y="80" width="100" height="60" fill={color} rx="8" opacity={isHighlight ? 1 : 0.7} style={{ transition: 'all 0.3s' }} />
-                    <text x={x + 50} y="115" textAnchor="middle" fill="white" fontSize="12" fontWeight="700">
-                      {['Frame', 'Engine', 'Paint', 'QA', 'Ship'][i]}
-                    </text>
-                    {i < 4 && (
-                      <polygon points={x + 105 + ',150 ' + (x + 125) + ',145 ' + (x + 125) + ',155'} fill="#999" />
-                    )}
-                  </g>
-                );
-              })}
-
-              {/* Table below */}
-              <text x="50" y="240" fontSize="12" fontWeight="700" fill="#1a1a1a">Fixed flow • You design • High reliability • Low flexibility</text>
-            </svg>
-            <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-              {['Fixed Flow', 'You Design', 'High Reliability', 'Low Flexibility'].map((item) => (
-                <div key={item} style={{ padding: '12px', backgroundColor: '#fff', border: '1px solid #e9ecef', borderRadius: '8px', fontSize: '13px', fontWeight: '500' }}>
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>KEY INSIGHT</div>
-            <p>Workflows = assembly line. Same steps, same order, every time. The power is in predictability — you know exactly what will happen.</p>
-          </div>
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
         </div>
       );
     }
 
-    function S2({ active }) {
-      const [selected, setSelected] = useState('TRIGGER');
+    /* Sidebar icons */
+    function AssemblyIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="2" y="9" width="5" height="6" rx="1" />
+          <rect x="9.5" y="9" width="5" height="6" rx="1" />
+          <rect x="17" y="9" width="5" height="6" rx="1" />
+          <line x1="7" y1="12" x2="9.5" y2="12" />
+          <line x1="14.5" y1="12" x2="17" y2="12" />
+        </svg>
+      );
+    }
 
-      const blocks = {
-        TRIGGER: { icon: '\u{1F550}', title: 'TRIGGER', desc: 'What starts it', examples: ['Timer', 'New email', 'Webhook', 'Form submission'] },
-        ACTION: { icon: '\u{2699}\uFE0F', title: 'ACTION', desc: 'Non-AI steps', examples: ['Fetch data', 'Filter', 'Transform', 'API calls'] },
-        'AI NODE': { icon: '\u{1F9E0}', title: 'AI NODE', desc: 'LLM steps', examples: ['Summarize', 'Classify', 'Generate', 'Extract'] },
-        OUTPUT: { icon: '\u{2708}\uFE0F', title: 'OUTPUT', desc: 'Where results go', examples: ['Email', 'Slack', 'Database', 'File'] }
-      };
+    function PatternsIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="5" r="3" />
+          <circle cx="5" cy="19" r="3" />
+          <circle cx="19" cy="19" r="3" />
+          <line x1="12" y1="8" x2="5" y2="16" />
+          <line x1="12" y1="8" x2="19" y2="16" />
+        </svg>
+      );
+    }
+
+    function ExamplesIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="3" width="18" height="18" rx="3" />
+          <path d="M8 12h8" />
+          <path d="M8 8h8" />
+          <path d="M8 16h5" />
+        </svg>
+      );
+    }
+
+    function CompareIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2v20" />
+          <path d="M2 12h4" />
+          <path d="M18 12h4" />
+          <rect x="2" y="6" width="8" height="12" rx="2" />
+          <rect x="14" y="6" width="8" height="12" rx="2" />
+        </svg>
+      );
+    }
+
+    function BuildIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    }
+
+    /* Assembly Line SVG animation for Stage 1 */
+    function AssemblyLineSVG() {
+      const stations = [
+        { label: 'Trigger', color: '#95a5a6' },
+        { label: 'Action', color: '#95a5a6' },
+        { label: 'AI Node', color: '#6c5ce7' },
+        { label: 'Output', color: '#2ecc71' }
+      ];
+      return (
+        <svg width="520" height="120" viewBox="0 0 520 120">
+          {/* Conveyor belt */}
+          <line x1="30" y1="70" x2="490" y2="70" stroke="#e0e0e0" strokeWidth="4" strokeDasharray="8,4">
+            <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.5s" repeatCount="indefinite" />
+          </line>
+          {stations.map((s, i) => {
+            const x = 60 + i * 130;
+            return (
+              <g key={i}>
+                <rect x={x - 35} y="35" width="70" height="40" rx="8" fill={s.color} opacity="0.15" stroke={s.color} strokeWidth="2">
+                  <animate attributeName="opacity" values="0;1" dur="0.6s" begin={`${i * 0.3}s`} fill="freeze" />
+                </rect>
+                <text x={x} y="60" textAnchor="middle" fontSize="13" fontWeight="700" fill={s.color}>
+                  {s.label}
+                </text>
+                {i < stations.length - 1 && (
+                  <polygon points={`${x + 45},55 ${x + 55},55 ${x + 55},50 ${x + 65},58 ${x + 55},66 ${x + 55},61 ${x + 45},61`} fill={s.color} opacity="0.5">
+                    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
+                  </polygon>
+                )}
+              </g>
+            );
+          })}
+          {/* Moving item on belt */}
+          <circle r="6" fill="#6c5ce7" opacity="0.7">
+            <animate attributeName="cx" values="30;490" dur="3s" repeatCount="indefinite" />
+            <animate attributeName="cy" values="70;70" dur="3s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+      );
+    }
+
+    /* Pipeline SVG for Stage 3 */
+    function PipelineSVG({ steps }) {
+      const w = 110;
+      const totalW = steps.length * w + (steps.length - 1) * 30;
+      return (
+        <svg width={totalW} height="80" viewBox={`0 0 ${totalW} 80`} style={{ maxWidth: '100%' }}>
+          {steps.map((s, i) => {
+            const x = i * (w + 30);
+            const isAI = s.ai;
+            const bg = isAI ? '#6c5ce7' : '#95a5a6';
+            return (
+              <g key={i}>
+                <rect x={x} y="10" width={w} height="44" rx="8" fill={bg} opacity="0.12" stroke={bg} strokeWidth="2">
+                  <animate attributeName="opacity" values="0;1" dur="0.5s" begin={`${i * 0.15}s`} fill="freeze" />
+                </rect>
+                <text x={x + w / 2} y="37" textAnchor="middle" fontSize="11" fontWeight="700" fill={bg}>
+                  {s.name}
+                </text>
+                {isAI && (
+                  <text x={x + w / 2} y="50" textAnchor="middle" fontSize="8" fill="#6c5ce7" opacity="0.6">AI</text>
+                )}
+                {i < steps.length - 1 && (
+                  <polygon points={`${x + w + 5},28 ${x + w + 5},23 ${x + w + 20},32 ${x + w + 5},41 ${x + w + 5},36`} fill={bg} opacity="0.4">
+                    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="1.5s" repeatCount="indefinite" />
+                  </polygon>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+
+    /* Stage 1: What are Workflows? */
+    function S1() {
+      const chars = [
+        { icon: "\u2699\uFE0F", label: 'Fixed Flow', desc: 'Same steps every run' },
+        { icon: "\uD83D\uDC64", label: 'You Design', desc: 'Engineer sets the path' },
+        { icon: "\u2705", label: 'High Reliability', desc: 'Predictable outcomes' },
+        { icon: "\uD83D\uDD12", label: 'Low Flexibility', desc: 'Cannot adapt on the fly' }
+      ];
 
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>Every workflow has 4 building blocks: Triggers, Actions, AI Nodes, and Outputs. Understanding these lets you design any pipeline.</p>
-          <div style={P.scene}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
-              {Object.entries(blocks).map(([key, block]) => (
+        <>
+          <div>
+            <div className="stage-header">What are Workflows?</div>
+          </div>
+          <div className="explanation">
+            A workflow chains multiple AI steps in a fixed sequence &mdash; like a factory assembly line.
+            Each station does one thing well and passes the result to the next. You, the engineer, decide the
+            sequence in advance.
+          </div>
+          <div className="scene-card">
+            <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
+              Think: Henry Ford&rsquo;s Assembly Line
+            </div>
+            <div style={{ fontSize: '14px', color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>
+              Just as Ford&rsquo;s assembly line revolutionized manufacturing by breaking complex car-building into
+              simple, repeatable stations, AI workflows break complex tasks into discrete steps &mdash; each one
+              handled by the right tool or model.
+            </div>
+            <AssemblyLineSVG />
+            <div className="char-grid" style={{ marginTop: '28px' }}>
+              {chars.map((c, i) => (
+                <div className="char-chip fade-in" key={i} style={{ animationDelay: `${0.1 * i}s` }}>
+                  <div className="char-chip-icon">{c.icon}</div>
+                  <div className="char-chip-label">{c.label}</div>
+                  <div className="char-chip-desc">{c.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <InsightBlock>
+            Organizations report 30&ndash;50% process time reductions after implementing AI workflows.
+            The key advantage is predictability &mdash; the same input always follows the same path.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 2: The Five Patterns */
+    function S2() {
+      const [expanded, setExpanded] = useState(null);
+
+      const patterns = [
+        {
+          id: 'chaining',
+          title: 'Prompt Chaining',
+          subtitle: 'Assembly Line',
+          desc: 'Sequential processing where each step builds on the previous output.',
+          example: 'Scrape webpage \u2192 Summarize content \u2192 Extract key entities \u2192 Generate report. Each LLM call receives the output of the prior step as input.'
+        },
+        {
+          id: 'routing',
+          title: 'Routing',
+          subtitle: 'Sorting Hat',
+          desc: 'Classify the input first, then send it down the correct specialized path.',
+          example: 'Support ticket arrives \u2192 Classifier determines: billing, technical, or account issue \u2192 Routes to the matching prompt template with domain-specific instructions.'
+        },
+        {
+          id: 'parallel',
+          title: 'Parallelization',
+          subtitle: 'Multi-Lane Highway',
+          desc: 'Run independent subtasks simultaneously, then merge results.',
+          example: 'Competitive analysis: Analyze pricing page AND scrape blog AND review job postings \u2014 all in parallel. A final merge step synthesizes the three analyses into one report.'
+        },
+        {
+          id: 'orchestrator',
+          title: 'Orchestrator-Workers',
+          subtitle: 'Project Manager',
+          desc: 'A central LLM breaks a task apart and delegates subtasks to specialist workers.',
+          example: 'Complex document analysis: orchestrator reads the doc, decides what needs extraction, assigns workers for tables, text, and images, then assembles the final output.'
+        },
+        {
+          id: 'evaluator',
+          title: 'Evaluator-Optimizer',
+          subtitle: 'QA Inspector',
+          desc: 'One LLM generates output, another evaluates quality, looping until standards are met.',
+          example: 'Draft marketing copy \u2192 QA model scores clarity, tone, accuracy \u2192 If score < threshold, feedback is sent back to the drafter for revision. Typically converges in 2\u20133 loops.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">The Five Patterns</div>
+          </div>
+          <div className="explanation">
+            Most AI workflows fit into five proven patterns. Click each card to see a real-world example
+            of the pattern in action.
+          </div>
+          <div className="scene-card">
+            <div className="pattern-grid">
+              {patterns.map((p, i) => (
                 <div
-                  key={key}
-                  onClick={() => setSelected(key)}
-                  style={{
-                    padding: '20px',
-                    backgroundColor: selected === key ? '#6c5ce7' : '#fff',
-                    border: selected === key ? 'none' : '2px solid #e9ecef',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s',
-                    color: selected === key ? 'white' : '#1a1a1a'
-                  }}
+                  key={p.id}
+                  className={`pattern-card fade-in ${expanded === p.id ? 'expanded' : ''}`}
+                  style={{ animationDelay: `${0.1 * i}s` }}
+                  onClick={() => setExpanded(expanded === p.id ? null : p.id)}
                 >
-                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>{block.icon}</div>
-                  <div style={{ fontWeight: '700', fontSize: '13px', marginBottom: '4px' }}>{block.title}</div>
-                  <div style={{ fontSize: '11px', opacity: 0.8 }}>{block.desc}</div>
+                  <div className="pattern-card-title">{i + 1}. {p.title}</div>
+                  <div className="pattern-card-subtitle">{p.subtitle}</div>
+                  <div className="pattern-card-desc">{p.desc}</div>
+                  {expanded !== p.id && (
+                    <div className="pattern-card-hint">Click to see example &darr;</div>
+                  )}
+                  <div className="pattern-card-example">
+                    <strong>Example:</strong> {p.example}
+                  </div>
                 </div>
               ))}
             </div>
-            <div style={{ backgroundColor: selected === 'TRIGGER' || selected === 'OUTPUT' ? '#e8f0fe' : '#f0faf0', padding: '20px', borderRadius: '12px' }}>
-              <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>Examples:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                {blocks[selected].examples.map((ex) => (
-                  <div key={ex} style={{ padding: '8px 12px', backgroundColor: 'white', borderRadius: '6px', fontSize: '13px' }}>
-                    {ex}
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>KEY INSIGHT</div>
-            <p>Think of workflows as LEGO: Triggers start the machine, Actions handle data plumbing, AI Nodes do the thinking, Outputs deliver results. Mix and match to build any automation.</p>
-          </div>
-        </div>
+          <InsightBlock>
+            Start with Prompt Chaining &mdash; it covers 80% of use cases. Graduate to Orchestrator-Workers or
+            Evaluator-Optimizer only when you need dynamic decomposition or quality loops.
+          </InsightBlock>
+        </>
       );
     }
 
-    function S3({ active }) {
-      const [tab, setTab] = useState(0);
+    /* Stage 3: Real-World Examples */
+    function S3() {
+      const [activeTab, setActiveTab] = useState(0);
 
       const workflows = [
         {
           name: 'Competitor Monitor',
-          steps: ['Timer (weekly)', 'Fetch Website', 'Extract Changes (AI)', 'Compare to Last Week (AI)', 'Format Report', 'Send to Slack'],
-          savings: '8 hrs/week'
+          saves: '8 hrs/week',
+          steps: [
+            { name: 'Timer (weekly)', ai: false },
+            { name: 'Scrape Sites', ai: false },
+            { name: 'Extract Changes', ai: true },
+            { name: 'Compare Diffs', ai: true },
+            { name: 'Format Report', ai: false },
+            { name: 'Send to Slack', ai: false }
+          ],
+          desc: 'Every Monday, this workflow scrapes competitor websites, uses an LLM to identify what changed since last week, compares those changes against your product, formats a concise diff report, and posts it to your team Slack channel.'
         },
         {
           name: 'Content Pipeline',
-          steps: ['New Brief (form)', 'Research Topic (AI)', 'Generate Draft (AI)', 'Edit & Polish (AI)', 'Create Images (AI)', 'Publish to CMS'],
-          savings: '12 hrs/week'
+          saves: '12 hrs/week',
+          steps: [
+            { name: 'New Brief', ai: false },
+            { name: 'Research Topic', ai: true },
+            { name: 'Generate Draft', ai: true },
+            { name: 'Edit & Polish', ai: true },
+            { name: 'Create Images', ai: true },
+            { name: 'Publish', ai: false }
+          ],
+          desc: 'When a content brief is submitted, the workflow researches the topic via web search, generates a first draft, runs an editing pass for tone and accuracy, generates supporting images, and publishes the finished piece to your CMS.'
         },
         {
-          name: 'Support Triage',
-          steps: ['New Ticket', 'Classify Urgency (AI)', 'Extract Key Info (AI)', 'Route to Team', 'Auto-Reply (AI)'],
-          savings: '6 hrs/week'
+          name: 'Cold Outreach',
+          saves: '6 hrs/week',
+          steps: [
+            { name: 'Enrich Prospect', ai: false },
+            { name: 'Research Pain', ai: true },
+            { name: 'Draft Email', ai: true },
+            { name: 'QA Check', ai: true },
+            { name: 'Queue Send', ai: false }
+          ],
+          desc: 'For each new prospect, the workflow enriches their profile from a data provider, uses AI to research their likely pain points, drafts a personalized cold email, runs a quality check for tone and compliance, and queues it for delivery.'
         }
       ];
 
-      const workflow = workflows[tab];
+      const current = workflows[activeTab];
 
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>Here are 3 production workflow patterns you can build today with tools like N8N, Make, or Zapier.</p>
-          <div style={P.scene}>
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        <>
+          <div>
+            <div className="stage-header">Real-World Examples</div>
+          </div>
+          <div className="explanation">
+            Here are three production workflows that teams use today. Each one chains simple steps into
+            a powerful pipeline. Purple steps use AI; gray steps are standard automations.
+          </div>
+          <div className="scene-card">
+            <div className="tab-bar">
               {workflows.map((w, i) => (
                 <button
                   key={i}
-                  onClick={() => setTab(i)}
-                  style={P.navBtn(tab === i)}
+                  className={`tab-btn ${activeTab === i ? 'active' : ''}`}
+                  onClick={() => setActiveTab(i)}
                 >
                   {w.name}
                 </button>
               ))}
             </div>
-            <svg viewBox="0 0 800 180" style={{ width: '100%', height: '180px', marginBottom: '20px' }}>
-              {workflow.steps.map((step, i) => {
-                const x = 40 + i * 130;
-                const isAI = step.includes('(AI)');
-                return (
-                  <g key={i}>
-                    <rect x={x} y="60" width="100" height="50" fill={isAI ? '#6c5ce7' : '#999'} rx="6" />
-                    <text x={x + 50} y="90" textAnchor="middle" fill="white" fontSize="11" fontWeight="500">
-                      {step.split('(')[0].trim()}
-                    </text>
-                    {i < workflow.steps.length - 1 && (
-                      <polygon points={x + 105 + ',87 ' + (x + 120) + ',82 ' + (x + 120) + ',92'} fill="#999" />
-                    )}
-                  </g>
-                );
-              })}
-            </svg>
-            <div style={{ padding: '12px 16px', backgroundColor: '#e8f0fe', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '500' }}>
-              \u{23F1} Estimated time savings: <strong>{workflow.savings}</strong>
+            <div style={{ width: '100%', overflowX: 'auto', display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+              <PipelineSVG steps={current.steps} />
+            </div>
+            <div style={{
+              display: 'flex', justifyContent: 'center', gap: '24px',
+              marginTop: '16px', marginBottom: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#666' }}>
+                <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#6c5ce7', display: 'inline-block', opacity: 0.3 }}></span>
+                AI Step
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#666' }}>
+                <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#95a5a6', display: 'inline-block', opacity: 0.3 }}></span>
+                Standard Step
+              </div>
+            </div>
+            <div style={{
+              width: '100%', padding: '16px 20px', background: 'white',
+              borderRadius: '10px', border: '1px solid #e8e3f8', marginTop: '12px'
+            }}>
+              <div style={{ fontSize: '14px', color: '#555', lineHeight: '1.7' }}>
+                {current.desc}
+              </div>
+              <div style={{
+                marginTop: '12px', fontSize: '13px', fontWeight: 700, color: '#2ecc71'
+              }}>
+                Saves: {current.saves}
+              </div>
             </div>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>KEY INSIGHT</div>
-            <p>The best workflows automate the boring 80%. Notice how AI handles understanding and generating, while traditional steps handle data plumbing. That combo is the sweet spot.</p>
-          </div>
-        </div>
+          <InsightBlock>
+            Notice how AI steps are sandwiched between standard automation steps. The best workflows use
+            AI only where judgment is required &mdash; and rely on deterministic code for everything else.
+          </InsightBlock>
+        </>
       );
     }
 
-    function S4({ active }) {
-      const [answers, setAnswers] = useState([false, false, false, false]);
+    /* Stage 4: Workflow vs Agent */
+    function S4() {
+      const [answers, setAnswers] = useState({});
 
       const questions = [
-        'Do you know all the steps in advance?',
-        'Same process every time?',
-        'Need to handle unexpected situations?',
-        'Multiple tools, dynamic decisions?'
+        { id: 'q1', text: 'Do you know all the steps in advance?', wf: true },
+        { id: 'q2', text: 'Is it the same process every time?', wf: true },
+        { id: 'q3', text: 'Do you need to handle unexpected situations?', wf: false },
+        { id: 'q4', text: 'Does it require multiple tools and dynamic decisions?', wf: false }
       ];
 
-      const recommendation = answers[0] && answers[1] && !answers[2] && !answers[3] ? 'WORKFLOW' : 'AGENT';
+      const toggleAnswer = (id) => {
+        setAnswers(prev => {
+          const next = { ...prev };
+          if (next[id] === undefined) {
+            next[id] = true;
+          } else if (next[id] === true) {
+            next[id] = false;
+          } else {
+            delete next[id];
+          }
+          return next;
+        });
+      };
+
+      const answered = Object.keys(answers).length;
+      let recommendation = null;
+      if (answered === 4) {
+        const workflowScore = questions.reduce((acc, q) => {
+          const a = answers[q.id];
+          if (q.wf && a) return acc + 1;
+          if (!q.wf && !a) return acc + 1;
+          return acc;
+        }, 0);
+        recommendation = workflowScore >= 3 ? 'workflow' : 'agent';
+      }
 
       return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>The critical question — when do you use a fixed workflow vs letting an AI agent figure it out?</p>
-          <div style={P.scene}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '24px' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: '12px' }}>{\u{1F4D2}}</div>
-                <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '8px' }}>WORKFLOW</div>
-                <div style={{ fontSize: '13px', color: '#666' }}>Recipe metaphor • Do step 1, then 2, then 3 • You plan the steps • Same path every time</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: '12px' }}>{\u{1F468}\u{200D}\u{1F373}}</div>
-                <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '8px' }}>AGENT</div>
-                <div style={{ fontSize: '13px', color: '#666' }}>Chef metaphor • Achieve this goal • AI plans the steps • Different path based on situation</div>
-              </div>
-            </div>
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px' }}>
-              {questions.map((q, i) => (
-                <div key={i} style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <input
-                    type="checkbox"
-                    checked={answers[i]}
-                    onChange={(e) => {
-                      const newAnswers = [...answers];
-                      newAnswers[i] = e.target.checked;
-                      setAnswers(newAnswers);
-                    }}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                  />
-                  <span style={{ fontSize: '13px' }}>{q}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: recommendation === 'WORKFLOW' ? '#e8f0fe' : '#f0e8fe', borderRadius: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>RECOMMENDATION:</div>
-              <div style={{ fontSize: '18px', fontWeight: '700', color: recommendation === 'WORKFLOW' ? '#6c5ce7' : '#9b59b6' }}>
-                {recommendation}
-              </div>
-            </div>
+        <>
+          <div>
+            <div className="stage-header">Workflow vs Agent</div>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>KEY INSIGHT</div>
-            <p>Recipe (Workflow) vs Chef (Agent). If you can write down every step beforehand, use a workflow. If you need adaptability, use an agent. Most real systems combine both.</p>
+          <div className="explanation">
+            A workflow is like a recipe &mdash; fixed steps, predictable results. An agent is like a chef &mdash;
+            improvises, adapts, makes dynamic decisions. Use this interactive tool to figure out which one fits your use case.
           </div>
-        </div>
-      );
-    }
-
-    function S5({ active }) {
-      const [expanded, setExpanded] = useState(null);
-
-      const steps = [
-        { num: 1, title: 'Trigger: Timer (8am daily)', config: 'Runs every morning at 8:00 AM' },
-        { num: 2, title: 'Action: Fetch top 5 articles from RSS feeds', config: 'Connects to 5 RSS feeds and retrieves latest articles' },
-        { num: 3, title: 'AI Node: Summarize each article (3 sentences)', config: 'Prompt: "Summarize this news article in exactly 3 sentences. Focus on key facts."' },
-        { num: 4, title: 'AI Node: Generate personal digest intro', config: 'Prompt: "Write a 1-sentence intro for today\'s news digest. Make it engaging."' },
-        { num: 5, title: 'Output: Send formatted email', config: 'Template: Subject: [Date] News Digest | Body: Intro + Articles + Footer' }
-      ];
-
-      return (
-        <div style={P.explainRow}>
-          <p style={P.explain}>Let's walk through designing a workflow from scratch using the 4 building blocks.</p>
-          <div style={P.scene}>
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '16px', color: '#1a1a1a' }}>Example: Daily News Digest</div>
-              {steps.map((step, i) => (
-                <div key={i} style={{ marginBottom: '8px' }}>
+          <div className="scene-card">
+            <div style={{ width: '100%', marginBottom: '20px' }}>
+              <div style={{ fontWeight: 700, fontSize: '15px', color: '#1a1a1a', marginBottom: '12px' }}>
+                Answer each question (click to toggle Yes / No / Unanswered):
+              </div>
+              {questions.map((q, i) => {
+                const a = answers[q.id];
+                const cls = a === true ? 'yes' : (a === false ? 'no' : '');
+                const label = a === true ? 'YES' : (a === false ? 'NO' : '\u2014');
+                return (
                   <div
-                    onClick={() => setExpanded(expanded === i ? null : i)}
-                    style={{
-                      padding: '12px 16px',
-                      backgroundColor: expanded === i ? '#6c5ce7' : '#fff',
-                      border: expanded === i ? 'none' : '1px solid #e9ecef',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      color: expanded === i ? 'white' : '#1a1a1a',
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      transition: 'all 0.2s'
-                    }}
+                    key={q.id}
+                    className={`decision-question fade-in ${cls}`}
+                    style={{ animationDelay: `${0.1 * i}s` }}
+                    onClick={() => toggleAnswer(q.id)}
                   >
-                    Step {step.num}: {step.title}
+                    <span>{q.text}</span>
+                    <span style={{
+                      fontWeight: 700, fontSize: '13px', minWidth: '36px', textAlign: 'center',
+                      color: a === true ? '#2ecc71' : (a === false ? '#e74c3c' : '#999')
+                    }}>{label}</span>
                   </div>
-                  {expanded === i && (
-                    <div style={{ padding: '12px 16px', backgroundColor: '#f8f9fa', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px', fontSize: '12px', marginBottom: '4px' }}>
-                      {step.config}
-                    </div>
-                  )}
+                );
+              })}
+            </div>
+
+            {recommendation && (
+              <div className="fade-in" style={{
+                width: '100%', padding: '20px', borderRadius: '12px',
+                background: recommendation === 'workflow' ? '#f0faf0' : '#f5f3ff',
+                border: `2px solid ${recommendation === 'workflow' ? '#2ecc71' : '#6c5ce7'}`,
+                marginBottom: '20px', textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: recommendation === 'workflow' ? '#27ae60' : '#6c5ce7' }}>
+                  {recommendation === 'workflow' ? 'Use a Workflow' : 'Consider an Agent'}
                 </div>
-              ))}
-            </div>
-            <div style={{ padding: '16px', backgroundColor: '#e8f0fe', borderRadius: '8px' }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', marginBottom: '8px', color: '#6c5ce7' }}>TOOL RECOMMENDATIONS</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                {[
-                  { tool: 'N8N', desc: 'Self-hosted, free, best for AI' },
-                  { tool: 'Make', desc: 'Visual, cloud-based, easy' },
-                  { tool: 'Zapier', desc: 'Most integrations, simplest' }
-                ].map((t) => (
-                  <div key={t.tool} style={{ padding: '8px', backgroundColor: 'white', borderRadius: '6px', fontSize: '11px' }}>
-                    <div style={{ fontWeight: '700', marginBottom: '2px' }}>{t.tool}</div>
-                    <div style={{ opacity: 0.7 }}>{t.desc}</div>
-                  </div>
-                ))}
+                <div style={{ fontSize: '14px', color: '#555', marginTop: '6px' }}>
+                  {recommendation === 'workflow'
+                    ? 'Your use case is predictable and repeatable \u2014 a workflow will be cheaper, faster, and more reliable.'
+                    : 'Your use case requires flexibility and dynamic decision-making \u2014 an agent can adapt to unexpected situations.'}
+                </div>
               </div>
-            </div>
+            )}
+
+            <table className="compare-table" style={{ width: '100%' }}>
+              <thead>
+                <tr>
+                  <th>Dimension</th>
+                  <th style={{ color: '#2ecc71' }}>Workflow (Recipe)</th>
+                  <th style={{ color: '#6c5ce7' }}>Agent (Chef)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Flow</td><td>Fixed, predetermined</td><td>Dynamic, decided at runtime</td></tr>
+                <tr><td>Predictability</td><td>High &mdash; same input, same path</td><td>Variable &mdash; path depends on context</td></tr>
+                <tr><td>Cost</td><td>Low &mdash; minimal LLM calls</td><td>High &mdash; many LLM calls per run</td></tr>
+                <tr><td>Token Usage</td><td>~1x baseline</td><td>~4x more tokens</td></tr>
+                <tr><td>Error Handling</td><td>Explicit, designed by you</td><td>Model decides recovery strategy</td></tr>
+                <tr><td>Best For</td><td>Repeatable processes</td><td>Open-ended, complex tasks</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>KEY INSIGHT</div>
-            <p>Start with a 3-step workflow: Trigger \u{2192} AI \u{2192} Output. Add complexity only when needed. N8N is the best free option for AI workflows because of its native AI nodes and self-hosting capability.</p>
-          </div>
-        </div>
+          <InsightBlock>
+            When in doubt, start with a workflow. You can always upgrade to an agent later. Workflows use
+            roughly 4x fewer tokens than agents for the same task &mdash; meaning significantly lower cost and latency.
+          </InsightBlock>
+        </>
       );
     }
 
-    function App() {
-      const [step, setStep] = useState(0);
+    /* Stage 5: Build Your First */
+    function S5() {
+      const [openStep, setOpenStep] = useState(null);
+
+      const buildSteps = [
+        {
+          id: 0,
+          title: '1. Trigger: Timer at 8 AM daily',
+          content: 'Set a cron-based trigger that fires every morning at 8:00 AM. This is the entry point \u2014 no AI needed, just a simple scheduler. In n8n or Make, this is a single "Schedule" node.'
+        },
+        {
+          id: 1,
+          title: '2. Action: Fetch top 5 RSS articles',
+          content: 'Use an HTTP Request node to pull from your favorite RSS feeds. Parse the XML, extract the top 5 articles by date, and pass the titles + URLs + body text downstream.'
+        },
+        {
+          id: 2,
+          title: '3. AI Node: Summarize each article in 3 sentences',
+          content: 'For each article, send the body text to an LLM with the prompt: "Summarize this article in exactly 3 concise sentences. Focus on the key takeaway." Use Prompt Chaining: article text in, summary out.'
+        },
+        {
+          id: 3,
+          title: '4. AI Node: Generate personal digest intro',
+          content: 'Pass all 5 summaries to an LLM and ask it to write a 2-sentence personalized introduction that highlights the day\'s overarching theme. This gives your digest a human touch.'
+        },
+        {
+          id: 4,
+          title: '5. Output: Send formatted email',
+          content: 'Assemble the intro + summaries into an HTML email template. Use a Send Email node (Gmail, SendGrid, etc.) to deliver it to your inbox. No AI needed \u2014 just string concatenation and an API call.'
+        }
+      ];
+
+      return (
+        <>
+          <div>
+            <div className="stage-header">Build Your First Workflow</div>
+          </div>
+          <div className="explanation">
+            Let&rsquo;s walk through building a <strong>Daily News Digest</strong> workflow step by step.
+            Click each step to expand the details.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
+                Daily News Digest &mdash; 5 Steps
+              </div>
+              {buildSteps.map((step, i) => (
+                <div
+                  key={step.id}
+                  className={`expand-step fade-in ${openStep === step.id ? 'open' : ''}`}
+                  style={{ animationDelay: `${0.08 * i}s` }}
+                  onClick={() => setOpenStep(openStep === step.id ? null : step.id)}
+                >
+                  <div className="expand-step-header">
+                    <span>{step.title}</span>
+                    <span style={{
+                      fontSize: '18px', color: '#b0a6e8',
+                      transform: openStep === step.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s ease', display: 'inline-block'
+                    }}>&#9662;</span>
+                  </div>
+                  <div className="expand-step-body">
+                    <div className="expand-step-content">{step.content}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ width: '100%', marginTop: '28px' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '12px' }}>
+                Recommended Tools
+              </div>
+              <div className="tool-grid">
+                <div className="tool-card fade-in">
+                  <div className="tool-card-name">n8n</div>
+                  <div className="tool-card-tag">SELF-HOSTED &bull; FREE</div>
+                  <div className="tool-card-desc">Best for AI workflows. Open-source, full control, native LLM nodes. Ideal for developers.</div>
+                </div>
+                <div className="tool-card fade-in" style={{ animationDelay: '0.1s' }}>
+                  <div className="tool-card-name">Make</div>
+                  <div className="tool-card-tag">VISUAL &bull; CLOUD</div>
+                  <div className="tool-card-desc">Beautiful visual builder. Drag-and-drop interface makes complex flows easy to design.</div>
+                </div>
+                <div className="tool-card fade-in" style={{ animationDelay: '0.2s' }}>
+                  <div className="tool-card-name">Zapier</div>
+                  <div className="tool-card-tag">MOST INTEGRATIONS &bull; SIMPLEST</div>
+                  <div className="tool-card-desc">6,000+ app integrations. Simplest setup, best for non-technical users.</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ width: '100%', marginTop: '28px' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#c0392b', marginBottom: '12px' }}>
+                Common Mistakes to Avoid
+              </div>
+              <div className="mistake-grid">
+                <div className="mistake-card fade-in">
+                  <div className="mistake-card-title">Skipping the QA Step</div>
+                  <div className="mistake-card-desc">Always add a validation node after AI-generated content. LLMs can hallucinate &mdash; catch it before it ships.</div>
+                </div>
+                <div className="mistake-card fade-in" style={{ animationDelay: '0.1s' }}>
+                  <div className="mistake-card-title">Chains Too Long (&gt;7 Steps)</div>
+                  <div className="mistake-card-desc">Errors compound with each step. Keep chains short and add checkpoints between long sequences.</div>
+                </div>
+                <div className="mistake-card fade-in" style={{ animationDelay: '0.2s' }}>
+                  <div className="mistake-card-title">Not Logging Intermediates</div>
+                  <div className="mistake-card-desc">Save each step&rsquo;s output. When something breaks at step 5, you need to see what step 3 produced.</div>
+                </div>
+                <div className="mistake-card fade-in" style={{ animationDelay: '0.3s' }}>
+                  <div className="mistake-card-title">Using Agent When Workflow Suffices</div>
+                  <div className="mistake-card-desc">If the path is known, use a workflow. Agents cost 4x more in tokens and add unpredictable latency.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            The best first workflow is one that automates something you already do manually every week.
+            Start small, measure the time saved, then expand. A 5-step news digest can save 3+ hours per week.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
 
       const stages = [
-        { title: 'What are AI Workflows?', component: S1 },
-        { title: 'Anatomy of a Workflow', component: S2 },
-        { title: 'Real-World Examples', component: S3 },
-        { title: 'Workflow vs Agent', component: S4 },
-        { title: 'Build Your First Workflow', component: S5 }
+        { icon: AssemblyIcon, label: 'Assembly', component: S1 },
+        { icon: PatternsIcon, label: 'Patterns', component: S2 },
+        { icon: ExamplesIcon, label: 'Examples', component: S3 },
+        { icon: CompareIcon, label: 'Compare', component: S4 },
+        { icon: BuildIcon, label: 'Build', component: S5 },
       ];
 
-      const CurrentScene = stages[step].component;
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) {
+          setCurrentStage(currentStage + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) {
+          setCurrentStage(currentStage - 1);
+        }
+      };
+
+      const handleStageClick = (idx) => {
+        setCurrentStage(idx);
+      };
 
       return (
-        <div style={P.root}>
-          {/* Sidebar */}
-          <div style={P.sidebar}>
-            {stages.map((stage, i) => (
-              <div key={i}>
-                <div
-                  onClick={() => setStep(i)}
-                  style={P.stepCircle(step === i, i < step)}
-                >
-                  {i < step ? '\u2713' : i + 1}
-                </div>
-                <div style={P.stepLabel} onClick={() => setStep(i)}>
-                  {stage.title}
-                </div>
-                {i < stages.length - 1 && <div style={P.connector(i < step)} />}
-              </div>
-            ))}
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => {
+              const IconComp = stage.icon;
+              return (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button
+                      className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                      onClick={() => handleStageClick(idx)}
+                    >
+                      <IconComp />
+                    </button>
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
 
-          {/* Main content */}
-          <div style={P.main}>
-            {/* Top bar */}
-            <div style={P.topBar}>
-              <div style={P.leftSection}>
-                <a href="../../index.html" style={P.backLink}>\u{2190} Back</a>
-                <div style={P.badge}>INTERACTIVE</div>
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">5.4</span>
+                  <div className="title">AI Workflows</div>
+                </div>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">INTERACTIVE</div>
+                </div>
               </div>
-              <div style={P.title}>AI Workflows: Orchestrated Pipelines</div>
-              <div style={P.navRow}>
-                <button
-                  onClick={() => setStep(Math.max(0, step - 1))}
-                  disabled={step === 0}
-                  style={{ ...P.navBtn(false), opacity: step === 0 ? 0.5 : 1, cursor: step === 0 ? 'default' : 'pointer' }}
-                >
-                  \u{2190}
-                </button>
-                <span style={P.navP}>{step + 1} / {stages.length}</span>
-                <button
-                  onClick={() => setStep(Math.min(stages.length - 1, step + 1))}
-                  disabled={step === stages.length - 1}
-                  style={{ ...P.navBtn(false), opacity: step === stages.length - 1 ? 0.5 : 1, cursor: step === stages.length - 1 ? 'default' : 'pointer' }}
-                >
-                  \u{2192}
-                </button>
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of 5</span>
+                <div className="nav-arrows">
+                  <button
+                    className="arrow-btn"
+                    onClick={handlePrev}
+                    disabled={currentStage === 0}
+                    title="Previous stage"
+                  >
+                    &#8592;
+                  </button>
+                  <button
+                    className="arrow-btn"
+                    onClick={handleNext}
+                    disabled={currentStage === stages.length - 1}
+                    title="Next stage"
+                  >
+                    &#8594;
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Content */}
-            <div style={P.content}>
-              <CurrentScene active={step} />
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
             </div>
           </div>
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
   </script>
 </body>
 </html>

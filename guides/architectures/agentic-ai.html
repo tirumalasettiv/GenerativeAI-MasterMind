@@ -3,367 +3,1244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agentic AI: Multi-Agent Systems</title>
+  <title>Agentic AI - Interactive Guide</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #root { width: 100%; height: 100%; overflow: hidden; }
-    body { font-family: 'DM Sans', sans-serif; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-    @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes blink { 0%, 100% { stroke-width: 2; } 50% { stroke-width: 4; opacity: 0.7; } }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid #e0e0e0;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .pattern-card {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .pattern-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .pattern-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .pattern-label {
+      font-weight: 700;
+      font-size: 18px;
+      color: #6c5ce7;
+      margin-bottom: 4px;
+    }
+
+    .pattern-description {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .pattern-hint {
+      font-size: 11px;
+      color: #b0a6e8;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .pattern-card.expanded .pattern-hint { display: none; }
+
+    .pattern-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .pattern-card.expanded .pattern-detail {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .design-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .design-card {
+      padding: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .design-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-4px);
+    }
+
+    .design-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+      grid-column: 1 / -1;
+    }
+
+    .design-label {
+      font-weight: 700;
+      font-size: 18px;
+      color: #6c5ce7;
+      margin-bottom: 4px;
+    }
+
+    .design-description {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .design-hint {
+      font-size: 11px;
+      color: #b0a6e8;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .design-card.expanded .design-hint { display: none; }
+
+    .design-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .design-card.expanded .design-detail {
+      max-height: 400px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .framework-card {
+      padding: 20px 24px;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .framework-card-emoji { font-size: 24px; flex-shrink: 0; }
+    .framework-card-title { font-weight: 700; font-size: 16px; color: #1a1a1a; margin-bottom: 4px; }
+    .framework-card-desc { font-size: 14px; color: #555; line-height: 1.6; }
+
+    .gotcha-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #fef5f5;
+      border-radius: 8px;
+      border: 1px solid #fce0e0;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-emoji { font-size: 20px; flex-shrink: 0; }
+    .gotcha-label { font-weight: 700; font-size: 14px; color: #c0392b; }
+    .gotcha-desc { font-size: 13px; color: #666; margin-top: 2px; }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .checklist-item.checked {
+      border-color: #2ecc71;
+      background: #f0faf0;
+    }
+
+    .checklist-item:hover {
+      border-color: #6c5ce7;
+    }
+
+    .checklist-checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .checklist-item.checked .checklist-checkbox {
+      background: #2ecc71;
+      border-color: #2ecc71;
+      color: white;
+    }
+
+    .hierarchy-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .hierarchy-segment {
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      flex: 1;
+      transition: all 0.3s ease;
+    }
+
+    .launch-btn {
+      padding: 12px 32px;
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+
+    .launch-btn:hover {
+      background: #5a4bd1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .launch-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes flowPulse {
+      0% { stroke-dashoffset: 8; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .slide-in-right {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect } = React;
 
-    const P = {
-      root: { display: 'flex', flexDirection: 'row', width: '100%', height: '100%', backgroundColor: '#ffffff', overflow: 'hidden' },
-      sidebar: { width: '180px', backgroundColor: '#f8f9fa', borderRight: '1px solid #e9ecef', padding: '20px', overflowY: 'auto' },
-      stepCircle: (stage, current) => ({
-        width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: stage < current ? '#2ecc71' : stage === current ? '#6c5ce7' : '#e9ecef',
-        color: '#ffffff', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s',
-        animation: stage === current ? 'pulse 2s infinite' : 'none'
-      }),
-      stepLabel: { fontSize: '12px', marginTop: '8px', color: '#4a5568', textAlign: 'center', maxWidth: '80px' },
-      main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
-      topBar: { height: '64px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef', display: 'flex', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', justifyContent: 'space-between' },
-      leftSection: { display: 'flex', alignItems: 'center', gap: '16px' },
-      backLink: { color: '#6c5ce7', textDecoration: 'none', fontSize: '14px', fontWeight: '500', cursor: 'pointer', transition: 'opacity 0.2s' },
-      badge: { backgroundColor: '#e8f0fe', color: '#6c5ce7', padding: '4px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '700' },
-      title: { fontFamily: 'Fraunces, serif', fontSize: '28px', fontWeight: '700', color: '#1a202c' },
-      navRow: { display: 'flex', alignItems: 'center', gap: '8px' },
-      navBtn: (disabled) => ({
-        width: '36px', height: '36px', border: 'none', backgroundColor: disabled ? '#e9ecef' : '#f0f0f0', cursor: disabled ? 'not-allowed' : 'pointer',
-        fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', transition: 'all 0.2s',
-        color: disabled ? '#cbd5e0' : '#4a5568'
-      }),
-      navP: { fontSize: '14px', color: '#4a5568', fontWeight: '500' },
-      content: { flex: 1, overflowY: 'auto', padding: '40px 48px' },
-      explainRow: { display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' },
-      explain: { fontSize: '18px', lineHeight: '1.7', color: '#2d3748' },
-      scene: { backgroundColor: '#f8f9fa', borderRadius: '16px', padding: '32px', minHeight: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn 0.5s' },
-      insightLabel: { color: '#1a9456', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' },
-      insight: { backgroundColor: '#f0faf0', borderLeft: '4px solid #2ecc71', padding: '16px', borderRadius: '4px', color: '#2d3748', fontSize: '16px', lineHeight: '1.6' }
-    };
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
 
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
+        </div>
+      );
+    }
+
+    /* Sidebar icon components */
+
+    function NetworkIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="5" r="3" />
+          <circle cx="5" cy="19" r="3" />
+          <circle cx="19" cy="19" r="3" />
+          <line x1="12" y1="8" x2="5" y2="16" />
+          <line x1="12" y1="8" x2="19" y2="16" />
+          <line x1="5" y1="19" x2="19" y2="19" />
+        </svg>
+      );
+    }
+
+    function GridIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      );
+    }
+
+    function RocketIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z" />
+          <path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z" />
+          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+        </svg>
+      );
+    }
+
+    function CogIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+        </svg>
+      );
+    }
+
+    function ToolIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    }
+
+    function CompassIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+        </svg>
+      );
+    }
+
+    /* ========== Stage 1: What is Agentic AI? ========== */
     function S1() {
-      const [activeAgent, setActiveAgent] = useState(null);
-      const agents = [
-        { name: 'Director', role: 'Orchestrator', tools: 'Task planning, delegation', produces: 'Project plan', color: '#a29bfe', emoji: '\ud83c\udfac' },
-        { name: 'Writer', role: 'Content Agent', tools: 'Text generation, research', produces: 'Script & dialogue', color: '#74b9ff', emoji: '\u270d\ufe0f' },
-        { name: 'Cinematographer', role: 'Visual Agent', tools: 'Shot planning, composition', produces: 'Shot list', color: '#fab1a0', emoji: '\ud83d\udcfd' },
-        { name: 'Editor', role: 'Review Agent', tools: 'Quality check, feedback', produces: 'Approved content', color: '#55efc4', emoji: '\u2705' },
-        { name: 'Sound Designer', role: 'Audio Agent', tools: 'Audio synthesis, mixing', produces: 'Soundscape', color: '#fd79a8', emoji: '\ud83c\udfb5' }
-      ];
-      return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>Multiple specialized AI agents working together as a team, each with different expertise, collaborating to tackle complex projects — like an AI company with different departments.</p>
-          </div>
-          <div style={P.scene}>
-            <svg width="500" height="320" viewBox="0 0 500 320">
-              {/* Center Director */}
-              <circle cx="250" cy="160" r="35" fill={agents[0].color} opacity="0.8" />
-              <circle cx="250" cy="160" r="35" fill="none" stroke={agents[0].color} strokeWidth="2" style={{ animation: 'pulse 2s infinite' }} />
-              <text x="250" y="170" textAnchor="middle" fontSize="24" fill="#fff">{agents[0].emoji}</text>
+      const [selectedAgent, setSelectedAgent] = useState(null);
 
-              {/* Connected Agents */}
-              {[agents[1], agents[2], agents[3], agents[4]].map((agent, i) => {
-                const angle = (i * 90 * Math.PI) / 180;
-                const x = 250 + 110 * Math.cos(angle);
-                const y = 160 + 110 * Math.sin(angle);
-                return (
-                  <g key={i}>
-                    <line x1="250" y1="160" x2={x} y2={y} stroke={agent.color} strokeWidth="2" style={{ animation: 'blink 2s infinite' }} opacity="0.6" />
-                    <circle cx={x} cy={y} r="30" fill={agent.color} opacity="0.7" style={{ cursor: 'pointer' }} onClick={() => setActiveAgent(i)} />
-                    <text x={x} y={y + 6} textAnchor="middle" fontSize="20" fill="#fff">{agent.emoji}</text>
-                  </g>
-                );
-              })}
-            </svg>
+      const agents = [
+        { id: 'director', label: 'Director', x: 200, y: 40, color: '#6c5ce7', desc: 'The orchestrator. Decomposes the project, assigns tasks, manages the timeline, and ensures all pieces come together cohesively.' },
+        { id: 'writer', label: 'Writer', x: 60, y: 140, color: '#e17055', desc: 'The content specialist. Drafts scripts, dialogue, and narrative arcs based on the director\'s vision and research inputs.' },
+        { id: 'cinematographer', label: 'Camera', x: 340, y: 140, color: '#00b894', desc: 'The visual expert. Plans shots, lighting, and composition. Translates written scenes into visual storytelling.' },
+        { id: 'editor', label: 'Editor', x: 100, y: 250, color: '#fdcb6e', desc: 'The quality reviewer. Reviews all output against the original brief, catches errors, and ensures consistency across the project.' },
+        { id: 'sound', label: 'Sound', x: 300, y: 250, color: '#74b9ff', desc: 'The audio specialist. Handles music, effects, and ambient sound. Works in parallel with the editor to finalize output.' }
+      ];
+
+      const connections = [
+        ['director', 'writer'], ['director', 'cinematographer'],
+        ['director', 'editor'], ['director', 'sound'],
+        ['writer', 'editor'], ['cinematographer', 'editor'],
+        ['editor', 'sound']
+      ];
+
+      const getAgent = (id) => agents.find(a => a.id === id);
+
+      return (
+        <>
+          <div><div className="stage-header">What is Agentic AI?</div></div>
+          <div className="explanation">
+            Multiple specialized AI agents working together as a team, each with different expertise, collaborating on complex projects. You would never ask one person to be researcher, writer, editor, and publisher simultaneously &mdash; and you should not ask one AI agent to do it either.
           </div>
-          {activeAgent !== null && (
-            <div style={{ ...P.insight, animation: 'slideInRight 0.3s' }}>
-              <div style={P.insightLabel}>{agents[activeAgent + 1].role}</div>
-              <strong>{agents[activeAgent + 1].name}</strong><br/>
-              Tools: {agents[activeAgent + 1].tools}<br/>
-              Produces: {agents[activeAgent + 1].produces}
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '15px', lineHeight: '1.7', color: '#333', marginBottom: '20px' }}>
+                <strong style={{ color: '#1a1a1a' }}>Analogy: A Film Production Crew.</strong> Click each agent node to learn its role.
+              </div>
+              <svg viewBox="0 0 400 310" style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block' }}>
+                {connections.map(([fromId, toId], idx) => {
+                  const from = getAgent(fromId);
+                  const to = getAgent(toId);
+                  const isActive = selectedAgent === fromId || selectedAgent === toId;
+                  return (
+                    <line key={idx}
+                      x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                      stroke={isActive ? '#6c5ce7' : '#d0d0d0'}
+                      strokeWidth={isActive ? 3 : 1.5}
+                      strokeDasharray={isActive ? '0' : '4 4'}
+                      style={isActive ? { animation: 'pulse 1.5s ease infinite' } : {}}
+                    />
+                  );
+                })}
+                {agents.map(agent => (
+                  <g key={agent.id} onClick={() => setSelectedAgent(selectedAgent === agent.id ? null : agent.id)} style={{ cursor: 'pointer' }}>
+                    <circle cx={agent.x} cy={agent.y} r={selectedAgent === agent.id ? 28 : 24}
+                      fill={agent.color} stroke="white" strokeWidth="3"
+                      style={{ transition: 'all 0.3s ease', filter: selectedAgent === agent.id ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' : 'none' }}
+                    />
+                    <text x={agent.x} y={agent.y + 4} textAnchor="middle" fill="white" fontSize="10" fontWeight="700" fontFamily="DM Sans">{agent.label}</text>
+                  </g>
+                ))}
+              </svg>
+              {selectedAgent && (
+                <div className="fade-in" style={{ marginTop: '20px', padding: '16px 20px', background: 'white', borderRadius: '10px', border: `2px solid ${getAgent(selectedAgent).color}` }}>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: getAgent(selectedAgent).color, marginBottom: '6px' }}>
+                    {getAgent(selectedAgent).label}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#555', lineHeight: 1.6 }}>
+                    {getAgent(selectedAgent).desc}
+                  </div>
+                </div>
+              )}
+              <div style={{ marginTop: '24px', padding: '16px 20px', background: '#f5f3ff', borderRadius: '10px', border: '1px solid #e8e3f8', textAlign: 'center' }}>
+                <div style={{ fontSize: '13px', color: '#6c5ce7', fontWeight: 700, marginBottom: '4px' }}>CORNELL STUDY</div>
+                <div style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a1a', fontFamily: 'Fraunces, serif' }}>42.68% vs 2.92%</div>
+                <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>Multi-agent success rate vs. single agent on complex planning tasks</div>
+              </div>
             </div>
-          )}
-          <div style={{ ...P.insight, marginTop: '24px' }}>
-            <div style={P.insightLabel}>Key Message</div>
-            "Each agent is an expert. Together, they create what none could alone."
           </div>
-        </div>
+          <InsightBlock>
+            Agentic AI is not about making one model smarter &mdash; it is about making multiple models collaborate. Each agent has a focused role, clear inputs and outputs, and the orchestrator ensures the team delivers a result no single agent could achieve alone.
+          </InsightBlock>
+        </>
       );
     }
 
+    /* ========== Stage 2: Four Patterns ========== */
     function S2() {
-      const [expandedPattern, setExpandedPattern] = useState(0);
+      const [expanded, setExpanded] = useState(null);
+
       const patterns = [
-        { name: 'Pipeline', desc: 'Agents work in sequence', example: 'Research \u2192 Write \u2192 Edit \u2192 Publish', bestFor: 'Content creation, document processing', visual: '\ud83d\udc04 \u2192 \ud83d\udc04 \u2192 \ud83d\udc04 \u2192 \ud83d\udc04' },
-        { name: 'Supervisor', desc: 'One agent assigns and reviews work', example: 'Manager delegates research tasks to specialists', bestFor: 'Complex projects needing coordination', visual: '\ud83d\udc60\n\ud83d\udc40 \ud83d\udc40 \ud83d\udc40' },
-        { name: 'Debate', desc: 'Agents argue different sides', example: 'Bull case vs Bear case \u2192 Final recommendation', bestFor: 'Decision-making, risk analysis', visual: '\ud83d\udcc4 \u2194\ufe0f \ud83d\udcc4 \u2192 \u2696\ufe0f' },
-        { name: 'Swarm', desc: 'Agents work in parallel', example: '5 researchers each tackle different sources', bestFor: 'Research, data collection, speed', visual: '\ud83c\udf0c \ud83c\udf0c \ud83c\udf0c \ud83c\udf0c \ud83c\udf0c' }
+        {
+          id: 'pipeline',
+          emoji: '\u27A1\uFE0F',
+          title: 'Pipeline',
+          desc: 'Fixed order: Agent A \u2192 B \u2192 C. Like an assembly line.',
+          detail: 'Each agent processes the output of the previous one in a strict sequence. Best for structured workflows, document processing, and compliance pipelines where order matters. Example: Research \u2192 Write \u2192 Edit \u2192 Publish. Predictable, easy to debug, but no parallelism.',
+          bestFor: 'Structured workflows, document processing, compliance'
+        },
+        {
+          id: 'supervisor',
+          emoji: '\uD83D\uDC68\u200D\uD83D\uDCBC',
+          title: 'Supervisor',
+          desc: 'Central orchestrator decomposes tasks, assigns to specialists.',
+          detail: 'A manager agent breaks down the task, delegates to specialized workers, and synthesizes results. Like a project manager. Roughly 70% of production multi-agent systems use this pattern. The supervisor can re-route, retry, and dynamically adjust assignments.',
+          bestFor: 'Complex projects, dynamic task allocation'
+        },
+        {
+          id: 'debate',
+          emoji: '\u2696\uFE0F',
+          title: 'Debate',
+          desc: 'Multiple agents argue opposing positions; a judge synthesizes.',
+          detail: 'Agents take different stances on a problem and present arguments. A judge agent evaluates the arguments and synthesizes a final answer. Like a courtroom. Research shows up to 23% higher accuracy on reasoning tasks. Best for risk assessment, legal analysis, and strategic planning.',
+          bestFor: 'Risk assessment, legal analysis, strategic planning'
+        },
+        {
+          id: 'swarm',
+          emoji: '\uD83D\uDC1C',
+          title: 'Swarm',
+          desc: 'Autonomous agents with minimal central control, shared state.',
+          detail: 'Agents operate independently with minimal coordination, sharing state through a common knowledge base. Like an ant colony. No single point of failure. Best for parallelizable tasks, distributed research, and exploratory analysis where agents can work simultaneously.',
+          bestFor: 'Parallelizable tasks, distributed research, exploration'
+        }
       ];
+
       return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>There are 4 common patterns for organizing multi-agent teams. Each has different strengths and use cases.</p>
+        <>
+          <div><div className="stage-header">Four Patterns</div></div>
+          <div className="explanation">
+            Multi-agent systems are not one-size-fits-all. Four distinct collaboration patterns have emerged, each suited to different types of problems. Click each pattern to explore.
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '24px' }}>
-            {patterns.map((p, i) => (
-              <div key={i} style={{
-                border: '1px solid #e9ecef', borderRadius: '8px', padding: '16px', cursor: 'pointer',
-                backgroundColor: expandedPattern === i ? '#e8f0fe' : '#f8f9fa',
-                borderLeft: expandedPattern === i ? '4px solid #6c5ce7' : '4px solid transparent',
-                transition: 'all 0.3s', animation: expandedPattern === i ? 'slideInRight 0.3s' : 'none'
-              }} onClick={() => setExpandedPattern(i)}>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a202c', marginBottom: '8px' }}>{p.name}</div>
-                <div style={{ fontSize: '13px', color: '#718096' }}>{p.desc}</div>
-                {expandedPattern === i && (
-                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #cbd5e0' }}>
-                    <div style={{ fontSize: '12px', color: '#4a5568', marginBottom: '12px' }}>
-                      <strong>Example:</strong> {p.example}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#4a5568', marginBottom: '12px' }}>
-                      <strong>Best for:</strong> {p.bestFor}
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="pattern-grid">
+                {patterns.map(p => (
+                  <div key={p.id}
+                    className={`pattern-card ${expanded === p.id ? 'expanded' : ''}`}
+                    onClick={() => setExpanded(expanded === p.id ? null : p.id)}
+                  >
+                    <div className="pattern-label">{p.emoji} {p.title}</div>
+                    <div className="pattern-description">{p.desc}</div>
+                    <div className="pattern-hint">Click to explore</div>
+                    <div className="pattern-detail">
+                      {p.detail}
+                      <div style={{ marginTop: '10px', padding: '8px 12px', background: '#e8e3f8', borderRadius: '6px', fontSize: '12px', fontWeight: 700, color: '#6c5ce7' }}>
+                        Best for: {p.bestFor}
+                      </div>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Pattern Selection</div>
-            Pipeline for sequential quality. Supervisor for complex coordination. Debate for better decisions. Swarm for speed. Most production systems mix 2-3 patterns.
-          </div>
-        </div>
+          <InsightBlock>
+            Most production systems use the <strong>Supervisor</strong> pattern (~70%). Start there unless your task specifically calls for debate (high-stakes reasoning) or swarm (massively parallel work). Pipelines work best when the sequence is well-defined and unlikely to change.
+          </InsightBlock>
+        </>
       );
     }
 
+    /* ========== Stage 3: Product Launch Team ========== */
     function S3() {
-      const [launched, setLaunched] = useState(false);
-      const agents = [
-        { name: 'Market Researcher', color: '#a29bfe', tools: 'Web search, survey analysis', output: 'Market brief', emoji: '\ud83d\udd0d' },
-        { name: 'Content Writer', color: '#74b9ff', tools: 'Text generation, templates', output: 'Blog posts, emails, social', emoji: '\u270d\ufe0f' },
-        { name: 'Designer', color: '#fab1a0', tools: 'Image generation, layout', output: 'Graphics, landing page', emoji: '\ud83c\udfa8' },
-        { name: 'Editor/QA', color: '#55efc4', tools: 'Grammar, brand, fact check', output: 'Approved assets', emoji: '\u2705' }
-      ];
-      return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>Let's see a concrete example — building a multi-agent system for a product launch. Watch how agents collaborate through handoff points.</p>
-          </div>
-          <div style={P.scene}>
-            <svg width="480" height="280" viewBox="0 0 480 280">
-              {/* Agent circles in workflow */}
-              {agents.map((agent, i) => {
-                const x = 60 + i * 110;
-                const y = 140;
-                return (
-                  <g key={i} style={{ animation: launched ? `slideInRight 0.${4 + i}s` : 'none' }}>
-                    <circle cx={x} cy={y} r="32" fill={agent.color} opacity="0.8" />
-                    <text x={x} y={y + 8} textAnchor="middle" fontSize="22" fill="#fff">{agent.emoji}</text>
-                    <text x={x} y={y + 65} textAnchor="middle" fontSize="11" fill="#2d3748" fontWeight="600">{agent.name}</text>
-                  </g>
-                );
-              })}
-              {/* Flow arrows */}
-              {[0, 1, 2].map((i) => (
-                <line key={i} x1={80 + i * 110} y1="140" x2={110 + i * 110} y2="140"
-                  stroke="#cbd5e0" strokeWidth="2" markerEnd="url(#arrowhead)" style={{ opacity: launched ? 1 : 0.3 }} />
-              ))}
-              <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                  <polygon points="0 0, 10 3, 0 6" fill="#cbd5e0" />
-                </marker>
-              </defs>
-              {/* Supervisor arc */}
-              <path d="M 60 100 Q 240 50 420 100" stroke="#6c5ce7" strokeWidth="2" fill="none" strokeDasharray="5,5" opacity="0.5" />
-              <text x="240" y="40" textAnchor="middle" fontSize="12" fill="#6c5ce7" fontWeight="600">Supervisor Oversees</text>
-            </svg>
-          </div>
-          <button onClick={() => setLaunched(!launched)} style={{
-            backgroundColor: '#6c5ce7', color: '#fff', border: 'none', padding: '10px 20px',
-            borderRadius: '4px', cursor: 'pointer', marginTop: '16px', fontWeight: '600', fontSize: '14px',
-            transition: 'background 0.2s'
-          }} onMouseOver={(e) => e.target.style.backgroundColor = '#5f3dc4'} onMouseOut={(e) => e.target.style.backgroundColor = '#6c5ce7'}>
-            {launched ? 'Reset' : 'Launch Campaign'}
-          </button>
-          <div style={{ ...P.insight, marginTop: '24px' }}>
-            <div style={P.insightLabel}>Revision Loop Magic</div>
-            The revision loop is what makes multi-agent special. In a workflow, content goes through once. In a multi-agent system, the Editor can send it back to the Writer 3 times until it\u0027s perfect.
-          </div>
-        </div>
-      );
-    }
+      const [launchStep, setLaunchStep] = useState(-1);
+      const [isRunning, setIsRunning] = useState(false);
+      const [reviewLoop, setReviewLoop] = useState(false);
 
-    function S4() {
-      const [expandedPanel, setExpandedPanel] = useState(0);
-      const panels = [
-        { title: 'Agent Design', content: 'Define role description (system prompt), tool access (what each agent can use), and output format (what they produce).' },
-        { title: 'Communication', content: 'Agents talk via shared memory (blackboard), direct messages (agent-to-agent), or event bus (publish-subscribe).' },
-        { title: 'Memory & State', content: 'Short-term: conversation context. Long-term: vector store for past work. Shared state: team knowledge base.' },
-        { title: 'Error Handling', content: 'Retry with feedback, escalate to supervisor, fallback to simpler agent, or escalate to human-in-the-loop.' }
+      const pipelineAgents = [
+        { label: 'Research Agent', color: '#6c5ce7', desc: 'Gathers market data, competitor positioning, and audience insights. Outputs a structured brief.' },
+        { label: 'Writing Agent', color: '#e17055', desc: 'Consumes the research brief, produces a campaign draft, and can generate channel-specific variants.' },
+        { label: 'Editing Agent', color: '#00b894', desc: 'Reviews against the ORIGINAL research \u2014 not just the draft. Catches fabricated claims and factual issues.' },
+        { label: 'Publishing Agent', color: '#74b9ff', desc: 'Formats content for blog, LinkedIn, and email. Pushes the final campaign live.' }
       ];
-      return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>Key decisions when designing a multi-agent system — agent roles, communication, memory, and error handling.</p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '24px' }}>
-            {panels.map((panel, i) => (
-              <div key={i} style={{
-                border: '1px solid #e9ecef', borderRadius: '8px', padding: '20px', cursor: 'pointer',
-                backgroundColor: expandedPanel === i ? '#e8f0fe' : '#f8f9fa',
-                transition: 'all 0.3s'
-              }} onClick={() => setExpandedPanel(i)}>
-                <div style={{ fontSize: '16px', fontWeight: '700', color: '#1a202c', marginBottom: '12px' }}>{panel.title}</div>
-                {expandedPanel === i && (
-                  <div style={{ fontSize: '14px', color: '#4a5568', lineHeight: '1.6', animation: 'slideInRight 0.3s' }}>
-                    {panel.content}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Design Philosophy</div>
-            The hardest part of multi-agent systems isn\u0027t the individual agents — it\u0027s the coordination. Define clear handoffs, communication protocols, and failure modes before writing code.
-          </div>
-        </div>
-      );
-    }
 
-    function S5() {
-      const [checkedCount, setCheckedCount] = useState(0);
-      const [checks, setChecks] = useState([false, false, false, false]);
-      const items = [
-        'Multiple expertise areas needed?',
-        'Quality matters more than speed?',
-        'Work benefits from review/critique cycles?',
-        'Complex project, not a simple task?'
-      ];
-      const tools = [
-        { name: 'CrewAI', desc: 'Open-source framework for building cooperative AI agents' },
-        { name: 'AutoGen', desc: 'Framework for autonomous agent research and multi-agent conversation' },
-        { name: 'LangGraph', desc: 'Graph-based framework for building agent workflows' },
-        { name: 'Swarm (OpenAI)', desc: 'Lightweight multi-agent orchestration framework' }
-      ];
-      const handleCheck = (i) => {
-        const newChecks = [...checks];
-        newChecks[i] = !newChecks[i];
-        setChecks(newChecks);
-        setCheckedCount(newChecks.filter(Boolean).length);
+      const runLaunch = () => {
+        setIsRunning(true);
+        setLaunchStep(0);
+        setReviewLoop(false);
+        let step = 0;
+        const timer = setInterval(() => {
+          step++;
+          if (step === 3) {
+            setReviewLoop(true);
+            setLaunchStep(step);
+            setTimeout(() => {
+              setReviewLoop(false);
+              setLaunchStep(step);
+              setTimeout(() => {
+                setLaunchStep(4);
+                setIsRunning(false);
+                clearInterval(timer);
+              }, 800);
+            }, 1200);
+            clearInterval(timer);
+          } else {
+            setLaunchStep(step);
+          }
+        }, 1000);
       };
-      return (
-        <div style={P.content}>
-          <div style={P.explainRow}>
-            <p style={P.explain}>Real tools for building multi-agent systems, and how to decide if you actually need one.</p>
-          </div>
 
-          <div style={{ marginBottom: '32px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1a202c', marginBottom: '16px' }}>Available Tools</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-              {tools.map((tool, i) => (
-                <div key={i} style={{ backgroundColor: '#f8f9fa', padding: '16px', borderRadius: '8px', border: '1px solid #e9ecef' }}>
-                  <div style={{ fontWeight: '700', color: '#1a202c', marginBottom: '6px' }}>{tool.name}</div>
-                  <div style={{ fontSize: '13px', color: '#4a5568' }}>{tool.desc}</div>
+      return (
+        <>
+          <div><div className="stage-header">Product Launch Team</div></div>
+          <div className="explanation">
+            A concrete example: a hybrid supervisor-pipeline for launching a marketing campaign. Four agents work in sequence with a supervisor oversight arc. The editing agent can kick work back &mdash; creating a review loop.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <svg viewBox="0 0 520 200" style={{ width: '100%', maxWidth: '560px', margin: '0 auto', display: 'block' }}>
+                {/* Supervisor arc */}
+                <path d="M 65 40 Q 260 -20 455 40" fill="none" stroke="#b0a6e8" strokeWidth="2" strokeDasharray="6 4" />
+                <text x="260" y="12" textAnchor="middle" fill="#b0a6e8" fontSize="11" fontWeight="700" fontFamily="DM Sans">SUPERVISOR OVERSIGHT</text>
+
+                {/* Pipeline boxes */}
+                {pipelineAgents.map((agent, idx) => {
+                  const x = 10 + idx * 130;
+                  const isActive = launchStep === idx;
+                  const isDone = launchStep > idx;
+                  return (
+                    <g key={idx}>
+                      <rect x={x} y="50" width="110" height="60" rx="10"
+                        fill={isActive ? agent.color : isDone ? agent.color + '33' : 'white'}
+                        stroke={agent.color} strokeWidth={isActive ? 3 : 2}
+                        style={{ transition: 'all 0.4s ease' }}
+                      />
+                      <text x={x + 55} y="76" textAnchor="middle" fill={isActive ? 'white' : '#333'}
+                        fontSize="11" fontWeight="700" fontFamily="DM Sans">{agent.label}</text>
+                      <text x={x + 55} y="98" textAnchor="middle" fill={isActive ? 'rgba(255,255,255,0.8)' : '#999'}
+                        fontSize="9" fontFamily="DM Sans">{isDone ? 'Done' : isActive ? 'Working...' : 'Waiting'}</text>
+                      {idx < 3 && (
+                        <path d={`M ${x + 110} 80 L ${x + 130} 80`}
+                          stroke={isDone ? '#2ecc71' : '#d0d0d0'} strokeWidth="2" markerEnd="url(#arrow)" />
+                      )}
+                    </g>
+                  );
+                })}
+
+                {/* Review loop arrow */}
+                {reviewLoop && (
+                  <g style={{ animation: 'fadeIn 0.3s ease' }}>
+                    <path d="M 340 115 Q 280 160 210 115" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeDasharray="6 3"
+                      style={{ animation: 'flowPulse 0.5s linear infinite' }} />
+                    <text x="275" y="158" textAnchor="middle" fill="#e74c3c" fontSize="10" fontWeight="700" fontFamily="DM Sans">
+                      Issues found! Revising...
+                    </text>
+                  </g>
+                )}
+
+                {/* Arrow marker */}
+                <defs>
+                  <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#999" />
+                  </marker>
+                </defs>
+
+                {/* Completion badge */}
+                {launchStep === 4 && (
+                  <g style={{ animation: 'fadeIn 0.4s ease' }}>
+                    <rect x="180" y="140" width="160" height="36" rx="18" fill="#2ecc71" />
+                    <text x="260" y="163" textAnchor="middle" fill="white" fontSize="13" fontWeight="700" fontFamily="DM Sans">
+                      Campaign Live!
+                    </text>
+                  </g>
+                )}
+              </svg>
+
+              {launchStep >= 0 && launchStep < 4 && (
+                <div className="fade-in" style={{ marginTop: '16px', padding: '14px 18px', background: 'white', borderRadius: '10px', border: `2px solid ${pipelineAgents[Math.min(launchStep, 3)].color}`, fontSize: '14px', color: '#555', lineHeight: 1.6 }}>
+                  <strong style={{ color: pipelineAgents[Math.min(launchStep, 3)].color }}>{pipelineAgents[Math.min(launchStep, 3)].label}:</strong> {pipelineAgents[Math.min(launchStep, 3)].desc}
+                </div>
+              )}
+
+              <div style={{ textAlign: 'center' }}>
+                <button className="launch-btn" onClick={runLaunch} disabled={isRunning}>
+                  {isRunning ? 'Running Campaign...' : launchStep === 4 ? 'Relaunch Campaign' : 'Launch Campaign'}
+                </button>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            The key insight: the Editing Agent reviews against the <strong>original research</strong>, not just the draft. If it finds fabricated claims, it kicks the draft back to the Writing Agent &mdash; creating a review loop within the pipeline. This is what makes agentic systems self-correcting.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ========== Stage 4: Building Multi-Agent Systems ========== */
+    function S4() {
+      const [expanded, setExpanded] = useState(null);
+
+      const designCards = [
+        {
+          id: 'agent-design',
+          emoji: '\uD83E\uDDE9',
+          title: 'Agent Design',
+          desc: 'Define role, tools, and output format for each agent.',
+          detail: 'Every agent needs three things: a role description (system prompt defining its expertise), tool access (which APIs and functions it can call), and a clear output format (structured JSON, markdown, or plain text). Keep scope narrow \u2014 an agent that does everything does nothing well.'
+        },
+        {
+          id: 'communication',
+          emoji: '\uD83D\uDCE1',
+          title: 'Communication',
+          desc: 'How agents talk to each other and pass work.',
+          detail: 'Three communication patterns: Shared memory (blackboard pattern \u2014 all agents read/write a common state), Direct messages (agent-to-agent handoffs with typed contracts), and Event bus (publish-subscribe for loosely coupled agents). Define clear handoff protocols: what data is passed, what format, what the receiver should do.'
+        },
+        {
+          id: 'memory',
+          emoji: '\uD83E\uDDE0',
+          title: 'Memory & State',
+          desc: 'Short-term, long-term, and shared team knowledge.',
+          detail: 'Short-term memory: the current conversation context within a single task. Long-term memory: a vector store for past work, decisions, and learned patterns. Shared state: a team knowledge base that all agents can read and update. Without proper memory, agents repeat mistakes or contradict each other.'
+        },
+        {
+          id: 'errors',
+          emoji: '\uD83D\uDEE1\uFE0F',
+          title: 'Error Handling',
+          desc: 'What happens when an agent fails or produces bad output.',
+          detail: 'Four strategies: Retry with feedback (tell the agent what went wrong), Escalate to supervisor (let the orchestrator decide next steps), Fallback to simpler agent (degrade gracefully), and Human-in-the-loop (escalate to a person for critical decisions). Never let a failed agent silently corrupt the pipeline.'
+        }
+      ];
+
+      return (
+        <>
+          <div><div className="stage-header">Building Multi-Agent Systems</div></div>
+          <div className="explanation">
+            The hardest part is not individual agents &mdash; it is coordination. Four design dimensions determine whether your multi-agent system works or falls apart. Click each card to explore.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="design-grid">
+                {designCards.map(card => (
+                  <div key={card.id}
+                    className={`design-card ${expanded === card.id ? 'expanded' : ''}`}
+                    onClick={() => setExpanded(expanded === card.id ? null : card.id)}
+                  >
+                    <div className="design-label">{card.emoji} {card.title}</div>
+                    <div className="design-description">{card.desc}</div>
+                    <div className="design-hint">Click to explore</div>
+                    <div className="design-detail">{card.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            &ldquo;The hardest part isn&rsquo;t individual agents &mdash; it&rsquo;s coordination.&rdquo; Most multi-agent failures come from poor inter-agent contracts, not from weak individual agents. Define clear input/output schemas between every agent pair before writing any agent logic.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ========== Stage 5: Frameworks & Tools ========== */
+    function S5() {
+      const frameworks = [
+        {
+          emoji: '\uD83D\uDE80',
+          title: 'CrewAI',
+          desc: 'Best for prototyping and experimentation. Lowest barrier to entry \u2014 define agents in under 20 lines of Python. Role-based agent definition with built-in task delegation. Great for proof-of-concept, but less control over complex state management.',
+          color: '#6c5ce7'
+        },
+        {
+          emoji: '\uD83D\uDD17',
+          title: 'LangGraph',
+          desc: 'Best for production systems. Graph-based workflows with explicit state machines, checkpointing, and human-in-the-loop support. Most battle-tested in enterprise environments. Steeper learning curve, but offers the most control over agent orchestration.',
+          color: '#00b894'
+        },
+        {
+          emoji: '\uD83D\uDCAC',
+          title: 'AutoGen / AG2',
+          desc: 'Best for conversational multi-agent patterns. Designed for multi-party dialogue, group debates, and collaborative reasoning. Agents talk to each other naturally. Ideal for debate patterns and scenarios requiring agent-to-agent negotiation.',
+          color: '#e17055'
+        }
+      ];
+
+      const gotchas = [
+        { emoji: '\u26A0\uFE0F', label: 'Over-engineering', desc: 'Using 5 agents when 1 would do. Start simple, add agents only when you prove a single agent cannot handle the task.' },
+        { emoji: '\uD83D\uDCC4', label: 'Poor Inter-Agent Contracts', desc: 'Agents passing unstructured text instead of typed schemas. Define JSON contracts between every agent pair.' },
+        { emoji: '\uD83D\uDD0D', label: 'Missing Observability', desc: 'No logging of agent-to-agent communication. You cannot debug what you cannot see. Log every handoff.' },
+        { emoji: '\uD83D\uDCA7', label: 'Context Bleed', desc: 'Agent A\'s context leaking into Agent B. Each agent should have a clean, scoped context window with only what it needs.' }
+      ];
+
+      return (
+        <>
+          <div><div className="stage-header">Frameworks & Tools</div></div>
+          <div className="explanation">
+            Three major frameworks have emerged for building multi-agent systems. Each serves a different use case. Below, also find the four most common gotchas that trip up builders.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', marginBottom: '16px' }}>Frameworks</div>
+              {frameworks.map((fw, idx) => (
+                <div className="framework-card fade-in" key={idx}
+                  style={{ borderLeftColor: fw.color, animationDelay: `${0.15 * idx}s` }}>
+                  <div className="framework-card-emoji">{fw.emoji}</div>
+                  <div>
+                    <div className="framework-card-title">{fw.title}</div>
+                    <div className="framework-card-desc">{fw.desc}</div>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#c0392b', marginTop: '28px', marginBottom: '16px' }}>Common Gotchas</div>
+              {gotchas.map((g, idx) => (
+                <div className="gotcha-row fade-in" key={idx} style={{ animationDelay: `${0.1 * idx}s` }}>
+                  <div className="gotcha-emoji">{g.emoji}</div>
+                  <div>
+                    <div className="gotcha-label">{g.label}</div>
+                    <div className="gotcha-desc">{g.desc}</div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-
-          <div style={{ marginBottom: '32px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1a202c', marginBottom: '16px' }}>Decision Checklist</h3>
-            {items.map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', cursor: 'pointer' }}
-                onClick={() => handleCheck(i)}>
-                <input type="checkbox" checked={checks[i]} onChange={() => {}} style={{ cursor: 'pointer', width: '18px', height: '18px' }} />
-                <span style={{ fontSize: '15px', color: '#2d3748' }}>{item}</span>
-              </div>
-            ))}
-            <div style={{ marginTop: '20px', padding: '12px 16px', backgroundColor: '#e8f0fe', borderRadius: '4px', fontSize: '14px', fontWeight: '600', color: '#6c5ce7' }}>
-              {checkedCount}/4 checked: {checkedCount >= 3 ? '\ud83d\udc4b Agentic AI recommended' : checkedCount < 2 ? '\ud83d\udca1 Try a simpler architecture first' : '\ud83e\udd14 Consider your specific needs'}
-            </div>
-          </div>
-
-          <div style={{ ...P.insight, marginBottom: '24px' }}>
-            <div style={P.insightLabel}>Architecture Hierarchy</div>
-            LLM Chat \u2192 RAG \u2192 Workflow \u2192 Agent \u2192 Agentic. Start simple. Don\u0027t use a construction crew when you need a handyman.
-          </div>
-
-          <div style={P.insight}>
-            <div style={P.insightLabel}>Final Thought</div>
-            Multi-agent systems are the most powerful but also the most complex architecture. Use them when the task genuinely requires multiple specialists and review cycles. For everything else, start simpler.
-          </div>
-        </div>
+          <InsightBlock>
+            Start with <strong>CrewAI</strong> for prototyping, graduate to <strong>LangGraph</strong> for production. Use <strong>AutoGen</strong> when your agents need to debate or negotiate. The framework matters less than getting your agent contracts and error handling right.
+          </InsightBlock>
+        </>
       );
     }
 
-    function App() {
-      const [currentStage, setCurrentStage] = useState(0);
-      const stages = [
-        { title: 'What is Agentic AI?', component: S1 },
-        { title: 'Team Patterns', component: S2 },
-        { title: 'Product Launch Team', component: S3 },
-        { title: 'Building Multi-Agent Systems', component: S4 },
-        { title: 'Tools & When to Use', component: S5 }
+    /* ========== Stage 6: When to Use ========== */
+    function S6() {
+      const [checks, setChecks] = useState([false, false, false, false]);
+
+      const questions = [
+        'Multiple expertise areas needed?',
+        'Quality matters more than speed?',
+        'Work benefits from review / critique cycles?',
+        'Complex project, not a simple task?'
       ];
-      const CurrentComponent = stages[currentStage].component;
+
+      const toggleCheck = (idx) => {
+        const next = [...checks];
+        next[idx] = !next[idx];
+        setChecks(next);
+      };
+
+      const count = checks.filter(Boolean).length;
+
+      const getRecommendation = () => {
+        if (count >= 3) return { text: 'Agentic AI recommended', color: '#2ecc71', bg: '#f0faf0' };
+        if (count >= 1) return { text: 'Consider your needs carefully', color: '#f39c12', bg: '#fef9e7' };
+        return { text: 'Try a simpler architecture first', color: '#e74c3c', bg: '#fef5f5' };
+      };
+
+      const rec = getRecommendation();
+
+      const hierarchy = [
+        { label: 'LLM Chat', color: '#74b9ff', textColor: '#1a5276' },
+        { label: 'RAG', color: '#81ecec', textColor: '#0c5e5e' },
+        { label: 'Workflow', color: '#fdcb6e', textColor: '#7d6608' },
+        { label: 'Agent', color: '#fab1a0', textColor: '#7f3b2e' },
+        { label: 'Agentic', color: '#6c5ce7', textColor: '#ffffff' }
+      ];
 
       return (
-        <div style={P.root}>
-          {/* Sidebar */}
-          <div style={P.sidebar}>
-            {stages.map((stage, i) => (
-              <div key={i} style={{ marginBottom: '24px', cursor: 'pointer' }} onClick={() => setCurrentStage(i)}>
-                <div style={P.stepCircle(i, currentStage)}>{i + 1}</div>
-                <div style={P.stepLabel}>{stage.title}</div>
+        <>
+          <div><div className="stage-header">When to Use Agentic AI</div></div>
+          <div className="explanation">
+            Agentic AI is powerful but expensive (~40,000 tokens per query). Use this decision checklist to determine if your problem truly needs a multi-agent approach, or if a simpler architecture will serve you better.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', marginBottom: '16px' }}>Decision Checklist</div>
+              {questions.map((q, idx) => (
+                <div key={idx}
+                  className={`checklist-item ${checks[idx] ? 'checked' : ''}`}
+                  onClick={() => toggleCheck(idx)}
+                >
+                  <div className="checklist-checkbox">
+                    {checks[idx] ? '\u2713' : ''}
+                  </div>
+                  {q}
+                </div>
+              ))}
+
+              <div className="fade-in" style={{ marginTop: '20px', padding: '16px 24px', background: rec.bg, borderRadius: '12px', border: `2px solid ${rec.color}`, textAlign: 'center' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: rec.color, marginBottom: '4px' }}>
+                  {count} of 4 checked
+                </div>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: rec.color, fontFamily: 'Fraunces, serif' }}>
+                  {rec.text}
+                </div>
               </div>
-            ))}
+
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', marginTop: '28px', marginBottom: '12px' }}>Architecture Hierarchy (simplest to most complex)</div>
+              <div className="hierarchy-bar">
+                {hierarchy.map((h, idx) => (
+                  <div key={idx} className="hierarchy-segment"
+                    style={{
+                      background: h.color,
+                      color: h.textColor,
+                      borderRadius: idx === 0 ? '10px 0 0 10px' : idx === hierarchy.length - 1 ? '0 10px 10px 0' : '0'
+                    }}>
+                    {h.label}
+                  </div>
+                ))}
+              </div>
+              <div style={{ textAlign: 'center', fontSize: '11px', color: '#999', marginTop: '6px' }}>
+                Simple &rarr; Complex &nbsp;&nbsp;|&nbsp;&nbsp; Low cost &rarr; ~40,000 tokens/query ($$$$$)
+              </div>
+
+              <div style={{ marginTop: '24px', padding: '16px 20px', background: '#f5f3ff', borderRadius: '10px', border: '1px solid #e8e3f8', textAlign: 'center' }}>
+                <div style={{ fontSize: '13px', color: '#6c5ce7', fontWeight: 700, marginBottom: '4px' }}>GARTNER PREDICTION</div>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: '#1a1a1a', fontFamily: 'Fraunces, serif' }}>33%</div>
+                <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>of enterprise software will include agentic AI by 2028</div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            &ldquo;Don&rsquo;t use a construction crew when you need a handyman.&rdquo; Agentic AI is the most powerful architecture in the hierarchy, but it is also the most expensive and hardest to debug. Always start with the simplest architecture that solves your problem and scale up only when you hit its limits.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ========== Main Guide Component ========== */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stages = [
+        { icon: NetworkIcon, label: 'What', component: S1 },
+        { icon: GridIcon, label: 'Patterns', component: S2 },
+        { icon: RocketIcon, label: 'Example', component: S3 },
+        { icon: CogIcon, label: 'Building', component: S4 },
+        { icon: ToolIcon, label: 'Tools', component: S5 },
+        { icon: CompassIcon, label: 'When', component: S6 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+
+      const handleNext = () => {
+        if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1);
+      };
+
+      const handlePrev = () => {
+        if (currentStage > 0) setCurrentStage(currentStage - 1);
+      };
+
+      const handleStageClick = (idx) => setCurrentStage(idx);
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => {
+              const IconComp = stage.icon;
+              return (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button
+                      className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                      onClick={() => handleStageClick(idx)}
+                    >
+                      <IconComp />
+                    </button>
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
 
-          {/* Main Content */}
-          <div style={P.main}>
-            {/* Top Bar */}
-            <div style={P.topBar}>
-              <div style={P.leftSection}>
-                <a href="../../index.html" style={P.backLink} onMouseOver={(e) => e.target.style.opacity = '0.7'} onMouseOut={(e) => e.target.style.opacity = '1'}>← Back</a>
-                <div style={P.badge}>DEEP DIVE</div>
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">5.6</span>
+                  <div className="title">Agentic AI</div>
+                </div>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">DEEP DIVE</div>
+                </div>
               </div>
-              <div style={P.navRow}>
-                <button style={P.navBtn(currentStage === 0)} onClick={() => setCurrentStage(Math.max(0, currentStage - 1))}>←</button>
-                <span style={P.navP}>{currentStage + 1}/5</span>
-                <button style={P.navBtn(currentStage === 4)} onClick={() => setCurrentStage(Math.min(4, currentStage + 1))}>→</button>
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of 6</span>
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentStage === 0} title="Previous stage">&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={currentStage === stages.length - 1} title="Next stage">&#8594;</button>
+                </div>
               </div>
             </div>
 
-            {/* Stage Title */}
-            <div style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef', paddingLeft: '48px', paddingRight: '48px', paddingTop: '20px', paddingBottom: '20px' }}>
-              <h1 style={P.title}>Agentic AI: Multi-Agent Systems</h1>
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
             </div>
-
-            {/* Content */}
-            <CurrentComponent />
           </div>
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
   </script>
 </body>
 </html>
