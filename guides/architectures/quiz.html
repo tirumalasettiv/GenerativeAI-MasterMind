@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Module 5 Quiz &mdash; The Five AI Architectures</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
+    #root { height: 100vh; overflow: hidden; }
+    .container { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 120px; background: #f8f9fa; border-right: 1px solid #e0e0e0; padding: 80px 12px 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .step-btn { width: 64px; height: 64px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.3s ease; position: relative; flex-shrink: 0; }
+    .step-btn.active { background: #6c5ce7; border-color: #6c5ce7; color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
+    .step-btn.correct { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .step-btn.incorrect { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+    .step-btn-label { font-size: 11px; font-weight: 600; color: #999; margin-top: 4px; text-align: center; letter-spacing: 0.3px; transition: color 0.3s ease; }
+    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
+    .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
+    .step-connector.active { background: #6c5ce7; }
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1; background: white; flex-shrink: 0; }
+    .left-section { display: flex; align-items: center; gap: 20px; }
+    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .back-link:hover { color: #2ecc71; }
+    .badge { display: inline-block; background: #e8e3f8; color: #6c5ce7; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
+    .title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .nav-arrows { display: flex; gap: 12px; }
+    .arrow-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
+    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; padding: 32px 48px; gap: 30px; }
+    .explanation { font-size: 22px; line-height: 1.7; color: #2a2a2a; }
+    .scene-card { background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%); border-radius: 16px; padding: 40px; border: 1px solid #e8e3f8; min-height: auto; box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08); }
+    .insight-box { background: #f0faf0; border-left: 4px solid #2ecc71; padding: 24px; border-radius: 8px; color: #1a5e3a; font-size: 17px; line-height: 1.7; margin-top: 24px; position: relative; }
+    .insight-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #2ecc71; margin-bottom: 8px; text-transform: uppercase; }
+    .progress-indicator { font-size: 13px; font-weight: 600; color: #6c5ce7; background: #f5f3ff; padding: 4px 12px; border-radius: 12px; margin-right: 12px; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.6s ease forwards; }
+    .option-card { padding: 18px 24px; background: white; border: 2px solid #e0e0e0; border-radius: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 16px; font-size: 16px; line-height: 1.5; }
+    .option-card:hover { border-color: #6c5ce7; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108, 92, 231, 0.1); }
+    .option-card.selected { border-color: #6c5ce7; background: #f5f3ff; }
+    .option-card.correct { border-color: #2ecc71; background: #f0faf0; }
+    .option-card.incorrect { border-color: #e74c3c; background: #fef5f5; }
+    .option-card.disabled { cursor: default; opacity: 0.7; }
+    .option-card.disabled:hover { transform: none; box-shadow: none; }
+    .option-letter { width: 36px; height: 36px; border-radius: 50%; background: #f5f3ff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #6c5ce7; flex-shrink: 0; transition: all 0.3s ease; }
+    .option-card.selected .option-letter { background: #6c5ce7; border-color: #6c5ce7; color: white; }
+    .option-card.correct .option-letter { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .option-card.incorrect .option-letter { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .submit-btn { padding: 14px 40px; background: #6c5ce7; color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; letter-spacing: 0.3px; }
+    .submit-btn:hover { background: #5a4bd1; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3); }
+    .submit-btn:disabled { background: #c4bce8; cursor: not-allowed; transform: none; box-shadow: none; }
+    .section-tag { display: inline-block; background: #eee9fd; color: #6c5ce7; padding: 4px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 12px; }
+    .score-ring { width: 180px; height: 180px; position: relative; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .score-number { font-family: 'Fraunces', serif; font-size: 48px; font-weight: 700; color: #1a1a1a; line-height: 1; }
+    .score-label { font-size: 14px; color: #999; font-weight: 500; }
+    .result-card { padding: 20px 24px; background: white; border-radius: 14px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 16px; transition: all 0.3s ease; }
+    .result-card:hover { border-color: #6c5ce7; box-shadow: 0 4px 16px rgba(108, 92, 231, 0.08); }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .scale-in { animation: scaleIn 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!--
+    Security note: dangerouslySetInnerHTML below renders only hardcoded SVG icon
+    strings defined in SECTION_ICONS and INSIGHT_ICON constants. No user input is
+    involved — these are developer-controlled static markup, same pattern used
+    across all quiz files in this project.
+  -->
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    const QUESTIONS = [
+      { id: 1, section: "5.1 Architecture Overview", question: "What is the correct order of the five AI architectures from simplest to most complex?", options: ["RAG \u2192 LLM Chat \u2192 Workflow \u2192 Agent \u2192 Agentic AI", "LLM Chat \u2192 RAG \u2192 Workflow \u2192 Agent \u2192 Agentic AI", "Workflow \u2192 LLM Chat \u2192 RAG \u2192 Agentic AI \u2192 Agent", "LLM Chat \u2192 Workflow \u2192 RAG \u2192 Agentic AI \u2192 Agent"], correct: 1, explanation: "The five architectures form a spectrum from simplest to most complex: LLM Chat (bicycle) \u2192 RAG (car) \u2192 Workflow (bus) \u2192 Agent (taxi) \u2192 Agentic AI (fleet). Each level adds capability and cost." },
+      { id: 2, section: "5.1 Architecture Overview", question: "Approximately how many tokens per query does Agentic AI consume compared to basic LLM Chat?", options: ["About 3x more", "About 8x more", "About 25x more", "About 100x more"], correct: 2, explanation: "Agentic AI uses roughly 40,000 tokens per query versus LLM Chat\u2019s 1,500 \u2014 about 25x more expensive. This is why the golden rule is to always start with the simplest architecture that solves your problem." },
+      { id: 3, section: "5.1 Architecture Overview", question: "In the architecture decision tree, what is the first question you should ask?", options: ["Does my task need multiple expertise domains?", "Does a single prompt solve the problem?", "Do I need access to my specific data?", "Is the process repeatable and well-defined?"], correct: 1, explanation: "The decision tree starts with the simplest option: can a single prompt solve it? If yes, use LLM Chat. Only escalate to more complex architectures when simpler ones genuinely can\u2019t handle the task." },
+      { id: 4, section: "5.2 Basic LLM Chat", question: "What is the \u2018over-engineering trap\u2019 in AI architecture selection?", options: ["Using too many API keys for a single application", "Building complex RAG pipelines or deploying agents when a well-crafted prompt would suffice", "Choosing the cheapest AI model to save costs", "Writing too many unit tests for AI applications"], correct: 1, explanation: "The over-engineering trap is building a RAG pipeline or deploying agents when a system prompt with few-shot examples would work perfectly. A well-crafted prompt that ships today beats a complex pipeline that ships next quarter." },
+      { id: 5, section: "5.2 Basic LLM Chat", question: "Which technique involves pasting documents directly into a prompt to leverage large context windows?", options: ["Prompt chaining", "Few-shot learning", "Context stuffing", "Temperature tuning"], correct: 2, explanation: "Context stuffing takes advantage of 128K+ token context windows by pasting documents directly into the prompt. It\u2019s day-one simple and covers many use cases that people mistakenly build RAG pipelines for." },
+      { id: 6, section: "5.2 Basic LLM Chat", question: "What are the four key limitations that signal you should upgrade from LLM Chat to a more complex architecture?", options: ["Speed, accuracy, creativity, and memory", "Knowledge cutoff, no custom data, hallucinations, and no tool use", "Cost, latency, token limits, and rate limiting", "Language support, image generation, audio processing, and video understanding"], correct: 1, explanation: "LLM Chat has four core limitations: knowledge cutoff (training data ends), no custom data access, hallucinations (confident but wrong answers), and no tool use (can\u2019t take real-world actions). Each maps to a specific upgrade path." },
+      { id: 7, section: "5.3 RAG Architecture", question: "What does RAG stand for, and what is its primary benefit?", options: ["Rapid Answer Generation \u2014 makes AI respond faster", "Retrieval-Augmented Generation \u2014 grounds answers in your actual documents", "Recursive Algorithm Gateway \u2014 improves model accuracy through recursion", "Real-time Adaptive Generation \u2014 updates model weights in real time"], correct: 1, explanation: "RAG stands for Retrieval-Augmented Generation. It searches your documents first, then generates answers grounded in what it found \u2014 like a reference librarian who reads the relevant pages before answering. This reduces hallucinations by 70\u201390%." },
+      { id: 8, section: "5.3 RAG Architecture", question: "What are the five core components of a RAG pipeline?", options: ["Tokenizer, Encoder, Decoder, Classifier, Output Layer", "Document Loader, Chunker, Embeddings, Vector Database, LLM Synthesis", "Web Scraper, Parser, Cache, Search Engine, Response Generator", "Input Handler, Middleware, Database, API Gateway, Frontend"], correct: 1, explanation: "A RAG pipeline has five components: Document Loader (reads files), Chunker (splits into pieces), Embeddings (converts to vectors), Vector Database (stores for search), and LLM Synthesis (generates grounded answers with citations)." },
+      { id: 9, section: "5.3 RAG Architecture", question: "What is the recommended chunk size for RAG document splitting, and why does overlap matter?", options: ["1000\u20132000 tokens with no overlap, to maximize unique content per chunk", "256\u2013512 tokens with 10\u201320% overlap, to preserve context at boundaries", "50\u2013100 tokens with 50% overlap, to maximize retrieval precision", "The entire document as one chunk, to avoid losing context"], correct: 1, explanation: "Chunks of 256\u2013512 tokens with 10\u201320% overlap strike the best balance. Too large and retrieval becomes imprecise; too small and you lose context. Overlap ensures sentences that span chunk boundaries aren\u2019t cut off." },
+      { id: 10, section: "5.4 AI Workflows", question: "What is the key characteristic that distinguishes a workflow from an agent?", options: ["Workflows use larger language models than agents", "Workflows follow a fixed, pre-defined sequence while agents decide steps dynamically", "Workflows can use tools but agents cannot", "Workflows are more expensive than agents"], correct: 1, explanation: "The fundamental difference: in a workflow, the engineer designs the sequence in advance \u2014 same steps every run, high reliability, low flexibility. An agent decides its next step dynamically based on observations, giving flexibility but less predictability." },
+      { id: 11, section: "5.4 AI Workflows", question: "Which workflow pattern classifies input first and then routes it down a specialized path?", options: ["Prompt Chaining", "Routing", "Parallelization", "Evaluator-Optimizer"], correct: 1, explanation: "The Routing pattern works like a sorting hat: it classifies the input first, then sends it down the appropriate specialized path. For example, a support ticket classifier routes to billing, technical, or account-specific handlers." },
+      { id: 12, section: "5.4 AI Workflows", question: "Which workflow pattern covers 80% of use cases according to the guide?", options: ["Orchestrator-Workers", "Evaluator-Optimizer", "Parallelization", "Prompt Chaining"], correct: 3, explanation: "Prompt Chaining \u2014 a simple sequential pipeline where each step builds on the previous output \u2014 covers 80% of workflow use cases. You should only graduate to more complex patterns like Orchestrator-Workers or Evaluator-Optimizer when chaining genuinely can\u2019t handle the task." },
+      { id: 13, section: "5.5 AI Agents", question: "What is the ReAct loop that powers AI agents?", options: ["Read \u2192 Evaluate \u2192 Apply \u2192 Compute \u2192 Terminate", "Reason \u2192 Act \u2192 Observe \u2192 Repeat", "Retrieve \u2192 Analyze \u2192 Classify \u2192 Transform", "Request \u2192 Authenticate \u2192 Cache \u2192 Transmit"], correct: 1, explanation: "The ReAct loop (Reason + Act) is the core of agent architecture: the agent reasons about the problem (Thought), selects and calls a tool (Action), receives the result (Observation), then repeats until the goal is achieved." },
+      { id: 14, section: "5.5 AI Agents", question: "Why do most enterprise agent experiments fail to reach production?", options: ["AI models aren\u2019t powerful enough for agent tasks", "Tool overload, poor tool definitions, and no error recovery", "Agents are too expensive for any real-world use", "Regulatory restrictions prevent agent deployment"], correct: 1, explanation: "Only 1 in 9 enterprises experimenting with agents actually run them in production. The three most common failures: too many tools confuse the agent, poorly defined tools force guessing, and missing error recovery causes crashes when APIs fail." },
+      { id: 15, section: "5.5 AI Agents", question: "What is the recommended maximum number of tools for an AI agent?", options: ["1\u20133 tools", "5\u201310 tools", "20\u201350 tools", "Unlimited \u2014 more tools means more capability"], correct: 1, explanation: "Limit agents to 5\u201310 of the most critical tools. Too many tools create a paradox of choice \u2014 the agent spends more time deciding which tool to use than actually solving the problem, leading to confused or incorrect tool selections." },
+      { id: 16, section: "5.6 Agentic AI", question: "Which multi-agent collaboration pattern has agents argue different perspectives while an observer synthesizes the best reasoning?", options: ["Sequential Handoff", "Swarm", "Hierarchical", "Debate"], correct: 3, explanation: "The Debate pattern has multiple agents argue competing perspectives while an observer agent synthesizes the strongest reasoning. This is useful for complex decisions where exploring multiple viewpoints leads to better outcomes." },
+      { id: 17, section: "5.6 Agentic AI", question: "What is \u2018context bleed\u2019 in multi-agent systems?", options: ["When agents run out of context window space", "When one agent\u2019s context leaks into another agent\u2019s reasoning", "When the system prompt is too long", "When agents share the same API key"], correct: 1, explanation: "Context bleed occurs when Agent A\u2019s context leaks into Agent B\u2019s reasoning, causing unexpected behavior. It\u2019s one of the four common gotchas in agentic systems, alongside over-engineering, poor inter-agent contracts, and missing observability." },
+      { id: 18, section: "5.6 Agentic AI", question: "According to the guide, when should you choose Agentic AI over simpler architectures?", options: ["Whenever you need the highest possible accuracy", "When you have a large compute budget", "When you need multiple expertise domains and quality matters more than speed", "When you want to impress stakeholders with cutting-edge technology"], correct: 2, explanation: "Agentic AI is warranted when: multiple expertise areas are needed, quality matters more than speed, work benefits from review/critique cycles, and the task is genuinely complex. If fewer than 3 of these apply, a simpler architecture is likely better." },
+    ];
+
+    /* Hardcoded SVG icon strings — developer-controlled constants, no user input */
+    const SECTION_ICONS = {
+      "5.1": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="5" height="8" rx="1"/><rect x="10" y="8" width="5" height="12" rx="1"/><rect x="17" y="4" width="5" height="16" rx="1"/></svg>',
+      "5.2": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+      "5.3": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+      "5.4": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>',
+      "5.5": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M12 13v4"/><circle cx="7" cy="20" r="2"/><circle cx="17" cy="20" r="2"/></svg>',
+      "5.6": '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="12" cy="16" r="3"/><path d="M10.5 9.5l1.5 4M13.5 9.5l-1.5 4"/></svg>',
+    };
+
+    /* Hardcoded SVG — developer-controlled constant, no user input */
+    const INSIGHT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>';
+
+    function QuestionView({ question, questionIndex, totalQuestions, selectedAnswer, answered, onSelect, onSubmit, onNext }) {
+      const letters = ['A', 'B', 'C', 'D'];
+      return (
+        <div className="fade-in" key={question.id}>
+          <div className="section-tag">{question.section}</div>
+          <div className="explanation">{question.question}</div>
+          <div className="scene-card">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+              {question.options.map((option, idx) => {
+                let cardClass = 'option-card';
+                if (answered) { cardClass += ' disabled'; if (idx === question.correct) { cardClass += ' correct'; } else if (idx === selectedAnswer && idx !== question.correct) { cardClass += ' incorrect'; } } else if (selectedAnswer === idx) { cardClass += ' selected'; }
+                return (
+                  <div key={idx} className={cardClass} onClick={() => !answered && onSelect(idx)} style={{ animationDelay: `${idx * 0.08}s` }}>
+                    <div className="option-letter">{letters[idx]}</div>
+                    <div style={{ flex: 1 }}>{option}</div>
+                    {answered && idx === question.correct && (<span style={{ fontSize: 20, flexShrink: 0 }}>&#10003;</span>)}
+                    {answered && idx === selectedAnswer && idx !== question.correct && (<span style={{ fontSize: 20, flexShrink: 0 }}>&#10007;</span>)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {!answered && (<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}><button className="submit-btn" disabled={selectedAnswer === null} onClick={onSubmit}>Check Answer</button></div>)}
+          {answered && (<div className="insight-box fade-in"><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> {selectedAnswer === question.correct ? 'CORRECT!' : 'EXPLANATION'}</div>{question.explanation}</div>)}
+          {answered && (<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }} className="fade-in"><button className="submit-btn" onClick={onNext}>{questionIndex < totalQuestions - 1 ? 'Next Question \u2192' : 'See Results'}</button></div>)}
+        </div>
+      );
+    }
+
+    function ResultsView({ questions, answers }) {
+      const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      const circumference = 2 * Math.PI * 75;
+      const strokeDashoffset = circumference - (percentage / 100) * circumference;
+      const getGrade = () => {
+        if (percentage >= 90) return { label: 'Outstanding!', color: '#2ecc71', emoji: '\uD83C\uDF1F' };
+        if (percentage >= 70) return { label: 'Great Job!', color: '#6c5ce7', emoji: '\uD83D\uDCAA' };
+        if (percentage >= 50) return { label: 'Good Effort!', color: '#f39c12', emoji: '\uD83D\uDC4D' };
+        return { label: 'Keep Learning!', color: '#e74c3c', emoji: '\uD83D\uDCDA' };
+      };
+      const grade = getGrade();
+      const sectionScores = {};
+      questions.forEach((q, i) => { const sec = q.section.split(' ')[0]; if (!sectionScores[sec]) sectionScores[sec] = { correct: 0, total: 0, name: q.section }; sectionScores[sec].total++; if (answers[i] === q.correct) sectionScores[sec].correct++; });
+
+      return (
+        <div className="scale-in">
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>{grade.emoji}</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 32, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>{grade.label}</div>
+            <div style={{ fontSize: 16, color: '#999' }}>Module 5: The Five AI Architectures</div>
+          </div>
+          <div className="scene-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 48, flexWrap: 'wrap' }}>
+            <div className="score-ring">
+              <svg width="180" height="180" viewBox="0 0 180 180">
+                <circle cx="90" cy="90" r="75" fill="none" stroke="#e8e8f0" strokeWidth="10" />
+                <circle cx="90" cy="90" r="75" fill="none" stroke={grade.color} strokeWidth="10" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} style={{ transition: 'stroke-dashoffset 1s ease' }} />
+              </svg>
+              <div className="score-text"><div className="score-number">{percentage}%</div><div className="score-label">{correctCount}/{questions.length}</div></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 280 }}>
+              {Object.entries(sectionScores).map(([sec, data]) => (
+                <div key={sec} className="result-card">
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: data.correct === data.total ? '#f0faf0' : '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }} dangerouslySetInnerHTML={{__html: SECTION_ICONS[sec] || ''}} />
+                  <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{data.name}</div><div style={{ fontSize: 12, color: '#999' }}>{data.correct}/{data.total} correct</div></div>
+                  <div style={{ padding: '4px 12px', borderRadius: 10, fontSize: 12, fontWeight: 700, background: data.correct === data.total ? '#f0faf0' : '#fef5f5', color: data.correct === data.total ? '#2ecc71' : '#e74c3c' }}>{Math.round((data.correct / data.total) * 100)}%</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="insight-box" style={{ marginTop: 24 }}><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> RECOMMENDATION</div>{percentage >= 90 ? "Excellent mastery of AI architectures! You\u2019ve completed all five modules of the GenAI MasterMind curriculum. You now have a comprehensive understanding of generative AI from fundamentals through advanced multi-agent systems." : percentage >= 70 ? "Strong understanding of AI architectures! Review the sections you missed, particularly the decision criteria for choosing between architectures. Consider retaking to solidify your knowledge." : "Consider revisiting the architecture guides where you scored below 100%. Focus on understanding when to use each architecture and the trade-offs between complexity, cost, and capability."}</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
+            <a href="../../index.html" className="submit-btn" style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}>Back to Guides</a>
+            <button className="submit-btn" onClick={() => window.location.reload()}>Retake Quiz</button>
+          </div>
+        </div>
+      );
+    }
+
+    function Quiz() {
+      const [currentQuestion, setCurrentQuestion] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+      const [answered, setAnswered] = useState(false);
+      const [answers, setAnswers] = useState([]);
+      const [showResults, setShowResults] = useState(false);
+      const contentRef = useRef(null);
+
+      const handleSelect = (idx) => setSelectedAnswer(idx);
+      const handleSubmit = () => { setAnswered(true); const na = [...answers]; na[currentQuestion] = selectedAnswer; setAnswers(na); };
+      const handleNext = () => { if (currentQuestion < QUESTIONS.length - 1) { setCurrentQuestion(currentQuestion + 1); setSelectedAnswer(null); setAnswered(false); if (contentRef.current) contentRef.current.scrollTop = 0; } else { setShowResults(true); } };
+      const handlePrev = () => { if (currentQuestion > 0 && !showResults) { setCurrentQuestion(currentQuestion - 1); setSelectedAnswer(answers[currentQuestion - 1] ?? null); setAnswered(answers[currentQuestion - 1] !== undefined); if (contentRef.current) contentRef.current.scrollTop = 0; } };
+      const handleStageClick = (idx) => { if (showResults) return; if (idx <= answers.length) { setCurrentQuestion(idx); setSelectedAnswer(answers[idx] ?? null); setAnswered(answers[idx] !== undefined); if (contentRef.current) contentRef.current.scrollTop = 0; } };
+      const getStepStatus = (idx) => { if (answers[idx] !== undefined) { return answers[idx] === QUESTIONS[idx].correct ? 'correct' : 'incorrect'; } return ''; };
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {QUESTIONS.map((q, idx) => (
+              <React.Fragment key={idx}>
+                <div className={`step-wrapper ${currentQuestion === idx && !showResults ? 'active' : ''}`}>
+                  <button className={`step-btn ${currentQuestion === idx && !showResults ? 'active' : ''} ${getStepStatus(idx)}`} onClick={() => handleStageClick(idx)} style={{ fontSize: 16, fontWeight: 700 }}>
+                    {answers[idx] !== undefined ? (answers[idx] === QUESTIONS[idx].correct ? '\u2713' : '\u2717') : idx + 1}
+                  </button>
+                  <div className="step-btn-label">Q{idx + 1}</div>
+                </div>
+                {idx < QUESTIONS.length - 1 && (<div className={`step-connector ${answers[idx] !== undefined ? 'active' : ''}`} />)}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
+                <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">5.7</span>
+                  <div className="title">Module 5 Quiz</div>
+                </div>
+                <div style={{ marginLeft: 16 }}><div className="badge">QUIZ</div></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {!showResults && <span className="progress-indicator">Question {currentQuestion + 1} of {QUESTIONS.length}</span>}
+                {showResults && <span className="progress-indicator">Results</span>}
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentQuestion === 0 || showResults} title="Previous question">&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={!answered || showResults} title="Next question">&#8594;</button>
+                </div>
+              </div>
+            </div>
+            <div className="content-area scrollbar-hide" ref={contentRef}>
+              {showResults ? <ResultsView questions={QUESTIONS} answers={answers} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Quiz />);
+  </script>
+</body>
+</html>

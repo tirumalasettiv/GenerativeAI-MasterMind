@@ -676,7 +676,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState } = React;
+    const { useState, useRef } = React;
 
     /* Insight icon as React element */
     const insightSvg = React.createElement('svg', {
@@ -1457,6 +1457,7 @@
     /* Main Guide Component */
     function Guide() {
       const [currentStage, setCurrentStage] = useState(0);
+      const contentRef = useRef(null);
 
       const stages = [
         { icon: SearchIcon, label: 'What is RAG', component: S1 },
@@ -1467,15 +1468,14 @@
         { icon: RocketIcon, label: 'Production', component: S6 },
       ];
 
+      const goTo = (idx) => {
+        if (idx >= 0 && idx < stages.length) {
+          setCurrentStage(idx);
+          if (contentRef.current) contentRef.current.scrollTop = 0;
+        }
+      };
+
       const CurrentComponent = stages[currentStage].component;
-
-      const handleNext = () => {
-        if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1);
-      };
-
-      const handlePrev = () => {
-        if (currentStage > 0) setCurrentStage(currentStage - 1);
-      };
 
       return (
         <div className="container">
@@ -1487,7 +1487,7 @@
                   <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
                     <button
                       className={`step-btn ${currentStage === idx ? 'active' : ''}`}
-                      onClick={() => setCurrentStage(idx)}
+                      onClick={() => goTo(idx)}
                     >
                       <IconComp />
                     </button>
@@ -1516,11 +1516,11 @@
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span className="progress-indicator">Page {currentStage + 1} of 6</span>
+                <span className="progress-indicator">Page {currentStage + 1} of {stages.length}</span>
                 <div className="nav-arrows">
                   <button
                     className="arrow-btn"
-                    onClick={handlePrev}
+                    onClick={() => goTo(currentStage - 1)}
                     disabled={currentStage === 0}
                     title="Previous stage"
                   >
@@ -1528,7 +1528,7 @@
                   </button>
                   <button
                     className="arrow-btn"
-                    onClick={handleNext}
+                    onClick={() => goTo(currentStage + 1)}
                     disabled={currentStage === stages.length - 1}
                     title="Next stage"
                   >
@@ -1538,8 +1538,10 @@
               </div>
             </div>
 
-            <div className="content-area scrollbar-hide" key={currentStage}>
-              <CurrentComponent />
+            <div className="content-area scrollbar-hide" ref={contentRef}>
+              <div className="fade-in" key={currentStage}>
+                <CurrentComponent />
+              </div>
             </div>
           </div>
         </div>
