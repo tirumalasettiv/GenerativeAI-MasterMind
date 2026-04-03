@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
   <title>Module 3 Quiz &mdash; Context Engineering</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -25,7 +26,7 @@
     .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
     .step-connector.active { background: #6c5ce7; }
     .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid #e0e0e0; background: white; flex-shrink: 0; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1; background: white; flex-shrink: 0; }
     .left-section { display: flex; align-items: center; gap: 20px; }
     .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
     .back-link:hover { color: #2ecc71; }

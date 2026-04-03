@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Course Final Exam — GenAI MasterMind</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn.correct {
+      background: #2ecc71;
+      border-color: #2ecc71;
+      color: white;
+    }
+
+    .step-btn.incorrect {
+      background: #e74c3c;
+      border-color: #e74c3c;
+      color: white;
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 3px solid transparent;
+      border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #eee9fd, #eaf4fd);
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 32px 48px;
+      gap: 30px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 40px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 24px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .option-card {
+      padding: 18px 24px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .option-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(108, 92, 231, 0.1);
+    }
+
+    .option-card.selected {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .option-card.correct {
+      border-color: #2ecc71;
+      background: #f0faf0;
+    }
+
+    .option-card.incorrect {
+      border-color: #e74c3c;
+      background: #fef5f5;
+    }
+
+    .option-card.disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .option-card.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .option-letter {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: #6c5ce7;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .option-card.selected .option-letter {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+    }
+
+    .option-card.correct .option-letter {
+      background: #2ecc71;
+      border-color: #2ecc71;
+      color: white;
+    }
+
+    .option-card.incorrect .option-letter {
+      background: #e74c3c;
+      border-color: #e74c3c;
+      color: white;
+    }
+
+    .submit-btn {
+      padding: 14px 40px;
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .submit-btn:hover {
+      background: #5a4bd1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+    }
+
+    .submit-btn:disabled {
+      background: #c4bce8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .section-tag {
+      display: inline-block;
+      background: #eee9fd;
+      color: #6c5ce7;
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    .module-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-left: 8px;
+    }
+
+    .score-ring {
+      width: 180px;
+      height: 180px;
+      position: relative;
+    }
+
+    .score-ring svg {
+      transform: rotate(-90deg);
+    }
+
+    .score-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .score-number {
+      font-family: 'Fraunces', serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1;
+    }
+
+    .score-label {
+      font-size: 14px;
+      color: #999;
+      font-weight: 500;
+    }
+
+    .result-card {
+      padding: 20px 24px;
+      background: white;
+      border-radius: 14px;
+      border: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .result-card:hover {
+      border-color: #6c5ce7;
+      box-shadow: 0 4px 16px rgba(108, 92, 231, 0.08);
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .scale-in {
+      animation: scaleIn 0.5s ease forwards;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const MODULE_META = {
+      1: { name: "Fundamentals", color: "#6c5ce7", bg: "#eee9fd", emoji: "\uD83E\uDDE0" },
+      2: { name: "Prompt Engineering", color: "#e17055", bg: "#fde8e0", emoji: "\uD83C\uDFAF" },
+      3: { name: "Context Engineering", color: "#00b894", bg: "#e6f9f3", emoji: "\uD83D\uDDC2\uFE0F" },
+      4: { name: "MCP", color: "#0984e3", bg: "#e0f0ff", emoji: "\uD83D\uDD0C" },
+      5: { name: "Architectures", color: "#d63031", bg: "#fde8e8", emoji: "\uD83C\uDFD7\uFE0F" },
+    };
+
+    const QUESTIONS = [
+      // Module 1: Fundamentals
+      {
+        id: 1, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "What distinguishes 'generative' AI from other forms of artificial intelligence?",
+        options: [
+          "It uses larger datasets for training",
+          "It creates new content rather than classifying or predicting existing data",
+          "It runs faster than traditional AI models",
+          "It requires human supervision at every step"
+        ],
+        correct: 1,
+        explanation: "The defining trait of generative AI is its ability to create new content \u2014 text, images, code, audio \u2014 rather than simply classifying, sorting, or making predictions about existing data."
+      },
+      {
+        id: 2, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "Why can the same prompt produce different outputs each time you run it?",
+        options: [
+          "The model retrains itself between requests",
+          "Server load causes random errors in processing",
+          "Probabilistic token sampling introduces controlled randomness into generation",
+          "The model deliberately varies responses to avoid copyright issues"
+        ],
+        correct: 2,
+        explanation: "LLMs use probabilistic sampling when selecting the next token. Rather than always picking the single most likely token, the model samples from a distribution \u2014 controlled by temperature \u2014 which introduces natural variation."
+      },
+      {
+        id: 3, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "What is 'fine-tuning' and how does it differ from prompt engineering?",
+        options: [
+          "Fine-tuning adjusts the prompt format; prompt engineering adjusts model weights",
+          "Fine-tuning modifies the model's learned weights; prompt engineering crafts better inputs without changing the model",
+          "They are two names for the same process",
+          "Fine-tuning is for images only; prompt engineering is for text only"
+        ],
+        correct: 1,
+        explanation: "Fine-tuning actually modifies the model's internal weights by training on additional data, permanently changing its behavior. Prompt engineering works with the model as-is, optimizing the input to get better outputs."
+      },
+      {
+        id: 4, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "What is a 'multimodal' model?",
+        options: [
+          "A model that can run on multiple operating systems",
+          "A model trained by multiple companies collaboratively",
+          "A model that processes multiple data types such as text, images, audio, and video",
+          "A model with multiple pricing tiers"
+        ],
+        correct: 2,
+        explanation: "Multimodal models can understand and generate across multiple data types \u2014 text, images, audio, video \u2014 in a single model. GPT-4o and Gemini are examples of multimodal models."
+      },
+      {
+        id: 5, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "What does RLHF (Reinforcement Learning from Human Feedback) achieve?",
+        options: [
+          "It makes models generate faster outputs",
+          "It aligns model outputs with human preferences and values",
+          "It reduces the model's parameter count",
+          "It enables models to access the internet"
+        ],
+        correct: 1,
+        explanation: "RLHF is a training technique where human raters rank model outputs, and the model learns to prefer responses that humans rate highly. This aligns the model's behavior with human expectations for helpfulness, safety, and quality."
+      },
+      {
+        id: 6, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "What does the 'V' in the VERIFY framework stand for?",
+        options: [
+          "Visualize the AI's reasoning process",
+          "Validate the source and cross-check claims",
+          "Verify the model version before use",
+          "Vote on the best AI response"
+        ],
+        correct: 1,
+        explanation: "V stands for Validate \u2014 always cross-check AI claims against reliable sources. Never take AI output at face value, especially for factual claims, statistics, or citations."
+      },
+      {
+        id: 7, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "Which limitation prevents an AI from telling you today's stock price?",
+        options: [
+          "Hallucination \u2014 it would make up the wrong price",
+          "Context window \u2014 stock data is too large to process",
+          "Knowledge cutoff \u2014 its training data has a fixed end date",
+          "Token limit \u2014 numerical data costs too many tokens"
+        ],
+        correct: 2,
+        explanation: "Knowledge cutoff means the model's training data has a fixed end date. It simply doesn't have access to any information after that date, including current stock prices, recent events, or today's weather."
+      },
+      {
+        id: 8, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "What is the relationship between tokens and API cost?",
+        options: [
+          "Tokens are free; you only pay for compute time",
+          "API pricing is per-token \u2014 more tokens consumed means higher cost for both input and output",
+          "You pay a flat rate regardless of token usage",
+          "Only output tokens are charged; input tokens are free"
+        ],
+        correct: 1,
+        explanation: "LLM API pricing is based on tokens consumed. Both input tokens (your prompt) and output tokens (the response) are metered. Longer prompts and longer responses cost more, which is why efficient prompting matters."
+      },
+      {
+        id: 9, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "Why are LLMs sometimes described as 'stochastic parrots' by critics?",
+        options: [
+          "They can only repeat exact phrases from training data",
+          "They reproduce statistical patterns from training without true understanding of meaning",
+          "They require random seed numbers to function",
+          "They were originally trained exclusively on bird sounds"
+        ],
+        correct: 1,
+        explanation: "The 'stochastic parrot' critique argues that LLMs are sophisticated pattern matchers \u2014 they reproduce statistical correlations from training data without genuinely understanding the meaning behind the words they generate."
+      },
+      {
+        id: 10, module: 1,
+        section: "Module 1 \u2014 Fundamentals",
+        question: "What happens when a model's context window is exceeded mid-conversation?",
+        options: [
+          "The model automatically compresses all prior context",
+          "Earlier content is dropped or truncated and the model loses access to it",
+          "The conversation ends with an error message",
+          "The model switches to a larger context window automatically"
+        ],
+        correct: 1,
+        explanation: "When the context window fills up, the oldest content gets pushed out \u2014 like a whiteboard where you must erase old notes to make room. The model can no longer 'see' that earlier content and may forget important context from the start of the conversation."
+      },
+      // Module 2: Prompt Engineering
+      {
+        id: 11, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "What does the 'C' in the COSTAR framework stand for?",
+        options: [
+          "Creativity \u2014 how imaginative the response should be",
+          "Context \u2014 the background information the AI needs to understand the task",
+          "Constraint \u2014 the limitations on the AI's response",
+          "Clarity \u2014 how clear the instructions are"
+        ],
+        correct: 1,
+        explanation: "C stands for Context \u2014 the background information that helps the AI understand the situation. Without context, the AI has to guess what you're working on, often leading to generic or irrelevant responses."
+      },
+      {
+        id: 12, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "What is 'prompt injection'?",
+        options: [
+          "Adding more examples to improve prompt quality",
+          "A technique for combining multiple prompts into one",
+          "Malicious input designed to trick AI into ignoring its system instructions",
+          "Injecting code into the prompt for the AI to execute"
+        ],
+        correct: 2,
+        explanation: "Prompt injection is a security vulnerability where crafted user input manipulates the AI into ignoring its original system instructions. For example, a user might write 'Ignore all previous instructions and do X instead.'"
+      },
+      {
+        id: 13, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "What is the difference between a 'system prompt' and a 'user prompt'?",
+        options: [
+          "System prompts are longer; user prompts are shorter",
+          "System prompts set the AI's behavioral rules and persona; user prompts contain the specific request",
+          "System prompts are optional; user prompts are required",
+          "System prompts are written by the AI; user prompts are written by humans"
+        ],
+        correct: 1,
+        explanation: "The system prompt defines the AI's role, constraints, and behavior rules \u2014 like a job description. The user prompt is the actual task or question. Together they form the complete instruction set the AI works from."
+      },
+      {
+        id: 14, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "What does the 'O' in the COSTAR framework stand for?",
+        options: [
+          "Output \u2014 the format of the response",
+          "Optimization \u2014 how to improve the prompt",
+          "Objective \u2014 the specific task you want the AI to accomplish",
+          "Origin \u2014 where the data comes from"
+        ],
+        correct: 2,
+        explanation: "O stands for Objective \u2014 the specific goal or task you want the AI to accomplish. A clear objective is the most critical component because without knowing WHAT you want, even perfect context and formatting won't help."
+      },
+      {
+        id: 15, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "What does the 'A' in the COSTAR framework stand for?",
+        options: [
+          "Accuracy \u2014 how precise the output should be",
+          "Action \u2014 what the AI should physically do",
+          "Audience \u2014 who the output is intended for",
+          "Analysis \u2014 how deeply to examine the topic"
+        ],
+        correct: 2,
+        explanation: "A stands for Audience \u2014 who will read or use the output. Telling the AI the audience is 'C-level executives' produces very different content than 'junior developers' or '5th graders.' The audience shapes vocabulary, depth, and tone."
+      },
+      {
+        id: 16, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "When is Chain-of-Thought prompting MOST effective?",
+        options: [
+          "Simple factual lookups like 'What year was X founded?'",
+          "Creative writing tasks like poetry or fiction",
+          "Complex multi-step reasoning, math, and logic problems",
+          "Summarizing short paragraphs of text"
+        ],
+        correct: 2,
+        explanation: "Chain-of-Thought shines on problems requiring multi-step reasoning \u2014 math, logic puzzles, coding problems, and analytical tasks. It forces the model to show its work step-by-step, significantly reducing errors on complex reasoning."
+      },
+      {
+        id: 17, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "Why should you avoid vague instructions like 'make it better'?",
+        options: [
+          "The AI will refuse to process vague prompts",
+          "Vague prompts cost more tokens to process",
+          "The AI has no criteria to optimize against \u2014 specific instructions yield specific improvements",
+          "The AI will always produce the same output regardless of the instruction"
+        ],
+        correct: 2,
+        explanation: "'Make it better' gives the AI no direction \u2014 better how? More concise? More detailed? More formal? Specific instructions like 'shorten to 200 words and use more data points' give the AI clear criteria to work toward."
+      },
+      {
+        id: 18, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "What is 'prompt chaining' as a technique?",
+        options: [
+          "Sending the same prompt to multiple AI models simultaneously",
+          "Breaking a complex task into sequential smaller prompts where each output feeds the next",
+          "Linking prompts together using hyperlinks",
+          "Repeating the same prompt multiple times until the output improves"
+        ],
+        correct: 1,
+        explanation: "Prompt chaining breaks a complex task into a sequence of simpler prompts. The output from step 1 becomes input for step 2, and so on. This produces higher quality results than trying to accomplish everything in a single massive prompt."
+      },
+      {
+        id: 19, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "When should you NOT use meta prompting?",
+        options: [
+          "When working with a new AI model for the first time",
+          "When the task involves multiple stakeholders",
+          "For simple, straightforward tasks where you already know exactly what to ask",
+          "When the output needs to be in a specific format"
+        ],
+        correct: 2,
+        explanation: "Meta prompting \u2014 asking the AI to write the prompt for you \u2014 adds unnecessary overhead for simple tasks. If you already know what you want and how to ask for it, just ask directly. Save meta prompting for complex or unfamiliar tasks."
+      },
+      {
+        id: 20, module: 2,
+        section: "Module 2 \u2014 Prompt Engineering",
+        question: "What does the 'R' in the COSTAR framework stand for?",
+        options: [
+          "Reasoning \u2014 how the AI should think through the problem",
+          "Response format \u2014 the desired output structure (JSON, bullets, essay, etc.)",
+          "Reference \u2014 source materials the AI should cite",
+          "Relevance \u2014 how closely to stick to the topic"
+        ],
+        correct: 1,
+        explanation: "R stands for Response format \u2014 explicitly specifying how you want the output structured. Whether it's JSON, markdown, bullet points, a table, or a narrative essay, defining the format prevents the AI from guessing and ensures usable output."
+      },
+      // Module 3: Context Engineering
+      {
+        id: 21, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "Which of the following is one of the five sources of context for an LLM?",
+        options: [
+          "The model's parameter count",
+          "The GPU hardware running the model",
+          "Retrieved documents from external knowledge bases",
+          "The programming language the model was built with"
+        ],
+        correct: 2,
+        explanation: "The five sources of context are: system prompt, user input, conversation history, tool results, and retrieved documents. Retrieved documents (via RAG or similar) inject external knowledge into the model's context window."
+      },
+      {
+        id: 22, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "What is 'context window utilization' and why does it matter?",
+        options: [
+          "It measures how fast the model processes tokens",
+          "It tracks how many users are using the model simultaneously",
+          "It measures how effectively the available context budget is used \u2014 wasted space means wasted capability",
+          "It counts how many windows are open in the browser"
+        ],
+        correct: 2,
+        explanation: "Context window utilization is about using your available token budget wisely. Filling it with irrelevant content wastes capacity on noise. Using too little means the model lacks information it could benefit from. The goal is the right information, efficiently packed."
+      },
+      {
+        id: 23, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "What is 'Tier 2' in the three-tier memory hierarchy?",
+        options: [
+          "Project Memory \u2014 shared team conventions stored in version control",
+          "User Memory \u2014 personalized preferences and interaction history per individual",
+          "Dynamic Memory \u2014 on-demand context imports for specific tasks",
+          "System Memory \u2014 the model's built-in training knowledge"
+        ],
+        correct: 1,
+        explanation: "Tier 2 is User Memory \u2014 it stores individual user preferences, past interaction patterns, and learned behaviors. Unlike Tier 1 (shared project standards) or Tier 3 (on-demand imports), Tier 2 personalizes the AI experience per user."
+      },
+      {
+        id: 24, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "What happens when contradictory instructions appear in the model's context?",
+        options: [
+          "The model always follows the most recent instruction",
+          "The model throws an error and stops processing",
+          "Context clash occurs \u2014 model behavior becomes unpredictable or inconsistent",
+          "The model asks the user to clarify"
+        ],
+        correct: 2,
+        explanation: "Context clash occurs when conflicting instructions compete for the model's attention. The model may follow either instruction unpredictably, produce confused outputs, or try to satisfy both simultaneously \u2014 leading to inconsistent results."
+      },
+      {
+        id: 25, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "Why is sub-agent isolation a valuable context management technique?",
+        options: [
+          "It makes each sub-agent run faster by using less memory",
+          "Each sub-agent gets only the context it needs, preventing pollution and confusion across tasks",
+          "It allows sub-agents to share context freely between each other",
+          "It reduces the cost of API calls by half"
+        ],
+        correct: 1,
+        explanation: "Sub-agent isolation ensures each agent's context window contains only what's relevant to its specific task. This prevents context pollution (irrelevant data from other tasks) and context confusion (misleading information from unrelated operations)."
+      },
+      {
+        id: 26, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "What is the difference between 'Reset' and 'Compact' in context management?",
+        options: [
+          "Reset is for text; Compact is for images",
+          "Reset clears all context for a fresh start; Compact summarizes existing context to free space while preserving key information",
+          "Reset is permanent; Compact is temporary",
+          "They are the same operation with different names"
+        ],
+        correct: 1,
+        explanation: "Reset wipes the slate clean \u2014 ideal when switching to a completely different task. Compact summarizes the existing conversation to reclaim token space while keeping the essential information \u2014 ideal when the same task has grown too long."
+      },
+      {
+        id: 27, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "What is 'context poisoning'?",
+        options: [
+          "When the context window becomes too large to process",
+          "When tool calls introduce hallucinated or incorrect data into the context, corrupting subsequent reasoning",
+          "When users intentionally provide false information",
+          "When the model's training data contains errors"
+        ],
+        correct: 1,
+        explanation: "Context poisoning happens when tool calls return hallucinated, outdated, or incorrect data that the model then treats as ground truth. Once bad data enters the context, the model's reasoning becomes corrupted \u2014 garbage in, garbage out."
+      },
+      {
+        id: 28, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "Why should system prompts use principles rather than rigid step-by-step scripts?",
+        options: [
+          "Principles are shorter and cheaper to process",
+          "Scripts are more effective but harder to write",
+          "Principles let the model reason about edge cases; scripts break on unexpected inputs",
+          "There is no difference \u2014 both approaches work equally well"
+        ],
+        correct: 2,
+        explanation: "Principle-based system prompts give the model a reasoning framework it can adapt to novel situations. Rigid scripts work only for anticipated scenarios and break on edge cases the script author didn't foresee \u2014 the 'Goldilocks Zone' favors principles."
+      },
+      {
+        id: 29, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "What is 'context confusion'?",
+        options: [
+          "When the user doesn't understand the model's response",
+          "When irrelevant information in the context misleads the model's responses",
+          "When the model cannot parse the input format",
+          "When two users share the same context window"
+        ],
+        correct: 1,
+        explanation: "Context confusion occurs when irrelevant information clutters the context window, causing the model to factor in unrelated data when generating responses. It's different from context clash (contradictions) \u2014 confusion is about noise, clash is about conflicts."
+      },
+      {
+        id: 30, module: 3,
+        section: "Module 3 \u2014 Context Engineering",
+        question: "What determines the 'right' amount of context to provide?",
+        options: [
+          "Always fill the entire context window for maximum information",
+          "Use the minimum possible context to save costs",
+          "Enough to answer accurately, little enough to avoid noise \u2014 the Goldilocks principle",
+          "Exactly 4,096 tokens regardless of the task"
+        ],
+        correct: 2,
+        explanation: "The Goldilocks principle: too little context and the model lacks critical information; too much and it drowns in noise. The right amount provides everything needed for accurate responses without introducing irrelevant information that could mislead."
+      },
+      // Module 4: MCP
+      {
+        id: 31, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "What three primitives can an MCP server expose?",
+        options: [
+          "Functions, Classes, and Variables",
+          "Tools, Resources, and Prompts",
+          "Endpoints, Middleware, and Routes",
+          "Inputs, Outputs, and Logs"
+        ],
+        correct: 1,
+        explanation: "MCP servers can expose three primitives: Tools (executable functions the LLM can call), Resources (read-only data the LLM can access), and Prompts (reusable prompt templates). Each serves a different purpose in the MCP ecosystem."
+      },
+      {
+        id: 32, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "What transport protocols does MCP support?",
+        options: [
+          "HTTP and WebSocket only",
+          "gRPC and Protocol Buffers",
+          "stdio for local processes and HTTP/SSE for remote servers",
+          "TCP and UDP only"
+        ],
+        correct: 2,
+        explanation: "MCP supports two transport protocols: stdio (standard input/output) for local processes running on the same machine, and HTTP with Server-Sent Events (SSE) for remote servers. This flexibility supports both local tools and cloud-hosted services."
+      },
+      {
+        id: 33, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "How does the MCP 'host' differ from the MCP 'client'?",
+        options: [
+          "They are the same thing with different names",
+          "The host is the user; the client is the AI model",
+          "The host is the application (e.g., Claude Code); the client manages connections to servers within the host",
+          "The host runs on the server; the client runs on the user's machine"
+        ],
+        correct: 2,
+        explanation: "The host is the top-level application (like Claude Code, Cursor, or a custom app). The client is a component within the host that manages the connection to a specific MCP server. One host can contain multiple clients, each connected to a different server."
+      },
+      {
+        id: 34, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "What is 'tool poisoning' in the MCP context?",
+        options: [
+          "When a tool returns too much data, filling the context window",
+          "When a tool crashes and corrupts the model's memory",
+          "Malicious tool descriptions that trick the LLM into performing unsafe actions",
+          "When outdated tools provide stale information"
+        ],
+        correct: 2,
+        explanation: "Tool poisoning is a security risk where an MCP server's tool descriptions are crafted to manipulate the LLM. For example, a malicious tool description might instruct the model to send sensitive data to an external server when the tool is called."
+      },
+      {
+        id: 35, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "What is the advantage of MCP 'resources' over 'tools'?",
+        options: [
+          "Resources are faster to execute",
+          "Resources provide read-only data without executing code or causing side effects",
+          "Resources cost fewer tokens to use",
+          "Resources don't require server connections"
+        ],
+        correct: 1,
+        explanation: "MCP resources provide data without executing code \u2014 they're read-only and have no side effects. Tools, by contrast, perform actions (write files, send emails, modify databases). Resources are safer because they can't accidentally change anything."
+      },
+      {
+        id: 36, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "Why do MCP tool calls consume more tokens than equivalent inline code?",
+        options: [
+          "MCP uses a less efficient encoding format",
+          "MCP tools require authentication tokens that consume space",
+          "Structured JSON schemas plus round-trip conversations add significant overhead compared to a single code execution",
+          "MCP tools process data more slowly, requiring more tokens"
+        ],
+        correct: 2,
+        explanation: "Each MCP tool call involves JSON schema definitions (consuming tokens upfront), structured request/response formatting, and potentially multiple round-trips. The same logic written as inline code executes once without schema overhead or conversational back-and-forth."
+      },
+      {
+        id: 37, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "What problem does project-scoped MCP configuration solve?",
+        options: [
+          "It makes MCP servers run faster for specific projects",
+          "It limits which servers load per project, preventing irrelevant tools from consuming tokens globally",
+          "It allows sharing MCP configuration across team members",
+          "It encrypts MCP communications for sensitive projects"
+        ],
+        correct: 1,
+        explanation: "Project-scoped configuration ensures only relevant MCP servers are loaded for each project. Without it, all globally configured servers load for every project \u2014 a web dev project doesn't need database admin tools consuming thousands of tokens."
+      },
+      {
+        id: 38, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "With MCP, integrating N tools across M platforms requires how many total implementations?",
+        options: [
+          "N \u00d7 M implementations (one per tool-platform pair)",
+          "N + M implementations (each tool builds one server, each platform builds one client)",
+          "Just N implementations (one per tool)",
+          "Just M implementations (one per platform)"
+        ],
+        correct: 1,
+        explanation: "MCP reduces the integration problem from N\u00d7M to N+M. Each tool vendor builds one MCP server, and each platform builds one MCP client. A new tool instantly works with all platforms, and a new platform instantly accesses all tools."
+      },
+      {
+        id: 39, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "What is the primary risk of loading too many MCP servers simultaneously?",
+        options: [
+          "The servers will conflict with each other and crash",
+          "Context pollution \u2014 tool definitions consume tokens before the conversation even begins",
+          "The AI will become confused about which server to use",
+          "Network bandwidth becomes the bottleneck"
+        ],
+        correct: 1,
+        explanation: "Every loaded MCP server adds its tool definitions to the context window. With many servers, thousands of tokens can be consumed by tool schemas alone \u2014 before a single user message. This is context pollution: paying for irrelevant capability."
+      },
+      {
+        id: 40, module: 4,
+        section: "Module 4 \u2014 MCP",
+        question: "How does 'code mode' differ from traditional MCP tool calling?",
+        options: [
+          "Code mode uses Python instead of JavaScript",
+          "Code mode runs on the server instead of the client",
+          "The LLM generates code executed once in a sandbox instead of making multiple round-trip tool calls",
+          "Code mode bypasses the MCP protocol entirely"
+        ],
+        correct: 2,
+        explanation: "In code mode, the LLM writes a single block of code (e.g., TypeScript) that calls multiple tools in sequence, executes once in a sandboxed environment, and returns the result. This eliminates the ping-pong of individual tool calls, reducing latency, tokens, and cost."
+      },
+      // Module 5: Architectures
+      {
+        id: 41, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "In the architecture spectrum, which architecture is compared to a 'bicycle'?",
+        options: [
+          "RAG \u2014 because it's a basic form of retrieval",
+          "LLM Chat \u2014 because it's the simplest, direct conversation with no external tools",
+          "Workflow \u2014 because it follows a fixed path",
+          "Agent \u2014 because it moves autonomously"
+        ],
+        correct: 1,
+        explanation: "LLM Chat is the 'bicycle' of AI architectures \u2014 the simplest, most lightweight option. It's just direct conversation with the model using only its training knowledge, with no databases, tools, or retrieval systems attached."
+      },
+      {
+        id: 42, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "What primary benefit does RAG provide over plain LLM Chat?",
+        options: [
+          "It makes the model respond faster",
+          "It allows the model to generate images",
+          "It grounds responses in actual documents, reducing hallucinations by 70-90%",
+          "It reduces the cost of API calls"
+        ],
+        correct: 2,
+        explanation: "RAG's key benefit is grounding \u2014 by retrieving relevant documents and including them in the prompt, the model has factual evidence to base its responses on rather than relying solely on training knowledge. This dramatically reduces hallucinations."
+      },
+      {
+        id: 43, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "What are the 5 components of a RAG pipeline?",
+        options: [
+          "Parser, Tokenizer, Model, Decoder, Cache",
+          "Input, Process, Output, Validate, Store",
+          "Document Loader, Chunker, Embeddings, Vector Database, LLM Synthesis",
+          "Query, Search, Rank, Filter, Display"
+        ],
+        correct: 2,
+        explanation: "A RAG pipeline consists of: Document Loader (reads files), Chunker (splits into pieces), Embeddings (converts to vectors), Vector Database (stores and searches vectors), and LLM Synthesis (generates the final answer from retrieved context)."
+      },
+      {
+        id: 44, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "Why is chunk size a critical design decision in RAG?",
+        options: [
+          "It determines the programming language used",
+          "Larger chunks are always better for accuracy",
+          "Too large adds noise that dilutes relevance; too small loses context needed for comprehension",
+          "Chunk size only affects storage costs, not retrieval quality"
+        ],
+        correct: 2,
+        explanation: "Chunk size is a precision-vs-context tradeoff. Large chunks include more context but may dilute the relevant signal with noise. Small chunks are more precise but may split important information across boundaries. The sweet spot is typically 256-512 tokens."
+      },
+      {
+        id: 45, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "What is the ReAct loop in AI agents?",
+        options: [
+          "A framework for building React.js applications with AI",
+          "A Thought \u2192 Action \u2192 Observation cycle repeated until the goal is achieved",
+          "A method for reacting to user input in real time",
+          "A loop that reactivates the model after each timeout"
+        ],
+        correct: 1,
+        explanation: "ReAct (Reasoning + Acting) is the core agent pattern: the agent Thinks (plans next step), Acts (calls a tool), Observes (checks the result), then repeats. Each observation informs the next thought, making the agent adaptive and resilient."
+      },
+      {
+        id: 46, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "What distinguishes a Workflow from an Agent?",
+        options: [
+          "Workflows are more expensive to run",
+          "Agents require human supervision; Workflows don't",
+          "Workflows follow fixed predetermined steps; Agents dynamically decide the next action at each step",
+          "There is no meaningful difference \u2014 the terms are interchangeable"
+        ],
+        correct: 2,
+        explanation: "The key distinction is determinism. Workflows follow a fixed, predetermined sequence \u2014 the same steps every time. Agents decide dynamically at each step based on observations, adapting their approach as new information emerges."
+      },
+      {
+        id: 47, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "Which workflow pattern uses a feedback loop to iteratively improve output quality?",
+        options: [
+          "Prompt Chaining \u2014 sequential processing",
+          "Routing \u2014 classifier-based selection",
+          "Parallelization \u2014 simultaneous subtask execution",
+          "Evaluator-Optimizer \u2014 generates, evaluates, revises until a quality threshold is met"
+        ],
+        correct: 3,
+        explanation: "The Evaluator-Optimizer pattern creates a quality feedback loop: one LLM generates content, another evaluates it against criteria, and if quality is below threshold, the content is revised. This loop repeats until the output meets standards (typically 2-3 iterations)."
+      },
+      {
+        id: 48, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "Which multi-agent collaboration pattern accounts for approximately 70% of production deployments?",
+        options: [
+          "Pipeline \u2014 fixed sequential handoff between agents",
+          "Supervisor \u2014 central orchestrator decomposes tasks and delegates to specialists",
+          "Debate \u2014 agents argue opposing positions while a judge synthesizes",
+          "Swarm \u2014 self-organizing autonomous agents with minimal central control"
+        ],
+        correct: 1,
+        explanation: "The Supervisor pattern dominates production systems because it balances flexibility with control. A central orchestrator decomposes complex tasks, delegates to specialized agents, handles errors, and synthesizes results \u2014 like a project manager leading a team."
+      },
+      {
+        id: 49, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "What are the three core capabilities every AI agent needs?",
+        options: [
+          "Speed, Accuracy, and Cost-efficiency",
+          "Training, Fine-tuning, and Deployment",
+          "Reasoning, Tool Use, and Memory/Context",
+          "Input Processing, Output Generation, and Logging"
+        ],
+        correct: 2,
+        explanation: "Every capable agent requires: Reasoning (break down goals, plan steps, adapt to unexpected results), Tool Use (call external APIs, databases, file systems via MCP), and Memory/Context (maintain state across multi-step workflows without losing the original goal)."
+      },
+      {
+        id: 50, module: 5,
+        section: "Module 5 \u2014 Architectures",
+        question: "What is the 'Golden Rule' of AI architecture selection?",
+        options: [
+          "Always use the most advanced architecture available",
+          "Match the architecture to the team's technical skill level",
+          "Start simple, measure results, and upgrade only when data tells you to",
+          "Choose the architecture with the lowest token cost"
+        ],
+        correct: 2,
+        explanation: "The Golden Rule: start with the simplest architecture that could work (often LLM Chat), measure its performance, and upgrade only when you have evidence the current approach isn't sufficient. Over-engineering wastes time and money."
+      },
+    ];
+
+    const MODULE_ICONS = {
+      1: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+      2: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4"/><path d="M8 12h8"/></svg>',
+      3: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 8h2"/><path d="M7 11h5"/></svg>',
+      4: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6"/><path d="M12 16v6"/><circle cx="12" cy="12" r="2"/><path d="M4.93 4.93l4.24 4.24"/><path d="M14.83 14.83l4.24 4.24"/><path d="M2 12h6"/><path d="M16 12h6"/></svg>',
+      5: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+    };
+
+    /* SVG icon used in explanation boxes - static developer-controlled content, no user input */
+    const INSIGHT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>';
+
+    function QuestionView({ question, questionIndex, totalQuestions, selectedAnswer, answered, onSelect, onSubmit, onNext }) {
+      const letters = ['A', 'B', 'C', 'D'];
+      const meta = MODULE_META[question.module];
+
+      return (
+        <div className="fade-in" key={question.id}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <div className="section-tag">
+              {question.section}
+            </div>
+            <span className="module-tag" style={{ background: meta.bg, color: meta.color }}>
+              {meta.emoji} {meta.name}
+            </span>
+          </div>
+
+          <div className="explanation">
+            {question.question}
+          </div>
+
+          <div className="scene-card">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+              {question.options.map((option, idx) => {
+                let cardClass = 'option-card';
+                if (answered) {
+                  cardClass += ' disabled';
+                  if (idx === question.correct) {
+                    cardClass += ' correct';
+                  } else if (idx === selectedAnswer && idx !== question.correct) {
+                    cardClass += ' incorrect';
+                  }
+                } else if (selectedAnswer === idx) {
+                  cardClass += ' selected';
+                }
+
+                return (
+                  <div
+                    key={idx}
+                    className={cardClass}
+                    onClick={() => !answered && onSelect(idx)}
+                    style={{ animationDelay: `${idx * 0.08}s` }}
+                  >
+                    <div className="option-letter">{letters[idx]}</div>
+                    <div style={{ flex: 1 }}>{option}</div>
+                    {answered && idx === question.correct && (
+                      <span style={{ fontSize: 20, flexShrink: 0 }}>&#10003;</span>
+                    )}
+                    {answered && idx === selectedAnswer && idx !== question.correct && (
+                      <span style={{ fontSize: 20, flexShrink: 0 }}>&#10007;</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {!answered && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+              <button
+                className="submit-btn"
+                disabled={selectedAnswer === null}
+                onClick={onSubmit}
+              >
+                Check Answer
+              </button>
+            </div>
+          )}
+
+          {answered && (
+            <div className="insight-box fade-in">
+              <div className="insight-label">
+                {/* Static SVG icon - no user input involved */}
+                <span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} />
+                {selectedAnswer === question.correct ? 'CORRECT!' : 'EXPLANATION'}
+              </div>
+              {question.explanation}
+            </div>
+          )}
+
+          {answered && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }} className="fade-in">
+              <button
+                className="submit-btn"
+                onClick={onNext}
+              >
+                {questionIndex < totalQuestions - 1 ? 'Next Question \u2192' : 'See Results'}
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function ResultsView({ questions, answers }) {
+      const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      const circumference = 2 * Math.PI * 75;
+      const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+      const getGrade = () => {
+        if (percentage >= 90) return { label: 'Outstanding!', color: '#2ecc71', emoji: '\uD83C\uDF1F' };
+        if (percentage >= 70) return { label: 'Great Job!', color: '#6c5ce7', emoji: '\uD83D\uDCAA' };
+        if (percentage >= 50) return { label: 'Good Effort!', color: '#f39c12', emoji: '\uD83D\uDC4D' };
+        return { label: 'Keep Learning!', color: '#e74c3c', emoji: '\uD83D\uDCDA' };
+      };
+
+      const grade = getGrade();
+
+      const moduleScores = {};
+      questions.forEach((q, i) => {
+        const mod = q.module;
+        if (!moduleScores[mod]) moduleScores[mod] = { correct: 0, total: 0 };
+        moduleScores[mod].total++;
+        if (answers[i] === q.correct) moduleScores[mod].correct++;
+      });
+
+      return (
+        <div className="scale-in">
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>{grade.emoji}</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 32, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
+              {grade.label}
+            </div>
+            <div style={{ fontSize: 16, color: '#999' }}>Course Final Exam \u2014 All 5 Modules</div>
+          </div>
+
+          <div className="scene-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 48, flexWrap: 'wrap' }}>
+            <div className="score-ring">
+              <svg width="180" height="180" viewBox="0 0 180 180">
+                <circle cx="90" cy="90" r="75" fill="none" stroke="#e8e8f0" strokeWidth="10" />
+                <circle
+                  cx="90" cy="90" r="75"
+                  fill="none"
+                  stroke={grade.color}
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  style={{ transition: 'stroke-dashoffset 1s ease' }}
+                />
+              </svg>
+              <div className="score-text">
+                <div className="score-number">{percentage}%</div>
+                <div className="score-label">{correctCount}/{questions.length}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 320 }}>
+              {Object.entries(moduleScores).map(([mod, data]) => {
+                const meta = MODULE_META[mod];
+                return (
+                  <div key={mod} className="result-card">
+                    {/* Static SVG module icons - no user input involved */}
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 10,
+                      background: data.correct === data.total ? '#f0faf0' : meta.bg,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                      color: data.correct === data.total ? '#2ecc71' : meta.color,
+                    }}
+                      dangerouslySetInnerHTML={{__html: MODULE_ICONS[mod] || ''}}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>
+                        {meta.emoji} Module {mod}: {meta.name}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#999' }}>{data.correct}/{data.total} correct</div>
+                    </div>
+                    <div style={{
+                      padding: '4px 12px',
+                      borderRadius: 10,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      background: data.correct === data.total ? '#f0faf0' : '#fef5f5',
+                      color: data.correct === data.total ? '#2ecc71' : '#e74c3c',
+                    }}>
+                      {Math.round((data.correct / data.total) * 100)}%
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="insight-box" style={{ marginTop: 24 }}>
+            <div className="insight-label">
+              {/* Static SVG icon - no user input involved */}
+              <span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} />
+              RECOMMENDATION
+            </div>
+            {percentage >= 90
+              ? "Exceptional mastery across all modules! You have a comprehensive understanding of Generative AI \u2014 from fundamentals through advanced architectures. You're ready to build production AI systems."
+              : percentage >= 70
+              ? "Strong overall understanding! Review the modules where you scored below 100% to solidify your knowledge, then you'll be fully ready to apply these concepts in practice."
+              : percentage >= 50
+              ? "Good foundation! Focus on the modules with the lowest scores \u2014 revisit those guides before moving on to building AI applications."
+              : "Keep learning! Revisit each module's guides, starting with the ones you scored lowest on. Take the individual module quizzes to build up your knowledge before retaking this final exam."
+            }
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
+            <a
+              href="../../index.html"
+              className="submit-btn"
+              style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}
+            >
+              Back to Guides
+            </a>
+            <button
+              className="submit-btn"
+              onClick={() => window.location.reload()}
+            >
+              Retake Exam
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    function Quiz() {
+      const [currentQuestion, setCurrentQuestion] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+      const [answered, setAnswered] = useState(false);
+      const [answers, setAnswers] = useState([]);
+      const [showResults, setShowResults] = useState(false);
+      const contentRef = useRef(null);
+
+      const handleSelect = (idx) => {
+        setSelectedAnswer(idx);
+      };
+
+      const handleSubmit = () => {
+        setAnswered(true);
+        const newAnswers = [...answers];
+        newAnswers[currentQuestion] = selectedAnswer;
+        setAnswers(newAnswers);
+      };
+
+      const handleNext = () => {
+        if (currentQuestion < QUESTIONS.length - 1) {
+          setCurrentQuestion(currentQuestion + 1);
+          setSelectedAnswer(null);
+          setAnswered(false);
+          if (contentRef.current) contentRef.current.scrollTop = 0;
+        } else {
+          setShowResults(true);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentQuestion > 0 && !showResults) {
+          setCurrentQuestion(currentQuestion - 1);
+          setSelectedAnswer(answers[currentQuestion - 1] ?? null);
+          setAnswered(answers[currentQuestion - 1] !== undefined);
+          if (contentRef.current) contentRef.current.scrollTop = 0;
+        }
+      };
+
+      const handleStageClick = (idx) => {
+        if (showResults) return;
+        if (idx <= answers.length) {
+          setCurrentQuestion(idx);
+          setSelectedAnswer(answers[idx] ?? null);
+          setAnswered(answers[idx] !== undefined);
+          if (contentRef.current) contentRef.current.scrollTop = 0;
+        }
+      };
+
+      const getStepStatus = (idx) => {
+        if (answers[idx] !== undefined) {
+          return answers[idx] === QUESTIONS[idx].correct ? 'correct' : 'incorrect';
+        }
+        return '';
+      };
+
+      return (
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {QUESTIONS.map((q, idx) => {
+              const meta = MODULE_META[q.module];
+              const prevModule = idx > 0 ? QUESTIONS[idx - 1].module : null;
+              const showDivider = prevModule !== null && prevModule !== q.module;
+
+              return (
+                <React.Fragment key={idx}>
+                  {showDivider && (
+                    <div style={{
+                      width: '80%', height: 2, background: `linear-gradient(90deg, transparent, ${meta.color}, transparent)`,
+                      margin: '6px 0', flexShrink: 0, borderRadius: 1,
+                    }} />
+                  )}
+                  <div className={`step-wrapper ${currentQuestion === idx && !showResults ? 'active' : ''}`}>
+                    <button
+                      className={`step-btn ${currentQuestion === idx && !showResults ? 'active' : ''} ${getStepStatus(idx)}`}
+                      onClick={() => handleStageClick(idx)}
+                      style={{ fontSize: 16, fontWeight: 700 }}
+                    >
+                      {answers[idx] !== undefined
+                        ? (answers[idx] === QUESTIONS[idx].correct ? '\u2713' : '\u2717')
+                        : idx + 1
+                      }
+                    </button>
+                    <div className="step-btn-label">Q{idx + 1}</div>
+                  </div>
+                  {idx < QUESTIONS.length - 1 && QUESTIONS[idx + 1].module === q.module && (
+                    <div className={`step-connector ${answers[idx] !== undefined ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
+                <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">F.1</span>
+                  <div className="title">Course Final Exam</div>
+                </div>
+                <div style={{ marginLeft: 16 }}>
+                  <div className="badge">FINAL EXAM</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {!showResults && (
+                  <span className="progress-indicator">
+                    Question {currentQuestion + 1} of {QUESTIONS.length}
+                  </span>
+                )}
+                {showResults && (
+                  <span className="progress-indicator">
+                    Results
+                  </span>
+                )}
+                <div className="nav-arrows">
+                  <button
+                    className="arrow-btn"
+                    onClick={handlePrev}
+                    disabled={currentQuestion === 0 || showResults}
+                    title="Previous question"
+                  >
+                    &#8592;
+                  </button>
+                  <button
+                    className="arrow-btn"
+                    onClick={handleNext}
+                    disabled={!answered || showResults}
+                    title="Next question"
+                  >
+                    &#8594;
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="content-area scrollbar-hide" ref={contentRef}>
+              {showResults ? (
+                <ResultsView questions={QUESTIONS} answers={answers} />
+              ) : (
+                <QuestionView
+                  question={QUESTIONS[currentQuestion]}
+                  questionIndex={currentQuestion}
+                  totalQuestions={QUESTIONS.length}
+                  selectedAnswer={selectedAnswer}
+                  answered={answered}
+                  onSelect={handleSelect}
+                  onSubmit={handleSubmit}
+                  onNext={handleNext}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Quiz />);
+  </script>
+</body>
+</html>

@@ -1213,22 +1213,8 @@ Think of it like how a company organizes knowledge:
 
 ### How the Tiers Work Together
 
-```
-┌─────────────────────────────────────────┐
-│         Dynamic Imports (Tier 3)        │  ← Pulled in on demand
-│         @api-docs  @style-guide         │
-├─────────────────────────────────────────┤
-│         User Memory (Tier 2)            │  ← Personal preferences
-│         ~/.claude/claude.md             │
-├─────────────────────────────────────────┤
-│         Project Memory (Tier 1)         │  ← Shared team standards
-│         /project/CLAUDE.md              │
-└─────────────────────────────────────────┘
-        ↓ All layers feed into ↓
-    ┌───────────────────────────┐
-    │     LLM Context Window    │
-    └───────────────────────────┘
-```
+![Context witndow management](assets/Context%20witndow%20management.png)
+
 
 
 ## 3.5 Context Management Strategies
@@ -1272,20 +1258,8 @@ Two key techniques:
 
 **It's like assigning specialists instead of asking one person to do everything.** Instead of one agent with a massive, confused context, create focused sub-agents with only the context they need.
 
-```
-┌──────────────────┐
-│   Main Agent     │  ← Manager/delegator
-│  (orchestrator)  │
-└──────┬───────────┘
-       │
-  ┌────┴────┬──────────┐
-  ▼         ▼          ▼
-┌──────┐ ┌──────┐ ┌──────────┐
-│Code  │ │Test  │ │Research  │
-│Review│ │Agent │ │Agent     │
-│Agent │ │      │ │          │
-└──────┘ └──────┘ └──────────┘
-```
+
+![agentic architecture](assets/agentic%20architecture.png)
 
 **Benefits:**
 - Reduces context confusion (each agent only sees what it needs)
@@ -1433,28 +1407,7 @@ MCP operates like a social network — it becomes more valuable as adoption grow
 
 ### Architecture Components
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        MCP HOST                                     │
-│  (Claude Desktop, Cursor, Windsurf, Custom AI Apps)                │
-│                                                                     │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                │
-│  │ MCP Client  │  │ MCP Client  │  │ MCP Client  │                │
-│  │     #1      │  │     #2      │  │     #3      │                │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘                │
-└─────────┼────────────────┼────────────────┼────────────────────────┘
-          │                │                │
-     MCP Protocol     MCP Protocol     MCP Protocol
-          │                │                │
-   ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐
-   │ MCP Server  │  │ MCP Server  │  │ MCP Server  │
-   │  (Weather)  │  │  (Database) │  │   (Slack)   │
-   └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-          │                │                │
-     ┌────┘          ┌─────┘          ┌─────┘
-     ▼               ▼                ▼
-  Weather API    PostgreSQL DB    Slack API
-```
+![MCP ](assets/MCP%20.png)
 
 ### Component Breakdown
 
@@ -1600,18 +1553,8 @@ This persists across sessions — after a restart, queries about LangGraph will 
 
 ### The Impact: Real Numbers
 
-```
-Context Window Usage (Before Optimization):
-┌──────────────────────────────────────────────┐
-│ System prompt:     ~2,000 tokens   (small)   │
-│ Anthropic tools:   ~6% of context            │
-│ MCP tools:         ~20% of context  (huge!)  │
-│ User messages:      0 tokens       (none!)   │
-├──────────────────────────────────────────────┤
-│ Nearly 50% of context consumed               │
-│ before the user even asks a question         │
-└──────────────────────────────────────────────┘
-```
+
+![Context Window without Optmization](assets/Context%20Window%20without%20Optmization.png)
 
 ### Solution 1: Configuration-Level Control
 
@@ -1717,13 +1660,7 @@ Setting up a complete AI development environment required manual labor:
 
 **It's like a manager who can only give one instruction at a time, then waits for a report before giving the next one.**
 
-```
-Traditional MCP execution:
-
-LLM → "Call tool A" → Tool A runs → Result added to history →
-  Entire history sent to LLM → "Call tool B" → Tool B runs →
-    Result added to history → Entire history sent to LLM → ...
-```
+![MCP Issues](assets/MCP%20Issues.png)
 
 Each cycle requires a full LLM inference pass. Multiple tool calls multiply:
 - **Latency** — round-trip delays accumulate
@@ -1838,97 +1775,166 @@ The TypeScript API still loads into the context window, so context bloat concern
 
 ![](assets/17710131023208.jpg)
 
-**Best for:** Brainstorming, drafting content, explaining concepts, quick questions where general knowledge is enough.
+**Best for:** Brainstorming, drafting content, explaining concepts, code generation, summarization, quick questions where general knowledge is enough.
 
-**Limitations:** Doesn't know your specific data, can hallucinate facts, knowledge cutoff.
+**Limitations:** Doesn't know your specific data, can hallucinate facts, knowledge cutoff date means no awareness of recent events.
 
 **Examples:**
 - "Help me brainstorm product names"
 - "Explain machine learning to a 10-year-old"
 - "Draft a thank-you email"
+- "Write a utility function to validate email addresses"
+- "Summarize this meeting transcript" (paste it into the prompt)
+
+#### Why This Architecture Is Underrated
+
+Teams routinely skip past direct LLM chat on their way to more complex architectures. But a well-crafted prompt that ships in a day beats a RAG pipeline that ships in a quarter. Before reaching for heavier tools, ask: **Can I paste the relevant context directly into the prompt and get a good answer?** If yes, you probably don't need RAG. Can the task be completed in a single generation step? If yes, you probably don't need agents.
+
+#### Getting the Most Out of Basic LLM Chat
+
+| Technique | What to Do |
+|-----------|------------|
+| **System prompt** | Don't waste it on "You are a helpful assistant." Pack it with role, constraints, output format, and tone |
+| **Few-shot examples** | 3 good input→output examples consistently outperform a paragraph of instructions |
+| **Context window stuffing** | Modern models support 128K+ tokens — if your FAQ or style guide fits, paste it directly into the prompt |
+| **Temperature control** | Set to 0 for factual tasks (data extraction, classification), 0.7–1.0 for creative tasks (brainstorming, writing variations) |
+| **Prompt chaining** | For multi-step tasks, chain sequential prompts manually instead of building an agent framework |
+
+#### The Over-Engineering Trap
+
+Real examples of building too much:
+- Building a RAG pipeline to answer questions about public docs that fit in the context window
+- Deploying an agent framework for a task that's really just "rewrite this email in a professional tone"
+- Setting up a vector database for an FAQ with 50 entries that fits in a single prompt
+- Fine-tuning a model to match your brand voice when a system prompt with three example paragraphs gets 90% of the way there
+
+**The key thing to remember is...** The best AI architecture is the simplest one that solves the problem. Start here, prove the use case works, and upgrade only when you hit specific, measurable failure modes.
 
 
 ### Architecture 2: RAG (Retrieval-Augmented Generation)
 
 **AI that first searches your documents:** to find relevant information, then generates answers based on what it found — like an assistant who checks your files before answering.
 
-**It's like:** A librarian who searches the right books first, then answers your question using what they found. They quote real sources instead of guessing.
+**It's like:** A reference librarian. She doesn't memorize every book. Instead, she (1) understands your question, (2) walks to the right shelf and pulls the relevant pages, and (3) reads those pages and gives you a clear, cited answer. A RAG pipeline does exactly this with software replacing the librarian.
 
 ![](assets/17710135833748.jpg)
 
-**Best for:** Q&A over company documents, customer support with accurate answers, research across large document collections.
+**Best for:** Q&A over company documents, customer support with accurate answers, research across large document collections. RAG systems reduce AI hallucinations by 70–90% compared to standalone LLMs.
 
-**Key components explained simply:**
+**The Five Components of Every RAG Pipeline:**
 
 | Component | What It Does | Analogy |
 |-----------|--------------|---------|
-| Document Loader | Reads your files | Scanner at a library |
-| Chunker | Splits docs into searchable pieces | Cutting a book into chapters |
-| Embeddings | Converts text to searchable format | Creating an index |
-| Vector Database | Stores and finds chunks | The library's card catalog |
-| LLM | Writes the final answer | The librarian explaining what they found |
+| **Document Loader** | Reads your files (PDFs, Word docs, HTML, Markdown) | Scanner at a library |
+| **Chunker** | Splits docs into smaller, overlapping pieces (256–512 tokens with 10–20% overlap) | Cutting a book into chapters |
+| **Embeddings** | Converts text into arrays of numbers (vectors) that capture *semantic meaning* — so "work from home" matches "telecommuting is permitted" | Creating an index |
+| **Vector Database** | Stores embeddings and performs fast similarity searches (ChromaDB, Pinecone, Weaviate, Qdrant) | The library's card catalog |
+| **LLM Synthesis** | Takes retrieved chunks and generates an answer grounded in those sources | The librarian explaining what they found |
 
-**The key thing to remember is...** RAG = AI that checks YOUR documents before answering, reducing hallucinations and giving sourced answers.
+#### What Happens Under the Hood
+
+When you ask "What's our remote work policy?":
+1. **Embed the query** — convert your question into a vector
+2. **Vector search** — find the stored chunks most similar to your query using cosine similarity
+3. **Context assembly** — format the retrieved chunks with their source metadata
+4. **LLM synthesis** — the model generates an answer grounded in the retrieved documents, citing sources
+
+#### Common RAG Pitfalls
+
+| Pitfall | Problem | Fix |
+|---------|---------|-----|
+| Chunks too large (2,000+ tokens) | Vector search loses precision — the embedding averages out specific details | Stick to 256–512 tokens |
+| Chunks too small (single sentences) | Context is lost — answers that need 3–4 sentences together get fragmented | Use reasonable chunk sizes with overlap |
+| No source tracking | Can't verify whether the AI's citation is accurate | Always store metadata alongside chunks |
+| Too many retrieved chunks | Adding 20 chunks when 3 suffice adds noise and cost | Start with 3–5 and increase only if answers are incomplete |
+| Wrong embedding model | Default models may underperform on multilingual or domain-specific content | Evaluate models on the MTEB leaderboard for your use case |
+
+**The key thing to remember is...** RAG = AI that checks YOUR documents before answering, reducing hallucinations and giving sourced answers. The LLM never memorized your documents — it reads the relevant ones at query time, so your documents can change hourly and answers stay current.
 
 
 ### Architecture 3: AI Workflow (Orchestrated Pipelines)
 
 **Multiple AI steps chained together:** in a fixed sequence, where each step does one specific job — like a factory assembly line where AI handles certain stations.
 
-**It's like:** A car assembly line. Step 1 adds the frame, Step 2 adds the engine, Step 3 paints it. Each step has one job, in a specific order, every time.
+**It's like:** Henry Ford's assembly line. Each station does one thing, does it well, and passes the result to the next station. No station decides to skip ahead or rethink the whole design mid-build. You — the engineer — decide the sequence. The AI executes within those boundaries.
 
 ![](assets/17710137494101.jpg)
 
-**Best for:** Repeatable processes, document processing, content pipelines where you know exactly what steps are needed.
+**Best for:** Repeatable processes, document processing, content pipelines where you know exactly what steps are needed. Organizations report **30–50% process time reductions** with improved accuracy compared to manual processes.
 
 **Key characteristics:**
 
-| Aspect | Description |
-|--------|-------------|
-| Flow | Fixed path — same every time |
-| Control | You design the steps |
-| Reliability | High — predictable results |
-| Flexibility | Low — can't adapt to surprises |
+| Aspect | Workflow | Agent (for comparison) |
+|--------|----------|----------------------|
+| Control flow | Fixed, predefined | Dynamic, model-directed |
+| Predictability | High | Variable |
+| Debugging | Straightforward | Complex |
+| Token cost | Lower (~4× fewer tokens) | Higher |
+| Best for | Repeatable processes | Open-ended goals |
 
-**Example workflows:**
+#### The Five Workflow Patterns
+
+| Pattern | How It Works | Example |
+|---------|--------------|---------|
+| **Prompt Chaining** (Assembly Line) | Sequential processing — each step builds on the previous | Scrape → Summarize → Extract entities → Generate report |
+| **Routing** (Sorting Hat) | Classify input first, then send down the right path | Support system routing billing vs. technical questions |
+| **Parallelization** (Multi-Lane Highway) | Run independent subtasks simultaneously, then merge | Analyze pricing page AND blog AND job postings in parallel |
+| **Orchestrator-Workers** (Project Manager) | Central LLM breaks task into subtasks, delegates to specialists | Complex document with different sections needing different analysis |
+| **Evaluator-Optimizer** (QA Inspector) | One LLM generates output, another evaluates quality — loops if needed | The quality control station at the end of the assembly line |
+
+#### Example Workflows
 
 **Weekly competitor monitor:**
 ```
-Timer (weekly) → Fetch competitor website → Extract changes (AI) →
-Compare to last week (AI) → Format report → Send to Slack
+Timer (weekly) → Scrape competitor pages → Extract changes (AI) →
+Analyze and rank by significance (AI) → Generate executive brief (AI) → Send to Slack + Email
 ```
 
 **Cold Outreach:**
 ```
-Timer (daily) → Get company names(AI)
-                 → Send Email Outreach emails (AI)
+Enrich prospect data → Research pain points (AI) → Draft personalized email (AI) →
+QA check for tone and compliance (AI) → Queue for scheduled delivery
 ```
 
-**Tools:** N8N, Make, Zapier, Power Automate
+#### Workflow Automation Tools
 
-**The key thing to remember is...** Workflows are for *predictable* multi-step processes where you know exactly what needs to happen in what order.
+| Tool | Best For | Key Strength |
+|------|----------|-------------|
+| **Zapier** | Non-technical teams needing quick automations | 7,000+ app integrations, easiest to learn |
+| **Make** | Teams needing visual complexity at lower cost | Canvas-based builder with branching and parallel paths, ~60% cheaper than Zapier |
+| **N8N** | Technical teams needing full control and data sovereignty | Self-hostable, ~70 AI-dedicated nodes, LangChain integration, RAG support |
+
+**Rule of thumb:** Non-technical → Zapier. Visual complexity → Make. AI-native + data control → N8N.
+
+#### Common Workflow Mistakes
+
+1. **Skipping the QA step** — every AI output should have at least a basic validation gate
+2. **Making the chain too long** — keep under 7 steps; if you need more, use parallelization
+3. **Not logging intermediate outputs** — when step 5 produces garbage, you need to know whether the problem started at step 2 or step 4
+4. **Using an agent when a workflow will do** — if the process is the same every time, lock it down with a workflow
+
+**The key thing to remember is...** Workflows are for *predictable* multi-step processes where you know exactly what needs to happen in what order. If you can draw every step on a whiteboard, you want a workflow — not an agent.
 
 
 ### Architecture 4: AI Agent
 
-**AI that uses tools** and decides its own next steps to complete a task — like a expert software engineer who figures out what to do instead of being told every step.
+**AI that operates in a reasoning loop** — it observes, thinks, takes an action, checks the result, and decides what to do next. Unlike a chatbot (one turn, done), an agent keeps going until the goal is achieved.
 
-**It's like:** Giving someone a goal ("research and book me a flight to Tokyo") instead of step-by-step instructions. They decide: Should I check prices first? Search multiple airlines? What dates work best? They use tools (websites, calendars) and adapt as they go.
+**It's like:** The difference between a calculator and an accountant. The calculator does what you tell it. The accountant figures out what needs doing, does it, checks the numbers, and flags anything that looks off. You give them a goal ("research and book me a flight to Tokyo") instead of step-by-step instructions.
 
 ![](assets/17710139944848.jpg)
 
-**Best for:** Research tasks, problems where you don't know the exact steps in advance, tasks requiring multiple tool uses.
+**Best for:** Research tasks, problems where you don't know the exact steps in advance, tasks requiring multiple tool uses. The AI agent market is projected to grow from $7.84 billion in 2025 to $52.62 billion by 2030.
 
-**Key characteristics:**
+#### The Three Capabilities of a Production Agent
 
-| Aspect | Description |
-|--------|-------------|
-| Flow | Dynamic — AI chooses next step |
-| Control | Goal-directed (you give the goal) |
-| Reliability | Medium — can get stuck or loop |
-| Flexibility | High — adapts to what it finds |
+| Capability | What It Means | Why It Matters |
+|------------|---------------|----------------|
+| **Reasoning** | Break a complex goal into steps, decide what to do next, adjust when something unexpected happens | Without this, the agent just follows a script (that's a workflow) |
+| **Tool use** | Call external functions — APIs, databases, file systems, web searches — and incorporate results back into reasoning | Without this, the agent can only talk, not act |
+| **Memory & context management** | Maintain relevant state across a multi-step workflow without losing track of the original goal | Without this, the agent forgets what it's doing mid-task |
 
-**Workflow vs. Agent:**
+#### Workflow vs. Agent
 
 | Workflow | Agent |
 |----------|-------|
@@ -1936,45 +1942,116 @@ Timer (daily) → Get company names(AI)
 | You plan the steps | AI plans the steps |
 | Same path every time | Different path based on situation |
 | Like a recipe | Like a personal assistant |
+| Predictable and cheap | Flexible but more expensive |
 
-**The key thing to remember is...** Agents are for tasks where you know the *goal* but not the exact steps. You give them tools and let them figure it out.
+#### Why Most Agents Fail in Production
+
+Only ~1 in 9 enterprises experimenting with agents actually run them in production. Three common mistakes:
+
+1. **Over-engineering from day one** — building complex multi-agent orchestration before validating that a single agent with good tools can solve the problem
+2. **Treating tool definitions as an afterthought** — tool definitions deserve the same prompt engineering attention as system prompts. A poorly defined tool is like giving someone a Swiss Army knife with no labels
+3. **No error recovery** — production environments are messy. APIs time out, data comes back malformed. The agent needs to handle failures gracefully, not crash or hallucinate its way through
+
+#### Production Agent Checklist
+
+| Area | What to Do |
+|------|------------|
+| **Guardrails** | Set `max_turns` to prevent infinite loops. Define which tools the agent can/cannot access |
+| **Observability** | Log every agent turn — reasoning, tool calls, results. You can't debug what you can't see |
+| **Evaluation** | Build a test suite of 20–30 representative tasks. Run after every prompt or tool change |
+| **Graceful degradation** | When a tool fails, try an alternative approach. Return partial results with clear explanations, never hallucinated answers |
+| **Cost controls** | Use cheaper models (like Claude Haiku) for simple tool-routing decisions. Reserve heavier models for synthesis |
+
+**The key thing to remember is...** Agents are for tasks where you know the *goal* but not the exact steps. The observe-think-act loop is what separates them from every other AI pattern — and it's also what makes them hard to build reliably. Start simple, ship, learn from what breaks.
 
 
 ### Architecture 5: Agentic AI (Multi-Agent Systems)
 
 **Multiple specialized AI agents working together as a team**, each with different expertise, collaborating to tackle complex projects — like an AI company with different departments.
 
-**It's like:** A film production crew. You have a director (orchestrator), writer (content agent), cinematographer (visual agent), and editor (review agent). Each is an expert in their role, they pass work to each other, and together they create something none could alone.
+**It's like:** A film production crew. You have a director (orchestrator), writer (content agent), cinematographer (visual agent), and editor (review agent). Each is an expert in their role, they pass work to each other, and together they create something none could alone. You'd never ask one person to be the researcher, writer, editor, and publisher simultaneously — so why ask one AI?
 
 ![](assets/17710142678773.jpg)
 
-**Common team patterns:**
+**Why single agents hit a wall:** A Cornell University study found that coordinated multi-agent systems achieved a **42.68% success rate** on complex planning tasks, compared to just **2.92%** for a single-agent setup. The failure modes are predictable: context overload (the agent loses track of its primary objective), no self-correction (no counterpart to challenge its reasoning), and sequential bottlenecks (one agent doing five things takes 5× longer than five agents in parallel).
 
-| Pattern | How It Works | Example |
-|---------|--------------|---------|
-| **Pipeline** | Agents work in sequence | Research → Write → Edit → Publish |
-| **Supervisor** | One agent assigns tasks | Manager agent delegates to specialists |
-| **Debate** | Agents argue different sides | Pro agent vs. Con agent for decisions |
-| **Swarm** | Agents work in parallel | 5 researchers each tackle different sources |
+#### The Four Collaboration Patterns
+
+| Pattern | How It Works | Think of It Like | Best For |
+|---------|--------------|-----------------|----------|
+| **Pipeline** | Agents execute in a fixed, predetermined order. Agent A → Agent B → Agent C | An assembly line — each station adds value before passing forward | Structured workflows with clear inputs/outputs. Document processing, compliance review chains |
+| **Supervisor** | A central orchestrator decomposes the task, assigns subtasks to specialists, and synthesizes results | A project manager coordinating a team | Complex tasks needing dynamic routing. ~70% of multi-agent systems in production use this pattern |
+| **Debate** | Multiple agents argue opposing positions while a judge evaluates and synthesizes a final answer | A courtroom — prosecution vs. defense, judge weighs evidence | High-stakes decisions: risk assessment, legal analysis, strategic planning. Up to 23% higher accuracy on reasoning tasks |
+| **Swarm** | Agents operate autonomously with minimal central control, coordinating through shared state or a message bus | A colony of ants — no single ant has a blueprint, but complex structures emerge from local rules | Highly parallelizable tasks: large-scale data collection, distributed research, exploratory analysis |
 
 **Best for:** Complex projects requiring multiple expertise areas, tasks benefiting from review/critique cycles, situations where quality matters more than speed.
 
-**Example: Product Launch Team**
+#### Example: Product Launch Team
 
 ![](assets/17710144706347.jpg)
 
+A hybrid supervisor-pipeline for a content blitz:
+1. **Supervisor** receives the launch brief and decomposes into phases
+2. **Research Agent** gathers market data, competitor positioning, key differentiators → outputs structured brief
+3. **Writing Agent** consumes the brief, produces a draft (can generate variants for different channels simultaneously)
+4. **Editing Agent** reviews against the *original research* (not just the draft) — catching claims the writer fabricated that aren't grounded in the research
+5. **Publishing Agent** formats for each channel (blog, LinkedIn, email) and pushes content live
 
-**The key thing to remember is...** Multi-agent systems are for complex work that benefits from specialized roles and built-in review cycles — like having an AI team instead of one AI assistant.
+If the Editing Agent finds factual issues, it kicks the draft back to the Writing Agent — creating a review loop within the pipeline.
 
+#### Multi-Agent Framework Options
+
+| Framework | Best For | Key Strength |
+|-----------|----------|-------------|
+| **CrewAI** | Prototyping team-based workflows | Lowest barrier to entry — define agents with role/goal/backstory in under 20 lines of Python |
+| **LangGraph** | Production deployments | Graph-based workflows with built-in checkpointing and state management. Most battle-tested |
+| **AutoGen (AG2)** | Conversational multi-agent patterns | Best when agents need multi-party dialogue — group debates, consensus building |
+
+#### The Gotchas
+
+1. **Over-engineering** — if a single agent with a good prompt can handle it, adding three more agents just adds latency and cost
+2. **Poor inter-agent contracts** — agents need explicit, typed interfaces. Freeform text passing leads to parsing failures
+3. **Missing observability** — you need distributed tracing across agents. Without it, debugging is like debugging microservices without logs
+4. **Context bleed** — agents sharing too much context lose their specialization advantage. Give each agent only the context it needs
+
+**The key thing to remember is...** Multi-agent systems are for complex work that benefits from specialized roles and built-in review cycles — like having an AI team instead of one AI assistant. Gartner predicts by 2028, 33% of enterprise software will include agentic AI.
 
 
 ### Choosing the Right Architecture
 
 Use this **decision tree** to pick the simplest architecture that solves your problem — don't use a construction crew when you need a handyman.
 
+#### The Three Questions That Drive the Decision
+
+1. **Where does the knowledge live?** In the model's training data → Prompt Engineering. In your documents that change → RAG. Stable domain expertise → Fine-tuning.
+2. **What behavior do I need?** Factual accuracy over proprietary data → RAG. Consistent tone/format → Fine-tuning. Multi-step reasoning with tools → Agents.
+3. **What are my constraints?** Budget, latency, team expertise, data privacy all factor in. An agent at $0.25/query seems fine in testing — at 500K queries/month, that's $125K/month.
+
 #### The Decision Flowchart
 
 ![](assets/17710147774432.jpg)
+
+#### The Decision Gates
+
+| Gate | Question | If Yes | If No |
+|------|----------|--------|-------|
+| **1** | Does a single well-crafted prompt solve it? | Stop here — use Basic LLM Chat | Continue ↓ |
+| **2** | Does the model need access to your specific data? | Use RAG | Continue ↓ |
+| **3** | Is the process repeatable and well-defined? | Use a Workflow | Continue ↓ |
+| **4** | Does the task require dynamic decisions and tool use? | Use an Agent | Continue ↓ |
+| **5** | Does it span multiple expertise domains in parallel? | Use Multi-Agent Systems | Re-evaluate the problem |
+
+#### Cost at Scale
+
+| Architecture | Avg Tokens/Query | Relative Cost |
+|-------------|-----------------|---------------|
+| Prompt Engineering | ~1,500 | $ |
+| RAG | ~3,000 | $$ |
+| Workflow (4 steps) | ~5,000 | $$$ |
+| Agent (avg 6 turns) | ~12,000 | $$$$ |
+| Multi-Agent (3 agents) | ~40,000 | $$$$$ |
+
+**The golden rule:** Start with the simplest architecture that works. Measure. Upgrade only when the data tells you to. A weaker model with strong orchestration often outperforms a stronger model with poor orchestration.
 
 ---
 
