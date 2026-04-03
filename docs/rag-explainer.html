@@ -1,19 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <title>What is RAG? — Interactive Guide</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
+    #root { height: 100vh; overflow: hidden; }
+    .container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar { width: 120px; background: #f8f9fa; border-right: 1px solid #e0e0e0; padding: 80px 12px 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .step-btn { width: 64px; height: 64px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.3s ease; position: relative; flex-shrink: 0; }
+    .step-btn.active { background: #6c5ce7; border-color: #6c5ce7; color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
+    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+    .step-btn-label { font-size: 11px; font-weight: 600; color: #999; margin-top: 4px; text-align: center; letter-spacing: 0.3px; transition: color 0.3s ease; }
+    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
+    .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
+    .step-connector.active { background: #6c5ce7; }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1; background: white; flex-shrink: 0; }
+    .left-section { display: flex; align-items: center; gap: 20px; }
+    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .back-link:hover { color: #2ecc71; }
+    .badge { display: inline-block; background: #e8e3f8; color: #6c5ce7; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .progress-indicator { font-size: 13px; font-weight: 600; color: #6c5ce7; background: #f5f3ff; padding: 4px 12px; border-radius: 12px; margin-right: 12px; }
+    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
+    .title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .stage-header { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .nav-arrows { display: flex; gap: 12px; }
+    .arrow-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
+    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; padding: 32px 48px; gap: 30px; }
+    .explanation { font-size: 22px; line-height: 1.7; color: #2a2a2a; }
+    .scene-card { background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%); border-radius: 16px; padding: 40px; border: 1px solid #e8e3f8; min-height: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08); }
+    .insight-box { background: #f0faf0; border-left: 4px solid #2ecc71; padding: 24px; border-radius: 8px; color: #1a5e3a; font-size: 17px; line-height: 1.7; margin-top: 24px; position: relative; }
+    .insight-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #2ecc71; margin-bottom: 8px; text-transform: uppercase; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .fade-in { animation: fadeIn 0.6s ease forwards; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .cur { animation: blink 0.7s infinite; }
+
+    /* Chat bubbles */
+    .chat-bubble-user {
+      background: #6c5ce7; color: #fff; padding: 8px 16px; border-radius: 14px 14px 4px 14px;
+      font-size: 16px; font-weight: 600; max-width: 400px; margin-left: auto; margin-bottom: 14px; line-height: 1.5;
+    }
+    .chat-bubble-ai {
+      background: #f4f4fa; padding: 12px 16px; border-radius: 14px 14px 14px 4px;
+      font-size: 16px; max-width: 440px; margin-bottom: 10px; line-height: 1.6;
+    }
+    .chat-bubble-ai.with-rag {
+      border: 1px solid rgba(46, 204, 113, 0.27); font-size: 18px; line-height: 1.7; color: #1a1a2e;
+    }
+    .hallucination-badge {
+      margin-top: 8px; font-size: 12px; font-weight: 700; color: #c0392b; background: #fdeaea;
+      display: inline-block; padding: 3px 10px; border-radius: 8px;
+    }
+
+    /* Document grid */
+    .doc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .doc-card {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px; border-radius: 10px; border: 2px solid #e8e8ef;
+      background: #fafafe; transition: all 0.4s ease;
+    }
+    .doc-card.matched {
+      border-color: #2ecc71; background: #f0faf4; transform: scale(1.04);
+      box-shadow: 0 4px 16px rgba(46, 204, 113, 0.13);
+    }
+    .doc-card-title { font-size: 12px; font-weight: 700; color: #8a8a9a; }
+    .doc-card.matched .doc-card-title { color: #1a9456; }
+    .doc-card-match { font-size: 11px; color: #2ecc71; font-weight: 700; }
+
+    /* Prompt assembly blocks */
+    .prompt-block {
+      padding: 10px 14px; border-radius: 10px; transition: opacity 0.5s;
+    }
+    .prompt-block-label { font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+    .prompt-block-text { font-size: 16px; color: #2d2d3d; margin-top: 5px; font-family: monospace; line-height: 1.6; }
+    .prompt-connector { text-align: center; font-size: 18px; color: #c0c0d0; margin: 1px 0; }
+    .sent-to-llm {
+      padding: 8px 14px; border-radius: 10px; border: 2px solid #f39c12;
+      background: linear-gradient(135deg, #fef9f3, #fdf4ea); display: inline-block;
+    }
+    .sent-to-llm-label { font-size: 14px; font-weight: 700; color: #c87f0a; letter-spacing: 1px; }
+
+    /* Question grid */
+    .question-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .question-btn {
+      padding: 10px 14px; border-radius: 10px; border: 2px solid #dddde8; background: #fafafe;
+      cursor: pointer; font-size: 16px; color: #1a1a2e; text-align: left; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
+    }
+    .question-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+
+    /* Source badge */
+    .source-badge {
+      margin-top: 8px; font-size: 14px; font-weight: 700; color: #1a9456; background: #e2f5ea;
+      display: inline-block; padding: 3px 10px; border-radius: 8px;
+    }
+
+    /* Librarian steps */
+    .librarian-step {
+      display: flex; align-items: center; gap: 14px; padding: 10px 14px;
+      background: #fafafe; border-radius: 10px; border: 1px solid #eeeef5; text-align: left;
+      transition: all 0.5s ease;
+    }
+    .librarian-step.hidden { opacity: 0.15; transform: translateX(20px); }
+    .librarian-step.visible { opacity: 1; transform: translateX(0); }
+
+    /* Try-again button */
+    .try-again-btn {
+      margin-top: 8px; padding: 5px 14px; border: 1px solid #d0d0dd; border-radius: 14px;
+      background: #fff; cursor: pointer; font-size: 15px; color: #6c5ce7; font-weight: 700;
+      font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
+    }
+    .try-again-btn:hover { border-color: #6c5ce7; }
+
+    /* Small doc cards for S6 */
+    .doc-card-sm {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 8px; border-radius: 8px; border: 2px solid #e8e8ef;
+      background: #fafafe; transition: all 0.4s;
+    }
+    .doc-card-sm.matched { border-color: #2ecc71; background: #f0faf4; }
+    .doc-card-sm-title { font-size: 10px; font-weight: 700; color: #b0b0be; }
+    .doc-card-sm.matched .doc-card-sm-title { color: #1a9456; }
+  </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    /* ── Data ── */
     const KNOWLEDGE_BASE = [
       { id: 1, title: "Employee Handbook", icon: "\u{1F4D8}", content: "Annual leave: 20 days per year. Sick leave: 10 days. Parental leave: 12 weeks paid." },
       { id: 2, title: "Product Catalog", icon: "\u{1F4E6}", content: "Widget Pro costs $49.99. Widget Lite costs $29.99. Enterprise license starts at $999/year." },
@@ -41,55 +177,125 @@
       6: "Per our Travel Policy, the hotel budget is $150 per night. Flights should be economy class for trips under 6 hours, and meals are reimbursed up to $75 per day.",
     };
 
-    const STAGES = [
-      { icon: "\u{1F916}", label: "Problem", title: "The Problem", sub: "AI Has a Memory Gap" },
-      { icon: "\u{1F4DA}", label: "Analogy", title: "The Analogy", sub: "Think of a Brilliant Librarian" },
-      { icon: "\u{1F50D}", label: "Retrieve", title: "Step 1: Retrieve", sub: "Search for Relevant Info" },
-      { icon: "\u{1F4CE}", label: "Augment", title: "Step 2: Augment", sub: "Attach Info to the Question" },
-      { icon: "\u2728", label: "Generate", title: "Step 3: Generate", sub: "AI Crafts an Informed Answer" },
-      { icon: "\u{1F3AE}", label: "Try It", title: "Try It Yourself", sub: "See RAG in Action" },
-    ];
+    /* ── SVG Sidebar Icons ── */
+    function ProblemIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    }
 
-    const A = "#6c5ce7", G = "#2ecc71", GD = "#1a9456";
+    function AnalogyIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+        </svg>
+      );
+    }
 
-    const INSIGHTS = [
-      ["\u{1F4A1}", "Without access to your data, AI fills in the blanks with guesses \u2014 sometimes confidently wrong."],
-      ["\u{1F4A1}", "RAG is like a brilliant librarian: finds the right book first, then gives you an accurate answer."],
-      ["\u{1F4A1}", "Semantic search goes beyond keywords \u2014 it understands meaning, so 'vacation' matches 'annual leave'."],
-      ["\u{1F4A1}", "Like an open-book exam \u2014 the AI gets the question PLUS the relevant pages, so no guessing needed."],
-      ["\u{1F4A1}", "The answer cites real data. If info isn't in the knowledge base, it says \"I don't know.\""],
-      ["\u{1F4A1}", "Try different questions to see how RAG retrieves different documents and generates grounded answers."],
-    ];
+    function RetrieveIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      );
+    }
 
+    function AugmentIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+        </svg>
+      );
+    }
+
+    function GenerateIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      );
+    }
+
+    function TryItIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3" />
+        </svg>
+      );
+    }
+
+    /* ── InsightBlock ── */
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
+
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
+        </div>
+      );
+    }
+
+    /* ── Typewriter ── */
     function TW({ text, speed = 20 }) {
       const [d, setD] = useState("");
       const i = useRef(0);
       useEffect(() => {
         setD(""); i.current = 0;
-        const t = setInterval(() => { i.current++; setD(text.slice(0, i.current)); if (i.current >= text.length) clearInterval(t); }, speed);
+        const t = setInterval(() => {
+          i.current++;
+          setD(text.slice(0, i.current));
+          if (i.current >= text.length) clearInterval(t);
+        }, speed);
         return () => clearInterval(t);
       }, [text]);
       return <span>{d}{d.length < text.length && <span className="cur">|</span>}</span>;
     }
 
+    /* ── Stage Components ── */
+
     function S1() {
       const [showBad, setShowBad] = useState(false);
       useEffect(() => { const t = setTimeout(() => setShowBad(true), 1200); return () => clearTimeout(t); }, []);
       return (
-        <div style={{ textAlign: "center" }}>
-          <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 400, marginLeft: "auto", marginBottom: 14, lineHeight: 1.5 }}>
-            <TW text="How many vacation days do I get at our company?" speed={30} />
+        <>
+          <div><div className="stage-header">The Problem</div></div>
+          <div className="explanation">
+            Large Language Models are trained on general knowledge. They don't know your company's specific documents, policies, or data — so they guess, and sometimes get it completely wrong.
           </div>
-          {showBad && (
-            <div style={{ background: "#f4f4fa", padding: "12px 16px", borderRadius: "14px 14px 14px 4px", fontSize: 16, maxWidth: 440, marginBottom: 10, lineHeight: 1.6, animation: "fadeIn 0.5s" }}>
-              <div style={{ fontSize: 14, color: "#b45555", fontWeight: 700, marginBottom: 6 }}>{"\u26A0\uFE0F"} Without RAG:</div>
-              <p style={{ margin: 0, lineHeight: 1.7 }}>
-                "Typically, companies offer 10-15 days of PTO... but I don't actually have access to <em>your</em> company's specific policy. I might be making this up!"
-              </p>
-              <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: "#c0392b", background: "#fdeaea", display: "inline-block", padding: "3px 10px", borderRadius: 8 }}>{"\u274C"} Hallucination Risk</div>
+          <div className="scene-card">
+            <div style={{ textAlign: "center", width: "100%" }}>
+              <div className="chat-bubble-user">
+                <TW text="How many vacation days do I get at our company?" speed={30} />
+              </div>
+              {showBad && (
+                <div className="chat-bubble-ai fade-in">
+                  <div style={{ fontSize: 14, color: "#b45555", fontWeight: 700, marginBottom: 6 }}>{"\u26A0\uFE0F"} Without RAG:</div>
+                  <p style={{ margin: 0, lineHeight: 1.7 }}>
+                    "Typically, companies offer 10-15 days of PTO... but I don't actually have access to <em>your</em> company's specific policy. I might be making this up!"
+                  </p>
+                  <div className="hallucination-badge">{"\u274C"} Hallucination Risk</div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+          <InsightBlock>
+            Without access to your data, AI fills in the blanks with guesses — sometimes confidently wrong.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -108,25 +314,31 @@
         { emoji: "\u{1F4AC}", text: "Gives you an accurate, sourced answer" },
       ];
       return (
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 52, marginBottom: 12 }}>{"\u{1F4DA}"}</div>
-          <p style={{ color: "#4a4a5a", fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto 20px" }}>
-            Imagine a <strong>brilliant librarian</strong> who knows how to find anything — but only answers using the actual books on the shelves. That's RAG!
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 420, margin: "0 auto" }}>
-            {steps.map((s, i) => (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 14, padding: "10px 14px",
-                background: "#fafafe", borderRadius: 10, border: "1px solid #eeeef5", textAlign: "left",
-                opacity: i <= phase ? 1 : 0.15, transform: i <= phase ? "translateX(0)" : "translateX(20px)",
-                transition: "all 0.5s ease",
-              }}>
-                <span style={{ fontSize: 22 }}>{s.emoji}</span>
-                <span style={{ fontSize: 16, color: "#2d2d3d" }}>{s.text}</span>
-              </div>
-            ))}
+        <>
+          <div><div className="stage-header">The Analogy</div></div>
+          <div className="explanation">
+            Imagine a brilliant librarian who knows how to find anything — but only answers using the actual books on the shelves. That's exactly what RAG does for AI.
           </div>
-        </div>
+          <div className="scene-card">
+            <div style={{ textAlign: "center", width: "100%" }}>
+              <div style={{ fontSize: 52, marginBottom: 12 }}>{"\u{1F4DA}"}</div>
+              <p style={{ color: "#4a4a5a", fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto 20px" }}>
+                Imagine a <strong>brilliant librarian</strong> who knows how to find anything — but only answers using the actual books on the shelves. That's RAG!
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 420, margin: "0 auto" }}>
+                {steps.map((s, i) => (
+                  <div key={i} className={`librarian-step ${i <= phase ? 'visible' : 'hidden'}`}>
+                    <span style={{ fontSize: 22 }}>{s.emoji}</span>
+                    <span style={{ fontSize: 16, color: "#2d2d3d" }}>{s.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            RAG is like a brilliant librarian: finds the right book first, then gives you an accurate answer.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -139,30 +351,35 @@
         return () => { clearTimeout(t1); clearTimeout(t2); };
       }, []);
       return (
-        <div>
-          <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 340, marginLeft: "auto", marginBottom: 12 }}>How many vacation days do I get?</div>
-          <p style={{ color: "#4a4a5a", fontSize: 16, textAlign: "center", margin: "12px 0" }}>
-            {searching ? "\u{1F50D} Searching knowledge base..." : "\u2705 Found 2 relevant documents!"}
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-            {KNOWLEDGE_BASE.map((doc) => {
-              const isMatch = found.includes(doc.id);
-              return (
-                <div key={doc.id} style={{
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                  padding: 10, borderRadius: 10, border: `2px solid ${isMatch ? G : "#e8e8ef"}`,
-                  background: isMatch ? "#f0faf4" : "#fafafe",
-                  transform: isMatch ? "scale(1.04)" : "scale(1)",
-                  boxShadow: isMatch ? `0 4px 16px ${G}20` : "none", transition: "all 0.4s ease",
-                }}>
-                  <span style={{ fontSize: 20 }}>{doc.icon}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: isMatch ? GD : "#8a8a9a" }}>{doc.title}</span>
-                  {isMatch && <span style={{ fontSize: 11, color: G, fontWeight: 700 }}>MATCH {"\u2713"}</span>}
-                </div>
-              );
-            })}
+        <>
+          <div><div className="stage-header">Step 1: Retrieve</div></div>
+          <div className="explanation">
+            The system converts your question into a search query and finds the most relevant documents from your knowledge base using semantic similarity.
           </div>
-        </div>
+          <div className="scene-card">
+            <div style={{ width: "100%" }}>
+              <div className="chat-bubble-user" style={{ maxWidth: 340 }}>How many vacation days do I get?</div>
+              <p style={{ color: "#4a4a5a", fontSize: 16, textAlign: "center", margin: "12px 0" }}>
+                {searching ? "\u{1F50D} Searching knowledge base..." : "\u2705 Found 2 relevant documents!"}
+              </p>
+              <div className="doc-grid">
+                {KNOWLEDGE_BASE.map((doc) => {
+                  const isMatch = found.includes(doc.id);
+                  return (
+                    <div key={doc.id} className={`doc-card ${isMatch ? 'matched' : ''}`}>
+                      <span style={{ fontSize: 20 }}>{doc.icon}</span>
+                      <span className="doc-card-title">{doc.title}</span>
+                      {isMatch && <span className="doc-card-match">MATCH {"\u2713"}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Semantic search goes beyond keywords — it understands meaning, so 'vacation' matches 'annual leave'.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -175,33 +392,41 @@
         return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
       }, []);
       const bl = [
-        { color: A, bg: "#faf9fe", label: "\u2460 YOUR QUESTION", text: '"How many vacation days do I get?"' },
-        { color: GD, bg: "#eefaf2", label: "\u2461 RETRIEVED CONTEXT", text: '\u{1F4D8} "Annual leave: 20 days per year. Sick leave: 10 days..." \u{1F48A} "Health insurance, 401k match..."' },
+        { color: "#6c5ce7", bg: "#faf9fe", label: "\u2460 YOUR QUESTION", text: '"How many vacation days do I get?"' },
+        { color: "#1a9456", bg: "#eefaf2", label: "\u2461 RETRIEVED CONTEXT", text: '\u{1F4D8} "Annual leave: 20 days per year. Sick leave: 10 days..." \u{1F48A} "Health insurance, 401k match..."' },
         { color: "#d63031", bg: "#fdf2ef", label: "\u2462 AUGMENTED PROMPT \u2192 AI", text: '"Using ONLY the following context, answer the user\'s question. Context: [Employee Handbook + Benefits Guide] Question: How many vacation days?"' },
       ];
       return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {bl.map((b, i) => (
-            <div key={i}>
-              <div style={{
-                padding: "10px 14px", borderRadius: 10, border: `2px solid ${b.color}28`, background: b.bg,
-                opacity: ph >= i ? 1 : 0.1, transition: "opacity 0.5s",
-              }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: b.color, letterSpacing: 1 }}>{b.label}</div>
-                <div style={{ fontSize: 16, color: "#2d2d3d", marginTop: 5, fontFamily: "monospace", lineHeight: 1.6 }}>{b.text}</div>
-              </div>
-              {i < 2 && <div style={{ textAlign: "center", fontSize: 18, color: "#c0c0d0", margin: "1px 0", opacity: ph >= i + 1 ? 1 : 0.1 }}>{"\uFF0B"}</div>}
+        <>
+          <div><div className="stage-header">Step 2: Augment</div></div>
+          <div className="explanation">
+            The magic: we combine the user's question with the retrieved documents into a single, enriched prompt. The AI now has the facts it needs.
+          </div>
+          <div className="scene-card">
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
+              {bl.map((b, i) => (
+                <div key={i}>
+                  <div className="prompt-block" style={{ border: `2px solid ${b.color}28`, background: b.bg, opacity: ph >= i ? 1 : 0.1 }}>
+                    <div className="prompt-block-label" style={{ color: b.color }}>{b.label}</div>
+                    <div className="prompt-block-text">{b.text}</div>
+                  </div>
+                  {i < 2 && <div className="prompt-connector" style={{ opacity: ph >= i + 1 ? 1 : 0.1 }}>{"\uFF0B"}</div>}
+                </div>
+              ))}
+              {ph >= 3 && (
+                <div style={{ textAlign: "center" }} className="fade-in">
+                  <div style={{ fontSize: 20, color: "#c0c0d0" }}>{"\u2B07\uFE0F"}</div>
+                  <div className="sent-to-llm">
+                    <span className="sent-to-llm-label">SENT TO LLM {"\u2192"}</span>
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
-          {ph >= 3 && (
-            <div style={{ textAlign: "center", animation: "fadeIn 0.3s" }}>
-              <div style={{ fontSize: 20, color: "#c0c0d0" }}>{"\u2B07\uFE0F"}</div>
-              <div style={{ padding: "8px 14px", borderRadius: 10, border: "2px solid #f39c12", background: "linear-gradient(135deg, #fef9f3, #fdf4ea)", display: "inline-block" }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#c87f0a", letterSpacing: 1 }}>SENT TO LLM {"\u2192"}</span>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+          <InsightBlock>
+            Like an open-book exam — the AI gets the question PLUS the relevant pages, so no guessing needed.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -209,16 +434,27 @@
       const [show, setShow] = useState(false);
       useEffect(() => { const t = setTimeout(() => setShow(true), 600); return () => clearTimeout(t); }, []);
       return (
-        <div>
-          <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 340, marginLeft: "auto", marginBottom: 12 }}>How many vacation days do I get?</div>
-          {show && (
-            <div style={{ background: "#f4f4fa", border: `1px solid ${G}44`, padding: "12px 16px", borderRadius: "14px 14px 14px 4px", fontSize: 18, lineHeight: 1.7, color: "#1a1a2e", animation: "fadeIn 0.4s" }}>
-              <div style={{ fontSize: 14, color: GD, fontWeight: 700, marginBottom: 6 }}>{"\u2705"} With RAG:</div>
-              <TW text="Based on our Employee Handbook, you get 20 days of annual leave per year, plus 10 sick days. You also have access to 12 weeks of paid parental leave. For more details, check the full handbook!" speed={18} />
-              <div style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: GD, background: "#e2f5ea", display: "inline-block", padding: "3px 10px", borderRadius: 8 }}>{"\u{1F4D8}"} Source: Employee Handbook</div>
+        <>
+          <div><div className="stage-header">Step 3: Generate</div></div>
+          <div className="explanation">
+            Now the AI generates an answer grounded in real company data — not guesses. It can even cite its sources!
+          </div>
+          <div className="scene-card">
+            <div style={{ width: "100%" }}>
+              <div className="chat-bubble-user" style={{ maxWidth: 340 }}>How many vacation days do I get?</div>
+              {show && (
+                <div className="chat-bubble-ai with-rag fade-in">
+                  <div style={{ fontSize: 14, color: "#1a9456", fontWeight: 700, marginBottom: 6 }}>{"\u2705"} With RAG:</div>
+                  <TW text="Based on our Employee Handbook, you get 20 days of annual leave per year, plus 10 sick days. You also have access to 12 weeks of paid parental leave. For more details, check the full handbook!" speed={18} />
+                  <div className="source-badge">{"\u{1F4D8}"} Source: Employee Handbook</div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+          <InsightBlock>
+            The answer cites real data. If info isn't in the knowledge base, it says "I don't know."
+          </InsightBlock>
+        </>
       );
     }
 
@@ -235,158 +471,123 @@
       };
 
       return (
-        <div>
-          {phase === "idle" ? (
-            <div>
-              <p style={{ color: "#4a4a5a", fontSize: 16, textAlign: "center", marginBottom: 12 }}>Pick a question and watch RAG in action:</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {SAMPLE_QUESTIONS.map((sq, i) => (
-                  <button key={i} onClick={() => handleQuestion(i)} style={{
-                    padding: "10px 14px", borderRadius: 10, border: "2px solid #dddde8", background: "#fafafe",
-                    cursor: "pointer", fontSize: 16, color: "#1a1a2e", textAlign: "left", fontWeight: 500, fontFamily: "'DM Sans'",
-                  }}>{sq.q}</button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 360, marginLeft: "auto", marginBottom: 10 }}>{SAMPLE_QUESTIONS[selected].q}</div>
-              {(phase === "searching" || phase === "found" || phase === "answering") && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 12 }}>
-                  {KNOWLEDGE_BASE.map((doc) => {
-                    const isMatch = matchedDocs.includes(doc.id);
-                    return (
-                      <div key={doc.id} style={{
-                        display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                        padding: 8, borderRadius: 8, border: `2px solid ${isMatch ? G : "#e8e8ef"}`,
-                        background: isMatch ? "#f0faf4" : "#fafafe", transition: "all 0.4s",
-                      }}>
-                        <span style={{ fontSize: 16 }}>{doc.icon}</span>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: isMatch ? GD : "#b0b0be" }}>{doc.title}</span>
-                      </div>
-                    );
-                  })}
+        <>
+          <div><div className="stage-header">Try It Yourself</div></div>
+          <div className="explanation">
+            Pick a question below and watch the full RAG pipeline retrieve documents and generate a grounded answer.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: "100%" }}>
+              {phase === "idle" ? (
+                <div>
+                  <p style={{ color: "#4a4a5a", fontSize: 16, textAlign: "center", marginBottom: 12 }}>Pick a question and watch RAG in action:</p>
+                  <div className="question-grid">
+                    {SAMPLE_QUESTIONS.map((sq, i) => (
+                      <button key={i} onClick={() => handleQuestion(i)} className="question-btn">{sq.q}</button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="chat-bubble-user" style={{ maxWidth: 360 }}>{SAMPLE_QUESTIONS[selected].q}</div>
+                  {(phase === "searching" || phase === "found" || phase === "answering") && (
+                    <div className="doc-grid" style={{ marginBottom: 12 }}>
+                      {KNOWLEDGE_BASE.map((doc) => {
+                        const isMatch = matchedDocs.includes(doc.id);
+                        return (
+                          <div key={doc.id} className={`doc-card-sm ${isMatch ? 'matched' : ''}`}>
+                            <span style={{ fontSize: 16 }}>{doc.icon}</span>
+                            <span className="doc-card-sm-title">{doc.title}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {phase === "answering" && (
+                    <div className="chat-bubble-ai with-rag fade-in">
+                      <TW text={ANSWERS[matchedDocs[0]]} speed={18} />
+                      <div className="source-badge">{"\u{1F4C4}"} Source: {KNOWLEDGE_BASE.find(d => d.id === matchedDocs[0])?.title}</div>
+                    </div>
+                  )}
+                  <button onClick={() => { setSelected(null); setPhase("idle"); setMatchedDocs([]); }} className="try-again-btn">{"\u2190"} Try another</button>
                 </div>
               )}
-              {phase === "answering" && (
-                <div style={{ background: "#f4f4fa", border: `1px solid ${G}44`, padding: "12px 16px", borderRadius: "14px 14px 14px 4px", fontSize: 18, lineHeight: 1.7, color: "#1a1a2e", animation: "fadeIn 0.4s" }}>
-                  <TW text={ANSWERS[matchedDocs[0]]} speed={18} />
-                  <div style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: GD, background: "#e2f5ea", display: "inline-block", padding: "3px 10px", borderRadius: 8 }}>{"\u{1F4C4}"} Source: {KNOWLEDGE_BASE.find(d => d.id === matchedDocs[0])?.title}</div>
-                </div>
-              )}
-              <button onClick={() => { setSelected(null); setPhase("idle"); setMatchedDocs([]); }} style={{ marginTop: 8, padding: "5px 14px", border: "1px solid #d0d0dd", borderRadius: 14, background: "#fff", cursor: "pointer", fontSize: 15, color: A, fontWeight: 700, fontFamily: "'DM Sans'" }}>{"\u2190"} Try another</button>
             </div>
-          )}
-        </div>
+          </div>
+          <InsightBlock>
+            Try different questions to see how RAG retrieves different documents and generates grounded answers.
+          </InsightBlock>
+        </>
       );
     }
 
-    function RAGExplainer() {
-      const [stage, setStage] = useState(0);
-      const cur = STAGES[stage];
-      const scenes = [<S1 />, <S2 />, <S3 />, <S4 />, <S5 />, <S6 />];
+    /* ── Main Guide Component ── */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stages = [
+        { icon: ProblemIcon, label: 'Problem', component: S1 },
+        { icon: AnalogyIcon, label: 'Analogy', component: S2 },
+        { icon: RetrieveIcon, label: 'Retrieve', component: S3 },
+        { icon: AugmentIcon, label: 'Augment', component: S4 },
+        { icon: GenerateIcon, label: 'Generate', component: S5 },
+        { icon: TryItIcon, label: 'Try It', component: S6 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+      const handleNext = () => { if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
 
       return (
-        <div style={P.root}>
-          <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
-            @keyframes fadeIn { from {opacity:0;transform:translateY(6px)} to {opacity:1;transform:translateY(0)} }
-            @keyframes pulse { from {transform:scale(1)} to {transform:scale(1.15)} }
-            .cur { animation: blink 0.7s infinite; }
-            @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            button:hover { filter: brightness(1.06); }
-            html, body, #root { height: 100%; overflow: hidden; }
-          `}</style>
-
-          <div style={P.sidebar}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: "#a0a0b0", marginBottom: 10, textAlign: "center" }}>STEPS</div>
-            {STAGES.map((s, i) => (
-              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <button onClick={() => setStage(i)} style={{
-                  width: 44, height: 44, borderRadius: "50%", border: "none", display: "flex",
-                  alignItems: "center", justifyContent: "center", fontSize: 22, cursor: "pointer",
-                  transition: "all 0.3s", fontFamily: "'DM Sans'",
-                  background: i === stage ? A : i < stage ? G : "#e8e8f0",
-                  color: i <= stage ? "#fff" : "#aaa",
-                  transform: i === stage ? "scale(1.15)" : "scale(1)",
-                  boxShadow: i === stage ? `0 0 14px ${A}30` : "none",
-                }}>{s.icon}</button>
-                <div style={{
-                  fontSize: 12, fontWeight: 700, marginTop: 2, textAlign: "center",
-                  color: i === stage ? A : i < stage ? GD : "#b0b0be", letterSpacing: 0.2,
-                }}>{s.label}</div>
-                {i < STAGES.length - 1 && (
-                  <div style={{ width: 3, height: 10, margin: "2px 0", background: i < stage ? G : "#e0e0ed", borderRadius: 2 }} />
-                )}
-              </div>
-            ))}
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => {
+              const IconComp = stage.icon;
+              return (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button className={`step-btn ${currentStage === idx ? 'active' : ''}`} onClick={() => setCurrentStage(idx)}>
+                      <IconComp />
+                    </button>
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
-
-          <div style={P.main}>
-            <div style={P.topBar}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={P.badge}>INTERACTIVE GUIDE</span>
-                  <h1 style={P.title}>What is <span style={{ color: A }}>RAG</span>?</h1>
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">5.7</span>
+                  <div className="title">What is RAG?</div>
+                </div>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">BEGINNER</div>
                 </div>
               </div>
-              <div style={P.navRow}>
-                <button disabled={stage === 0} onClick={() => setStage(stage - 1)} style={{ ...P.navBtn, opacity: stage === 0 ? 0.3 : 1 }}>{"\u2190"}</button>
-                <span style={{ fontSize: 15, color: "#6a6a7a", fontWeight: 600, minWidth: 40, textAlign: "center" }}>{stage + 1}/{STAGES.length}</span>
-                <button disabled={stage === STAGES.length - 1} onClick={() => setStage(stage + 1)} style={{ ...P.navBtn, ...P.navP, opacity: stage === STAGES.length - 1 ? 0.3 : 1 }}>{"\u2192"}</button>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of {stages.length}</span>
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentStage === 0}>&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={currentStage === stages.length - 1}>&#8594;</button>
+                </div>
               </div>
             </div>
-
-            <div style={{ marginBottom: 12 }}>
-              <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, color: "#1a1a2e" }}>
-                <span style={{ color: A }}>{cur.title}</span>
-              </h2>
-              <p style={{ fontSize: 18, color: "#4a4a5a", fontWeight: 500, marginTop: 2 }}>{cur.sub}</p>
-            </div>
-
-            <div style={P.content} key={stage}>
-              <div style={P.explainRow}>
-                <p style={P.explain}>{
-                  ["Large Language Models are trained on general knowledge. They don't know your company's specific documents, policies, or data \u2014 so they guess, and sometimes get it completely wrong.",
-                   "Imagine a brilliant librarian who knows how to find anything \u2014 but only answers using the actual books on the shelves. That's exactly what RAG does for AI.",
-                   "The system converts your question into a search query and finds the most relevant documents from your knowledge base using semantic similarity.",
-                   "The magic: we combine the user's question with the retrieved documents into a single, enriched prompt. The AI now has the facts it needs.",
-                   "Now the AI generates an answer grounded in real company data \u2014 not guesses. It can even cite its sources!",
-                   "Pick a question below and watch the full RAG pipeline retrieve documents and generate a grounded answer."][stage]
-                }</p>
-              </div>
-              <div style={P.scene}>
-                <div style={{ animation: "fadeIn 0.3s" }}>{scenes[stage]}</div>
-              </div>
-              <div style={P.insight}>
-                <span style={{ fontSize: 20, flexShrink: 0 }}>{INSIGHTS[stage][0]}</span>
-                <span>{INSIGHTS[stage][1]}</span>
-              </div>
+            <div className="content-area scrollbar-hide" key={currentStage}>
+              <CurrentComponent />
             </div>
           </div>
         </div>
       );
     }
 
-    const P = {
-      root: { display: "flex", width: "100%", height: "100vh", overflow: "hidden", fontFamily: "'DM Sans', sans-serif", color: "#1a1a2e", background: "linear-gradient(180deg, #f7f6fd 0%, #fff 50%, #fafafe 100%)" },
-      sidebar: { width: 120, flexShrink: 0, background: "#fff", borderRight: "1px solid #e8e8f0", padding: "12px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" },
-      main: { width: "75%", maxWidth: "75%", display: "flex", flexDirection: "column", padding: "16px 32px 12px", overflow: "hidden", minWidth: 0, margin: "0 auto" },
-      topBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexShrink: 0 },
-      badge: { fontSize: 11, fontWeight: 700, letterSpacing: 2, color: A, background: "#eee9fd", padding: "3px 12px", borderRadius: 14 },
-      title: { fontFamily: "'Fraunces', serif", fontSize: 30, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.2 },
-      navRow: { display: "flex", alignItems: "center", gap: 6 },
-      navBtn: { width: 36, height: 36, borderRadius: 8, border: "1px solid #d0d0dd", background: "#fff", cursor: "pointer", fontSize: 18, fontWeight: 600, color: "#3d3d4d", fontFamily: "'DM Sans'", display: "flex", alignItems: "center", justifyContent: "center" },
-      navP: { background: A, color: "#fff", border: "none" },
-      content: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 },
-      explainRow: { flexShrink: 0, marginBottom: 10 },
-      explain: { fontSize: 18, color: "#2d2d3d", lineHeight: 1.7, margin: 0 },
-      scene: { flex: 1, background: "#fff", borderRadius: 14, padding: "14px 18px", border: "1px solid #e0e0ec", boxShadow: "0 2px 16px rgba(0,0,0,0.04)", overflow: "auto", minHeight: 0 },
-      insight: { display: "flex", alignItems: "center", gap: 10, background: "#f7f6fd", borderRadius: 10, padding: "10px 14px", marginTop: 10, border: "1px solid #e8e4f2", fontSize: 16, color: "#2d2d3d", lineHeight: 1.6, flexShrink: 0 },
-    };
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<RAGExplainer />);
+    ReactDOM.createRoot(document.getElementById("root")).render(<Guide />);
   </script>
 </body>
 </html>

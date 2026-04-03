@@ -1,19 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <title>RAG Under the Hood — Deep Dive</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
+    #root { height: 100vh; overflow: hidden; }
+    .container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar { width: 120px; background: #f8f9fa; border-right: 1px solid #e0e0e0; padding: 80px 12px 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .step-btn { width: 64px; height: 64px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.3s ease; position: relative; flex-shrink: 0; }
+    .step-btn.active { background: #6c5ce7; border-color: #6c5ce7; color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
+    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
+    .step-btn-label { font-size: 11px; font-weight: 600; color: #999; margin-top: 4px; text-align: center; letter-spacing: 0.3px; transition: color 0.3s ease; }
+    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
+    .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
+    .step-connector.active { background: #6c5ce7; }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1; background: white; flex-shrink: 0; }
+    .left-section { display: flex; align-items: center; gap: 20px; }
+    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .back-link:hover { color: #2ecc71; }
+    .badge { display: inline-block; background: #e8e3f8; color: #6c5ce7; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .progress-indicator { font-size: 13px; font-weight: 600; color: #6c5ce7; background: #f5f3ff; padding: 4px 12px; border-radius: 12px; margin-right: 12px; }
+    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
+    .title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .stage-header { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .nav-arrows { display: flex; gap: 12px; }
+    .arrow-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
+    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; padding: 32px 48px; gap: 30px; }
+    .explanation { font-size: 22px; line-height: 1.7; color: #2a2a2a; }
+    .scene-card { background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%); border-radius: 16px; padding: 40px; border: 1px solid #e8e3f8; min-height: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08); }
+    .insight-box { background: #f0faf0; border-left: 4px solid #2ecc71; padding: 24px; border-radius: 8px; color: #1a5e3a; font-size: 17px; line-height: 1.7; margin-top: 24px; position: relative; }
+    .insight-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #2ecc71; margin-bottom: 8px; text-transform: uppercase; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .fade-in { animation: fadeIn 0.6s ease forwards; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .cur { animation: blink 0.7s infinite; }
+
+    /* Terminal styles */
+    .terminal-wrap { background: #fafafe; border-radius: 12px; border: 1px solid #e0e0ec; overflow: hidden; width: 100%; }
+    .terminal-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: #f0f0f5; border-bottom: 1px solid #e0e0ec; }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .terminal-body { padding: 14px 18px; font-family: monospace; font-size: 16px; line-height: 1.7; }
+
+    /* Chunk grid */
+    .chunk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+    .chunk-card { padding: 14px 16px; border-radius: 12px; cursor: pointer; transition: all 0.3s; border: 2px solid #dddde8; background: #fff; }
+    .chunk-card.revealed { background: #fafafe; }
+    .chunk-card-section { font-size: 14px; font-weight: 700; }
+    .chunk-card-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-top: 3px; }
+    .chunk-card-text { font-size: 16px; color: #2d2d3d; margin-top: 5px; line-height: 1.6; }
+
+    /* Tab buttons */
+    .tab-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .tab-btn { padding: 5px 16px; border-radius: 20px; border: 2px solid #dddde8; font-size: 15px; font-weight: 700; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .tab-btn.active { color: #fff; }
+    .embed-panel { background: #f7f6fd; border-radius: 12px; border: 1px solid #e4e0f2; padding: 14px 18px; width: 100%; }
+    .embed-source { font-size: 15px; color: #2d2d3d; margin-bottom: 8px; }
+    .embed-arrow { text-align: center; font-size: 23px; color: #b0b0be; margin: 6px 0; }
+    .embed-arrow-label { font-size: 15px; color: #4a4a5a; font-weight: 600; }
+    .dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
+    .dim-row { display: flex; align-items: center; gap: 8px; }
+    .dim-label { font-size: 14px; color: #4a4a5a; font-family: monospace; width: 24px; font-weight: 600; }
+
+    /* Vector space */
+    .vector-space { position: relative; width: 100%; min-height: 240px; background: linear-gradient(135deg, #f7f6fd, #eee9fd); border-radius: 14px; border: 1px solid #d8d3ea; overflow: hidden; }
+    .vector-gridline { position: absolute; background: #d0cbe5; }
+    .vector-gridline-h { left: 0; right: 0; height: 1px; }
+    .vector-gridline-v { top: 0; bottom: 0; width: 1px; }
+    .vector-space-label { position: absolute; bottom: 6px; right: 10px; font-size: 11px; color: #9a90b8; letter-spacing: 1.5px; font-weight: 700; }
+    .vector-dot-wrap { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: z-index 0s; }
+    .vector-dot { border-radius: 50%; transition: all 0.3s; }
+    .vector-dot-label { font-size: 14px; font-weight: 700; }
+    .vector-tooltip { position: absolute; top: -48px; background: #fff; border-radius: 8px; padding: 5px 10px; font-size: 14px; color: #2d2d3d; white-space: nowrap; animation: fadeIn 0.2s; box-shadow: 0 3px 12px rgba(0,0,0,0.1); font-family: monospace; }
+
+    /* Score rows */
+    .score-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .score-row { display: flex; align-items: center; padding: 8px 12px; border-radius: 8px; border: 2px solid #e8e8f0; background: #fff; }
+    .score-row.best { border-color: #2ecc71; background: #eefaf2; }
+    .score-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; flex-shrink: 0; }
+    .score-label { font-size: 16px; color: #1a1a2e; font-weight: 600; flex: 1; }
+    .score-bar { width: 80px; height: 10px; background: #e8e8f0; border-radius: 5px; overflow: hidden; margin-right: 8px; }
+    .score-fill { height: 100%; border-radius: 5px; transition: width 0.8s cubic-bezier(.22,.68,0,1.2); }
+    .score-value { font-size: 15px; font-family: monospace; min-width: 38px; font-weight: 400; color: #6a6a7a; }
+    .score-value.best { font-weight: 700; color: #1a9456; }
+    .score-best { font-size: 13px; background: #2ecc71; color: #fff; padding: 2px 8px; border-radius: 8px; font-weight: 700; margin-left: 6px; }
+
+    /* Question grid & buttons */
+    .question-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+    .question-btn { padding: 10px 14px; border-radius: 10px; border: 2px solid #dddde8; background: #fafafe; cursor: pointer; font-size: 16px; color: #1a1a2e; text-align: left; font-weight: 500; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .question-btn:hover { border-color: #6c5ce7; background: #f5f3ff; }
+    .try-again-btn { margin-top: 8px; padding: 6px 16px; border: 1px solid #d0d0dd; border-radius: 16px; background: #fff; cursor: pointer; font-size: 15px; color: #6c5ce7; font-weight: 700; font-family: 'DM Sans', sans-serif; align-self: flex-start; transition: all 0.2s; }
+    .try-again-btn:hover { border-color: #6c5ce7; background: #f5f3ff; }
+
+    /* Prompt blocks */
+    .prompt-stack { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .prompt-block { padding: 10px 14px; border-radius: 10px; transition: opacity 0.5s; }
+    .prompt-block-label { font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+    .prompt-block-text { font-size: 16px; color: #2d2d3d; margin-top: 5px; font-family: monospace; line-height: 1.6; }
+    .prompt-plus { text-align: center; font-size: 18px; color: #c0c0d0; margin: 1px 0; transition: opacity 0.5s; }
+    .prompt-result { text-align: center; animation: fadeIn 0.3s; }
+    .prompt-result-arrow { font-size: 20px; color: #c0c0d0; }
+    .prompt-result-box { padding: 8px 14px; border-radius: 10px; border: 2px solid #f39c12; background: linear-gradient(135deg, #fef9f3, #fdf4ea); display: inline-block; }
+    .prompt-result-label { font-size: 14px; font-weight: 700; color: #c87f0a; letter-spacing: 1px; }
+
+    /* Chat bubbles */
+    .chat-bubble-user { background: #6c5ce7; color: #fff; padding: 8px 16px; border-radius: 14px 14px 4px 14px; font-size: 16px; font-weight: 600; max-width: 360px; margin-left: auto; margin-bottom: 12px; }
+    .chat-source-row { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 8px; }
+    .chat-source-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .chat-source-text { font-size: 15px; color: #3d3d4d; font-weight: 600; }
+    .chat-bubble-ai { background: #f4f4fa; border: 1px solid rgba(46,204,113,0.27); padding: 12px 16px; border-radius: 14px 14px 14px 4px; font-size: 18px; line-height: 1.7; color: #1a1a2e; animation: fadeIn 0.4s; }
+    .source-badge { margin-top: 8px; font-size: 14px; font-weight: 700; color: #1a9456; background: #e2f5ea; display: inline-block; padding: 3px 10px; border-radius: 8px; }
+
+    /* Searching state */
+    .searching-state { text-align: center; padding: 16px; color: #4a4a5a; font-size: 18px; }
+    .searching-icon { font-size: 30px; animation: pulse 0.8s infinite alternate; display: inline-block; }
+
+    /* Bar component */
+    .bar-track { height: 10px; background: #e8e8f0; border-radius: 5px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 5px; transition: width 0.6s cubic-bezier(.22,.68,0,1.2); }
+    .bar-value { font-size: 14px; color: #3d3d4d; font-family: monospace; font-weight: 500; }
+  </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    /* ─── Data ─── */
     const CHUNKS = [
       { id: 0, title: "Annual Leave", text: "All full-time employees are entitled to 20 days of paid annual leave per calendar year. Leave accrues at 1.67 days per month. Unused leave up to 5 days may be carried over.", section: "\u00A73.1" },
       { id: 1, title: "Sick Leave", text: "Employees receive 10 days of paid sick leave per year. A medical certificate is required for absences exceeding 3 consecutive days. Unused sick leave does not carry over.", section: "\u00A73.2" },
@@ -50,28 +183,96 @@
       { text: "Do I get paid extra on holidays?", scores: [0.24, 0.33, 0.21, 0.95], top: 3, answer: "Yes! Employees working on any of the 11 public holidays receive double pay." },
     ];
 
-    const STAGES = [
-      { icon: "\u{1F4C4}", label: "Ingest", title: "Document Ingestion", sub: "Loading raw documents" },
-      { icon: "\u2702\uFE0F", label: "Chunk", title: "Chunking", sub: "Splitting into searchable pieces" },
-      { icon: "\u{1F522}", label: "Embed", title: "Embeddings", sub: "Text \u2192 number vectors" },
-      { icon: "\u{1F5C4}\uFE0F", label: "Store", title: "Vector Database", sub: "Indexed for similarity search" },
-      { icon: "\u{1F50D}", label: "Query", title: "Query & Retrieval", sub: "Finding the best match" },
-      { icon: "\u{1F9E9}", label: "Assemble", title: "Prompt Assembly", sub: "Building the augmented prompt" },
-      { icon: "\u2728", label: "Generate", title: "Generation", sub: "Grounded answer from LLM" },
-    ];
-
-    const A = "#6c5ce7", G = "#2ecc71", GD = "#1a9456";
     const CC = ["#6c5ce7", "#2ecc71", "#e17055", "#f39c12"];
-    const INSIGHTS = [
-      ["\u{1F4A1}", "Like photocopying a textbook so the librarian can work with it \u2014 the original stays safe."],
-      ["\u{1F4A1}", "Like cutting a book into index cards \u2014 each covers one topic, small enough to search fast."],
-      ["\u{1F4A1}", "Like GPS coordinates in \"meaning space\" \u2014 similar topics end up near each other."],
-      ["\u{1F4A1}", "Like a constellation map \u2014 nearby stars discuss similar topics. We find the nearest one."],
-      ["\u{1F4A1}", "Like asking \"which index card is closest in meaning?\" \u2014 math finds the best match instantly."],
-      ["\u{1F4A1}", "Like an open-book exam \u2014 the question PLUS the relevant pages, so no guessing needed."],
-      ["\u{1F4A1}", "The answer cites real data. If info isn't in the knowledge base, it says \"I don't know.\""],
-    ];
 
+    /* ─── SVG Sidebar Icons ─── */
+    function IngestIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+      );
+    }
+
+    function ChunkIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="6" cy="6" r="3" />
+          <path d="M8.12 8.12L12 12" />
+          <path d="M20 4L8.12 15.88" />
+          <circle cx="6" cy="18" r="3" />
+          <path d="M14.8 14.8L20 20" />
+        </svg>
+      );
+    }
+
+    function EmbedIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="9" x2="20" y2="9" />
+          <line x1="4" y1="15" x2="20" y2="15" />
+          <line x1="10" y1="3" x2="8" y2="21" />
+          <line x1="16" y1="3" x2="14" y2="21" />
+        </svg>
+      );
+    }
+
+    function StoreIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        </svg>
+      );
+    }
+
+    function QueryIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      );
+    }
+
+    function AssembleIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 01-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 10-3.214 3.214c.446.166.855.497.925.968a.979.979 0 01-.276.837l-1.61 1.61a2.404 2.404 0 01-1.705.707 2.402 2.402 0 01-1.704-.706l-1.568-1.568a1.026 1.026 0 00-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 11-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 00-.289-.877l-1.568-1.568A2.402 2.402 0 011.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 01.837-.276c.47.07.802.48.968.925a2.501 2.501 0 103.214-3.214c-.446-.166-.855-.497-.925-.968a.979.979 0 01.276-.837l1.61-1.61a2.404 2.404 0 011.705-.707c.618 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 113.237 3.237c-.464.18-.894.527-.967 1.02z" />
+        </svg>
+      );
+    }
+
+    function GenerateIcon() {
+      return (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
+        </svg>
+      );
+    }
+
+    /* ─── InsightBlock ─── */
+    const insightSvg = React.createElement('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+      stroke: '#2ecc71', strokeWidth: 2
+    },
+      React.createElement('path', { d: 'M9 18h6' }),
+      React.createElement('path', { d: 'M10 22h4' }),
+      React.createElement('path', { d: 'M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z' })
+    );
+
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">{insightSvg} INSIGHT</div>
+          {children}
+        </div>
+      );
+    }
+
+    /* ─── Shared Components ─── */
     function TW({ text, speed = 16 }) {
       const [d, setD] = useState("");
       const i = useRef(0);
@@ -88,30 +289,44 @@
       useEffect(() => { const t = setTimeout(() => setA(value * 100), 100); return () => clearTimeout(t); }, [value]);
       return (
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ width: w, height: 10, background: "#e8e8f0", borderRadius: 5, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${a}%`, background: color, borderRadius: 5, transition: "width 0.6s cubic-bezier(.22,.68,0,1.2)" }} />
+          <div className="bar-track" style={{ width: w }}>
+            <div className="bar-fill" style={{ width: `${a}%`, background: color }} />
           </div>
-          <span style={{ fontSize: 14, color: "#3d3d4d", fontFamily: "monospace", fontWeight: 500 }}>{value.toFixed(2)}</span>
+          <span className="bar-value">{value.toFixed(2)}</span>
         </div>
       );
     }
 
+    /* ─── Stage Components ─── */
     function S1() {
       const [lines, setLines] = useState(0);
       useEffect(() => { const t = setInterval(() => setLines(p => Math.min(p + 1, 11)), 200); return () => clearInterval(t); }, []);
       return (
-        <div style={P.termWrap}>
-          <div style={P.termBar}>
-            <span style={{ ...P.dot, background: "#ff5f56" }} /><span style={{ ...P.dot, background: "#ffbd2e" }} /><span style={{ ...P.dot, background: "#27c93f" }} />
-            <span style={{ marginLeft: 10, fontSize: 15, color: "#4a4a5a", fontWeight: 600 }}>employee_handbook.pdf</span>
+        <>
+          <div><div className="stage-header">Document Ingestion</div></div>
+          <div className="explanation">
+            First, we load the raw document into our system — PDFs, Word docs, wikis, or database exports.
           </div>
-          <div style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: 16, lineHeight: 1.7 }}>
-            {FULL_DOC_LINES.slice(0, lines).map((l, i) => (
-              <div key={i} style={{ color: l.accent ? A : l.bold ? "#1a1a2e" : "#2d2d3d", fontWeight: l.bold ? 700 : 400 }}>{l.text || "\u00A0"}</div>
-            ))}
-            {lines < 11 && <span className="cur" style={{ color: A }}>{"\u2588"}</span>}
+          <div className="scene-card">
+            <div className="terminal-wrap">
+              <div className="terminal-bar">
+                <span className="terminal-dot" style={{ background: "#ff5f56" }} />
+                <span className="terminal-dot" style={{ background: "#ffbd2e" }} />
+                <span className="terminal-dot" style={{ background: "#27c93f" }} />
+                <span style={{ marginLeft: 10, fontSize: 15, color: "#4a4a5a", fontWeight: 600 }}>employee_handbook.pdf</span>
+              </div>
+              <div className="terminal-body">
+                {FULL_DOC_LINES.slice(0, lines).map((l, i) => (
+                  <div key={i} style={{ color: l.accent ? "#6c5ce7" : l.bold ? "#1a1a2e" : "#2d2d3d", fontWeight: l.bold ? 700 : 400 }}>{l.text || "\u00A0"}</div>
+                ))}
+                {lines < 11 && <span className="cur" style={{ color: "#6c5ce7" }}>{"\u2588"}</span>}
+              </div>
+            </div>
           </div>
-        </div>
+          <InsightBlock>
+            Like photocopying a textbook so the librarian can work with it — the original stays safe.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -119,50 +334,73 @@
       const [ac, setAc] = useState(-1);
       useEffect(() => { const t = setInterval(() => setAc(p => p >= 3 ? 3 : p + 1), 500); return () => clearInterval(t); }, []);
       return (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {CHUNKS.map((c, i) => (
-            <div key={i} onClick={() => setAc(i)} style={{
-              padding: "12px 14px", borderRadius: 12, cursor: "pointer", transition: "all 0.3s",
-              border: `2px solid ${i <= ac ? CC[i] : "#dddde8"}`, background: i === ac ? "#fafafe" : "#fff",
-              boxShadow: i === ac ? `0 4px 16px ${CC[i]}15` : "none",
-            }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: CC[i] }}>{c.section}</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a2e", marginTop: 3 }}>{c.title}</div>
-              <div style={{ fontSize: 16, color: "#2d2d3d", marginTop: 5, lineHeight: 1.6 }}>
-                {i === ac ? c.text : c.text.slice(0, 65) + "..."}
-              </div>
+        <>
+          <div><div className="stage-header">Chunking</div></div>
+          <div className="explanation">
+            Documents are too long to search efficiently, so we split them into chunks — smaller, meaningful pieces.
+          </div>
+          <div className="scene-card">
+            <div className="chunk-grid">
+              {CHUNKS.map((c, i) => (
+                <div key={i} onClick={() => setAc(i)}
+                  className={`chunk-card ${i <= ac ? 'revealed' : ''}`}
+                  style={{
+                    borderColor: i <= ac ? CC[i] : "#dddde8",
+                    boxShadow: i === ac ? `0 4px 16px ${CC[i]}15` : "none",
+                  }}>
+                  <div className="chunk-card-section" style={{ color: CC[i] }}>{c.section}</div>
+                  <div className="chunk-card-title">{c.title}</div>
+                  <div className="chunk-card-text">
+                    {i === ac ? c.text : c.text.slice(0, 65) + "..."}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+          <InsightBlock>
+            Like cutting a book into index cards — each covers one topic, small enough to search fast.
+          </InsightBlock>
+        </>
       );
     }
 
     function S3() {
       const [ai, setAi] = useState(0);
       return (
-        <div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-            {CHUNKS.map((c, i) => (
-              <button key={i} onClick={() => setAi(i)} style={{
-                padding: "5px 16px", borderRadius: 20, border: `2px solid ${CC[i]}`, fontSize: 15, fontWeight: 700,
-                background: i === ai ? CC[i] : "transparent", color: i === ai ? "#fff" : CC[i],
-                cursor: "pointer", fontFamily: "'DM Sans'", transition: "all 0.2s",
-              }}>{c.section}</button>
-            ))}
+        <>
+          <div><div className="stage-header">Embeddings</div></div>
+          <div className="explanation">
+            We convert each chunk into a list of numbers called a vector. Similar meaning leads to similar numbers.
           </div>
-          <div style={{ background: "#f7f6fd", borderRadius: 12, border: "1px solid #e4e0f2", padding: "12px 16px" }}>
-            <div style={{ fontSize: 15, color: "#2d2d3d", marginBottom: 8 }}>"{CHUNKS[ai].text.slice(0, 60)}..."</div>
-            <div style={{ textAlign: "center", fontSize: 23, color: "#b0b0be", margin: "6px 0" }}>{"\u2B07\uFE0F"} <span style={{ fontSize: 15, color: "#4a4a5a", fontWeight: 600 }}>Embedding Model</span></div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 20px" }}>
-              {VECS[ai].map((v, j) => (
-                <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 14, color: "#4a4a5a", fontFamily: "monospace", width: 24, fontWeight: 600 }}>d{j + 1}</span>
-                  <Bar value={v} color={CC[ai]} />
-                </div>
+          <div className="scene-card">
+            <div className="tab-row">
+              {CHUNKS.map((c, i) => (
+                <button key={i} onClick={() => setAi(i)}
+                  className={`tab-btn ${i === ai ? 'active' : ''}`}
+                  style={{
+                    borderColor: CC[i],
+                    background: i === ai ? CC[i] : "transparent",
+                    color: i === ai ? "#fff" : CC[i],
+                  }}>{c.section}</button>
               ))}
             </div>
+            <div className="embed-panel">
+              <div className="embed-source">"{CHUNKS[ai].text.slice(0, 60)}..."</div>
+              <div className="embed-arrow">{"\u2B07\uFE0F"} <span className="embed-arrow-label">Embedding Model</span></div>
+              <div className="dim-grid">
+                {VECS[ai].map((v, j) => (
+                  <div key={j} className="dim-row">
+                    <span className="dim-label">d{j + 1}</span>
+                    <Bar value={v} color={CC[ai]} />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+          <InsightBlock>
+            Like GPS coordinates in "meaning space" — similar topics end up near each other.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -170,36 +408,43 @@
       const [hov, setHov] = useState(-1);
       const pos = [{ x: 25, y: 20 }, { x: 70, y: 75 }, { x: 35, y: 70 }, { x: 75, y: 22 }];
       return (
-        <div style={{
-          position: "relative", width: "100%", height: "100%", minHeight: 220,
-          background: "linear-gradient(135deg, #f7f6fd, #eee9fd)", borderRadius: 14,
-          border: "1px solid #d8d3ea", overflow: "hidden",
-        }}>
-          {[25, 50, 75].map(p => <div key={`h${p}`} style={{ position: "absolute", top: `${p}%`, left: 0, right: 0, height: 1, background: "#d0cbe5" }} />)}
-          {[25, 50, 75].map(p => <div key={`v${p}`} style={{ position: "absolute", left: `${p}%`, top: 0, bottom: 0, width: 1, background: "#d0cbe5" }} />)}
-          <div style={{ position: "absolute", bottom: 6, right: 10, fontSize: 11, color: "#9a90b8", letterSpacing: 1.5, fontWeight: 700 }}>VECTOR SPACE</div>
-          {CHUNKS.map((c, i) => (
-            <div key={i} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(-1)} style={{
-              position: "absolute", left: `${pos[i].x}%`, top: `${pos[i].y}%`, transform: "translate(-50%,-50%)",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer", zIndex: hov === i ? 10 : 1,
-            }}>
-              <div style={{
-                width: hov === i ? 26 : 18, height: hov === i ? 26 : 18, borderRadius: "50%", background: CC[i],
-                boxShadow: `0 0 ${hov === i ? 24 : 8}px ${CC[i]}55`, transition: "all 0.3s",
-              }} />
-              <span style={{ fontSize: 14, color: CC[i], fontWeight: 700 }}>{hov === i ? c.title : c.section}</span>
-              {hov === i && (
-                <div style={{
-                  position: "absolute", top: -48, background: "#fff", border: `1px solid ${CC[i]}44`, borderRadius: 8,
-                  padding: "5px 10px", fontSize: 14, color: "#2d2d3d", whiteSpace: "nowrap", animation: "fadeIn 0.2s",
-                  boxShadow: "0 3px 12px rgba(0,0,0,0.1)", fontFamily: "monospace",
-                }}>
-                  [{VECS[i].slice(0, 3).map(v => v.toFixed(2)).join(", ")}, ...]
+        <>
+          <div><div className="stage-header">Vector Database</div></div>
+          <div className="explanation">
+            Vectors are stored in a vector database — optimized for finding similar items by comparing numbers.
+          </div>
+          <div className="scene-card">
+            <div className="vector-space" style={{ height: 260 }}>
+              {[25, 50, 75].map(p => <div key={`h${p}`} className="vector-gridline vector-gridline-h" style={{ top: `${p}%` }} />)}
+              {[25, 50, 75].map(p => <div key={`v${p}`} className="vector-gridline vector-gridline-v" style={{ left: `${p}%` }} />)}
+              <div className="vector-space-label">VECTOR SPACE</div>
+              {CHUNKS.map((c, i) => (
+                <div key={i} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(-1)}
+                  className="vector-dot-wrap"
+                  style={{
+                    left: `${pos[i].x}%`, top: `${pos[i].y}%`,
+                    transform: "translate(-50%,-50%)",
+                    zIndex: hov === i ? 10 : 1,
+                  }}>
+                  <div className="vector-dot" style={{
+                    width: hov === i ? 26 : 18, height: hov === i ? 26 : 18,
+                    background: CC[i],
+                    boxShadow: `0 0 ${hov === i ? 24 : 8}px ${CC[i]}55`,
+                  }} />
+                  <span className="vector-dot-label" style={{ color: CC[i] }}>{hov === i ? c.title : c.section}</span>
+                  {hov === i && (
+                    <div className="vector-tooltip" style={{ borderColor: `${CC[i]}44` }}>
+                      [{VECS[i].slice(0, 3).map(v => v.toFixed(2)).join(", ")}, ...]
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+          <InsightBlock>
+            Like a constellation map — nearby stars discuss similar topics. We find the nearest one.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -208,48 +453,51 @@
       const [ph, setPh] = useState("pick");
       const run = (i) => { setQi(i); setPh("searching"); setTimeout(() => setPh("results"), 1000); };
       return (
-        <div>
-          {ph === "pick" ? (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              {QS.map((q, i) => (
-                <button key={i} onClick={() => run(i)} style={{
-                  padding: "10px 14px", borderRadius: 10, border: "2px solid #dddde8", background: "#fafafe",
-                  cursor: "pointer", fontSize: 16, color: "#1a1a2e", textAlign: "left", fontWeight: 500, fontFamily: "'DM Sans'",
-                }}>{q.text}</button>
-              ))}
-            </div>
-          ) : (
-            <div>
-              <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 360, marginLeft: "auto", marginBottom: 12 }}>{QS[qi].text}</div>
-              {ph === "searching" ? (
-                <div style={{ textAlign: "center", padding: 16, color: "#4a4a5a", fontSize: 18 }}>
-                  <span style={{ fontSize: 30, animation: "pulse 0.8s infinite alternate" }}>{"\u{1F50D}"}</span> Computing scores...
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {CHUNKS.map((c, i) => {
-                    const s = QS[qi].scores[i], isT = i === QS[qi].top;
-                    return (
-                      <div key={i} style={{
-                        display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: 8,
-                        border: `2px solid ${isT ? G : "#e8e8f0"}`, background: isT ? "#eefaf2" : "#fff",
-                      }}>
-                        <div style={{ width: 10, height: 10, borderRadius: "50%", background: CC[i], marginRight: 10, flexShrink: 0 }} />
-                        <span style={{ fontSize: 16, color: "#1a1a2e", fontWeight: 600, flex: 1 }}>{c.title}</span>
-                        <div style={{ width: 80, height: 10, background: "#e8e8f0", borderRadius: 5, overflow: "hidden", marginRight: 8 }}>
-                          <div style={{ height: "100%", width: `${s * 100}%`, background: isT ? G : "#c0c0d0", borderRadius: 5, transition: "width 0.8s cubic-bezier(.22,.68,0,1.2)" }} />
+        <>
+          <div><div className="stage-header">Query & Retrieval</div></div>
+          <div className="explanation">
+            When a user asks a question, we convert it to a vector and find the most similar chunk.
+          </div>
+          <div className="scene-card">
+            {ph === "pick" ? (
+              <div className="question-grid">
+                {QS.map((q, i) => (
+                  <button key={i} onClick={() => run(i)} className="question-btn">{q.text}</button>
+                ))}
+              </div>
+            ) : (
+              <div style={{ width: "100%" }}>
+                <div className="chat-bubble-user">{QS[qi].text}</div>
+                {ph === "searching" ? (
+                  <div className="searching-state">
+                    <span className="searching-icon">{"\u{1F50D}"}</span> Computing scores...
+                  </div>
+                ) : (
+                  <div className="score-list">
+                    {CHUNKS.map((c, i) => {
+                      const s = QS[qi].scores[i], isT = i === QS[qi].top;
+                      return (
+                        <div key={i} className={`score-row ${isT ? 'best' : ''}`}>
+                          <div className="score-dot" style={{ background: CC[i] }} />
+                          <span className="score-label">{c.title}</span>
+                          <div className="score-bar">
+                            <div className="score-fill" style={{ width: `${s * 100}%`, background: isT ? "#2ecc71" : "#c0c0d0" }} />
+                          </div>
+                          <span className={`score-value ${isT ? 'best' : ''}`}>{(s * 100).toFixed(0)}%</span>
+                          {isT && <span className="score-best">BEST</span>}
                         </div>
-                        <span style={{ fontSize: 15, fontFamily: "monospace", color: isT ? GD : "#6a6a7a", fontWeight: isT ? 700 : 400, minWidth: 38 }}>{(s * 100).toFixed(0)}%</span>
-                        {isT && <span style={{ fontSize: 13, background: G, color: "#fff", padding: "2px 8px", borderRadius: 8, fontWeight: 700, marginLeft: 6 }}>BEST</span>}
-                      </div>
-                    );
-                  })}
-                  <button onClick={() => { setQi(null); setPh("pick"); }} style={{ marginTop: 6, padding: "6px 16px", border: "1px solid #d0d0dd", borderRadius: 16, background: "#fff", cursor: "pointer", fontSize: 15, color: A, fontWeight: 700, fontFamily: "'DM Sans'", alignSelf: "flex-start" }}>{"\u2190"} Try another</button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                      );
+                    })}
+                    <button onClick={() => { setQi(null); setPh("pick"); }} className="try-again-btn">{"\u2190"} Try another</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <InsightBlock>
+            Like asking "which index card is closest in meaning?" — math finds the best match instantly.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -262,33 +510,45 @@
         return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
       }, []);
       const bl = [
-        { color: A, bg: "#faf9fe", label: "\u2460 SYSTEM INSTRUCTION", text: '"Answer ONLY using the provided context. Say you don\'t know if unsure."' },
-        { color: GD, bg: "#eefaf2", label: "\u2461 RETRIEVED CONTEXT", text: '"Employees are entitled to 20 days annual leave. Accrues at 1.67 days/month..."' },
+        { color: "#6c5ce7", bg: "#faf9fe", label: "\u2460 SYSTEM INSTRUCTION", text: '"Answer ONLY using the provided context. Say you don\'t know if unsure."' },
+        { color: "#1a9456", bg: "#eefaf2", label: "\u2461 RETRIEVED CONTEXT", text: '"Employees are entitled to 20 days annual leave. Accrues at 1.67 days/month..."' },
         { color: "#d63031", bg: "#fdf2ef", label: "\u2462 USER QUESTION", text: '"How many vacation days do I get?"' },
       ];
       return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {bl.map((b, i) => (
-            <div key={i}>
-              <div style={{
-                padding: "10px 14px", borderRadius: 10, border: `2px solid ${b.color}28`, background: b.bg,
-                opacity: ph >= i ? 1 : 0.1, transition: "opacity 0.5s",
-              }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: b.color, letterSpacing: 1 }}>{b.label}</div>
-                <div style={{ fontSize: 16, color: "#2d2d3d", marginTop: 5, fontFamily: "monospace", lineHeight: 1.6 }}>{b.text}</div>
-              </div>
-              {i < 2 && <div style={{ textAlign: "center", fontSize: 18, color: "#c0c0d0", margin: "1px 0", opacity: ph >= i + 1 ? 1 : 0.1 }}>{"\uFF0B"}</div>}
+        <>
+          <div><div className="stage-header">Prompt Assembly</div></div>
+          <div className="explanation">
+            The system assembles a super-prompt: system instructions + retrieved context + user question.
+          </div>
+          <div className="scene-card">
+            <div className="prompt-stack">
+              {bl.map((b, i) => (
+                <div key={i}>
+                  <div className="prompt-block"
+                    style={{
+                      border: `2px solid ${b.color}28`, background: b.bg,
+                      opacity: ph >= i ? 1 : 0.1,
+                    }}>
+                    <div className="prompt-block-label" style={{ color: b.color }}>{b.label}</div>
+                    <div className="prompt-block-text">{b.text}</div>
+                  </div>
+                  {i < 2 && <div className="prompt-plus" style={{ opacity: ph >= i + 1 ? 1 : 0.1 }}>{"\uFF0B"}</div>}
+                </div>
+              ))}
+              {ph >= 3 && (
+                <div className="prompt-result">
+                  <div className="prompt-result-arrow">{"\u2B07\uFE0F"}</div>
+                  <div className="prompt-result-box">
+                    <span className="prompt-result-label">AUGMENTED PROMPT {"\u2192"} LLM</span>
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
-          {ph >= 3 && (
-            <div style={{ textAlign: "center", animation: "fadeIn 0.3s" }}>
-              <div style={{ fontSize: 20, color: "#c0c0d0" }}>{"\u2B07\uFE0F"}</div>
-              <div style={{ padding: "8px 14px", borderRadius: 10, border: "2px solid #f39c12", background: "linear-gradient(135deg, #fef9f3, #fdf4ea)", display: "inline-block" }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#c87f0a", letterSpacing: 1 }}>AUGMENTED PROMPT {"\u2192"} LLM</span>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+          <InsightBlock>
+            Like an open-book exam — the question PLUS the relevant pages, so no guessing needed.
+          </InsightBlock>
+        </>
       );
     }
 
@@ -297,146 +557,110 @@
       const [ans, setAns] = useState(false);
       const run = (i) => { setQi(i); setAns(false); setTimeout(() => setAns(true), 500); };
       return (
-        <div>
-          {qi === null ? (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              {QS.map((q, i) => (
-                <button key={i} onClick={() => run(i)} style={{
-                  padding: "10px 14px", borderRadius: 10, border: "2px solid #dddde8", background: "#fafafe",
-                  cursor: "pointer", fontSize: 16, color: "#1a1a2e", textAlign: "left", fontWeight: 500, fontFamily: "'DM Sans'",
-                }}>{q.text}</button>
-              ))}
-            </div>
-          ) : (
-            <div>
-              <div style={{ background: A, color: "#fff", padding: "8px 16px", borderRadius: "14px 14px 4px 14px", fontSize: 16, fontWeight: 600, maxWidth: 340, marginLeft: "auto", marginBottom: 10 }}>{QS[qi].text}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 8 }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: CC[QS[qi].top] }} />
-                <span style={{ fontSize: 15, color: "#3d3d4d", fontWeight: 600 }}>Using: {CHUNKS[QS[qi].top].title}</span>
+        <>
+          <div><div className="stage-header">Generation</div></div>
+          <div className="explanation">
+            The LLM reads the augmented prompt and generates an answer grounded in your actual data.
+          </div>
+          <div className="scene-card">
+            {qi === null ? (
+              <div className="question-grid">
+                {QS.map((q, i) => (
+                  <button key={i} onClick={() => run(i)} className="question-btn">{q.text}</button>
+                ))}
               </div>
-              {ans && (
-                <div style={{ background: "#f4f4fa", border: `1px solid ${G}44`, padding: "12px 16px", borderRadius: "14px 14px 14px 4px", fontSize: 18, lineHeight: 1.7, color: "#1a1a2e", animation: "fadeIn 0.4s" }}>
-                  <TW text={QS[qi].answer} speed={14} />
-                  <div style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: GD, background: "#e2f5ea", display: "inline-block", padding: "3px 10px", borderRadius: 8 }}>{"\u2705"} Source: {CHUNKS[QS[qi].top].title}</div>
+            ) : (
+              <div style={{ width: "100%" }}>
+                <div className="chat-bubble-user">{QS[qi].text}</div>
+                <div className="chat-source-row">
+                  <div className="chat-source-dot" style={{ background: CC[QS[qi].top] }} />
+                  <span className="chat-source-text">Using: {CHUNKS[QS[qi].top].title}</span>
                 </div>
-              )}
-              <button onClick={() => setQi(null)} style={{ marginTop: 8, padding: "5px 14px", border: "1px solid #d0d0dd", borderRadius: 14, background: "#fff", cursor: "pointer", fontSize: 15, color: A, fontWeight: 700, fontFamily: "'DM Sans'" }}>{"\u2190"} Try another</button>
-            </div>
-          )}
-        </div>
+                {ans && (
+                  <div className="chat-bubble-ai">
+                    <TW text={QS[qi].answer} speed={14} />
+                    <div className="source-badge">{"\u2705"} Source: {CHUNKS[QS[qi].top].title}</div>
+                  </div>
+                )}
+                <button onClick={() => setQi(null)} className="try-again-btn">{"\u2190"} Try another</button>
+              </div>
+            )}
+          </div>
+          <InsightBlock>
+            The answer cites real data. If info isn't in the knowledge base, it says "I don't know."
+          </InsightBlock>
+        </>
       );
     }
 
-    function RAGInternals() {
-      const [stage, setStage] = useState(0);
-      const cur = STAGES[stage];
-      const scenes = [<S1 />, <S2 />, <S3 />, <S4 />, <S5 />, <S6 />, <S7 />];
+    /* ─── Main Guide ─── */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stages = [
+        { icon: IngestIcon, label: 'Ingest', component: S1 },
+        { icon: ChunkIcon, label: 'Chunk', component: S2 },
+        { icon: EmbedIcon, label: 'Embed', component: S3 },
+        { icon: StoreIcon, label: 'Store', component: S4 },
+        { icon: QueryIcon, label: 'Query', component: S5 },
+        { icon: AssembleIcon, label: 'Assemble', component: S6 },
+        { icon: GenerateIcon, label: 'Generate', component: S7 },
+      ];
+
+      const CurrentComponent = stages[currentStage].component;
+      const handleNext = () => { if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
 
       return (
-        <div style={P.root}>
-          <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
-            @keyframes fadeIn { from {opacity:0;transform:translateY(6px)} to {opacity:1;transform:translateY(0)} }
-            @keyframes pulse { from {transform:scale(1)} to {transform:scale(1.15)} }
-            .cur { animation: blink 0.7s infinite; }
-            @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            button:hover { filter: brightness(1.06); }
-            html, body, #root { height: 100%; overflow: hidden; }
-          `}</style>
-
-          <div style={P.sidebar}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: "#a0a0b0", marginBottom: 10, textAlign: "center" }}>STAGES</div>
-            {STAGES.map((s, i) => (
-              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <button onClick={() => setStage(i)} style={{
-                  width: 44, height: 44, borderRadius: "50%", border: "none", display: "flex",
-                  alignItems: "center", justifyContent: "center", fontSize: 22, cursor: "pointer",
-                  transition: "all 0.3s", fontFamily: "'DM Sans'",
-                  background: i === stage ? A : i < stage ? G : "#e8e8f0",
-                  color: i <= stage ? "#fff" : "#aaa",
-                  transform: i === stage ? "scale(1.15)" : "scale(1)",
-                  boxShadow: i === stage ? `0 0 14px ${A}30` : "none",
-                }}>{s.icon}</button>
-                <div style={{
-                  fontSize: 12, fontWeight: 700, marginTop: 2, textAlign: "center",
-                  color: i === stage ? A : i < stage ? GD : "#b0b0be", letterSpacing: 0.2,
-                }}>{s.label}</div>
-                {i < STAGES.length - 1 && (
-                  <div style={{ width: 3, height: 10, margin: "2px 0", background: i < stage ? G : "#e0e0ed", borderRadius: 2 }} />
-                )}
-              </div>
-            ))}
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => {
+              const IconComp = stage.icon;
+              return (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button className={`step-btn ${currentStage === idx ? 'active' : ''}`} onClick={() => setCurrentStage(idx)}>
+                      <IconComp />
+                    </button>
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < stages.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
-
-          <div style={P.main}>
-            <div style={P.topBar}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={P.badge}>DEEP DIVE</span>
-                  <h1 style={P.title}>RAG <span style={{ color: A }}>Under the Hood</span></h1>
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">5.8</span>
+                  <div className="title">RAG Under the Hood</div>
+                </div>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">DEEP DIVE</div>
                 </div>
               </div>
-              <div style={P.navRow}>
-                <button disabled={stage === 0} onClick={() => setStage(stage - 1)} style={{ ...P.navBtn, opacity: stage === 0 ? 0.3 : 1 }}>{"\u2190"}</button>
-                <span style={{ fontSize: 15, color: "#6a6a7a", fontWeight: 600, minWidth: 40, textAlign: "center" }}>{stage + 1}/{STAGES.length}</span>
-                <button disabled={stage === STAGES.length - 1} onClick={() => setStage(stage + 1)} style={{ ...P.navBtn, ...P.navP, opacity: stage === STAGES.length - 1 ? 0.3 : 1 }}>{"\u2192"}</button>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of 7</span>
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentStage === 0}>&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={currentStage === stages.length - 1}>&#8594;</button>
+                </div>
               </div>
             </div>
-
-            <div style={{ marginBottom: 12 }}>
-              <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, color: "#1a1a2e" }}>
-                <span style={{ color: A }}>Stage {stage + 1}:</span> {cur.title}
-              </h2>
-              <p style={{ fontSize: 18, color: "#4a4a5a", fontWeight: 500, marginTop: 2 }}>{cur.sub}</p>
-            </div>
-
-            <div style={P.content} key={stage}>
-              <div style={P.explainRow}>
-                <p style={P.explain}>{
-                  ["First, we load the raw document into our system \u2014 PDFs, Word docs, wikis, or database exports.",
-                   "Documents are too long to search efficiently, so we split them into chunks \u2014 smaller, meaningful pieces.",
-                   "We convert each chunk into a list of numbers called a vector. Similar meaning \u2192 similar numbers.",
-                   "Vectors are stored in a vector database \u2014 optimized for finding similar items by comparing numbers.",
-                   "When a user asks a question, we convert it to a vector and find the most similar chunk.",
-                   "The system assembles a super-prompt: system instructions + retrieved context + user question.",
-                   "The LLM reads the augmented prompt and generates an answer grounded in your actual data."][stage]
-                }</p>
-              </div>
-              <div style={P.scene}>
-                <div style={{ animation: "fadeIn 0.3s" }}>{scenes[stage]}</div>
-              </div>
-              <div style={P.insight}>
-                <span style={{ fontSize: 20, flexShrink: 0 }}>{INSIGHTS[stage][0]}</span>
-                <span>{INSIGHTS[stage][1]}</span>
-              </div>
+            <div className="content-area scrollbar-hide" key={currentStage}>
+              <CurrentComponent />
             </div>
           </div>
         </div>
       );
     }
 
-    const P = {
-      root: { display: "flex", width: "100%", height: "100vh", overflow: "hidden", fontFamily: "'DM Sans', sans-serif", color: "#1a1a2e", background: "linear-gradient(180deg, #f7f6fd 0%, #fff 50%, #fafafe 100%)" },
-      sidebar: { width: 120, flexShrink: 0, background: "#fff", borderRight: "1px solid #e8e8f0", padding: "12px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" },
-      main: { width: "75%", maxWidth: "75%", display: "flex", flexDirection: "column", padding: "16px 32px 12px", overflow: "hidden", minWidth: 0, margin: "0 auto" },
-      topBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexShrink: 0 },
-      badge: { fontSize: 11, fontWeight: 700, letterSpacing: 2, color: A, background: "#eee9fd", padding: "3px 12px", borderRadius: 14 },
-      title: { fontFamily: "'Fraunces', serif", fontSize: 30, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.2 },
-      navRow: { display: "flex", alignItems: "center", gap: 6 },
-      navBtn: { width: 36, height: 36, borderRadius: 8, border: "1px solid #d0d0dd", background: "#fff", cursor: "pointer", fontSize: 18, fontWeight: 600, color: "#3d3d4d", fontFamily: "'DM Sans'", display: "flex", alignItems: "center", justifyContent: "center" },
-      navP: { background: A, color: "#fff", border: "none" },
-      content: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 },
-      explainRow: { flexShrink: 0, marginBottom: 10 },
-      explain: { fontSize: 18, color: "#2d2d3d", lineHeight: 1.7, margin: 0 },
-      scene: { flex: 1, background: "#fff", borderRadius: 14, padding: "14px 18px", border: "1px solid #e0e0ec", boxShadow: "0 2px 16px rgba(0,0,0,0.04)", overflow: "auto", minHeight: 0 },
-      insight: { display: "flex", alignItems: "center", gap: 10, background: "#f7f6fd", borderRadius: 10, padding: "10px 14px", marginTop: 10, border: "1px solid #e8e4f2", fontSize: 16, color: "#2d2d3d", lineHeight: 1.6, flexShrink: 0 },
-      termWrap: { background: "#fafafe", borderRadius: 10, border: "1px solid #e0e0ec", overflow: "hidden" },
-      termBar: { display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "#f0f0f5", borderBottom: "1px solid #e0e0ec" },
-      dot: { width: 12, height: 12, borderRadius: "50%" },
-    };
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<RAGInternals />);
+    ReactDOM.createRoot(document.getElementById("root")).render(<Guide />);
   </script>
 </body>
 </html>
