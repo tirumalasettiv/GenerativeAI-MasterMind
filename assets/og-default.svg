@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="GenerativeAI MasterMind — Interactive Learning">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6c5ce7"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#2ecc71"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#f5f3ff" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(80,80)">
+    <rect width="1040" height="470" rx="28" fill="url(#card)"/>
+    <text x="60" y="120" font-family="Fraunces, serif" font-weight="700" font-size="32" fill="#6c5ce7">GenerativeAI</text>
+    <text x="60" y="220" font-family="Fraunces, serif" font-weight="700" font-size="96" fill="#1a1a1a">MasterMind</text>
+    <text x="60" y="290" font-family="DM Sans, sans-serif" font-weight="500" font-size="28" fill="#666">Interactive Generative AI Learning Platform</text>
+    <g transform="translate(60,350)">
+      <circle cx="30" cy="30" r="28" fill="#6c5ce7"/>
+      <text x="30" y="38" text-anchor="middle" font-family="Fraunces, serif" font-weight="700" font-size="24" fill="#fff">5</text>
+      <text x="80" y="38" font-family="DM Sans, sans-serif" font-weight="600" font-size="22" fill="#2a2a2a">Modules</text>
+      <circle cx="240" cy="30" r="28" fill="#2ecc71"/>
+      <text x="240" y="38" text-anchor="middle" font-family="Fraunces, serif" font-weight="700" font-size="22" fill="#fff">24</text>
+      <text x="290" y="38" font-family="DM Sans, sans-serif" font-weight="600" font-size="22" fill="#2a2a2a">Guides</text>
+      <circle cx="470" cy="30" r="28" fill="#f39c12"/>
+      <text x="470" y="38" text-anchor="middle" font-family="DM Sans, sans-serif" font-weight="700" font-size="20" fill="#fff">AI</text>
+      <text x="520" y="38" font-family="DM Sans, sans-serif" font-weight="600" font-size="22" fill="#2a2a2a">Fundamentals → Agents</text>
+    </g>
+  </g>
+</svg>
