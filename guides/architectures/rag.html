@@ -763,6 +763,48 @@
       );
     }
 
+    function S1Diagram() {
+  return (
+    <svg width="480" height="140" viewBox="0 0 480 140"
+      style={{ maxWidth: '100%', overflow: 'visible', marginBottom: '20px' }}
+      aria-label="Before RAG: LLM alone risks hallucination. After RAG: document retrieval grounds the answer">
+      <defs>
+        <marker id="ragArrR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#e74c3c" />
+        </marker>
+        <marker id="ragArrG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#2ecc71" />
+        </marker>
+      </defs>
+      <text x="112" y="18" textAnchor="middle" fontSize="12" fontWeight="700" fill="#e74c3c" fontFamily="DM Sans">Before RAG</text>
+      <text x="362" y="18" textAnchor="middle" fontSize="12" fontWeight="700" fill="#2ecc71" fontFamily="DM Sans">After RAG</text>
+      <line x1="240" y1="8" x2="240" y2="140" stroke="#e0e0e0" strokeWidth="1" strokeDasharray="4 4" />
+      {/* Before: User → LLM → ⚠ */}
+      <rect x="18" y="32" width="70" height="30" rx="10" fill="#fdf2f2" stroke="#e74c3c" strokeWidth="1.5" />
+      <text x="53" y="51" textAnchor="middle" fontSize="11" fontWeight="600" fill="#e74c3c" fontFamily="DM Sans">User</text>
+      <line x1="88" y1="47" x2="116" y2="47" stroke="#e74c3c" strokeWidth="2" markerEnd="url(#ragArrR)" />
+      <rect x="116" y="32" width="70" height="30" rx="10" fill="#e74c3c" />
+      <text x="151" y="51" textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="DM Sans">LLM</text>
+      <line x1="186" y1="47" x2="206" y2="47" stroke="#e74c3c" strokeWidth="2" markerEnd="url(#ragArrR)" />
+      <rect x="206" y="32" width="28" height="30" rx="8" fill="#fdf2f2" stroke="#e74c3c" strokeWidth="1.5" />
+      <text x="220" y="51" textAnchor="middle" fontSize="16" fontFamily="DM Sans">⚠</text>
+      <text x="112" y="88" textAnchor="middle" fontSize="10" fontWeight="600" fill="#e74c3c" fontFamily="DM Sans">Hallucination risk</text>
+      <text x="112" y="103" textAnchor="middle" fontSize="10" fill="#888" fontFamily="DM Sans">answers from memory only</text>
+      {/* After: User → Docs → LLM → ✓ */}
+      <rect x="252" y="32" width="60" height="30" rx="10" fill="#e8f8f0" stroke="#2ecc71" strokeWidth="1.5" />
+      <text x="282" y="51" textAnchor="middle" fontSize="11" fontWeight="600" fill="#2ecc71" fontFamily="DM Sans">User</text>
+      <line x1="312" y1="47" x2="330" y2="47" stroke="#2ecc71" strokeWidth="2" markerEnd="url(#ragArrG)" />
+      <rect x="330" y="32" width="60" height="30" rx="10" fill="#e8f8f0" stroke="#2ecc71" strokeWidth="1.5" />
+      <text x="360" y="51" textAnchor="middle" fontSize="11" fontWeight="600" fill="#2ecc71" fontFamily="DM Sans">Docs</text>
+      <line x1="390" y1="47" x2="408" y2="47" stroke="#2ecc71" strokeWidth="2" markerEnd="url(#ragArrG)" />
+      <rect x="408" y="32" width="54" height="30" rx="10" fill="#2ecc71" />
+      <text x="435" y="51" textAnchor="middle" fontSize="11" fontWeight="700" fill="white" fontFamily="DM Sans">LLM</text>
+      <text x="362" y="88" textAnchor="middle" fontSize="10" fontWeight="600" fill="#2ecc71" fontFamily="DM Sans">✓ Grounded answer</text>
+      <text x="362" y="103" textAnchor="middle" fontSize="10" fill="#888" fontFamily="DM Sans">70–90% fewer hallucinations</text>
+    </svg>
+  );
+}
+
     /* Stage 1: What is RAG? */
     function S1() {
       const [mode, setMode] = useState('with');
@@ -797,6 +839,7 @@
             Retrieval-Augmented Generation (RAG) is an AI pattern where the model first searches your documents to find relevant information, then generates answers grounded in what it found. Think of it as a reference librarian who understands your question, walks to the right shelf, reads the relevant pages, and gives you a cited answer.
           </div>
           <div className="scene-card">
+            <S1Diagram />
             <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
               Question: &ldquo;What does our policy say about remote work?&rdquo;
             </div>
@@ -871,6 +914,46 @@
       );
     }
 
+    function S2Diagram() {
+  const steps = [
+    { label: 'Document\nLoader', icon: '📄', color: '#6c5ce7', bg: '#f5f3ff', x: 16  },
+    { label: 'Chunker',          icon: '✂️',  color: '#3498db', bg: '#e0f0ff', x: 108 },
+    { label: 'Embeddings',       icon: '🧮',  color: '#f39c12', bg: '#fff8e1', x: 200 },
+    { label: 'Vector DB',        icon: '🗃️',  color: '#e74c3c', bg: '#fdf2f2', x: 292 },
+    { label: 'LLM\nSynthesis',   icon: '🤖',  color: '#2ecc71', bg: '#e8f8f0', x: 384 },
+  ];
+  return (
+    <svg width="476" height="110" viewBox="0 0 476 110"
+      style={{ maxWidth: '100%', overflow: 'visible', marginBottom: '20px' }}
+      aria-label="RAG five-component pipeline: Document Loader, Chunker, Embeddings, Vector DB, LLM Synthesis">
+      <defs>
+        {steps.slice(0, -1).map((s, i) => (
+          <marker key={i} id={`rComp${i}`} markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill={s.color} />
+          </marker>
+        ))}
+      </defs>
+      {steps.map((s, i, arr) => {
+        const lines = s.label.split('\n');
+        return (
+          <g key={s.label}>
+            <rect x={s.x} y="16" width="80" height="76" rx="10" fill={s.bg} stroke={s.color} strokeWidth="1.5" />
+            <text x={s.x + 40} y="42" textAnchor="middle" fontSize="20" fontFamily="DM Sans">{s.icon}</text>
+            {lines.map((line, li) => (
+              <text key={li} x={s.x + 40} y={62 + li * 14} textAnchor="middle"
+                fontSize="10" fontWeight="600" fill={s.color} fontFamily="DM Sans">{line}</text>
+            ))}
+            {i < arr.length - 1 && (
+              <line x1={s.x + 80} y1="54" x2={arr[i + 1].x} y2="54"
+                stroke={s.color} strokeWidth="2" markerEnd={`url(#rComp${i})`} />
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
     /* Stage 2: The Five Components */
     function S2() {
       const [expanded, setExpanded] = useState(null);
@@ -912,6 +995,7 @@
             Every RAG system is built from five core components that form a pipeline. Documents flow in one end, and grounded answers come out the other. Click each component to explore its role.
           </div>
           <div className="scene-card">
+            <S2Diagram />
             <div style={{ display: 'flex', gap: '12px', width: '100%', flexWrap: 'wrap' }}>
               {components.map((comp, idx) => (
                 <div
@@ -953,6 +1037,49 @@
         </>
       );
     }
+
+    function S3Diagram() {
+  const steps = [
+    { label: 'Query',   color: '#6c5ce7', bg: '#f5f3ff' },
+    { label: 'Embed',   color: '#3498db', bg: '#e0f0ff' },
+    { label: 'Search',  color: '#f39c12', bg: '#fff8e1' },
+    { label: 'Top-K',   color: '#e74c3c', bg: '#fdf2f2' },
+    { label: 'Context', color: '#6c5ce7', bg: '#f5f3ff' },
+    { label: 'LLM',     color: '#6c5ce7', bg: '#6c5ce7' },
+    { label: 'Answer',  color: '#2ecc71', bg: '#e8f8f0' },
+  ];
+  const nodeW = 60, gap = 14;
+  const totalW = steps.length * nodeW + (steps.length - 1) * gap;
+  return (
+    <svg width={totalW} height="76" viewBox={`0 0 ${totalW} 76`}
+      style={{ maxWidth: '100%', overflow: 'visible', marginBottom: '20px' }}
+      aria-label="RAG query processing flow from Query through Embedding, Vector Search, Top-K retrieval, Context Assembly, LLM, to Answer">
+      <defs>
+        {steps.slice(0, -1).map((s, i) => (
+          <marker key={i} id={`rFlow${i}`} markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill={s.color} />
+          </marker>
+        ))}
+      </defs>
+      {steps.map((s, i, arr) => {
+        const x = i * (nodeW + gap);
+        const isLLM = s.label === 'LLM';
+        return (
+          <g key={s.label}>
+            <rect x={x} y="18" width={nodeW} height="32" rx="10"
+              fill={isLLM ? '#6c5ce7' : s.bg} stroke={s.color} strokeWidth="1.5" />
+            <text x={x + nodeW / 2} y="38" textAnchor="middle"
+              fontSize="11" fontWeight="600" fill={isLLM ? 'white' : s.color} fontFamily="DM Sans">{s.label}</text>
+            {i < arr.length - 1 && (
+              <line x1={x + nodeW} y1="34" x2={x + nodeW + gap} y2="34"
+                stroke={s.color} strokeWidth="2" markerEnd={`url(#rFlow${i})`} />
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
 
     /* Stage 3: Under the Hood */
     function S3() {
@@ -1052,6 +1179,7 @@
             Walk through exactly what happens when you ask a RAG system a question. Click each step to follow the journey from query to grounded answer.
           </div>
           <div className="scene-card">
+            <S3Diagram />
             <div style={{ width: '100%' }}>
               {steps.map((step, idx) => (
                 <div
