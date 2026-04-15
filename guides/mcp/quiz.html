@@ -219,6 +219,9 @@
       { id: 13, section: "4.2 Drawbacks", question: "Why is MCP's ping-pong execution pattern problematic?", options: ["It requires too many API keys", "Each tool call requires a full round-trip, multiplying latency, cost, and context size", "It only works with one programming language", "It requires the user to approve every single action"], correct: 1, explanation: "Traditional MCP uses repeated round-trip interactions: model requests tool \u2192 tool runs \u2192 result added to history \u2192 entire history sent to model. Each cycle requires a full LLM inference pass with growing context, multiplying latency and cost." },
       { id: 14, section: "4.2 Drawbacks", question: "Why are tool-call tokens considered 'unnatural' for LLMs?", options: ["They're too short for LLMs to process", "LLMs are primarily trained on text and code, not synthetic tool-call schemas", "Tool calls use a different character encoding", "LLMs can only output English text"], correct: 1, explanation: "LLMs are trained on trillions of tokens of text and code \u2014 their native language. Tool-call tokens and JSON schemas are synthetic, constructed by model developers with limited training examples. It's like asking Shakespeare to write in a language he barely knows." },
       { id: 15, section: "4.2 Code Mode", question: "How does 'code mode' improve on traditional MCP tool calling?", options: ["It removes the need for MCP servers entirely", "The LLM generates TypeScript code executed once in a sandbox instead of multiple round-trip tool calls", "It uses smaller AI models for faster responses", "It caches all tool results permanently"], correct: 1, explanation: "Code mode converts MCP tool definitions into a TypeScript API. The LLM generates code that calls this API, which is executed once in a secure sandbox \u2014 eliminating the multiple round-trip tool calls of traditional MCP and leveraging the LLM's native code generation strengths." },
+      { id: 16, section: "4.2 Lifecycle", question: "When does an MCP server actually run?", options: ["Continuously in the background on Anthropic's servers", "It's spawned by the MCP client (e.g., Claude Desktop) when needed and runs locally with your user's permissions and access", "Only when Claude decides to call a tool", "It runs in the cloud and Anthropic manages it"], correct: 1, explanation: "MCP servers run locally (or remotely if you host them), spawned by the client. They execute with your user's permissions \u2014 which is why trust and scope matter. Anthropic doesn't host or manage MCP servers." },
+      { id: 17, section: "4.1 Primitives", question: "You're building an MCP server for a recipe app. You want Claude to know about my pantry AND call 'search recipes' on demand. Which primitives fit?", options: ["Both as tools", "Both as resources", "'My pantry' as a resource (passive, user-selectable data), 'search recipes' as a tool (Claude-invoked action)", "Both as prompts"], correct: 2, explanation: "Resources = user-selected passive data (pulled into context). Tools = model-invoked actions. Prompts = reusable user-invoked templates. Static data you want Claude to reference \u2192 resource. Actions Claude should decide to take \u2192 tool." },
+      { id: 18, section: "4.2 Security", question: "Your MCP server needs to call a paid API that requires an API key. Where does the secret belong?", options: ["Hardcoded in the server code", "Sent from Claude in the tool call", "Stored in an environment variable or OS keychain the server reads at startup \u2014 never passed through the model", "Stored in the resource list"], correct: 2, explanation: "Secrets should never cross the model boundary \u2014 they'd end up in logs, training data, or chat history. Store in env vars or the OS keychain; the server reads them locally and uses them on your behalf." },
     ];
 
     const SECTION_ICONS = {
@@ -257,7 +260,7 @@
       );
     }
 
-    function ResultsView({ questions, answers }) {
+    function ResultsView({ questions, answers, onRetry }) {
       const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
       const percentage = Math.round((correctCount / questions.length) * 100);
       const circumference = 2 * Math.PI * 75;
@@ -298,9 +301,23 @@
             </div>
           </div>
           <div className="insight-box" style={{ marginTop: 24 }}><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> RECOMMENDATION</div>{percentage >= 90 ? "Excellent mastery of MCP! You're ready to move on to Module 5: The Five AI Architectures." : percentage >= 70 ? "Strong understanding! Review the sections you missed, then advance to the AI Architectures module." : "Consider revisiting the guide sections where you scored below 100% before moving to the next module."}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
-            <a href="../../index.html" className="submit-btn" style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}>Back to Guides</a>
-            <button className="submit-btn" onClick={() => window.location.reload()}>Retake Quiz</button>
+          <div className="module-complete-cta">
+            <div className="celebrate">
+              <span className="celebrate-icon" aria-hidden="true">🎉</span>
+              <span className="celebrate-text">Module 4 Complete</span>
+            </div>
+            <a href="../architectures/overview.html" className="continue-btn">
+              Continue to Module 5: Architectures →
+            </a>
+          </div>
+
+          <div className="quiz-actions" role="group" aria-label="Quiz actions">
+            <button type="button" className="action-btn" onClick={onRetry} aria-label="Retry this quiz">
+              ↻ Retry quiz
+            </button>
+            <a href="../../index.html#module-4" className="action-btn" aria-label="Review Module 4">
+              📖 Review module
+            </a>
           </div>
         </div>
       );
@@ -313,6 +330,15 @@
       const [answers, setAnswers] = useState([]);
       const [showResults, setShowResults] = useState(false);
       const contentRef = useRef(null);
+
+      const resetQuiz = () => {
+        setCurrentQuestion(0);
+        setSelectedAnswer(null);
+        setAnswered(false);
+        setAnswers([]);
+        setShowResults(false);
+        if (contentRef.current) contentRef.current.scrollTop = 0;
+      };
 
       const handleSelect = (idx) => setSelectedAnswer(idx);
       const handleSubmit = () => { setAnswered(true); const na = [...answers]; na[currentQuestion] = selectedAnswer; setAnswers(na); };
@@ -385,7 +411,7 @@
                 </div>
               </div>
               <main id="main" className="content-area scrollbar-hide" ref={contentRef}>
-                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
+                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} onRetry={resetQuiz} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
               </main>
             </div>
           </div>
