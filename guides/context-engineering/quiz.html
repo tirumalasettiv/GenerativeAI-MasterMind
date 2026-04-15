@@ -225,6 +225,9 @@
       { id: 13, section: "3.2 Context Management", question: "What is the main benefit of context isolation using sub-agents?", options: ["It makes API calls cheaper", "Each agent only sees the context it needs, reducing confusion and clash", "It allows using multiple AI models simultaneously", "It eliminates the need for system prompts"], correct: 1, explanation: "Context isolation means creating focused sub-agents with only the context they need. This reduces context confusion (each agent only sees relevant information), improves focus, and prevents context clash between unrelated tasks." },
       { id: 14, section: "3.2 System Prompts", question: "What is the 'Goldilocks Zone' for system prompts?", options: ["The longest possible set of detailed instructions", "No instructions at all \u2014 let the AI figure it out", "Principles and reasoning frameworks rather than rigid scripts or flowcharts", "Exact step-by-step flowcharts for every possible scenario"], correct: 2, explanation: "The Goldilocks Zone means 'not too specific, not too vague, but just right.' The best system prompts provide principles and reasoning frameworks rather than rigid flowcharts, teaching the AI how to think rather than what to say." },
       { id: 15, section: "3.2 System Prompts", question: "What are the four components of an optimal system prompt?", options: ["Length, format, tone, and audience", "Clear identity and scope, empowerment over constraint, reasoning framework, and clear boundaries", "Speed, accuracy, creativity, and safety", "Context, objective, style, and response format"], correct: 1, explanation: "The four components are: (1) Clear Identity and Scope, (2) Empowerment Over Constraint, (3) Reasoning Framework, and (4) Clear Boundaries as Heuristics. These principles leverage what LLMs do best \u2014 recognizing patterns and applying general rules." },
+      { id: 16, section: "3.2 Long Context", question: "You paste a 200-page document into a 1M-token context window. The model still misses key details buried in the middle. What's happening?", options: ["The context window isn't actually 1M tokens", "The 'lost in the middle' effect \u2014 models attend less reliably to content in the middle of long contexts", "The model is broken", "You need to re-paste it"], correct: 1, explanation: "Effective context < total context. Models reliably attend to the beginning and end of long inputs; middle content gets less attention. RAG or deliberate chunking/summarization often beats raw long-context dumps." },
+      { id: 17, section: "3.2 Long Context", question: "Your domain knowledge is 50MB of documentation that updates weekly. When is long-context preferable to RAG?", options: ["Always \u2014 just paste everything", "Never \u2014 RAG is always better", "When the full context fits AND queries need to reason across many documents at once, AND you don't need fresh retrieval", "Only for coding tasks"], correct: 2, explanation: "Long-context wins when cross-document reasoning matters and the material fits. RAG wins when freshness matters, the corpus is too large, or you need citations. Hybrid approaches often beat either alone." },
+      { id: 18, section: "3.2 Token Budgets", question: "Your 8k-token budget breaks down as: 2k system prompt, 1k user query, 2k retrieved context, 1k tool schemas. The model cuts off mid-reply. What's wrong?", options: ["The model is broken", "You only budgeted 6k of the 8k \u2014 that leaves just 2k for the model's reply, which isn't enough", "Tool schemas are free and don't count", "The user query was too long"], correct: 1, explanation: "Context budgets include the OUTPUT. Input + output must fit the window. Leaving 2k headroom for a reply is often too tight for anything complex \u2014 plan token budgets with the max reply length in mind." },
     ];
 
     const SECTION_ICONS = {
@@ -263,7 +266,7 @@
       );
     }
 
-    function ResultsView({ questions, answers }) {
+    function ResultsView({ questions, answers, onRetry }) {
       const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
       const percentage = Math.round((correctCount / questions.length) * 100);
       const circumference = 2 * Math.PI * 75;
@@ -304,9 +307,23 @@
             </div>
           </div>
           <div className="insight-box" style={{ marginTop: 24 }}><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> RECOMMENDATION</div>{percentage >= 90 ? "Excellent mastery of context engineering! You're ready to move on to Module 4: Model Context Protocol." : percentage >= 70 ? "Strong understanding! Review the sections you missed, then advance to Model Context Protocol." : "Consider revisiting the guide sections where you scored below 100% before moving to the next module."}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
-            <a href="../../index.html" className="submit-btn" style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}>Back to Guides</a>
-            <button className="submit-btn" onClick={() => window.location.reload()}>Retake Quiz</button>
+          <div className="module-complete-cta">
+            <div className="celebrate">
+              <span className="celebrate-icon" aria-hidden="true">🎉</span>
+              <span className="celebrate-text">Module 3 Complete</span>
+            </div>
+            <a href="../mcp/fundamentals.html" className="continue-btn">
+              Continue to Module 4: MCP →
+            </a>
+          </div>
+
+          <div className="quiz-actions" role="group" aria-label="Quiz actions">
+            <button type="button" className="action-btn" onClick={onRetry} aria-label="Retry this quiz">
+              ↻ Retry quiz
+            </button>
+            <a href="../../index.html#module-3" className="action-btn" aria-label="Review Module 3">
+              📖 Review module
+            </a>
           </div>
         </div>
       );
@@ -319,6 +336,15 @@
       const [answers, setAnswers] = useState([]);
       const [showResults, setShowResults] = useState(false);
       const contentRef = useRef(null);
+
+      const resetQuiz = () => {
+        setCurrentQuestion(0);
+        setSelectedAnswer(null);
+        setAnswered(false);
+        setAnswers([]);
+        setShowResults(false);
+        if (contentRef.current) contentRef.current.scrollTop = 0;
+      };
 
       const handleSelect = (idx) => setSelectedAnswer(idx);
       const handleSubmit = () => { setAnswered(true); const na = [...answers]; na[currentQuestion] = selectedAnswer; setAnswers(na); };
@@ -373,7 +399,7 @@
                 </div>
               </div>
               <main id="main" className="content-area scrollbar-hide" ref={contentRef}>
-                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
+                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} onRetry={resetQuiz} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
               </main>
             </div>
           </div>
