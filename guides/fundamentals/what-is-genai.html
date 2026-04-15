@@ -752,7 +752,7 @@
 
       return (
         <>
-          <div><div className="stage-header">What is Generative AI?</div></div>
+          <div><h2 className="stage-header">What is Generative AI?</h2></div>
           <div className="explanation">
             Generative AI is software that creates new content — text, images, code, audio, video — by predicting what should come next based on patterns it learned from millions of examples.
           </div>
@@ -945,28 +945,38 @@
 
       return (
         <>
-          <div><div className="stage-header">Understanding Through Analogies</div></div>
+          <div><h2 className="stage-header">Understanding Through Analogies</h2></div>
           <div className="explanation">
             Let's understand GenAI through 3 different lenses.
           </div>
           <div className="scene-card">
             <div className="analogy-cards">
-              {analogies.map(analogy => (
-                <div
-                  key={analogy.id}
-                  className={`analogy-card disclosure-card-host ${expanded === analogy.id ? 'expanded' : ''}`}
-                  onClick={() => setExpanded(expanded === analogy.id ? null : analogy.id)}
-                >
-                  <span className="disclosure-badge" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </span>
-                  <div className="analogy-icon"><AnalogyIcon id={analogy.id} /></div>
-                  <div className="analogy-title">{analogy.title}</div>
-                  <div className="analogy-description">{analogy.description}</div>
-                </div>
-              ))}
+              {analogies.map(analogy => {
+                const isExpanded = expanded === analogy.id;
+                const panelId = `analogy-panel-${analogy.id}`;
+                const toggle = () => setExpanded(expanded === analogy.id ? null : analogy.id);
+                return (
+                  <div
+                    key={analogy.id}
+                    className={`analogy-card disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isExpanded}
+                    aria-controls={panelId}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  >
+                    <span className="disclosure-badge" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
+                    <div className="analogy-icon"><AnalogyIcon id={analogy.id} /></div>
+                    <div className="analogy-title">{analogy.title}</div>
+                    <div id={panelId} className="analogy-description">{analogy.description}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -974,6 +984,8 @@
               type="button"
               className={`mechanics-toggle${showMechanics ? ' open' : ''}`}
               onClick={() => setShowMechanics(!showMechanics)}
+              aria-expanded={showMechanics}
+              aria-controls="mechanics-panel"
             >
               <span>{showMechanics ? 'Hide the mechanics' : 'Show the mechanics'}</span>
               <svg className="chevron" width="12" height="12" viewBox="0 0 24 24"
@@ -983,7 +995,7 @@
               </svg>
             </button>
           </div>
-          <div className={`mechanics-panel${showMechanics ? ' open' : ''}`}>
+          <div id="mechanics-panel" className={`mechanics-panel${showMechanics ? ' open' : ''}`}>
             <div className="mechanics-card">
               <TransformerDiagram />
               <div className="mechanics-caption">
@@ -1042,7 +1054,7 @@
 
       return (
         <>
-          <div><div className="stage-header">GenAI in Action</div></div>
+          <div><h2 className="stage-header">GenAI in Action</h2></div>
           <div className="explanation">
             See GenAI at work across 5 different domains.
           </div>
@@ -1150,7 +1162,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Next-Token Prediction</div></div>
+          <div><h2 className="stage-header">Next-Token Prediction</h2></div>
           <div className="explanation">
             At its core, GenAI does one thing: predicts the most likely next piece of content, over and over.
           </div>
@@ -1273,7 +1285,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Capabilities &amp; Limits</div></div>
+          <div><h2 className="stage-header">Capabilities &amp; Limits</h2></div>
           <div className="explanation">
             GenAI is incredibly powerful but has real limits — understanding these is key to using it well.
           </div>
@@ -1422,7 +1434,7 @@
 
       return (
         <>
-          <div><div className="stage-header">The GenAI Timeline</div></div>
+          <div><h2 className="stage-header">The GenAI Timeline</h2></div>
           <div className="explanation">
             GenAI went mainstream in late 2022 with ChatGPT — here's why it's transforming everything.
           </div>
@@ -1525,7 +1537,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">1.1</span>
-                    <div className="title">What is Generative AI?</div>
+                    <h1 className="title">What is Generative AI?</h1>
                   </div>
                   <div style={{ marginLeft: '16px' }}>
                     <div className="badge">INTERACTIVE</div>

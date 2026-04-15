@@ -488,7 +488,7 @@
         function Stage1() {
             return (
                 <>
-                    <div><div className="stage-header">The Core Difference</div></div>
+                    <div><h2 className="stage-header">The Core Difference</h2></div>
                     <p className="explanation">
                         Regular AI finds, sorts, or decides — Generative AI creates something new. One is a Picker, the other is a Maker.
                     </p>
@@ -526,7 +526,7 @@
 
             return (
                 <>
-                    <div><div className="stage-header">Picker vs Maker</div></div>
+                    <div><h2 className="stage-header">Picker vs Maker</h2></div>
                     <p className="explanation">
                         Regular AI is like a librarian — finds existing books. Generative AI is like an author — writes new ones.
                     </p>
@@ -537,13 +537,16 @@
                                 <div className="librarian-scene">
                                     <div className="interactive-prompt">Click a question below</div>
                                     <button
+                                        type="button"
                                         className="question-btn"
                                         onClick={() => setShowResponse('find')}
+                                        aria-expanded={showResponse === 'find'}
+                                        aria-controls="response-find"
                                     >
                                         ? Find me a book
                                     </button>
                                     {showResponse === 'find' && (
-                                        <div className="response">
+                                        <div id="response-find" className="response">
                                             Searches shelves, finds existing book, hands it to you.
                                         </div>
                                     )}
@@ -554,13 +557,16 @@
                                 <div className="librarian-scene">
                                     <div className="interactive-prompt">Click a question below</div>
                                     <button
+                                        type="button"
                                         className="question-btn"
                                         onClick={() => setShowResponse('write')}
+                                        aria-expanded={showResponse === 'write'}
+                                        aria-controls="response-write"
                                     >
                                         ? Write me a book
                                     </button>
                                     {showResponse === 'write' && (
-                                        <div className="response">
+                                        <div id="response-write" className="response">
                                             Takes your idea, writes completely new content from scratch.
                                         </div>
                                     )}
@@ -617,7 +623,7 @@
 
             return (
                 <>
-                    <div><div className="stage-header">Real-World Examples</div></div>
+                    <div><h2 className="stage-header">Real-World Examples</h2></div>
                     <p className="explanation">
                         See how the same task is handled differently by Regular AI vs Generative AI
                     </p>
@@ -704,7 +710,7 @@
 
             return (
                 <>
-                    <div><div className="stage-header">Types of AI Tasks</div></div>
+                    <div><h2 className="stage-header">Types of AI Tasks</h2></div>
                     <p className="explanation">
                         Before GenAI, these 5 types of AI were (and still are) everywhere — none of them create, they all analyze, sort, or choose.
                     </p>
@@ -904,7 +910,7 @@
 
             return (
                 <>
-                    <div><div className="stage-header">When to Use Which</div></div>
+                    <div><h2 className="stage-header">When to Use Which</h2></div>
                     <p className="explanation">
                         Understanding when to use Regular AI vs GenAI is key — use the right tool for the right job
                     </p>
@@ -1072,7 +1078,7 @@
                                     <span style={{ fontSize: '14px', color: '#999' }}>|</span>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <span className="guide-number">1.2</span>
-                                        <div className="title">{stages[currentStage].title}</div>
+                                        <h1 className="title">{stages[currentStage].title}</h1>
                                     </div>
                                     <div>
                                         <div className="badge">INTERACTIVE</div>

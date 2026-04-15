@@ -442,7 +442,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Hallucinations</div></div>
+          <div><h2 className="stage-header">Hallucinations</h2></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               It's like a confident friend who never admits they don't know something. Instead of saying "I don't know," GenAI will confidently make up an answer that sounds completely plausible but is totally wrong.
@@ -551,7 +551,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Knowledge Cutoff</div></div>
+          <div><h2 className="stage-header">Knowledge Cutoff</h2></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               It's like talking to someone who's been in a coma since a certain date. GenAI was trained on data up to a specific point. It has no idea what happened after that.
@@ -672,7 +672,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Context Window</div></div>
+          <div><h2 className="stage-header">Context Window</h2></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               It's like talking to someone with short-term memory loss. GenAI can only 'remember' a certain amount of your conversation. Share a 100-page document? It might forget the beginning by the time it reaches the end.
@@ -811,7 +811,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Mitigation Strategies</div></div>
+          <div><h2 className="stage-header">Mitigation Strategies</h2></div>
           <div style={P.explainRow}>
             <p style={P.explain}>
               Every limitation has a workaround. Here's how to mitigate each weakness and use AI more effectively. Notice that RAG (Retrieval-Augmented Generation) appears in all three solutions -- a powerful pattern covered in Module 3.
@@ -819,11 +819,20 @@
           </div>
           <div style={P.scene}>
             <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-              {solutions.map((solution, i) => (
+              {solutions.map((solution, i) => {
+                const isExpanded = expandedPanel === i;
+                const panelId = `mitigation-panel-${i}`;
+                const toggle = () => setExpandedPanel(expandedPanel === i ? null : i);
+                return (
                 <div
                   key={i}
-                  className={`disclosure-card-host ${expandedPanel === i ? 'expanded' : ''}`}
-                  onClick={() => setExpandedPanel(expandedPanel === i ? null : i)}
+                  className={`disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                   style={{
                     position: 'relative',
                     padding: '28px',
@@ -833,8 +842,8 @@
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     height: 'fit-content',
-                    transform: expandedPanel === i ? 'scale(1.02)' : 'scale(1)',
-                    boxShadow: expandedPanel === i ? '0 8px 24px rgba(108, 92, 231, 0.2)' : '0 4px 16px rgba(0,0,0,0.08)',
+                    transform: isExpanded ? 'scale(1.02)' : 'scale(1)',
+                    boxShadow: isExpanded ? '0 8px 24px rgba(108, 92, 231, 0.2)' : '0 4px 16px rgba(0,0,0,0.08)',
                     animation: 'slideInLeft 0.5s ease ' + (i * 0.1) + 's both'
                   }}
                 >
@@ -849,8 +858,8 @@
                   <div style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a1a', marginBottom: '14px', fontFamily: 'Fraunces, serif' }}>
                     {solution.title}
                   </div>
-                  {expandedPanel === i && (
-                    <div style={{ marginTop: '18px', paddingTop: '18px', borderTop: '2px solid #f0f0f0', animation: 'fadeIn 0.3s ease' }}>
+                  {isExpanded && (
+                    <div id={panelId} style={{ marginTop: '18px', paddingTop: '18px', borderTop: '2px solid #f0f0f0', animation: 'fadeIn 0.3s ease' }}>
                       {solution.tactics.map((tactic, j) => (
                         <div key={j} style={{ fontSize: '15px', marginBottom: '12px', paddingLeft: '22px', position: 'relative', color: '#2a2a2a', lineHeight: '1.6' }}>
                           <span style={{ position: 'absolute', left: '0', color: '#2ecc71', fontWeight: '700' }}>+</span>
@@ -860,7 +869,8 @@
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <div style={P.insight}>
@@ -922,7 +932,7 @@
                   <span style={{ fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">1.5</span>
-                    <div className="title">{STAGES[stage].title}</div>
+                    <h1 className="title">{STAGES[stage].title}</h1>
                   </div>
                   <div>
                     <div className="badge">BEGINNER</div>
