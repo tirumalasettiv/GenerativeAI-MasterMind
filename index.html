@@ -3,8 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive learning platform for Generative AI. Five modules — fundamentals, prompt engineering, context engineering, MCP, and architectures.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="GenerativeAI MasterMind — Interactive Learning">
+  <meta property="og:description" content="Interactive learning platform for Generative AI. Five modules — fundamentals, prompt engineering, context engineering, MCP, and architectures.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GenerativeAI MasterMind — Interactive Learning">
+  <meta name="twitter:description" content="Interactive learning platform for Generative AI. Five modules — fundamentals, prompt engineering, context engineering, MCP, and architectures.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title>GenAI MasterMind — Master Generative AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/guide-shared.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
@@ -361,39 +372,23 @@
       );
 
       return (
-        <div
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            background: "linear-gradient(180deg, #f7f6fd 0%, #fff 50%, #fafafe 100%)",
-            minHeight: "100vh",
-            color: "#1a1a2e",
-          }}
-        >
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              background: "linear-gradient(180deg, #f7f6fd 0%, #fff 50%, #fafafe 100%)",
+              minHeight: "100vh",
+              color: "#1a1a2e",
+            }}
+          >
           <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(12px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
             @keyframes slideDown {
               from { opacity: 0; transform: translateY(-12px); }
               to { opacity: 1; transform: translateY(0); }
             }
-            @keyframes pulse {
-              from { transform: scale(1); }
-              to { transform: scale(1.08); }
-            }
             .cursor {
               animation: blink 0.7s infinite;
-            }
-            @keyframes blink {
-              0%, 100% { opacity: 1; }
-              50% { opacity: 0; }
-            }
-            * {
-              box-sizing: border-box;
-              margin: 0;
-              padding: 0;
             }
             html, body {
               margin: 0;
@@ -479,7 +474,7 @@
           </div>
 
           {/* Main Content */}
-          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
+          <main id="main" style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
             {/* Progress Section */}
             <div
               style={{
@@ -614,7 +609,7 @@
                 </a>
               </div>
             )}
-          </div>
+          </main>
 
           {/* Footer */}
           <div
@@ -677,7 +672,8 @@
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </React.Fragment>
       );
     }
 
