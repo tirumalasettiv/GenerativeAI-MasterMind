@@ -684,7 +684,7 @@
               <div style={{ fontSize: '15px', lineHeight: '1.7', color: '#333', marginBottom: '20px' }}>
                 <strong style={{ color: '#1a1a1a' }}>Analogy: A Film Production Crew.</strong> Click each agent node to learn its role.
               </div>
-              <svg viewBox="0 0 400 310" style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block' }}>
+              <svg viewBox="0 0 400 310" style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block' }} aria-label="Interactive multi-agent network diagram">
                 {connections.map(([fromId, toId], idx) => {
                   const from = getAgent(fromId);
                   const to = getAgent(toId);
@@ -854,7 +854,7 @@
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
-              <svg viewBox="0 0 520 200" style={{ width: '100%', maxWidth: '560px', margin: '0 auto', display: 'block' }}>
+              <svg viewBox="0 0 520 200" style={{ width: '100%', maxWidth: '560px', margin: '0 auto', display: 'block' }} aria-label="Product launch pipeline: Research, Writing, Editing, Publishing agents with supervisor oversight">
                 {/* Supervisor arc */}
                 <path d="M 65 40 Q 260 -20 455 40" fill="none" stroke="#b0a6e8" strokeWidth="2" strokeDasharray="6 4" />
                 <text x="260" y="12" textAnchor="middle" fill="#b0a6e8" fontSize="11" fontWeight="700" fontFamily="DM Sans">SUPERVISOR OVERSIGHT</text>
@@ -1066,6 +1066,51 @@
       );
     }
 
+    /* ========== S6 Decision Matrix Diagram ========== */
+    function S6Diagram() {
+      const quadrants = [
+        { label: 'Workflow',     x: 54,  y: 48,  color: '#6c5ce7', bg: '#f5f3ff' },
+        { label: 'Agentic AI',  x: 214, y: 48,  color: '#e056a0', bg: '#fdf0f7' },
+        { label: 'RAG + Agent', x: 54,  y: 158, color: '#3498db', bg: '#e0f0ff' },
+        { label: 'Single Agent',x: 214, y: 158, color: '#f39c12', bg: '#fff8e1' },
+      ];
+      return (
+        <svg width="400" height="290" viewBox="0 0 400 290"
+          style={{ maxWidth: '100%', overflow: 'visible', marginBottom: '20px' }}
+          aria-label="2x2 decision matrix for choosing architecture: axes are Task Complexity and Uncertainty">
+          <defs>
+            <marker id="axisArr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0,8 3,0 6" fill="#ccc" />
+            </marker>
+          </defs>
+          {/* Axes */}
+          <line x1="44" y1="256" x2="390" y2="256" stroke="#ccc" strokeWidth="2" markerEnd="url(#axisArr)" />
+          <line x1="44" y1="256" x2="44" y2="22" stroke="#ccc" strokeWidth="2" markerEnd="url(#axisArr)" />
+          {/* Axis labels */}
+          <text x="217" y="276" textAnchor="middle" fontSize="11" fontWeight="600" fill="#888" fontFamily="DM Sans">Task Complexity →</text>
+          <text x="14" y="140" textAnchor="middle" fontSize="11" fontWeight="600" fill="#888"
+            fontFamily="DM Sans" transform="rotate(-90 14 140)">Uncertainty →</text>
+          {/* Crosshair */}
+          <line x1="214" y1="22" x2="214" y2="256" stroke="#e8e8e8" strokeWidth="1" strokeDasharray="4 4" />
+          <line x1="44" y1="148" x2="390" y2="148" stroke="#e8e8e8" strokeWidth="1" strokeDasharray="4 4" />
+          {/* Tick labels */}
+          <text x="129" y="270" textAnchor="middle" fontSize="10" fill="#bbb" fontFamily="DM Sans">Low</text>
+          <text x="302" y="270" textAnchor="middle" fontSize="10" fill="#bbb" fontFamily="DM Sans">High</text>
+          <text x="32" y="216" textAnchor="middle" fontSize="10" fill="#bbb" fontFamily="DM Sans">Low</text>
+          <text x="32" y="68" textAnchor="middle" fontSize="10" fill="#bbb" fontFamily="DM Sans">High</text>
+          {/* Quadrant boxes */}
+          {quadrants.map(q => (
+            <g key={q.label}>
+              <rect x={q.x} y={q.y} width="148" height="88" rx="12"
+                fill={q.bg} stroke={q.color} strokeWidth="2" />
+              <text x={q.x + 74} y={q.y + 48} textAnchor="middle"
+                fontSize="13" fontWeight="700" fill={q.color} fontFamily="DM Sans">{q.label}</text>
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
     /* ========== Stage 6: When to Use ========== */
     function S6() {
       const [checks, setChecks] = useState([false, false, false, false]);
@@ -1109,6 +1154,7 @@
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
+              <S6Diagram />
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', marginBottom: '16px' }}>Decision Checklist</div>
               {questions.map((q, idx) => (
                 <div key={idx}
