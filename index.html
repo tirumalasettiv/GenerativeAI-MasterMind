@@ -190,9 +190,9 @@
           >
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
               <GuideIcon guideId={guide.id} />
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", margin: 0 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", margin: 0, overflowWrap: "break-word" }}>
                     {guide.id} {guide.title}
                   </h3>
                   <span
@@ -210,7 +210,7 @@
                     {guide.badge}
                   </span>
                 </div>
-                <p style={{ fontSize: 13, color: "#6a6a7a", margin: 0 }}>{guide.desc}</p>
+                <p style={{ fontSize: 13, color: "#6a6a7a", margin: 0, overflowWrap: "break-word" }}>{guide.desc}</p>
               </div>
             </div>
             <div
