@@ -3,232 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta name="description" content="Open the black box. A visual walk through tokens, embeddings, attention, and next-token prediction that power modern LLMs.">
+    <meta name="theme-color" content="#6c5ce7">
+    <meta property="og:title" content="Inside the Black Box: How Generative AI Works">
+    <meta property="og:description" content="Open the black box. A visual walk through tokens, embeddings, attention, and next-token prediction that power modern LLMs.">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="../../assets/og-default.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Inside the Black Box: How Generative AI Works">
+    <meta name="twitter:description" content="Open the black box. A visual walk through tokens, embeddings, attention, and next-token prediction that power modern LLMs.">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title>Inside the Black Box: How Generative AI Works</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/guide-shared.css">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #f8f9fa;
-            color: #2c3e50;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        #root {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 40px;
-            border-bottom: 3px solid transparent;
-            border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1;
-            background: white;
-            flex-shrink: 0;
-        }
-
-        .left-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .back-link {
-            color: #6c5ce7;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .back-link:hover {
-            color: #2ecc71;
-        }
-
-        .badge {
-            display: inline-block;
-            background: #e8e3f8;
-            color: #6c5ce7;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .guide-number {
-      font-family: 'Fraunces', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #b0a6e8;
-      margin-right: 8px;
-    }
-
-        .title {
-            font-family: 'Fraunces', serif;
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        
-
-    .stage-header {
-      font-family: 'Fraunces', serif;
-      font-size: 24px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 8px;
-    }
-
-    .nav-arrows {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .progress-indicator {
-      font-size: 13px;
-      font-weight: 600;
-      color: #6c5ce7;
-      background: #f5f3ff;
-      padding: 4px 12px;
-      border-radius: 12px;
-      margin-right: 12px;
-    }
-
-        .arrow-btn {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #e0e0e0;
-            background: #fff;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .arrow-btn:hover:not(:disabled) {
-            border-color: #6c5ce7;
-            color: #6c5ce7;
-        }
-
-        .arrow-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 120px;
-            background: #f8f9fa;
-            border-right: 1px solid #e0e0e0;
-            padding: 80px 12px 40px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .step-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .step-btn {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #e0e0e0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: all 0.3s ease;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .step-btn.active {
-            background: #6c5ce7;
-            border-color: #6c5ce7;
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
-        }
-
-        .step-btn:hover {
-            border-color: #6c5ce7;
-            transform: translateY(-2px);
-        }
-
-        .step-btn-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #999;
-            margin-top: 4px;
-            text-align: center;
-            letter-spacing: 0.3px;
-            transition: color 0.3s ease;
-        }
-
-        .step-wrapper.active .step-btn-label {
-            color: #6c5ce7;
-        }
-
-        .step-connector {
-            width: 2px;
-            height: 16px;
-            background: #e0e0e0;
-            margin: 2px 0;
-            flex-shrink: 0;
-        }
-
-        .step-connector.active {
-            background: #6c5ce7;
-        }
-
-        .content-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            padding: 24px 36px;
-            background: white;
-            scroll-behavior: smooth;
-        }
-
         .content-wrapper {
             flex: 1;
             display: flex;
@@ -255,74 +49,6 @@
             border-radius: 4px;
         }
 
-        .scene-card {
-            background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
-            border: 1px solid #e0d4ff;
-            border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
-            margin: 20px 0;
-            min-height: 280px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .insight-box {
-            background: #f0faf0;
-            border-left: 4px solid #2ecc71;
-            padding: 16px 20px;
-            border-radius: 6px;
-            margin-top: 0;
-            font-size: 17px;
-            line-height: 1.7;
-            color: #555;
-        }
-
-        .insight-label {
-            font-weight: 700;
-            color: #1a9456;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
-        }
-
         .animated {
             animation: fadeIn 0.6s ease-out forwards;
         }
@@ -333,11 +59,6 @@
 
         .cursor-blink {
             animation: blink 1s infinite;
-        }
-
-        svg {
-            max-width: 100%;
-            height: auto;
         }
 
         .interactive-input {
@@ -1484,9 +1205,9 @@
             };
 
             return (
-                <div className="content-area">
+                <main id="main" className="content-area">
                     {renderStage()}
-                </div>
+                </main>
             );
         };
 
@@ -1502,50 +1223,59 @@
             };
 
             return (
-                <>
-                    <div className="top-bar">
-                        <div className="left-section">
-                            <a href="../../index.html" className="back-link">← Back to All Guides</a>
-                            <span style={{ fontSize: '14px', color: '#999' }}>|</span>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span className="guide-number">1.3</span>
-                                <div className="title">Inside the Black Box</div>
-                            </div>
-                            <div>
-                                <div className="badge">DEEP DIVE</div>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <span className="progress-indicator">Page {currentStage} of 5</span>
-                            <div className="nav-arrows">
-                                <button className="arrow-btn" onClick={handlePrevious} disabled={currentStage === 1}>←</button>
-                                <button className="arrow-btn" onClick={handleNext} disabled={currentStage === 5}>→</button>
-                            </div>
-                        </div>
-                    </div>
+                <React.Fragment>
+                    <a href="#main" className="skip-link">Skip to main content</a>
+                    <div className="container">
+                        <aside className="sidebar" aria-label="Guide sections">
+                            {STAGES.map((s, idx) => {
+                                const iconHtml = { __html: s.icon };
+                                return (
+                                    <React.Fragment key={s.id}>
+                                        <div className={`step-wrapper ${currentStage === s.id ? 'active' : ''}`}>
+                                            <button
+                                                type="button"
+                                                className={`step-btn ${currentStage === s.id ? 'active' : ''}`}
+                                                aria-label={`Step ${idx + 1}: ${s.name}`}
+                                                aria-current={currentStage === s.id ? "step" : undefined}
+                                                onClick={() => setCurrentStage(s.id)}
+                                                dangerouslySetInnerHTML={iconHtml}
+                                            />
+                                            <div className="step-btn-label">{s.name}</div>
+                                        </div>
+                                        {idx < STAGES.length - 1 && (
+                                            <div className={`step-connector ${currentStage > s.id ? 'active' : ''}`} />
+                                        )}
+                                    </React.Fragment>
+                                );
+                            })}
+                        </aside>
 
-                    <div className="main-container">
-                        <div className="sidebar">
-                            {STAGES.map((s, idx) => (
-                                <React.Fragment key={s.id}>
-                                    <div className={`step-wrapper ${currentStage === s.id ? 'active' : ''}`}>
-                                        <button
-                                            className={`step-btn ${currentStage === s.id ? 'active' : ''}`}
-                                            onClick={() => setCurrentStage(s.id)}
-                                            dangerouslySetInnerHTML={{__html: s.icon}}
-                                        />
-                                        <div className="step-btn-label">{s.name}</div>
+                        <div className="main-content">
+                            <div className="top-bar">
+                                <div className="left-section">
+                                    <a href="../../index.html" className="back-link">← Back to All Guides</a>
+                                    <span style={{ fontSize: '14px', color: '#999' }}>|</span>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <span className="guide-number">1.3</span>
+                                        <div className="title">Inside the Black Box</div>
                                     </div>
-                                    {idx < STAGES.length - 1 && (
-                                        <div className={`step-connector ${currentStage > s.id ? 'active' : ''}`} />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </div>
+                                    <div>
+                                        <div className="badge">DEEP DIVE</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span className="progress-indicator">Page {currentStage} of 5</span>
+                                    <nav className="nav-arrows" aria-label="Section navigation">
+                                        <button type="button" className="arrow-btn" aria-label="Previous section" onClick={handlePrevious} disabled={currentStage === 1}>←</button>
+                                        <button type="button" className="arrow-btn" aria-label="Next section" onClick={handleNext} disabled={currentStage === 5}>→</button>
+                                    </nav>
+                                </div>
+                            </div>
 
-                        <MainContent currentStage={currentStage} setCurrentStage={setCurrentStage} />
+                            <MainContent currentStage={currentStage} setCurrentStage={setCurrentStage} />
+                        </div>
                     </div>
-                </>
+                </React.Fragment>
             );
         };
 

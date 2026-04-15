@@ -3,292 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta name="description" content="Compare traditional AI and Generative AI side by side. See what each can and cannot do, and when to reach for which.">
+    <meta name="theme-color" content="#6c5ce7">
+    <meta property="og:title" content="Regular AI vs Generative AI — Interactive Guide">
+    <meta property="og:description" content="Compare traditional AI and Generative AI side by side. See what each can and cannot do, and when to reach for which.">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="../../assets/og-default.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Regular AI vs Generative AI — Interactive Guide">
+    <meta name="twitter:description" content="Compare traditional AI and Generative AI side by side. See what each can and cannot do, and when to reach for which.">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title>Regular AI vs Generative AI - Interactive Guide</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/guide-shared.css">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #f8f9fa;
-            overflow: hidden;
-        }
-
-        #root {
-            width: 100vw;
-            height: 100vh;
-        }
-
-        .container {
-            display: flex;
-            height: 100vh;
-            background: #fff;
-        }
-
-        .sidebar {
-            width: 120px;
-            background: #f8f9fa;
-            border-right: 1px solid #e0e0e0;
-            padding: 80px 12px 40px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .step-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .step-btn {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #e0e0e0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: all 0.3s ease;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .step-btn.active {
-            background: #6c5ce7;
-            border-color: #6c5ce7;
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
-        }
-
-        .step-btn:hover {
-            border-color: #6c5ce7;
-            transform: translateY(-2px);
-        }
-
-        .step-btn-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #999;
-            margin-top: 4px;
-            text-align: center;
-            letter-spacing: 0.3px;
-            transition: color 0.3s ease;
-        }
-
-        .step-wrapper.active .step-btn-label {
-            color: #6c5ce7;
-        }
-
-        .step-connector {
-            width: 2px;
-            height: 16px;
-            background: #e0e0e0;
-            margin: 2px 0;
-            flex-shrink: 0;
-        }
-
-        .step-connector.active {
-            background: #6c5ce7;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 40px;
-            border-bottom: 3px solid transparent;
-            border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1;
-            background: white;
-            flex-shrink: 0;
-        }
-
-        .left-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .back-link {
-            color: #6c5ce7;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .back-link:hover {
-            color: #2ecc71;
-        }
-
-        .badge {
-            display: inline-block;
-            background: #e8e3f8;
-            color: #6c5ce7;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .guide-number {
-      font-family: 'Fraunces', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #b0a6e8;
-      margin-right: 8px;
-    }
-
-        .title {
-            font-family: 'Fraunces', serif;
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        
-
-    .stage-header {
-      font-family: 'Fraunces', serif;
-      font-size: 24px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 8px;
-    }
-
-    .nav-arrows {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .progress-indicator {
-      font-size: 13px;
-      font-weight: 600;
-      color: #6c5ce7;
-      background: #f5f3ff;
-      padding: 4px 12px;
-      border-radius: 12px;
-      margin-right: 12px;
-    }
-
-        .arrow-btn {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #e0e0e0;
-            background: #fff;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .arrow-btn:hover:not(:disabled) {
-            border-color: #6c5ce7;
-            color: #6c5ce7;
-        }
-
-        .arrow-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .content-area {
-            flex: 1;
-            padding: 24px 36px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .explanation {
-            font-size: 22px;
-            line-height: 1.7;
-            color: #333;
-        }
-
-        .scene-card {
-            background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
-            border-radius: 16px;
-            padding: 28px 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #e0e0e0;
-            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
-            animation: fadeIn 0.6s ease;
-        }
-
-        .insight-box {
-            background: #f0faf0;
-            padding: 16px 20px;
-            border-radius: 12px;
-            border-left: 4px solid #2ecc71;
-            font-size: 17px;
-            line-height: 1.7;
-            color: #333;
-            margin-top: 0;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        @keyframes blink {
-            0%, 49%, 100% {
-                opacity: 1;
-            }
-            50%, 99% {
-                opacity: 0;
-            }
-        }
-
         .split-screen {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1309,52 +1040,58 @@
             const CurrentStage = stages[currentStage].component;
 
             return (
-                <div className="container">
-                    <div className="sidebar">
-                        {sidebarSteps.map((step, idx) => (
-                            <React.Fragment key={idx}>
-                                <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
-                                    <button
-                                        className={`step-btn ${currentStage === idx ? 'active' : ''}`}
-                                        onClick={() => setCurrentStage(idx)}
-                                        dangerouslySetInnerHTML={{__html: step.icon}}
-                                    />
-                                    <div className="step-btn-label">{step.label}</div>
-                                </div>
-                                {idx < sidebarSteps.length - 1 && (
-                                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
-                                )}
-                            </React.Fragment>
-                        ))}
-                    </div>
+                <React.Fragment>
+                    <a href="#main" className="skip-link">Skip to main content</a>
+                    <div className="container">
+                        <aside className="sidebar" aria-label="Guide sections">
+                            {sidebarSteps.map((step, idx) => (
+                                <React.Fragment key={idx}>
+                                    <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                                        <button
+                                            type="button"
+                                            className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                                            aria-label={`Step ${idx + 1}: ${step.label}`}
+                                            aria-current={currentStage === idx ? "step" : undefined}
+                                            onClick={() => setCurrentStage(idx)}
+                                            dangerouslySetInnerHTML={{ __html: step.icon }}
+                                        />
+                                        <div className="step-btn-label">{step.label}</div>
+                                    </div>
+                                    {idx < sidebarSteps.length - 1 && (
+                                        <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </aside>
 
-                    <div className="main-content">
-                        <div className="top-bar">
-                            <div className="left-section">
-                                <a href="../../index.html" className="back-link">← Back to All Guides</a>
-                                <span style={{ fontSize: '14px', color: '#999' }}>|</span>
+                        <div className="main-content">
+                            <div className="top-bar">
+                                <div className="left-section">
+                                    <a href="../../index.html" className="back-link">← Back to All Guides</a>
+                                    <span style={{ fontSize: '14px', color: '#999' }}>|</span>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <span className="guide-number">1.2</span>
+                                        <div className="title">{stages[currentStage].title}</div>
+                                    </div>
+                                    <div>
+                                        <div className="badge">INTERACTIVE</div>
+                                    </div>
+                                </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span className="guide-number">1.2</span>
-                                    <div className="title">{stages[currentStage].title}</div>
-                                </div>
-                                <div>
-                                    <div className="badge">INTERACTIVE GUIDE</div>
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span className="progress-indicator">Page {currentStage + 1} of 5</span>
-                                <div className="nav-arrows">
-                                    <button className="arrow-btn" onClick={() => setCurrentStage(Math.max(0, currentStage - 1))} disabled={currentStage === 0}>←</button>
-                                    <button className="arrow-btn" onClick={() => setCurrentStage(Math.min(stages.length - 1, currentStage + 1))} disabled={currentStage === stages.length - 1}>→</button>
+                                    <span className="progress-indicator">Page {currentStage + 1} of 5</span>
+                                    <nav className="nav-arrows" aria-label="Section navigation">
+                                        <button type="button" className="arrow-btn" aria-label="Previous section" onClick={() => setCurrentStage(Math.max(0, currentStage - 1))} disabled={currentStage === 0}>←</button>
+                                        <button type="button" className="arrow-btn" aria-label="Next section" onClick={() => setCurrentStage(Math.min(stages.length - 1, currentStage + 1))} disabled={currentStage === stages.length - 1}>→</button>
+                                    </nav>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="content-area">
-                            <CurrentStage />
+                            <main id="main" className="content-area">
+                                <CurrentStage />
+                            </main>
                         </div>
                     </div>
-                </div>
+                </React.Fragment>
             );
         }
 
