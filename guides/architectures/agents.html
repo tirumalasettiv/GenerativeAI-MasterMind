@@ -287,6 +287,7 @@
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .capability-card:hover {
@@ -303,8 +304,41 @@
     .capability-emoji { font-size: 32px; margin-bottom: 12px; }
     .capability-title { font-weight: 700; font-size: 18px; color: #1a1a1a; margin-bottom: 6px; }
     .capability-subtitle { font-size: 14px; color: #666; line-height: 1.5; }
-    .capability-hint { font-size: 11px; color: #b0a6e8; margin-top: 8px; font-style: italic; }
-    .capability-card.expanded .capability-hint { display: none; }
+
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
 
     .capability-detail {
       max-height: 0;
@@ -856,13 +890,17 @@
               {capabilities.map(cap => (
                 <div
                   key={cap.id}
-                  className={`capability-card ${expanded === cap.id ? 'expanded' : ''}`}
+                  className={`capability-card disclosure-card-host ${expanded === cap.id ? 'expanded' : ''}`}
                   onClick={() => setExpanded(expanded === cap.id ? null : cap.id)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
                   <div className="capability-emoji">{cap.emoji}</div>
                   <div className="capability-title">{cap.title}</div>
                   <div className="capability-subtitle">{cap.subtitle}</div>
-                  {expanded !== cap.id && <div className="capability-hint">Click to explore</div>}
                   <div className="capability-detail">{cap.detail}</div>
                 </div>
               ))}

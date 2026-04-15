@@ -461,6 +461,7 @@
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .click-card:hover {
@@ -517,6 +518,41 @@
       margin-top: 12px;
       padding-top: 12px;
       border-top: 1px solid #ddd;
+    }
+
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
 
     /* Decision gates */
@@ -1104,14 +1140,18 @@
                 {patterns.map((p, idx) => (
                   <div
                     key={p.id}
-                    className={`click-card ${expanded === p.id ? 'expanded' : ''}`}
+                    className={`click-card disclosure-card-host ${expanded === p.id ? 'expanded' : ''}`}
                     style={idx === 4 && expanded !== p.id ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
                     onClick={() => setExpanded(expanded === p.id ? null : p.id)}
                   >
+                    <span className="disclosure-badge" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
                     <div className="click-card-emoji">{p.emoji}</div>
                     <div className="click-card-title">{p.title}</div>
                     <div className="click-card-sub">{p.sub}</div>
-                    <div className="click-card-hint">Click to explore</div>
                     <div className="click-card-detail">{p.detail}</div>
                   </div>
                 ))}
@@ -1198,13 +1238,17 @@
                 {collabs.map(c => (
                   <div
                     key={c.id}
-                    className={`click-card ${expanded === c.id ? 'expanded' : ''}`}
+                    className={`click-card disclosure-card-host ${expanded === c.id ? 'expanded' : ''}`}
                     onClick={() => setExpanded(expanded === c.id ? null : c.id)}
                   >
+                    <span className="disclosure-badge" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
                     <div className="click-card-emoji">{c.emoji}</div>
                     <div className="click-card-title">{c.title}</div>
                     <div className="click-card-sub">{c.sub}</div>
-                    <div className="click-card-hint">Click to explore</div>
                     <div className="click-card-detail">{c.detail}</div>
                   </div>
                 ))}

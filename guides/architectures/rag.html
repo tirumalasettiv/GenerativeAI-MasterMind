@@ -345,6 +345,7 @@
       transition: all 0.3s ease;
       flex: 1;
       min-width: 0;
+      position: relative;
     }
 
     .component-card:hover {
@@ -577,6 +578,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       margin-bottom: 12px;
+      position: relative;
     }
 
     .pattern-card:hover {
@@ -601,14 +603,39 @@
       color: #1a1a1a;
     }
 
-    .expand-hint {
-      font-size: 18px;
-      color: #b0a6e8;
-      transition: transform 0.3s ease;
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
     }
-
-    .pattern-card.expanded .expand-hint {
-      transform: rotate(180deg);
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
 
     .pattern-card-content {
@@ -1000,7 +1027,7 @@
               {components.map((comp, idx) => (
                 <div
                   key={idx}
-                  className={`component-card fade-in ${expanded === idx ? 'expanded' : ''}`}
+                  className={`component-card disclosure-card-host fade-in ${expanded === idx ? 'expanded' : ''}`}
                   style={{
                     animationDelay: `${idx * 0.1}s`,
                     minWidth: expanded === idx ? '100%' : '140px',
@@ -1008,6 +1035,11 @@
                   }}
                   onClick={() => setExpanded(expanded === idx ? null : idx)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
                   <div style={{ fontSize: '28px' }}>{comp.icon}</div>
                   <div className="component-card-title">{comp.title}</div>
                   <div className="component-card-desc">{comp.desc}</div>
@@ -1511,10 +1543,15 @@
               {patterns.map((p, idx) => (
                 <div
                   key={idx}
-                  className={`pattern-card fade-in ${expanded === idx ? 'expanded' : ''}`}
+                  className={`pattern-card disclosure-card-host fade-in ${expanded === idx ? 'expanded' : ''}`}
                   style={{ animationDelay: `${idx * 0.1}s` }}
                   onClick={() => setExpanded(expanded === idx ? null : idx)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
                   <div className="pattern-card-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <span style={{ fontSize: '24px' }}>{p.icon}</span>
@@ -1523,7 +1560,6 @@
                         <div style={{ fontSize: '13px', color: '#666', marginTop: '2px' }}>{p.desc}</div>
                       </div>
                     </div>
-                    <span className="expand-hint">{'\u25BC'}</span>
                   </div>
                   <div className="pattern-card-content">
                     <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7', marginBottom: '12px' }}>

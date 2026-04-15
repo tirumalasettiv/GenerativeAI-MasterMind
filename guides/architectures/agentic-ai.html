@@ -287,6 +287,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .pattern-card:hover {
@@ -313,14 +314,40 @@
       line-height: 1.5;
     }
 
-    .pattern-hint {
-      font-size: 11px;
-      color: #b0a6e8;
-      margin-top: 8px;
-      font-style: italic;
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
     }
-
-    .pattern-card.expanded .pattern-hint { display: none; }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
 
     .pattern-detail {
       max-height: 0;
@@ -354,6 +381,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .design-card:hover {
@@ -380,14 +408,6 @@
       line-height: 1.5;
     }
 
-    .design-hint {
-      font-size: 11px;
-      color: #b0a6e8;
-      margin-top: 8px;
-      font-style: italic;
-    }
-
-    .design-card.expanded .design-hint { display: none; }
 
     .design-detail {
       max-height: 0;
@@ -783,12 +803,16 @@
               <div className="pattern-grid">
                 {patterns.map(p => (
                   <div key={p.id}
-                    className={`pattern-card ${expanded === p.id ? 'expanded' : ''}`}
+                    className={`pattern-card disclosure-card-host ${expanded === p.id ? 'expanded' : ''}`}
                     onClick={() => setExpanded(expanded === p.id ? null : p.id)}
                   >
+                    <span className="disclosure-badge" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
                     <div className="pattern-label">{p.emoji} {p.title}</div>
                     <div className="pattern-description">{p.desc}</div>
-                    <div className="pattern-hint">Click to explore</div>
                     <div className="pattern-detail">
                       {p.detail}
                       <div style={{ marginTop: '10px', padding: '8px 12px', background: '#e8e3f8', borderRadius: '6px', fontSize: '12px', fontWeight: 700, color: '#6c5ce7' }}>
@@ -978,12 +1002,16 @@
               <div className="design-grid">
                 {designCards.map(card => (
                   <div key={card.id}
-                    className={`design-card ${expanded === card.id ? 'expanded' : ''}`}
+                    className={`design-card disclosure-card-host ${expanded === card.id ? 'expanded' : ''}`}
                     onClick={() => setExpanded(expanded === card.id ? null : card.id)}
                   >
+                    <span className="disclosure-badge" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
                     <div className="design-label">{card.emoji} {card.title}</div>
                     <div className="design-description">{card.desc}</div>
-                    <div className="design-hint">Click to explore</div>
                     <div className="design-detail">{card.detail}</div>
                   </div>
                 ))}

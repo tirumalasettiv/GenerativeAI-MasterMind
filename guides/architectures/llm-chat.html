@@ -531,6 +531,7 @@
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .usecase-card:hover {
@@ -584,6 +585,41 @@
       margin-top: 12px;
       padding-top: 12px;
       border-top: 1px solid #ddd;
+    }
+
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
 
     .usecase-prompt {
@@ -1204,14 +1240,18 @@
               {useCases.map((uc, idx) => (
                 <div
                   key={uc.id}
-                  className={`usecase-card fade-in ${expandedCase === uc.id ? 'expanded' : ''}`}
+                  className={`usecase-card disclosure-card-host fade-in ${expandedCase === uc.id ? 'expanded' : ''}`}
                   style={{ animationDelay: `${0.08 * idx}s` }}
                   onClick={() => setExpandedCase(expandedCase === uc.id ? null : uc.id)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
                   <div className="usecase-emoji">{uc.emoji}</div>
                   <div className="usecase-title">{uc.title}</div>
                   <div className="usecase-desc">{uc.desc}</div>
-                  <div className="usecase-hint">Click to see example</div>
                   <div className="usecase-detail">
                     <div className="usecase-prompt">{uc.prompt}</div>
                     <div className="usecase-tag">Best For: {uc.bestFor}</div>

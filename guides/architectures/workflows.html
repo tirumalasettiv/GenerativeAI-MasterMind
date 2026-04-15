@@ -333,6 +333,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .pattern-card:hover {
@@ -366,15 +367,39 @@
       margin-top: 8px;
     }
 
-    .pattern-card-hint {
-      font-size: 11px;
-      color: #b0a6e8;
-      margin-top: 8px;
-      font-style: italic;
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
     }
-
-    .pattern-card.expanded .pattern-card-hint {
-      display: none;
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
 
     .pattern-card-example {
@@ -896,16 +921,18 @@
               {patterns.map((p, i) => (
                 <div
                   key={p.id}
-                  className={`pattern-card fade-in ${expanded === p.id ? 'expanded' : ''}`}
+                  className={`pattern-card disclosure-card-host fade-in ${expanded === p.id ? 'expanded' : ''}`}
                   style={{ animationDelay: `${0.1 * i}s` }}
                   onClick={() => setExpanded(expanded === p.id ? null : p.id)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
                   <div className="pattern-card-title">{i + 1}. {p.title}</div>
                   <div className="pattern-card-subtitle">{p.subtitle}</div>
                   <div className="pattern-card-desc">{p.desc}</div>
-                  {expanded !== p.id && (
-                    <div className="pattern-card-hint">Click to see example &darr;</div>
-                  )}
                   <div className="pattern-card-example">
                     <strong>Example:</strong> {p.example}
                   </div>
