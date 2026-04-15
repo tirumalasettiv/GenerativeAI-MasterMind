@@ -873,28 +873,53 @@
             CONTEXT WINDOW (200K TOKENS)
           </div>
           <div className="cw-track">
-            {segments.map((seg) => (
+            {segments.map((seg) => {
+              const isActive = activeSegment === seg.id;
+              const panelId = `cw-detail-${seg.id}`;
+              const toggle = () => setActiveSegment(activeSegment === seg.id ? null : seg.id);
+              return (
               <div
                 key={seg.id}
                 className="cw-segment"
                 style={{ width: `${seg.pct}%`, background: seg.color }}
-                onClick={() => setActiveSegment(activeSegment === seg.id ? null : seg.id)}
+                onClick={toggle}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isActive}
+                aria-controls={panelId}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                 title={seg.label}
               >
                 {seg.pct > 12 ? seg.label : ''}
               </div>
-            ))}
+              );
+            })}
           </div>
           <div className="cw-legend">
-            {segments.map((seg) => (
-              <div key={seg.id} className="cw-legend-item" onClick={() => setActiveSegment(activeSegment === seg.id ? null : seg.id)} style={{ cursor: 'pointer' }}>
+            {segments.map((seg) => {
+              const isActive = activeSegment === seg.id;
+              const panelId = `cw-detail-${seg.id}`;
+              const toggle = () => setActiveSegment(activeSegment === seg.id ? null : seg.id);
+              return (
+              <div
+                key={seg.id}
+                className="cw-legend-item"
+                onClick={toggle}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isActive}
+                aria-controls={panelId}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="cw-legend-dot" style={{ background: seg.color }} />
                 <span>{seg.label} ({seg.pct}%)</span>
               </div>
-            ))}
+              );
+            })}
           </div>
           {segments.map((seg) => (
-            <div key={seg.id} className={`cw-detail ${activeSegment === seg.id ? 'open' : ''}`}
+            <div key={seg.id} id={`cw-detail-${seg.id}`} className={`cw-detail ${activeSegment === seg.id ? 'open' : ''}`}
               style={{ padding: activeSegment === seg.id ? '12px 16px' : '0', background: seg.color + '18', borderLeft: `4px solid ${seg.color}`, borderRadius: '8px', fontSize: '14px', color: '#333', lineHeight: '1.6' }}
             >
               <strong style={{ color: seg.color }}>{seg.label}:</strong> {seg.desc}
@@ -919,7 +944,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">What is Context Engineering?</div>
+            <h2 className="stage-header">What is Context Engineering?</h2>
           </div>
           <div className="explanation">
             Context engineering is the discipline of designing dynamic systems that provide the right information, at the right time, to an LLM &mdash; so it can produce the best possible output. It&rsquo;s the next evolution beyond prompt engineering.
@@ -980,7 +1005,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Why Context Engineering Matters</div>
+            <h2 className="stage-header">Why Context Engineering Matters</h2>
           </div>
           <div className="explanation">
             Garbage in, garbage out &mdash; an LLM can only be as good as the context it receives. Context engineering is like preparing for an open-book exam.
@@ -1043,7 +1068,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">The Context Problem: When Things Go Wrong</div>
+            <h2 className="stage-header">The Context Problem: When Things Go Wrong</h2>
           </div>
           <div className="explanation">
             As AI agents work on longer tasks, three types of context failure can degrade their performance &mdash; poisoning, confusion, and clash.
@@ -1064,16 +1089,25 @@
                 <strong style={{ color: '#1a1a1a' }}>The Growing Context Problem:</strong> When an AI agent works on a long task, its context window grows continuously &mdash; tool call results accumulate, conversation history expands. Eventually: context exceeds window limits, cost and latency increase, and performance degrades.
               </div>
 
-              {failureTypes.map((failure, idx) => (
+              {failureTypes.map((failure, idx) => {
+                const isExpanded = expandedFailure === failure.id;
+                const panelId = `failure-panel-${failure.id}`;
+                const toggle = () => setExpandedFailure(expandedFailure === failure.id ? null : failure.id);
+                return (
                 <div
                   key={failure.id}
-                  className={`failure-card fade-in disclosure-card-host ${expandedFailure === failure.id ? 'expanded' : ''}`}
+                  className={`failure-card fade-in disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
                   style={{
                     background: failure.bg,
-                    borderColor: expandedFailure === failure.id ? failure.border : '#e0e0e0',
+                    borderColor: isExpanded ? failure.border : '#e0e0e0',
                     animationDelay: `${0.1 * idx}s`
                   }}
-                  onClick={() => setExpandedFailure(expandedFailure === failure.id ? null : failure.id)}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
@@ -1081,7 +1115,7 @@
                   <div className="failure-card-title">
                     <span>{failure.title}</span>
                   </div>
-                  <div className="failure-card-content">
+                  <div id={panelId} className="failure-card-content">
                     <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7' }}>
                       {failure.desc}
                     </div>
@@ -1090,7 +1124,8 @@
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <InsightBlock>
@@ -1130,7 +1165,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Who Needs Context Engineering?</div>
+            <h2 className="stage-header">Who Needs Context Engineering?</h2>
           </div>
           <div className="explanation">
             Context engineering isn&rsquo;t just for developers building AI agents. It matters for everyone interacting with AI.
@@ -1138,23 +1173,33 @@
           <div className="scene-card">
             <S4Diagram />
             <div className="costar-grid" style={{ marginTop: '24px', width: '100%' }}>
-              {roles.map((role, idx) => (
+              {roles.map((role, idx) => {
+                const isExpanded = expandedRole === role.id;
+                const panelId = `role-panel-${role.id}`;
+                const toggle = () => setExpandedRole(expandedRole === role.id ? null : role.id);
+                return (
                 <div
                   key={role.id}
-                  className={`costar-box disclosure-card-host ${expandedRole === role.id ? 'expanded' : ''}`}
-                  style={idx === 2 && expandedRole !== role.id ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
-                  onClick={() => setExpandedRole(expandedRole === role.id ? null : role.id)}
+                  className={`costar-box disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                  style={idx === 2 && !isExpanded ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
                   </span>
                   <div className="costar-label">{role.emoji} {role.title}</div>
                   <div className="costar-description">{role.desc}</div>
-                  <div className="costar-example">
+                  <div id={panelId} className="costar-example">
                     {role.detail}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <InsightBlock>
@@ -1189,7 +1234,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Key Foundations</div>
+            <h2 className="stage-header">Key Foundations</h2>
           </div>
           <div className="explanation">
             Three foundational principles to remember about context engineering.
@@ -1223,6 +1268,8 @@
       const [currentStage, setCurrentStage] = useState(0);
 
       const stageIconComponents = [LightbulbIcon, TargetIcon, AlertIcon, UsersIcon, BookIcon];
+
+      const NEXT_GUIDE = { id: "3.2", title: "Mastering Context", module: "Module 3", href: "./mastering-context.html" };
 
       const stages = [
         { icon: LightbulbIcon, label: 'What is CE', component: S1 },
@@ -1286,7 +1333,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">3.1</span>
-                    <div className="title">Context Engineering Foundations</div>
+                    <h1 className="title">Context Engineering Foundations</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">BEGINNER</div>
@@ -1322,6 +1369,19 @@
 
               <main id="main" className="content-area scrollbar-hide">
                 <CurrentComponent />
+                {currentStage === stages.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>

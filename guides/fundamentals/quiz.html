@@ -590,7 +590,7 @@
       );
     }
 
-    function ResultsView({ questions, answers }) {
+    function ResultsView({ questions, answers, onRetry }) {
       const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
       const percentage = Math.round((correctCount / questions.length) * 100);
       const circumference = 2 * Math.PI * 75;
@@ -693,20 +693,23 @@
             }
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
-            <a
-              href="../../index.html"
-              className="submit-btn"
-              style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}
-            >
-              Back to Guides
+          <div className="module-complete-cta">
+            <div className="celebrate">
+              <span className="celebrate-icon" aria-hidden="true">🎉</span>
+              <span className="celebrate-text">Module 1 Complete</span>
+            </div>
+            <a href="../prompt-engineering/costar-meta.html" className="continue-btn">
+              Continue to Module 2: Prompt Engineering →
             </a>
-            <button
-              className="submit-btn"
-              onClick={() => window.location.reload()}
-            >
-              Retake Quiz
+          </div>
+
+          <div className="quiz-actions" role="group" aria-label="Quiz actions">
+            <button type="button" className="action-btn" onClick={onRetry} aria-label="Retry this quiz">
+              ↻ Retry quiz
             </button>
+            <a href="../../index.html#module-1" className="action-btn" aria-label="Review Module 1">
+              📖 Review module
+            </a>
           </div>
         </div>
       );
@@ -719,6 +722,15 @@
       const [answers, setAnswers] = useState([]);
       const [showResults, setShowResults] = useState(false);
       const contentRef = useRef(null);
+
+      const resetQuiz = () => {
+        setCurrentQuestion(0);
+        setSelectedAnswer(null);
+        setAnswered(false);
+        setAnswers([]);
+        setShowResults(false);
+        if (contentRef.current) contentRef.current.scrollTop = 0;
+      };
 
       const handleSelect = (idx) => {
         setSelectedAnswer(idx);
@@ -805,7 +817,7 @@
                   <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
                   <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">1.7</span>
-                    <div className="title">Module 1 Quiz</div>
+                    <h1 className="title">Module 1 Quiz</h1>
                   </div>
                   <div style={{ marginLeft: 16 }}>
                     <div className="badge">QUIZ</div>
@@ -850,7 +862,7 @@
 
               <main id="main" className="content-area scrollbar-hide" ref={contentRef}>
                 {showResults ? (
-                  <ResultsView questions={QUESTIONS} answers={answers} />
+                  <ResultsView questions={QUESTIONS} answers={answers} onRetry={resetQuiz} />
                 ) : (
                   <QuestionView
                     question={QUESTIONS[currentQuestion]}

@@ -121,7 +121,7 @@
       );
     }
 
-    function ResultsView({ questions, answers }) {
+    function ResultsView({ questions, answers, onRetry }) {
       const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
       const percentage = Math.round((correctCount / questions.length) * 100);
       const circumference = 2 * Math.PI * 75;
@@ -162,9 +162,23 @@
             </div>
           </div>
           <div className="insight-box" style={{ marginTop: 24 }}><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> RECOMMENDATION</div>{percentage >= 90 ? "Excellent mastery of AI architectures! You\u2019ve completed all five modules of the GenAI MasterMind curriculum. You now have a comprehensive understanding of generative AI from fundamentals through advanced multi-agent systems." : percentage >= 70 ? "Strong understanding of AI architectures! Review the sections you missed, particularly the decision criteria for choosing between architectures. Consider retaking to solidify your knowledge." : "Consider revisiting the architecture guides where you scored below 100%. Focus on understanding when to use each architecture and the trade-offs between complexity, cost, and capability."}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
-            <a href="../../index.html" className="submit-btn" style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}>Back to Guides</a>
-            <button className="submit-btn" onClick={() => window.location.reload()}>Retake Quiz</button>
+          <div className="module-complete-cta">
+            <div className="celebrate">
+              <span className="celebrate-icon" aria-hidden="true">🎉</span>
+              <span className="celebrate-text">Module 5 Complete</span>
+            </div>
+            <a href="../final-exam/quiz.html" className="continue-btn">
+              Continue to the Final Exam →
+            </a>
+          </div>
+
+          <div className="quiz-actions" role="group" aria-label="Quiz actions">
+            <button type="button" className="action-btn" onClick={onRetry} aria-label="Retry this quiz">
+              ↻ Retry quiz
+            </button>
+            <a href="../../index.html#module-5" className="action-btn" aria-label="Review Module 5">
+              📖 Review module
+            </a>
           </div>
         </div>
       );
@@ -177,6 +191,15 @@
       const [answers, setAnswers] = useState([]);
       const [showResults, setShowResults] = useState(false);
       const contentRef = useRef(null);
+
+      const resetQuiz = () => {
+        setCurrentQuestion(0);
+        setSelectedAnswer(null);
+        setAnswered(false);
+        setAnswers([]);
+        setShowResults(false);
+        if (contentRef.current) contentRef.current.scrollTop = 0;
+      };
 
       const handleSelect = (idx) => setSelectedAnswer(idx);
       const handleSubmit = () => { setAnswered(true); const na = [...answers]; na[currentQuestion] = selectedAnswer; setAnswers(na); };
@@ -217,7 +240,7 @@
                   <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
                   <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">5.7</span>
-                    <div className="title">Module 5 Quiz</div>
+                    <h1 className="title">Module 5 Quiz</h1>
                   </div>
                   <div style={{ marginLeft: 16 }}><div className="badge">QUIZ</div></div>
                 </div>
@@ -249,7 +272,7 @@
                 </div>
               </div>
               <main id="main" className="content-area scrollbar-hide" ref={contentRef}>
-                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
+                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} onRetry={resetQuiz} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
               </main>
             </div>
           </div>

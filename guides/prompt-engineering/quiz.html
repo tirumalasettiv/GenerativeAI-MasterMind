@@ -224,6 +224,9 @@
       { id: 13, section: "2.2 Output Formatting", question: "Why should you specify the output format explicitly in your prompt?", options: ["It makes the AI use less memory", "It ensures the AI responds in a way your downstream code can parse and process", "It forces the AI to be more creative", "It is required by all AI models"], correct: 1, explanation: "Specifying format (JSON, CSV, Markdown, XML) ensures the AI structures output correctly, saving you parsing headaches downstream and making the output immediately usable." },
       { id: 14, section: "2.2 Few-Shot Examples", question: "What is the recommended approach for using few-shot examples?", options: ["Provide 10+ examples for maximum accuracy", "Show only examples of what you want, never what to avoid", "Show 2-3 good examples plus 1 example of what to avoid", "Use examples only for code generation tasks"], correct: 2, explanation: "Show 2-3 high-quality examples of what you want, plus 1 example of what to avoid. The AI learns your style and quality bar from examples better than from lengthy instructions." },
       { id: 15, section: "2.2 Combining Techniques", question: "What is the key takeaway about mastering prompt engineering?", options: ["Always use the most complex technique available", "Stick to one technique and master it completely", "Combine multiple techniques strategically and iterate based on results", "The specific technique doesn't matter as long as prompts are long enough"], correct: 2, explanation: "Prompt engineering is iterative. The best prompts use multiple methods together. Test your prompts, measure results, and refine. Small tweaks often yield dramatic improvements." },
+      { id: 16, section: "2.2 Chain-of-Thought", question: "You're asking an LLM to solve a multi-step logic puzzle. When is Chain-of-Thought prompting most useful?", options: ["Always \u2014 it improves output on every task", "For math, logic, or multi-step reasoning tasks where step-by-step thinking helps", "Only for creative writing tasks", "Never \u2014 modern models don't need it"], correct: 1, explanation: "Chain-of-Thought shines on multi-step reasoning (math, logic, planning). It's wasteful \u2014 and can even hurt \u2014 on simple lookups or creative tasks where extra verbosity dilutes the answer." },
+      { id: 17, section: "2.2 Role Prompting", question: "You prepend 'You are an expert cardiologist' to a prompt asking about a rare heart condition. What does this actually do?", options: ["Gives the model real medical expertise it didn't have before", "Unlocks a hidden 'expert mode' in the model", "Shifts the response style toward domain-appropriate vocabulary and structure, but doesn't add knowledge the model lacks", "Has no effect at all"], correct: 2, explanation: "Role prompting shapes tone and framing \u2014 the model draws on the domain patterns in its training \u2014 but it does NOT add knowledge. If the model doesn't know a condition, calling it 'expert' won't help." },
+      { id: 18, section: "2.2 Few-Shot Examples", question: "You have a classification task with 5 categories. The model works OK zero-shot but sometimes picks wrong labels. You try few-shot with 3 examples. What's the main trade-off?", options: ["Few-shot is always strictly better", "Few-shot improves consistency and label accuracy, but costs more tokens per call", "Few-shot always hurts accuracy", "Zero-shot is faster but uses more tokens"], correct: 1, explanation: "Few-shot examples anchor the model to your exact format and categories \u2014 usually improving consistency \u2014 but you pay for those extra tokens on every call. For high-volume workloads, that cost compounds." },
     ];
 
     const SECTION_ICONS = {
@@ -262,7 +265,7 @@
       );
     }
 
-    function ResultsView({ questions, answers }) {
+    function ResultsView({ questions, answers, onRetry }) {
       const correctCount = answers.filter((a, i) => a === questions[i].correct).length;
       const percentage = Math.round((correctCount / questions.length) * 100);
       const circumference = 2 * Math.PI * 75;
@@ -303,9 +306,23 @@
             </div>
           </div>
           <div className="insight-box" style={{ marginTop: 24 }}><div className="insight-label"><span dangerouslySetInnerHTML={{__html: INSIGHT_ICON}} /> RECOMMENDATION</div>{percentage >= 90 ? "Excellent mastery of prompt engineering! You're ready to move on to Module 3: Context Engineering and RAG." : percentage >= 70 ? "Strong understanding! Review the sections you missed, then advance to Context Engineering." : "Consider revisiting the guide sections where you scored below 100% before moving to the next module."}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
-            <a href="../../index.html" className="submit-btn" style={{ textDecoration: 'none', display: 'inline-block', background: 'white', color: '#6c5ce7', border: '2px solid #6c5ce7' }}>Back to Guides</a>
-            <button className="submit-btn" onClick={() => window.location.reload()}>Retake Quiz</button>
+          <div className="module-complete-cta">
+            <div className="celebrate">
+              <span className="celebrate-icon" aria-hidden="true">🎉</span>
+              <span className="celebrate-text">Module 2 Complete</span>
+            </div>
+            <a href="../context-engineering/foundations.html" className="continue-btn">
+              Continue to Module 3: Context Engineering →
+            </a>
+          </div>
+
+          <div className="quiz-actions" role="group" aria-label="Quiz actions">
+            <button type="button" className="action-btn" onClick={onRetry} aria-label="Retry this quiz">
+              ↻ Retry quiz
+            </button>
+            <a href="../../index.html#module-2" className="action-btn" aria-label="Review Module 2">
+              📖 Review module
+            </a>
           </div>
         </div>
       );
@@ -318,6 +335,15 @@
       const [answers, setAnswers] = useState([]);
       const [showResults, setShowResults] = useState(false);
       const contentRef = useRef(null);
+
+      const resetQuiz = () => {
+        setCurrentQuestion(0);
+        setSelectedAnswer(null);
+        setAnswered(false);
+        setAnswers([]);
+        setShowResults(false);
+        if (contentRef.current) contentRef.current.scrollTop = 0;
+      };
 
       const handleSelect = (idx) => setSelectedAnswer(idx);
       const handleSubmit = () => { setAnswered(true); const na = [...answers]; na[currentQuestion] = selectedAnswer; setAnswers(na); };
@@ -358,7 +384,7 @@
                   <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
                   <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">2.3</span>
-                    <div className="title">Module 2 Quiz</div>
+                    <h1 className="title">Module 2 Quiz</h1>
                   </div>
                   <div style={{ marginLeft: 16 }}><div className="badge">QUIZ</div></div>
                 </div>
@@ -372,7 +398,7 @@
                 </div>
               </div>
               <main id="main" className="content-area scrollbar-hide" ref={contentRef}>
-                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
+                {showResults ? <ResultsView questions={QUESTIONS} answers={answers} onRetry={resetQuiz} /> : <QuestionView question={QUESTIONS[currentQuestion]} questionIndex={currentQuestion} totalQuestions={QUESTIONS.length} selectedAnswer={selectedAnswer} answered={answered} onSelect={handleSelect} onSubmit={handleSubmit} onNext={handleNext} />}
               </main>
             </div>
           </div>
