@@ -921,6 +921,8 @@
         '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
       ];
 
+      const NEXT_GUIDE = { id: "2.2", title: "Prompt Techniques", module: "Module 2", href: "./techniques.html" };
+
       const stages = [
         { icon: stageIcons[0], label: 'Prompt Eng', component: S1 },
         { icon: stageIcons[1], label: 'Meta Prompt', component: S2 },
@@ -1015,6 +1017,19 @@
 
               <main id="main" className="content-area scrollbar-hide">
                 <CurrentComponent />
+                {currentStage === stages.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>

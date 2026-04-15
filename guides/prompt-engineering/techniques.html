@@ -454,6 +454,8 @@
       return <span className={className} style={style} dangerouslySetInnerHTML={{ __html: markup }} />;
     }
 
+    const NEXT_GUIDE = { id: "2.3", title: "Prompt Engineering Quiz", module: "Module 2", href: "./quiz.html", isQuiz: true };
+
     const TECHNIQUES = [
       {
         id: 'zero-shot',
@@ -941,6 +943,19 @@
                 {currentStage === 0
                   ? <OverviewStage onNavigate={setCurrentStage} />
                   : <DetailStage index={currentStage - 1} />}
+                {currentStage === totalStages - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>
