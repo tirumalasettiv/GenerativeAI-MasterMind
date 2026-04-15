@@ -3,285 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn context engineering foundations — what it is, why it matters, and how it beats one-shot prompts.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="Context Engineering Foundations — Interactive Guide">
+  <meta property="og:description" content="Learn context engineering foundations — what it is, why it matters, and how it beats one-shot prompts.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Context Engineering Foundations — Interactive Guide">
+  <meta name="twitter:description" content="Learn context engineering foundations — what it is, why it matters, and how it beats one-shot prompts.">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
   <title>Context Engineering Foundations - Interactive Guide</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: #ffffff;
-      color: #1a1a1a;
-      height: 100vh;
-    }
-
-    #root {
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .container {
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .sidebar {
-      width: 120px;
-      background: #f8f9fa;
-      border-right: 1px solid #e0e0e0;
-      padding: 80px 12px 40px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .step-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex-shrink: 0;
-    }
-
-    .step-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: white;
-      border: 2px solid #e0e0e0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      transition: all 0.3s ease;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .step-btn.active {
-      background: #6c5ce7;
-      border-color: #6c5ce7;
-      color: white;
-      transform: scale(1.1);
-      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
-    }
-
-    .step-btn:hover {
-      border-color: #6c5ce7;
-      transform: translateY(-2px);
-    }
-
-    .step-btn-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #999;
-      margin-top: 4px;
-      text-align: center;
-      letter-spacing: 0.3px;
-      transition: color 0.3s ease;
-    }
-
-    .step-wrapper.active .step-btn-label {
-      color: #6c5ce7;
-    }
-
-    .step-connector {
-      width: 2px;
-      height: 16px;
-      background: #e0e0e0;
-      margin: 2px 0;
-      flex-shrink: 0;
-    }
-
-    .step-connector.active {
-      background: #6c5ce7;
-    }
-
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 40px;
-      border-bottom: 3px solid transparent;
-      border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1;
-      background: white;
-      flex-shrink: 0;
-    }
-
-    .left-section {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .back-link {
-      color: #6c5ce7;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .back-link:hover {
-      color: #2ecc71;
-    }
-
-    .badge {
-      display: inline-block;
-      background: #e8e3f8;
-      color: #6c5ce7;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .progress-indicator {
-      font-size: 13px;
-      font-weight: 600;
-      color: #6c5ce7;
-      background: #f5f3ff;
-      padding: 4px 12px;
-      border-radius: 12px;
-      margin-right: 12px;
-    }
-
-    .guide-number {
-      font-family: 'Fraunces', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #b0a6e8;
-      margin-right: 8px;
-    }
-
-    .title {
-      font-family: 'Fraunces', serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1a1a;
-    }
-
-    .stage-header {
-      font-family: 'Fraunces', serif;
-      font-size: 24px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 8px;
-    }
-
-    .nav-arrows {
-      display: flex;
-      gap: 12px;
-    }
-
-    .arrow-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      border: 1px solid #e0e0e0;
-      background: white;
-      cursor: pointer;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
-
-    .arrow-btn:hover {
-      border-color: #6c5ce7;
-      color: #6c5ce7;
-      transform: translateY(-2px);
-    }
-
-    .arrow-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .content-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      scroll-behavior: smooth;
-      padding: 24px 36px;
-      gap: 18px;
-    }
-
-    .explanation {
-      font-size: 22px;
-      line-height: 1.7;
-      color: #2a2a2a;
-    }
+    /* Guide-specific: foundations (context-engineering) */
 
     .scene-card {
-      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
-      border-radius: 16px;
-      padding: 28px;
-      border: 1px solid #e8e3f8;
-      min-height: auto;
-      display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
-    }
-
-    .insight-box {
-      background: #f0faf0;
-      border-left: 4px solid #2ecc71;
-      padding: 16px 20px;
-      border-radius: 8px;
-      color: #1a5e3a;
-      font-size: 17px;
-      line-height: 1.7;
-      margin-top: 0;
-      position: relative;
-    }
-
-    .insight-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #2ecc71;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     @keyframes slideInRight {
@@ -303,24 +45,6 @@
       to {
         opacity: 1;
         transform: translateX(0);
-      }
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.6;
-      }
-    }
-
-    @keyframes blink {
-      0%, 50%, 100% {
-        opacity: 1;
-      }
-      25%, 75% {
-        opacity: 0;
       }
     }
 
@@ -421,28 +145,12 @@
       margin-top: 12px;
     }
 
-    .fade-in {
-      animation: fadeIn 0.6s ease forwards;
-    }
-
     .slide-in-right {
       animation: slideInRight 0.6s ease forwards;
     }
 
     .slide-in-left {
       animation: slideInLeft 0.6s ease forwards;
-    }
-
-    .pulse {
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .typing {
-      display: inline-block;
-      overflow: hidden;
-      border-right: 2px solid #6c5ce7;
-      white-space: nowrap;
-      animation: blink 1s steps(1) infinite;
     }
 
     /* Comparison styles */
@@ -626,15 +334,6 @@
       font-size: 15px;
       color: #333;
       line-height: 1.7;
-    }
-
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
     }
 
     /* Context source rows */
@@ -1552,71 +1251,81 @@
       };
 
       return (
-        <div className="container">
-          <div className="sidebar scrollbar-hide">
-            {stages.map((stage, idx) => {
-              const IconComp = stage.icon;
-              return (
-                <React.Fragment key={idx}>
-                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
-                    <button
-                      className={`step-btn ${currentStage === idx ? 'active' : ''}`}
-                      onClick={() => handleStageClick(idx)}
-                    >
-                      <IconComp />
-                    </button>
-                    <div className="step-btn-label">{stage.label}</div>
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar scrollbar-hide" aria-label="Guide sections">
+              {stages.map((stage, idx) => {
+                const IconComp = stage.icon;
+                return (
+                  <React.Fragment key={idx}>
+                    <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                      <button
+                        type="button"
+                        className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                        aria-label={`Step ${idx + 1}: ${stage.label}`}
+                        aria-current={currentStage === idx ? "step" : undefined}
+                        onClick={() => handleStageClick(idx)}
+                      >
+                        <IconComp />
+                      </button>
+                      <div className="step-btn-label">{stage.label}</div>
+                    </div>
+                    {idx < stages.length - 1 && (
+                      <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">3.1</span>
+                    <div className="title">Context Engineering Foundations</div>
                   </div>
-                  {idx < stages.length - 1 && (
-                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
-
-          <div className="main-content">
-            <div className="top-bar">
-              <div className="left-section">
-                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
-                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
-                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
-                  <span className="guide-number">3.1</span>
-                  <div className="title">Context Engineering Foundations</div>
+                  <div style={{ marginLeft: '20px' }}>
+                    <div className="badge">BEGINNER</div>
+                  </div>
                 </div>
-                <div style={{ marginLeft: '20px' }}>
-                  <div className="badge">BEGINNER GUIDE</div>
-                </div>
-              </div>
 
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span className="progress-indicator">Page {currentStage + 1} of 5</span>
-                <div className="nav-arrows">
-                  <button
-                    className="arrow-btn"
-                    onClick={handlePrev}
-                    disabled={currentStage === 0}
-                    title="Previous stage"
-                  >
-                    &#8592;
-                  </button>
-                  <button
-                    className="arrow-btn"
-                    onClick={handleNext}
-                    disabled={currentStage === stages.length - 1}
-                    title="Next stage"
-                  >
-                    &#8594;
-                  </button>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of 5</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      aria-label="Previous section"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      aria-label="Next section"
+                      onClick={handleNext}
+                      disabled={currentStage === stages.length - 1}
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
                 </div>
               </div>
-            </div>
 
-            <div className="content-area scrollbar-hide">
-              <CurrentComponent />
+              <main id="main" className="content-area scrollbar-hide">
+                <CurrentComponent />
+              </main>
             </div>
           </div>
-        </div>
+        </React.Fragment>
       );
     }
 
