@@ -172,7 +172,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 22px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -222,12 +222,12 @@
       width: 120px;
       background: #f8f9fa;
       border-right: 1px solid #e0e0e0;
-      padding: 80px 12px 40px;
+      padding: 50px 12px 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
     }
 
     .step-wrapper {
@@ -451,12 +451,12 @@
       },
       content: {
         flex: 1,
-        padding: '32px 48px',
+        padding: '20px 32px',
         overflowY: 'auto',
         scrollBehavior: 'smooth',
         display: 'flex',
         flexDirection: 'column',
-        gap: '24px'
+        gap: '16px'
       },
       explainRow: {
         display: 'flex',
@@ -464,7 +464,7 @@
         gap: '16px'
       },
       explain: {
-        fontSize: '22px',
+        fontSize: '18px',
         lineHeight: '1.7',
         color: '#333',
         maxWidth: '100%'
@@ -472,7 +472,7 @@
       scene: {
         background: 'linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%)',
         borderRadius: '16px',
-        padding: '36px 40px',
+        padding: '24px',
         border: '1px solid #e9ecef',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         display: 'flex',
@@ -495,12 +495,12 @@
         backgroundColor: '#f0faf0',
         borderLeft: '4px solid #2ecc71',
         borderRadius: '8px',
-        padding: '24px 28px',
+        padding: '14px 18px',
+        marginTop: '0',
         fontSize: '17px',
         lineHeight: '1.7',
         color: '#333',
-        fontStyle: 'italic',
-        marginTop: '24px'
+        fontStyle: 'italic'
       },
       sceneTitle: {
         fontSize: '24px',
@@ -638,8 +638,72 @@
       </div>
     );
 
+    const VERIFY_WORDS = ["Validate", "Exclude", "Review", "Iterate", "Flag", "Your Call"];
+    const VERIFY_LETTERS = ["V", "E", "R", "I", "F", "Y"];
+    const NODE_X = [10, 125, 240, 355, 470, 585];
+
+    const VERIFYFlow = ({ activeNode }) => {
+      const arrowId = "verifyArrow";
+      return (
+        <svg viewBox="0 0 720 130" style={{ width: '100%', maxWidth: '720px', height: 'auto', display: 'block' }}>
+          <defs>
+            <marker id={arrowId} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {NODE_X.slice(0, 5).map((x, i) => (
+            <path
+              key={i}
+              d={`M${x + 100},65 L${NODE_X[i + 1]},65`}
+              stroke="#b0a6e8"
+              strokeWidth="1.5"
+              fill="none"
+              markerEnd={`url(#${arrowId})`}
+            />
+          ))}
+          {NODE_X.map((x, i) => (
+            <g key={i}>
+              <rect
+                x={x}
+                y={30}
+                width={100}
+                height={70}
+                rx={12}
+                fill={i === activeNode ? '#f5f3ff' : '#ffffff'}
+                stroke={i === activeNode ? '#6c5ce7' : '#e0e0e0'}
+                strokeWidth={i === activeNode ? 2 : 1.5}
+              />
+              <text
+                x={x + 50}
+                y={60}
+                textAnchor="middle"
+                fontSize="28"
+                fontWeight="800"
+                fill="#6c5ce7"
+                fontFamily="DM Sans, sans-serif"
+              >
+                {VERIFY_LETTERS[i]}
+              </text>
+              <text
+                x={x + 50}
+                y={85}
+                textAnchor="middle"
+                fontSize="9"
+                fontWeight="600"
+                fill="#666"
+                fontFamily="DM Sans, sans-serif"
+              >
+                {VERIFY_WORDS[i]}
+              </text>
+            </g>
+          ))}
+        </svg>
+      );
+    };
+
     const OverviewStage = () => {
       const [revealed, setRevealed] = useState([]);
+      const [activeStep, setActiveStep] = useState(0);
 
       useEffect(() => {
         const letters = ['V', 'E', 'R', 'I', 'F', 'Y'];
@@ -648,6 +712,13 @@
             setRevealed(prev => [...prev, idx]);
           }, idx * 150);
         });
+      }, []);
+
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setActiveStep(prev => (prev + 1) % 6);
+        }, 1200);
+        return () => clearInterval(timer);
       }, []);
 
       const meanings = [
@@ -672,7 +743,8 @@
           </div>
 
           <div style={P.scene}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', alignItems: 'center' }}>
+              <VERIFYFlow activeNode={activeStep} />
               <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 {['V', 'E', 'R', 'I', 'F', 'Y'].map((letter, idx) => (
                   <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
@@ -844,6 +916,60 @@
       );
     };
 
+    const DataBoundaryDiagram = () => {
+      const greenItems = [
+        { label: "✓ Public info", y: 55 },
+        { label: "✓ Task context", y: 82 },
+        { label: "✓ Examples", y: 109 }
+      ];
+      const redItems = [
+        { label: "✕ Passwords", y: 55 },
+        { label: "✕ PII data", y: 82 },
+        { label: "✕ Private docs", y: 109 }
+      ];
+      return (
+        <svg viewBox="0 0 580 160" style={{ width: '100%', maxWidth: '580px', height: 'auto', display: 'block' }}>
+          {/* Prompt box */}
+          <rect x={190} y={20} width={200} height={120} rx={16} fill="#f5f3ff" stroke="#6c5ce7" strokeWidth={2} />
+          <text x={290} y={68} textAnchor="middle" fontSize="13" fontWeight="700" fill="#6c5ce7" fontFamily="DM Sans, sans-serif">Your</text>
+          <text x={290} y={85} textAnchor="middle" fontSize="13" fontWeight="700" fill="#6c5ce7" fontFamily="DM Sans, sans-serif">Prompt</text>
+
+          {/* IN label */}
+          <text x={95} y={18} textAnchor="middle" fontSize="11" fontWeight="700" fill="#2ecc71" fontFamily="DM Sans, sans-serif">IN</text>
+
+          {/* KEEP OUT label */}
+          <text x={485} y={18} textAnchor="middle" fontSize="11" fontWeight="700" fill="#e74c3c" fontFamily="DM Sans, sans-serif">KEEP OUT</text>
+
+          {/* Green items with arrows going INTO the box */}
+          {greenItems.map((item, i) => (
+            <g key={i}>
+              <text x={10} y={item.y} fontSize="11" fontWeight="600" fill="#1a9456" fontFamily="DM Sans, sans-serif">{item.label}</text>
+              <line x1={110} y1={item.y - 4} x2={188} y2={item.y - 4} stroke="#2ecc71" strokeWidth="1.5" markerEnd="url(#greenArrow)" />
+            </g>
+          ))}
+
+          {/* Red items with blocked arrows going away from the box */}
+          {redItems.map((item, i) => (
+            <g key={i}>
+              <line x1={392} y1={redItems[i].y - 4} x2={460} y2={redItems[i].y - 4} stroke="#e74c3c" strokeWidth="1.5" markerEnd="url(#redArrow)" />
+              {/* Barrier slash */}
+              <line x1={468} y1={redItems[i].y - 11} x2={456} y2={redItems[i].y + 5} stroke="#e74c3c" strokeWidth="2" />
+              <text x={472} y={item.y} fontSize="11" fontWeight="600" fill="#e74c3c" fontFamily="DM Sans, sans-serif">{item.label}</text>
+            </g>
+          ))}
+
+          <defs>
+            <marker id="greenArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#2ecc71" />
+            </marker>
+            <marker id="redArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#e74c3c" />
+            </marker>
+          </defs>
+        </svg>
+      );
+    };
+
     const ExcludeStage = () => {
       const [redacted, setRedacted] = useState([]);
       const [safetyScore, setSafetyScore] = useState(0);
@@ -881,6 +1007,9 @@
 
           <div style={P.scene}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <DataBoundaryDiagram />
+              </div>
               <div>
                 <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px', fontWeight: '500' }}>
                   Unsafe Prompt -- Click sensitive data to redact:

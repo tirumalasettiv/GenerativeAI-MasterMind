@@ -176,7 +176,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -218,8 +218,8 @@
       flex-direction: column;
       overflow-y: auto;
       scroll-behavior: smooth;
-      padding: 32px 48px;
-      gap: 30px;
+      padding: 24px 36px;
+      gap: 18px;
     }
 
     .explanation {
@@ -231,7 +231,7 @@
     .scene-card {
       background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
       border-radius: 16px;
-      padding: 40px;
+      padding: 28px;
       border: 1px solid #e8e3f8;
       min-height: auto;
       display: flex;
@@ -243,12 +243,12 @@
     .insight-box {
       background: #f0faf0;
       border-left: 4px solid #2ecc71;
-      padding: 24px;
+      padding: 16px 20px;
       border-radius: 8px;
       color: #1a5e3a;
       font-size: 17px;
       line-height: 1.7;
-      margin-top: 24px;
+      margin-top: 0;
       position: relative;
     }
 
@@ -347,6 +347,7 @@
     }
 
     .analogy-card {
+      position: relative;
       flex: 1;
       min-width: 180px;
       padding: 20px;
@@ -392,6 +393,42 @@
     .analogy-card.expanded .analogy-description {
       max-height: 200px;
       margin-top: 12px;
+    }
+
+    /* Disclosure badge - shared across all click-to-expand cards */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
 
     /* Stage 3 specific styles */
@@ -613,6 +650,305 @@
       margin-right: 12px;
     }
 
+    /* --- Visual diagrams (added enhancement) --- */
+
+    @keyframes dashMarch {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes barFill {
+      from { width: 0; }
+    }
+
+    @keyframes drawCurve {
+      from { stroke-dashoffset: 800; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(108, 92, 231, 0)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.35)); }
+    }
+
+    .flow-diagram {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .flow-diagram svg {
+      width: 100%;
+      max-width: 720px;
+      height: auto;
+    }
+
+    .flow-node-label {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      fill: #1a1a1a;
+    }
+
+    .flow-node-active rect {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: nodePulse 1.6s ease-in-out infinite;
+    }
+
+    .flow-arrow {
+      stroke: #b0a6e8;
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 4 4;
+      animation: dashMarch 1.2s linear infinite;
+    }
+
+    .flow-arrow.inactive {
+      stroke: #e0e0e0;
+      animation: none;
+    }
+
+    /* Override analogy-icon so SVG illustration renders at the right size */
+    .analogy-icon {
+      font-size: 0;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .analogy-icon svg {
+      width: 72px;
+      height: 72px;
+    }
+
+    /* S2 mechanics collapsible */
+    .mechanics-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: white;
+      border: 1px solid #d5cff5;
+      color: #6c5ce7;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: all 0.2s ease;
+    }
+
+    .mechanics-toggle:hover {
+      background: #f5f3ff;
+      border-color: #6c5ce7;
+      transform: translateY(-1px);
+    }
+
+    .mechanics-toggle .chevron {
+      transition: transform 0.3s ease;
+    }
+
+    .mechanics-toggle.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    .mechanics-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      flex-shrink: 0;
+    }
+
+    .mechanics-panel.open {
+      max-height: 420px;
+    }
+
+    .mechanics-card {
+      margin-top: 16px;
+      background: linear-gradient(135deg, #fbfbff 0%, #f5f3ff 100%);
+      border: 1px solid #e8e3f8;
+      border-radius: 14px;
+      padding: 28px 24px;
+    }
+
+    .mechanics-card svg {
+      width: 100%;
+      max-width: 720px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .mechanics-caption {
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    /* S4 probability bar chart */
+    .prob-bars-chart {
+      width: 560px;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .prob-bar-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 56px;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      background: white;
+      border: 1px solid #e8e3f8;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .prob-bar-row:hover {
+      border-color: #6c5ce7;
+      transform: translateX(2px);
+      box-shadow: 0 4px 14px rgba(108, 92, 231, 0.12);
+    }
+
+    .prob-bar-row.winner {
+      border-color: #a29bfe;
+      box-shadow: 0 0 0 3px rgba(162, 155, 254, 0.15);
+    }
+
+    .prob-bar-row.dim {
+      opacity: 0.3;
+      transform: none;
+    }
+
+    .prob-bar-row.locked {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .prob-bar-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      text-align: right;
+    }
+
+    .prob-bar-track {
+      position: relative;
+      height: 22px;
+      background: #f0edfa;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .prob-bar-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, #6c5ce7 0%, #a29bfe 100%);
+      border-radius: 8px;
+      animation: barFill 0.9s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+
+    .prob-bar-row.winner .prob-bar-fill {
+      background: linear-gradient(90deg, #6c5ce7 0%, #7d6ff0 60%, #a29bfe 100%);
+      box-shadow: 0 0 12px rgba(108, 92, 231, 0.5);
+    }
+
+    .prob-bar-pct {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c5ce7;
+      text-align: right;
+    }
+
+    /* S5 quadrant matrix */
+    .quadrant-chart {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .quadrant-chart svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .quadrant-legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #666;
+      flex-wrap: wrap;
+    }
+
+    .quadrant-legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* S6 growth curve */
+    .growth-curve {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto 20px auto;
+      padding: 18px 10px 6px;
+      background: white;
+      border: 1px solid #e8e3f8;
+      border-radius: 14px;
+    }
+
+    .growth-curve svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .growth-curve path.curve-line {
+      fill: none;
+      stroke: #6c5ce7;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 800;
+      animation: drawCurve 1.4s ease-out forwards;
+    }
+
+    .growth-dot {
+      transition: r 0.2s ease, filter 0.2s ease;
+      cursor: pointer;
+    }
+
+    .growth-dot.active {
+      r: 8;
+      filter: drop-shadow(0 0 6px rgba(108, 92, 231, 0.55));
+    }
+
+    .timeline-item.highlight .timeline-year {
+      color: #2ecc71;
+    }
+
+    /* --- end visual diagrams --- */
+
     .scrollbar-hide {
       -ms-overflow-style: none;
       scrollbar-width: none;
@@ -643,8 +979,61 @@
       { icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>', label: 'Video' },
     ];
 
+    const FLOW_NODES = [
+      'Training Data',
+      'Neural Network',
+      'Patterns',
+      'Token Prediction',
+      'Output',
+    ];
+
+    function FlowDiagram({ activeNode }) {
+      const W = 720, H = 90, NODE_W = 120, NODE_H = 60;
+      const xs = FLOW_NODES.map((_, i) => i * 150);
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" aria-label="GenAI pipeline flow">
+          <defs>
+            <marker id="flow-arrow-head" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+            <marker id="flow-arrow-head-dim" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#e0e0e0" />
+            </marker>
+          </defs>
+          {xs.slice(0, -1).map((x, i) => (
+            <path
+              key={`arrow-${i}`}
+              className={`flow-arrow${i === activeNode ? '' : ' inactive'}`}
+              d={`M ${x + NODE_W + 4} 45 L ${xs[i + 1] - 4} 45`}
+              markerEnd={i === activeNode ? 'url(#flow-arrow-head)' : 'url(#flow-arrow-head-dim)'}
+            />
+          ))}
+          {FLOW_NODES.map((label, i) => {
+            const isActive = i === activeNode;
+            const isPast = i < activeNode;
+            const stroke = isActive ? '#6c5ce7' : isPast ? '#a29bfe' : '#d8d8e8';
+            const fill = isActive || isPast ? '#f5f3ff' : 'white';
+            const textColor = isActive ? '#6c5ce7' : '#1a1a1a';
+            return (
+              <g key={`node-${i}`} className={isActive ? 'flow-node-active' : ''}>
+                <rect x={xs[i]} y={15} width={NODE_W} height={NODE_H} rx={12}
+                      fill={fill} stroke={stroke} strokeWidth={2} />
+                <text x={xs[i] + NODE_W / 2} y={51} textAnchor="middle"
+                      className="flow-node-label" fill={textColor}>
+                  {label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+
     function S1() {
       const [count, setCount] = useState(0);
+      const [activeNode, setActiveNode] = useState(0);
 
       useEffect(() => {
         const interval = setInterval(() => {
@@ -660,6 +1049,13 @@
         return () => clearInterval(interval);
       }, []);
 
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setActiveNode(prev => (prev + 1) % FLOW_NODES.length);
+        }, 1100);
+        return () => clearInterval(interval);
+      }, []);
+
       const outputs = OUTPUT_TYPES.slice(0, count);
 
       return (
@@ -669,13 +1065,16 @@
             Generative AI is software that creates new content — text, images, code, audio, video — by predicting what should come next based on patterns it learned from millions of examples.
           </div>
           <div className="scene-card">
-            <div className="demo-outputs">
+            <div className="flow-diagram">
+              <FlowDiagram activeNode={activeNode} />
+              <div className="demo-outputs">
               {outputs.map((output, idx) => (
                 <div key={idx} className="output-type fade-in">
                   <div className="output-icon" dangerouslySetInnerHTML={{__html: output.icon}} />
                   <div className="output-text">{output.label}</div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
           <div className="insight-box">
@@ -686,8 +1085,150 @@
       );
     }
 
+    function AnalogyIcon({ id }) {
+      const common = {
+        viewBox: '0 0 72 72',
+        fill: 'none',
+        stroke: '#6c5ce7',
+        strokeWidth: 1.5,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        xmlns: 'http://www.w3.org/2000/svg',
+      };
+      if (id === 1) {
+        return (
+          <svg {...common} aria-label="Phone with autocomplete suggestions">
+            <rect x="24" y="30" width="24" height="36" rx="3" fill="white" />
+            <line x1="32" y1="60" x2="40" y2="60" />
+            <rect x="6" y="4" width="20" height="8" rx="4" fill="#f5f3ff" />
+            <rect x="30" y="12" width="24" height="8" rx="4" fill="#f5f3ff" />
+            <rect x="14" y="20" width="32" height="8" rx="4" fill="#6c5ce7" stroke="#6c5ce7" />
+          </svg>
+        );
+      }
+      if (id === 2) {
+        return (
+          <svg {...common} aria-label="Parrot on a stack of books">
+            <ellipse cx="36" cy="38" rx="12" ry="16" fill="#f5f3ff" />
+            <circle cx="36" cy="22" r="8" fill="#f5f3ff" />
+            <path d="M 28 22 L 22 24 L 28 26 Z" fill="#6c5ce7" />
+            <circle cx="38" cy="20" r="1.4" fill="#6c5ce7" stroke="none" />
+            <path d="M 30 32 Q 26 42 30 48" />
+            <line x1="36" y1="54" x2="36" y2="58" />
+            <line x1="32" y1="58" x2="36" y2="60" />
+            <line x1="40" y1="58" x2="36" y2="60" />
+            <rect x="14" y="60" width="44" height="4" rx="1" fill="white" />
+            <rect x="10" y="64" width="52" height="4" rx="1" fill="white" />
+          </svg>
+        );
+      }
+      return (
+        <svg {...common} aria-label="Saxophone with musical notes">
+          <rect x="28" y="8" width="6" height="6" rx="1" fill="#6c5ce7" />
+          <line x1="31" y1="14" x2="31" y2="22" />
+          <path d="M 31 22 L 31 42 Q 31 54 42 54 Q 54 54 54 44 L 54 36" fill="white" />
+          <path d="M 54 36 L 62 56 L 46 56 Z" fill="#f5f3ff" />
+          <circle cx="34" cy="28" r="1.4" fill="#6c5ce7" stroke="none" />
+          <circle cx="34" cy="34" r="1.4" fill="#6c5ce7" stroke="none" />
+          <circle cx="34" cy="40" r="1.4" fill="#6c5ce7" stroke="none" />
+          <ellipse cx="12" cy="22" rx="3" ry="2" fill="#6c5ce7" stroke="none" />
+          <line x1="15" y1="22" x2="15" y2="12" />
+          <ellipse cx="20" cy="40" rx="3" ry="2" fill="#6c5ce7" stroke="none" />
+          <line x1="23" y1="40" x2="23" y2="30" />
+        </svg>
+      );
+    }
+
+    function TransformerDiagram() {
+      const tokens = ['The', 'best', 'way', 'to', '___'];
+      const probs = [
+        { tok: 'home', w: 56, c: '#6c5ce7' },
+        { tok: 'win', w: 38, c: '#a29bfe' },
+        { tok: 'rest', w: 24, c: '#cdc6f5' },
+      ];
+      return (
+        <svg viewBox="0 0 720 170" xmlns="http://www.w3.org/2000/svg" aria-label="Transformer pipeline">
+          <defs>
+            <marker id="tx-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+
+          <text x="360" y="18" textAnchor="middle" fontSize="13" fontWeight="700"
+                fill="#6c5ce7" fontFamily="DM Sans">
+            Inside the model
+          </text>
+
+          {tokens.map((tok, i) => {
+            const isBlank = tok === '___';
+            return (
+              <g key={`tok-${i}`}>
+                <rect x={18 + i * 22} y={62} width={20} height={22} rx={4}
+                      fill={isBlank ? '#fef5f5' : '#f5f3ff'}
+                      stroke={isBlank ? '#e74c3c' : '#a29bfe'} strokeWidth={1.2} />
+                <text x={28 + i * 22} y={77} textAnchor="middle" fontSize="9" fontWeight="600"
+                      fill={isBlank ? '#e74c3c' : '#1a1a1a'} fontFamily="DM Sans">
+                  {tok}
+                </text>
+              </g>
+            );
+          })}
+          <text x="78" y={102} textAnchor="middle" fontSize="11" fill="#666" fontFamily="DM Sans">
+            Input tokens
+          </text>
+
+          <path d="M 145 73 L 175 73" stroke="#b0a6e8" strokeWidth="2"
+                fill="none" markerEnd="url(#tx-arrow)" />
+
+          <rect x="180" y="50" width="100" height="48" rx="10"
+                fill="white" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="230" y="78" textAnchor="middle" fontSize="13" fontWeight="700"
+                fill="#1a1a1a" fontFamily="DM Sans">Embedding</text>
+          <text x="230" y="118" textAnchor="middle" fontSize="11"
+                fill="#666" fontFamily="DM Sans">Words → vectors</text>
+
+          <path d="M 285 73 L 315 73" stroke="#b0a6e8" strokeWidth="2"
+                fill="none" markerEnd="url(#tx-arrow)" />
+
+          <rect x="320" y="50" width="100" height="48" rx="10"
+                fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="370" y="74" textAnchor="middle" fontSize="13" fontWeight="700"
+                fill="#1a1a1a" fontFamily="DM Sans">Attention</text>
+          <text x="370" y="89" textAnchor="middle" fontSize="9" fontWeight="700"
+                fill="#6c5ce7" fontFamily="DM Sans">× N layers</text>
+          <text x="370" y="118" textAnchor="middle" fontSize="11"
+                fill="#666" fontFamily="DM Sans">Weighs context</text>
+
+          <path d="M 425 73 L 455 73" stroke="#b0a6e8" strokeWidth="2"
+                fill="none" markerEnd="url(#tx-arrow)" />
+
+          <rect x="460" y="50" width="100" height="48" rx="10"
+                fill="white" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="510" y="78" textAnchor="middle" fontSize="13" fontWeight="700"
+                fill="#1a1a1a" fontFamily="DM Sans">Feed-Forward</text>
+          <text x="510" y="118" textAnchor="middle" fontSize="11"
+                fill="#666" fontFamily="DM Sans">Transforms</text>
+
+          <path d="M 565 73 L 595 73" stroke="#b0a6e8" strokeWidth="2"
+                fill="none" markerEnd="url(#tx-arrow)" />
+
+          {probs.map((b, i) => (
+            <g key={`prob-${i}`}>
+              <text x={602} y={62 + i * 14} fontSize="10" fontWeight="600"
+                    fill="#1a1a1a" fontFamily="DM Sans">{b.tok}</text>
+              <rect x={628} y={54 + i * 14} width={b.w} height={9} rx={2} fill={b.c} />
+            </g>
+          ))}
+          <text x="658" y={118} textAnchor="middle" fontSize="11"
+                fill="#666" fontFamily="DM Sans">Probabilities</text>
+        </svg>
+      );
+    }
+
     function S2() {
       const [expanded, setExpanded] = useState(null);
+      const [showMechanics, setShowMechanics] = useState(false);
 
       const analogies = [
         {
@@ -721,14 +1262,41 @@
               {analogies.map(analogy => (
                 <div
                   key={analogy.id}
-                  className={`analogy-card ${expanded === analogy.id ? 'expanded' : ''}`}
+                  className={`analogy-card disclosure-card-host ${expanded === analogy.id ? 'expanded' : ''}`}
                   onClick={() => setExpanded(expanded === analogy.id ? null : analogy.id)}
                 >
-                  <div className="analogy-icon">{analogy.icon}</div>
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                  <div className="analogy-icon"><AnalogyIcon id={analogy.id} /></div>
                   <div className="analogy-title">{analogy.title}</div>
                   <div className="analogy-description">{analogy.description}</div>
                 </div>
               ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button
+              type="button"
+              className={`mechanics-toggle${showMechanics ? ' open' : ''}`}
+              onClick={() => setShowMechanics(!showMechanics)}
+            >
+              <span>{showMechanics ? 'Hide the mechanics' : 'Show the mechanics'}</span>
+              <svg className="chevron" width="12" height="12" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" strokeWidth="2.5"
+                   strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </div>
+          <div className={`mechanics-panel${showMechanics ? ' open' : ''}`}>
+            <div className="mechanics-card">
+              <TransformerDiagram />
+              <div className="mechanics-caption">
+                When the model "predicts a pattern," it runs tokens through embedding, attention, and feed-forward layers to produce a probability for every possible next token.
+              </div>
             </div>
           </div>
           <div className="insight-box">
@@ -831,6 +1399,7 @@
     function S4() {
       const [step, setStep] = useState(0);
       const [selections, setSelections] = useState([]);
+      const [lockedIdx, setLockedIdx] = useState(null);
 
       const steps = [
         {
@@ -874,8 +1443,18 @@
         }
       };
 
+      const handleBarClick = (option, idx) => {
+        if (lockedIdx !== null) return;
+        setLockedIdx(idx);
+        setTimeout(() => {
+          handleSelect(option);
+          setLockedIdx(null);
+        }, 380);
+      };
+
       const currentStep = steps[step];
       const fullText = `${currentStep.prompt} ${selections.map(s => s.text).join(' ')}`;
+      const maxProb = Math.max(...currentStep.options.map(o => parseFloat(o.prob)));
 
       return (
         <>
@@ -893,16 +1472,32 @@
               {step < steps.length && (
                 <div className="prediction-step">
                   <div className="step-label">Next prediction options:</div>
-                  <div className="probability-buttons">
-                    {currentStep.options.map((option, idx) => (
-                      <button
-                        key={idx}
-                        className="prob-btn"
-                        onClick={() => handleSelect(option)}
-                      >
-                        {option.text} ({option.prob})
-                      </button>
-                    ))}
+                  <div className="prob-bars-chart">
+                    {currentStep.options.map((option, idx) => {
+                      const pct = parseFloat(option.prob);
+                      const isWinner = pct === maxProb;
+                      const isLocked = lockedIdx === idx;
+                      const isDim = lockedIdx !== null && lockedIdx !== idx;
+                      const cls = ['prob-bar-row'];
+                      if (isWinner && lockedIdx === null) cls.push('winner');
+                      if (isLocked) cls.push('locked');
+                      if (isDim) cls.push('dim');
+                      return (
+                        <div
+                          key={`${step}-${idx}`}
+                          className={cls.join(' ')}
+                          onClick={() => handleBarClick(option, idx)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className="prob-bar-label">{option.text}</div>
+                          <div className="prob-bar-track">
+                            <div className="prob-bar-fill" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="prob-bar-pct">{option.prob}</div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -913,6 +1508,51 @@
             This single trick — next-token prediction — scaled up billions of times is what powers ChatGPT, DALL-E, and every other GenAI tool.
           </div>
         </>
+      );
+    }
+
+    function QuadrantMatrix() {
+      const points = [
+        { x: 320, y: 60,  label: 'Write poetry',  color: '#2ecc71' },
+        { x: 280, y: 95,  label: 'Brainstorm',    color: '#2ecc71' },
+        { x: 200, y: 110, label: 'Translate',     color: '#2ecc71' },
+        { x: 290, y: 200, label: 'Debug logic',   color: '#f39c12' },
+        { x: 100, y: 195, label: 'Cite a source', color: '#e74c3c' },
+        { x: 120, y: 240, label: 'Math proof',    color: '#e74c3c' },
+      ];
+      return (
+        <svg viewBox="0 0 440 320" xmlns="http://www.w3.org/2000/svg" aria-label="Where GenAI excels and fails">
+          <rect x="50"  y="30"  width="170" height="120" fill="#fff8e1" />
+          <rect x="220" y="30"  width="170" height="120" fill="#e8f7ef" />
+          <rect x="50"  y="150" width="170" height="120" fill="#fdebeb" />
+          <rect x="220" y="150" width="170" height="120" fill="#f5f5f5" />
+
+          <line x1="50" y1="150" x2="390" y2="150" stroke="#6c5ce7" strokeWidth="1.5" />
+          <line x1="220" y1="30" x2="220" y2="270" stroke="#6c5ce7" strokeWidth="1.5" />
+          <path d="M 390 150 L 384 146 M 390 150 L 384 154"
+                stroke="#6c5ce7" strokeWidth="1.5" fill="none" />
+          <path d="M 220 30 L 216 36 M 220 30 L 224 36"
+                stroke="#6c5ce7" strokeWidth="1.5" fill="none" />
+
+          <text x="50"  y="290" fontSize="12" fill="#666" fontFamily="DM Sans">← Factual</text>
+          <text x="390" y="290" textAnchor="end" fontSize="12" fill="#666" fontFamily="DM Sans">Creative →</text>
+          <text x="220" y="22"  textAnchor="middle" fontSize="12" fontWeight="700" fill="#6c5ce7" fontFamily="DM Sans">Pattern matching ↑</text>
+          <text x="220" y="304" textAnchor="middle" fontSize="12" fontWeight="700" fill="#6c5ce7" fontFamily="DM Sans">↓ Rigorous reasoning</text>
+
+          <text x="60"  y="48"  fontSize="10" fill="#b07d00" fontWeight="700" fontFamily="DM Sans">RISKY</text>
+          <text x="380" y="48"  textAnchor="end" fontSize="10" fill="#1a9456" fontWeight="700" fontFamily="DM Sans">SWEET SPOT</text>
+          <text x="60"  y="265" fontSize="10" fill="#c0392b" fontWeight="700" fontFamily="DM Sans">FAILS</text>
+          <text x="380" y="265" textAnchor="end" fontSize="10" fill="#7f8c8d" fontWeight="700" fontFamily="DM Sans">MIXED</text>
+
+          {points.map((p, i) => (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r="6" fill={p.color} stroke="white" strokeWidth="2" />
+              <text x={p.x + 11} y={p.y + 4} fontSize="11" fill="#1a1a1a" fontWeight="600" fontFamily="DM Sans">
+                {p.label}
+              </text>
+            </g>
+          ))}
+        </svg>
       );
     }
 
@@ -944,6 +1584,18 @@
           <div><div className="stage-header">Capabilities &amp; Limits</div></div>
           <div className="explanation">
             GenAI is incredibly powerful but has real limits — understanding these is key to using it well.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="quadrant-chart">
+                <QuadrantMatrix />
+              </div>
+              <div className="quadrant-legend">
+                <span><span className="quadrant-legend-dot" style={{ background: '#2ecc71' }} /> Strong fit</span>
+                <span><span className="quadrant-legend-dot" style={{ background: '#f39c12' }} /> Mixed</span>
+                <span><span className="quadrant-legend-dot" style={{ background: '#e74c3c' }} /> Struggles</span>
+              </div>
+            </div>
           </div>
           <div className="scene-card">
             <div className="can-cannot">
@@ -994,8 +1646,60 @@
       );
     }
 
+    function GrowthCurve({ activeIdx, onHover }) {
+      const points = [
+        { x: 60,  y: 180 },
+        { x: 200, y: 160 },
+        { x: 340, y: 120 },
+        { x: 460, y: 70 },
+        { x: 600, y: 30 },
+      ];
+      const yearLabels = ['2017', '2020', '2022', '2023', '2024–25'];
+      const path = 'M 60 180 C 200 180, 270 165, 340 120 C 400 90, 510 45, 600 30';
+      return (
+        <svg viewBox="0 0 660 220" xmlns="http://www.w3.org/2000/svg" aria-label="Capability growth 2017 to 2025">
+          <line x1="40" y1="200" x2="640" y2="200" stroke="#d8d8e8" strokeWidth="1.5" />
+          <line x1="40" y1="200" x2="40" y2="20" stroke="#d8d8e8" strokeWidth="1.5" />
+          <path d="M 640 200 L 634 196 M 640 200 L 634 204"
+                stroke="#d8d8e8" strokeWidth="1.5" fill="none" />
+          <path d="M 40 20 L 36 26 M 40 20 L 44 26"
+                stroke="#d8d8e8" strokeWidth="1.5" fill="none" />
+
+          <text x="640" y="216" textAnchor="end" fontSize="11" fill="#999" fontFamily="DM Sans">Year →</text>
+          <text x="50"  y="22"  fontSize="11" fill="#999" fontFamily="DM Sans">↑ Capability</text>
+
+          <path className="curve-line" d={path} />
+
+          {points.map((p, i) => (
+            <text key={`yr-${i}`} x={p.x} y="216" textAnchor="middle"
+                  fontSize="11" fontWeight="600"
+                  fill={activeIdx === i ? '#6c5ce7' : '#666'}
+                  fontFamily="DM Sans">
+              {yearLabels[i]}
+            </text>
+          ))}
+
+          {points.map((p, i) => (
+            <circle
+              key={`dot-${i}`}
+              cx={p.x}
+              cy={p.y}
+              r={activeIdx === i ? 8 : 5}
+              fill="#6c5ce7"
+              stroke="white"
+              strokeWidth="2"
+              className={`growth-dot${activeIdx === i ? ' active' : ''}`}
+              onMouseEnter={() => onHover(i)}
+              onMouseLeave={() => onHover(null)}
+            />
+          ))}
+        </svg>
+      );
+    }
+
     function S6() {
       const [animating, setAnimating] = useState(false);
+      const [hoverIdx, setHoverIdx] = useState(null);
 
       useEffect(() => {
         setAnimating(true);
@@ -1030,13 +1734,18 @@
           <div className="explanation">
             GenAI went mainstream in late 2022 with ChatGPT — here's why it's transforming everything.
           </div>
+          <div className="growth-curve">
+            <GrowthCurve activeIdx={hoverIdx} onHover={setHoverIdx} />
+          </div>
           <div className="scene-card">
             <div className="timeline">
               {milestones.map((milestone, idx) => (
                 <div
                   key={idx}
-                  className="timeline-item"
+                  className={`timeline-item${hoverIdx === idx ? ' highlight' : ''}`}
                   style={{ animationDelay: `${idx * 0.15}s` }}
+                  onMouseEnter={() => setHoverIdx(idx)}
+                  onMouseLeave={() => setHoverIdx(null)}
                 >
                   <div className="timeline-year">{milestone.year}</div>
                   <div className="timeline-event">{milestone.event}</div>

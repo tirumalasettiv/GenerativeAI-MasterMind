@@ -117,7 +117,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -235,6 +235,42 @@
 
     .step-connector.active {
       background: #6c5ce7;
+    }
+
+    /* Disclosure badge - shared across all click-to-expand cards */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
   </style>
 </head>
@@ -460,7 +496,8 @@
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        padding: '32px 48px',
+        gap: '18px',
+        padding: '24px 36px',
         scrollBehavior: 'smooth',
       },
       explainRow: {
@@ -479,8 +516,8 @@
         borderRadius: '16px',
         border: '1px solid #e0e0e0',
         boxShadow: '0 4px 16px rgba(108, 92, 231, 0.06), 0 2px 8px rgba(0,0,0,0.04)',
-        padding: '36px 40px',
-        marginBottom: '20px',
+        padding: '28px',
+        marginBottom: '0',
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
@@ -490,7 +527,7 @@
         minHeight: '0',
       },
       insight: {
-        padding: '24px 28px',
+        padding: '16px 20px',
         backgroundColor: '#f0faf0',
         borderLeft: '4px solid #2ecc71',
         borderRadius: '6px',
@@ -498,7 +535,7 @@
         lineHeight: '1.7',
         color: '#2c3e50',
         animation: 'fadeIn 0.3s ease-in',
-        marginTop: '24px',
+        marginTop: '0',
       },
       insightLabel: {
         fontWeight: 700,
@@ -531,6 +568,64 @@
       )
     );
 
+    // Capability vs Cost Scatter Plot for Stage 1
+    const ModelScatterPlot = () => (
+      <svg viewBox="0 0 500 320" style={{ width: '100%', maxWidth: '480px', fontFamily: 'DM Sans, sans-serif', overflow: 'visible' }}>
+        {/* Quadrant backgrounds */}
+        {/* Bottom-left: low cost, low cap */}
+        <rect x="60" y="160" width="190" height="120" fill="#f9f9f9" />
+        {/* Top-left: low cost, high cap — Best value */}
+        <rect x="60" y="40" width="190" height="120" fill="#e8f7ef" />
+        {/* Bottom-right: high cost, low cap */}
+        <rect x="250" y="160" width="210" height="120" fill="#fffbea" />
+        {/* Top-right: high cost, high cap — Premium */}
+        <rect x="250" y="40" width="210" height="120" fill="#f5f3ff" />
+
+        {/* Quadrant labels */}
+        <text x="68" y="58" fontSize="10" fill="#2ecc71" fontWeight="600" fontFamily="DM Sans, sans-serif">Best Value</text>
+        <text x="258" y="152" fontSize="10" fill="#6c5ce7" fontWeight="600" fontFamily="DM Sans, sans-serif">Premium</text>
+
+        {/* Axis lines */}
+        {/* X axis */}
+        <line x1="60" y1="280" x2="460" y2="280" stroke="#bbb" strokeWidth="1.5" />
+        {/* Arrow head X */}
+        <polygon points="460,276 470,280 460,284" fill="#bbb" />
+        {/* Y axis */}
+        <line x1="60" y1="280" x2="60" y2="30" stroke="#bbb" strokeWidth="1.5" />
+        {/* Arrow head Y */}
+        <polygon points="56,30 60,20 64,30" fill="#bbb" />
+
+        {/* Axis labels */}
+        <text x="255" y="300" fontSize="11" fill="#666" textAnchor="middle" fontFamily="DM Sans, sans-serif">Cost →</text>
+        <text x="20" y="160" fontSize="11" fill="#666" textAnchor="middle" fontFamily="DM Sans, sans-serif" transform="rotate(-90, 20, 160)">Capability ↑</text>
+
+        {/* X-axis tick labels */}
+        <text x="90" y="295" fontSize="10" fill="#aaa" textAnchor="middle" fontFamily="DM Sans, sans-serif">Low</text>
+        <text x="440" y="295" fontSize="10" fill="#aaa" textAnchor="middle" fontFamily="DM Sans, sans-serif">High</text>
+        {/* Y-axis tick labels */}
+        <text x="52" y="270" fontSize="10" fill="#aaa" textAnchor="end" fontFamily="DM Sans, sans-serif">Low</text>
+        <text x="52" y="50" fontSize="10" fill="#aaa" textAnchor="end" fontFamily="DM Sans, sans-serif">High</text>
+
+        {/* Llama dot — low cost, medium cap: x=120, y=120 */}
+        <circle cx="120" cy="150" r="8" fill="#6c5ce7" stroke="white" strokeWidth="2" />
+        <text x="132" y="154" fontSize="11" fill="#1a1a1a" fontWeight="600" fontFamily="DM Sans, sans-serif">Llama (open)</text>
+        <text x="132" y="167" fontSize="10" fill="#2ecc71" fontWeight="600" fontFamily="DM Sans, sans-serif">Open Source</text>
+
+        {/* Gemini dot — medium cost, medium-high cap: x=250, y=100 */}
+        <circle cx="250" cy="110" r="8" fill="#6c5ce7" stroke="white" strokeWidth="2" />
+        <text x="262" y="114" fontSize="11" fill="#1a1a1a" fontWeight="600" fontFamily="DM Sans, sans-serif">Gemini</text>
+
+        {/* Claude dot — medium-high cost, high cap: x=300, y=80 */}
+        <circle cx="310" cy="80" r="8" fill="#6c5ce7" stroke="white" strokeWidth="2" />
+        <text x="322" y="84" fontSize="11" fill="#1a1a1a" fontWeight="600" fontFamily="DM Sans, sans-serif">Claude</text>
+
+        {/* GPT-4 dot — high cost, high cap: x=380, y=60 */}
+        <circle cx="390" cy="60" r="8" fill="#6c5ce7" stroke="white" strokeWidth="2" />
+        <text x="402" y="64" fontSize="11" fill="#1a1a1a" fontWeight="600" fontFamily="DM Sans, sans-serif">GPT-4o</text>
+        <text x="402" y="77" fontSize="10" fill="#6c5ce7" fontWeight="600" fontFamily="DM Sans, sans-serif">Proprietary</text>
+      </svg>
+    );
+
     // Stage 1: Foundational Models
     const S1 = () => {
       const [expandedModel, setExpandedModel] = useState(null);
@@ -545,6 +640,9 @@
       return (
         <div style={P.scene}>
           <div><div className="stage-header">The AI Model Landscape</div></div>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '20px', marginTop: '8px' }}>
+            <ModelScatterPlot />
+          </div>
           <div style={{
             textAlign: 'center',
             marginBottom: '32px',
@@ -616,8 +714,10 @@
               {models.map((model, i) => (
                 <div
                   key={i}
+                  className={`disclosure-card-host ${expandedModel === i ? 'expanded' : ''}`}
                   onClick={() => setExpandedModel(expandedModel === i ? null : i)}
                   style={{
+                    position: 'relative',
                     padding: '14px',
                     backgroundColor: expandedModel === i ? '#6c5ce7' : '#f5f5f5',
                     color: expandedModel === i ? '#fff' : '#1a1a1a',
@@ -629,6 +729,11 @@
                     textAlign: 'center',
                   }}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
                   <div>{model.name}</div>
                   {expandedModel === i && (
                     <div style={{ fontSize: '12px', marginTop: '4px', opacity: 0.9 }}>
@@ -803,8 +908,10 @@
             {models.map((model, i) => (
               <div
                 key={i}
+                className={`disclosure-card-host ${expandedModel === i ? 'expanded' : ''}`}
                 onClick={() => setExpandedModel(expandedModel === i ? null : i)}
                 style={{
+                  position: 'relative',
                   padding: '16px',
                   backgroundColor: '#f8f8f8',
                   border: ('2px solid ' + (expandedModel === i ? model.color : '#e0e0e0')),
@@ -813,6 +920,11 @@
                   transition: 'all 0.2s',
                 }}
               >
+                <span className="disclosure-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </span>
                 <div style={{ fontSize: '16px', fontWeight: 600, color: model.color }}>{model.name}</div>
                 <div style={{ fontSize: '14px', color: '#888', marginTop: '3px' }}>{model.company}</div>
                 {expandedModel === i && (
@@ -912,6 +1024,66 @@
       );
     };
 
+    // 3-Tier Architecture Stack for Stage 4
+    const AppLayerStack = () => (
+      <svg viewBox="0 0 640 215" style={{ width: '100%', maxWidth: '620px', fontFamily: 'DM Sans, sans-serif', overflow: 'visible' }}>
+        {/* Tier 3 (bottom): Training Data + Compute — y=160-200 */}
+        <rect x="60" y="160" width="560" height="42" rx="8" fill="#f0f0f8" stroke="#b0a6e8" strokeWidth="1.5" />
+        <text x="340" y="185" fontSize="12" fill="#6c5ce7" textAnchor="middle" fontWeight="500" fontFamily="DM Sans, sans-serif">
+          Petabytes of text, images, code + GPU clusters
+        </text>
+        <text x="52" y="186" fontSize="11" fill="#b0a6e8" fontWeight="700" textAnchor="end" fontFamily="DM Sans, sans-serif">Compute</text>
+
+        {/* Up arrow: Tier3 → Tier2 at x=150 */}
+        <line x1="150" y1="158" x2="150" y2="141" stroke="#b0a6e8" strokeWidth="1.5" />
+        <polygon points="146,141 150,132 154,141" fill="#b0a6e8" />
+        <text x="163" y="150" fontSize="9" fill="#999" fontFamily="DM Sans, sans-serif">powers</text>
+
+        {/* Up arrow: Tier3 → Tier2 at x=320 */}
+        <line x1="320" y1="158" x2="320" y2="141" stroke="#b0a6e8" strokeWidth="1.5" />
+        <polygon points="316,141 320,132 324,141" fill="#b0a6e8" />
+
+        {/* Up arrow: Tier3 → Tier2 at x=490 */}
+        <line x1="490" y1="158" x2="490" y2="141" stroke="#b0a6e8" strokeWidth="1.5" />
+        <polygon points="486,141 490,132 494,141" fill="#b0a6e8" />
+
+        {/* Tier 2 (middle): Foundation Models — y=90-135 */}
+        <rect x="60" y="90" width="560" height="42" rx="8" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="1.5" />
+        {/* 4 model chips inside */}
+        {[['GPT-4o', 110], ['Claude', 225], ['Gemini', 340], ['Llama', 455]].map(([label, cx]) => (
+          <g key={label}>
+            <rect x={cx - 34} y="100" width="68" height="22" rx="5" fill="#6c5ce7" opacity="0.15" />
+            <text x={cx} y="115" fontSize="11" fill="#6c5ce7" textAnchor="middle" fontWeight="600" fontFamily="DM Sans, sans-serif">{label}</text>
+          </g>
+        ))}
+        <text x="52" y="116" fontSize="11" fill="#6c5ce7" fontWeight="700" textAnchor="end" fontFamily="DM Sans, sans-serif">Models</text>
+
+        {/* Up arrow: Tier2 → Tier1 at x=150 */}
+        <line x1="150" y1="88" x2="150" y2="71" stroke="#6c5ce7" strokeWidth="1.5" />
+        <polygon points="146,71 150,62 154,71" fill="#6c5ce7" />
+        <text x="163" y="80" fontSize="9" fill="#999" fontFamily="DM Sans, sans-serif">powers</text>
+
+        {/* Up arrow: Tier2 → Tier1 at x=320 */}
+        <line x1="320" y1="88" x2="320" y2="71" stroke="#6c5ce7" strokeWidth="1.5" />
+        <polygon points="316,71 320,62 324,71" fill="#6c5ce7" />
+
+        {/* Up arrow: Tier2 → Tier1 at x=490 */}
+        <line x1="490" y1="88" x2="490" y2="71" stroke="#6c5ce7" strokeWidth="1.5" />
+        <polygon points="486,71 490,62 494,71" fill="#6c5ce7" />
+
+        {/* Tier 1 (top): Application Layer — y=20-65 */}
+        <rect x="60" y="20" width="560" height="42" rx="8" fill="#e8f7ef" stroke="#2ecc71" strokeWidth="1.5" />
+        {/* 4 app chips inside */}
+        {[['Perplexity', 110], ['Gamma', 225], ['Cursor', 340], ['Copy.ai', 455]].map(([label, cx]) => (
+          <g key={label}>
+            <rect x={cx - 38} y="30" width="76" height="22" rx="5" fill="#2ecc71" opacity="0.18" />
+            <text x={cx} y="45" fontSize="11" fill="#1a9456" textAnchor="middle" fontWeight="600" fontFamily="DM Sans, sans-serif">{label}</text>
+          </g>
+        ))}
+        <text x="52" y="46" fontSize="11" fill="#2ecc71" fontWeight="700" textAnchor="end" fontFamily="DM Sans, sans-serif">Apps</text>
+      </svg>
+    );
+
     // Stage 4: Application Layer
     const S4 = () => {
       const [selectedApp, setSelectedApp] = useState(null);
@@ -928,6 +1100,9 @@
       return (
         <div style={P.scene}>
           <div><div className="stage-header">The App Layer</div></div>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '16px', marginTop: '8px' }}>
+            <AppLayerStack />
+          </div>
           <div style={{
             textAlign: 'center',
             marginBottom: '28px',

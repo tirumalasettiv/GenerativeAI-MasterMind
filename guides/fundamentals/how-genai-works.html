@@ -93,7 +93,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -224,7 +224,7 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            padding: 32px 40px;
+            padding: 24px 36px;
             background: white;
             scroll-behavior: smooth;
         }
@@ -259,7 +259,7 @@
             background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
             border: 1px solid #e0d4ff;
             border-radius: 16px;
-            padding: 36px 40px;
+            padding: 28px;
             box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
             margin: 20px 0;
             min-height: 280px;
@@ -274,9 +274,9 @@
         .insight-box {
             background: #f0faf0;
             border-left: 4px solid #2ecc71;
-            padding: 24px 28px;
+            padding: 16px 20px;
             border-radius: 6px;
-            margin-top: auto;
+            margin-top: 0;
             font-size: 17px;
             line-height: 1.7;
             color: #555;
@@ -748,6 +748,12 @@
             transform: scale(1.2);
         }
 
+        @keyframes dashMarch {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -773,6 +779,110 @@
             { id: 4, name: 'Attention', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' },
             { id: 5, name: 'Prediction', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>' }
         ];
+
+        // Training Flow Diagram
+        const TrainingFlowDiagram = () => {
+            const [activeNode, setActiveNode] = useState(0);
+
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    setActiveNode(prev => (prev + 1) % 4);
+                }, 1200);
+                return () => clearInterval(timer);
+            }, []);
+
+            const nodes = [
+                { label: 'Raw Text Data',     sub: 'Billions of examples',    x: 10  },
+                { label: 'Pattern Extraction', sub: 'Neural network reads',    x: 170 },
+                { label: 'Weight Updates',     sub: 'Billions of adjustments', x: 330 },
+                { label: 'Trained Model',      sub: 'Ready to predict',        x: 490 },
+            ];
+
+            const nodeW = 130;
+            const nodeH = 48;
+            const nodeY = 40;
+            const arrowColor = '#b0a6e8';
+
+            const arrowMarker = (
+                <defs>
+                    <marker id="tfArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill={arrowColor} />
+                    </marker>
+                </defs>
+            );
+
+            return (
+                <svg viewBox="0 0 640 130" style={{ width: '100%', maxWidth: '640px', height: 'auto', display: 'block', margin: '0 auto 12px' }}>
+                    {arrowMarker}
+
+                    {/* Connecting arrows */}
+                    {nodes.slice(0, 3).map((node, i) => {
+                        const x1 = node.x + nodeW;
+                        const x2 = nodes[i + 1].x;
+                        const midY = nodeY + nodeH / 2;
+                        return (
+                            <path
+                                key={`arrow-${i}`}
+                                d={`M${x1},${midY} L${x2},${midY}`}
+                                stroke={arrowColor}
+                                strokeWidth="1.5"
+                                fill="none"
+                                markerEnd="url(#tfArrow)"
+                                strokeDasharray="6 4"
+                                style={{ animation: 'dashMarch 0.6s linear infinite' }}
+                            />
+                        );
+                    })}
+
+                    {/* Nodes */}
+                    {nodes.map((node, i) => {
+                        let fill, stroke, strokeWidth;
+                        if (i === activeNode) {
+                            fill = '#f5f3ff'; stroke = '#6c5ce7'; strokeWidth = 2;
+                        } else if (i < activeNode) {
+                            fill = '#f5f3ff'; stroke = '#a29bfe'; strokeWidth = 1.5;
+                        } else {
+                            fill = 'white'; stroke = '#d8d8e8'; strokeWidth = 1.5;
+                        }
+                        return (
+                            <g key={`node-${i}`}>
+                                <rect
+                                    x={node.x}
+                                    y={nodeY}
+                                    width={nodeW}
+                                    height={nodeH}
+                                    rx={12}
+                                    fill={fill}
+                                    stroke={stroke}
+                                    strokeWidth={strokeWidth}
+                                />
+                                <text
+                                    x={node.x + nodeW / 2}
+                                    y={nodeY + nodeH / 2 - 5}
+                                    textAnchor="middle"
+                                    fontFamily="DM Sans, sans-serif"
+                                    fontSize="12"
+                                    fontWeight="600"
+                                    fill={i <= activeNode ? '#6c5ce7' : '#999'}
+                                >
+                                    {node.label}
+                                </text>
+                                <text
+                                    x={node.x + nodeW / 2}
+                                    y={nodeY + nodeH / 2 + 11}
+                                    textAnchor="middle"
+                                    fontFamily="DM Sans, sans-serif"
+                                    fontSize="10"
+                                    fill="#aaa"
+                                >
+                                    {node.sub}
+                                </text>
+                            </g>
+                        );
+                    })}
+                </svg>
+            );
+        };
 
         // Training Stage Component
         const S1 = ({ stage }) => {
@@ -805,6 +915,9 @@
                     </div>
 
                     <div className="scene-card">
+                        <div style={{ width: '100%' }}>
+                            <TrainingFlowDiagram />
+                        </div>
                         <div className="book-animation">
                             {books.map(book => (
                                 <div key={book.id} className="text-flow">
@@ -925,6 +1038,133 @@
             );
         };
 
+        // Token Breakdown SVG Diagram
+        const TokenBreakdown = () => {
+            const wordY = 20;
+            const tokenY = 80;
+            const chipH = 24;
+            const chipRx = 6;
+
+            const words = [
+                { label: 'playing',      cx: 100 },
+                { label: 'unbelievable', cx: 300 },
+                { label: 'tokenization', cx: 500 },
+            ];
+
+            const tokenGroups = [
+                { pieces: ['play', 'ing'],          startX: 54  },
+                { pieces: ['un', 'believ', 'able'],  startX: 224 },
+                { pieces: ['token', 'ization'],      startX: 436 },
+            ];
+
+            const chipColors = ['#f5f3ff'];
+            const chipStroke = '#6c5ce7';
+            const chipPad = 10;
+            const fontSize = 11;
+
+            // Estimate chip widths (approx 7px per char + 2*padding)
+            const chipWidth = (text) => text.length * 7 + chipPad * 2;
+
+            return (
+                <svg viewBox="0 0 600 120" style={{ width: '100%', maxWidth: '600px', height: 'auto', display: 'block', margin: '0 auto 12px' }}>
+                    {/* Label */}
+                    <text
+                        x="590"
+                        y="14"
+                        textAnchor="end"
+                        fontFamily="DM Sans, sans-serif"
+                        fontSize="10"
+                        fill="#aaa"
+                    >
+                        How AI sees words
+                    </text>
+
+                    {/* Row 1: full words */}
+                    {words.map((w, i) => {
+                        const ww = w.label.length * 7 + chipPad * 2;
+                        return (
+                            <g key={`word-${i}`}>
+                                <rect
+                                    x={w.cx - ww / 2}
+                                    y={wordY}
+                                    width={ww}
+                                    height={chipH}
+                                    rx={chipRx}
+                                    fill="#f0f8ff"
+                                    stroke="#a29bfe"
+                                    strokeWidth="1.5"
+                                />
+                                <text
+                                    x={w.cx}
+                                    y={wordY + chipH / 2 + 4}
+                                    textAnchor="middle"
+                                    fontFamily="DM Sans, sans-serif"
+                                    fontSize={fontSize}
+                                    fontWeight="600"
+                                    fill="#5a4bd1"
+                                >
+                                    {w.label}
+                                </text>
+                            </g>
+                        );
+                    })}
+
+                    {/* Arrows from words to tokens */}
+                    {words.map((w, i) => (
+                        <path
+                            key={`down-arrow-${i}`}
+                            d={`M${w.cx},${wordY + chipH} L${w.cx},${tokenY}`}
+                            stroke="#b0a6e8"
+                            strokeWidth="1.5"
+                            fill="none"
+                            markerEnd="url(#tbArrow)"
+                        />
+                    ))}
+
+                    <defs>
+                        <marker id="tbArrow" markerWidth="6" markerHeight="6" refX="3" refY="5" orient="auto">
+                            <path d="M0,0 L3,5 L6,0" fill="none" stroke="#b0a6e8" strokeWidth="1.5" />
+                        </marker>
+                    </defs>
+
+                    {/* Row 2: subword tokens */}
+                    {tokenGroups.map((group, gi) => {
+                        let curX = group.startX;
+                        return group.pieces.map((piece, pi) => {
+                            const cw = chipWidth(piece);
+                            const cx = curX;
+                            curX += cw + 4;
+                            return (
+                                <g key={`token-${gi}-${pi}`}>
+                                    <rect
+                                        x={cx}
+                                        y={tokenY}
+                                        width={cw}
+                                        height={chipH}
+                                        rx={chipRx}
+                                        fill="#f5f3ff"
+                                        stroke={chipStroke}
+                                        strokeWidth="1.5"
+                                    />
+                                    <text
+                                        x={cx + cw / 2}
+                                        y={tokenY + chipH / 2 + 4}
+                                        textAnchor="middle"
+                                        fontFamily="DM Sans, sans-serif"
+                                        fontSize={fontSize}
+                                        fontWeight="600"
+                                        fill="#6c5ce7"
+                                    >
+                                        {piece}
+                                    </text>
+                                </g>
+                            );
+                        });
+                    })}
+                </svg>
+            );
+        };
+
         // Tokens Stage Component
         const S3 = ({ stage }) => {
             const [userText, setUserText] = useState('Explain photosynthesis');
@@ -976,6 +1216,9 @@
                     </div>
 
                     <div className="scene-card">
+                        <div style={{ width: '100%' }}>
+                            <TokenBreakdown />
+                        </div>
                         <div style={{ width: '100%' }}>
                             <input
                                 type="text"

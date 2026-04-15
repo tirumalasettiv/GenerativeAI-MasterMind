@@ -174,7 +174,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -222,12 +222,12 @@
 
         .content-area {
             flex: 1;
-            padding: 32px 48px;
+            padding: 24px 36px;
             overflow-y: auto;
             scroll-behavior: smooth;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 18px;
         }
 
         .explanation {
@@ -239,7 +239,7 @@
         .scene-card {
             background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
             border-radius: 16px;
-            padding: 40px 48px;
+            padding: 28px 48px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -250,13 +250,13 @@
 
         .insight-box {
             background: #f0faf0;
-            padding: 24px 28px;
+            padding: 16px 20px;
             border-radius: 12px;
             border-left: 4px solid #2ecc71;
             font-size: 17px;
             line-height: 1.7;
             color: #333;
-            margin-top: 24px;
+            margin-top: 0;
             animation: fadeIn 0.8s ease;
         }
 
@@ -472,6 +472,7 @@
         }
 
         .card {
+            position: relative;
             background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
             padding: 24px;
             border-radius: 12px;
@@ -479,6 +480,42 @@
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
+        }
+
+        /* Disclosure badge - shared across all click-to-expand cards */
+        .disclosure-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f5f3ff;
+            border: 1.5px solid rgba(108, 92, 231, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .disclosure-badge svg {
+            width: 14px;
+            height: 14px;
+            stroke: #6c5ce7;
+            transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+        }
+        .disclosure-card-host:hover .disclosure-badge,
+        .disclosure-card-host.expanded .disclosure-badge {
+            background: #6c5ce7;
+            border-color: transparent;
+        }
+        .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+        .disclosure-card-host:hover .disclosure-badge svg,
+        .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+        .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+        @media (prefers-reduced-motion: reduce) {
+            .disclosure-badge svg { transition: none; }
         }
 
         .card:hover {
@@ -657,6 +694,66 @@
             { icon: SVG_ICONS.compass, label: 'When to Use' },
         ];
 
+        function ClassifyVsCreateDiagram() {
+            const violet = '#6c5ce7';
+            const green = '#2ecc71';
+            const arrowId1 = 'arrow-violet';
+            const arrowId2 = 'arrow-green';
+            return (
+                <svg viewBox="0 0 640 160" width="100%" style={{ display: 'block', maxWidth: '640px', margin: '0 auto' }} aria-label="Classify vs Create pipeline diagram">
+                    <defs>
+                        <marker id={arrowId1} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill={violet} />
+                        </marker>
+                        <marker id={arrowId2} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill={green} />
+                        </marker>
+                    </defs>
+
+                    {/* Divider */}
+                    <line x1="320" y1="20" x2="320" y2="150" stroke="#e0e0e0" strokeWidth="1.5" strokeDasharray="4 3" />
+
+                    {/* Left header — centered in 0–320 */}
+                    <text x="155" y="18" fontFamily="DM Sans, sans-serif" fontSize="13" fontWeight="700" fill={violet} textAnchor="middle">Regular AI</text>
+
+                    {/* Left nodes — all contained within x=10..304 */}
+                    <rect x="10" y="30" width="82" height="44" rx="10" fill="#f5f3ff" stroke={violet} strokeWidth="2" />
+                    <text x="51" y="57" fontFamily="DM Sans, sans-serif" fontSize="12" fill={violet} textAnchor="middle" fontWeight="600">Input</text>
+
+                    <rect x="110" y="30" width="88" height="44" rx="10" fill="#f5f3ff" stroke={violet} strokeWidth="2" />
+                    <text x="154" y="51" fontFamily="DM Sans, sans-serif" fontSize="11" fill={violet} textAnchor="middle" fontWeight="600">Classify /</text>
+                    <text x="154" y="64" fontFamily="DM Sans, sans-serif" fontSize="11" fill={violet} textAnchor="middle" fontWeight="600">Predict</text>
+
+                    <rect x="216" y="30" width="88" height="44" rx="10" fill="#f5f3ff" stroke={violet} strokeWidth="2" />
+                    <text x="260" y="51" fontFamily="DM Sans, sans-serif" fontSize="11" fill={violet} textAnchor="middle" fontWeight="600">Label /</text>
+                    <text x="260" y="64" fontFamily="DM Sans, sans-serif" fontSize="11" fill={violet} textAnchor="middle" fontWeight="600">Score</text>
+
+                    {/* Left arrows */}
+                    <path d="M92,52 L108,52" stroke={violet} strokeWidth="2" fill="none" markerEnd={`url(#${arrowId1})`} />
+                    <path d="M198,52 L214,52" stroke={violet} strokeWidth="2" fill="none" markerEnd={`url(#${arrowId1})`} />
+
+                    {/* Right header — centered in 320–640 */}
+                    <text x="485" y="18" fontFamily="DM Sans, sans-serif" fontSize="13" fontWeight="700" fill={green} textAnchor="middle">Generative AI</text>
+
+                    {/* Right nodes — all contained within x=330..626 */}
+                    <rect x="330" y="30" width="82" height="44" rx="10" fill="#f0faf5" stroke={green} strokeWidth="2" />
+                    <text x="371" y="57" fontFamily="DM Sans, sans-serif" fontSize="12" fill={green} textAnchor="middle" fontWeight="600">Prompt</text>
+
+                    <rect x="430" y="30" width="90" height="44" rx="10" fill="#f0faf5" stroke={green} strokeWidth="2" />
+                    <text x="475" y="51" fontFamily="DM Sans, sans-serif" fontSize="11" fill={green} textAnchor="middle" fontWeight="600">Generate /</text>
+                    <text x="475" y="64" fontFamily="DM Sans, sans-serif" fontSize="11" fill={green} textAnchor="middle" fontWeight="600">Create</text>
+
+                    <rect x="538" y="30" width="88" height="44" rx="10" fill="#f0faf5" stroke={green} strokeWidth="2" />
+                    <text x="582" y="51" fontFamily="DM Sans, sans-serif" fontSize="11" fill={green} textAnchor="middle" fontWeight="600">New</text>
+                    <text x="582" y="64" fontFamily="DM Sans, sans-serif" fontSize="11" fill={green} textAnchor="middle" fontWeight="600">Content</text>
+
+                    {/* Right arrows */}
+                    <path d="M412,52 L428,52" stroke={green} strokeWidth="2" fill="none" markerEnd={`url(#${arrowId2})`} />
+                    <path d="M520,52 L536,52" stroke={green} strokeWidth="2" fill="none" markerEnd={`url(#${arrowId2})`} />
+                </svg>
+            );
+        }
+
         function Stage1() {
             return (
                 <>
@@ -665,19 +762,22 @@
                         Regular AI finds, sorts, or decides — Generative AI creates something new. One is a Picker, the other is a Maker.
                     </p>
                     <div className="scene-card">
-                        <div className="split-screen">
-                            <div className="split-panel">
-                                <div className="panel-title"><SvgIcon html={SVG_ICONS.search48} /> Regular AI</div>
-                                <p style={{ fontSize: '16px', color: '#666', textAlign: 'center', margin: '12px 0' }}>Finds existing items</p>
-                                <div style={{ marginTop: '12px', padding: '16px', background: '#e8e4ff', borderRadius: '8px', fontSize: '15px' }}>
-                                    Search → Find → Sort
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+                            <ClassifyVsCreateDiagram />
+                            <div className="split-screen">
+                                <div className="split-panel">
+                                    <div className="panel-title"><SvgIcon html={SVG_ICONS.search48} /> Regular AI</div>
+                                    <p style={{ fontSize: '16px', color: '#666', textAlign: 'center', margin: '12px 0' }}>Finds existing items</p>
+                                    <div style={{ marginTop: '12px', padding: '16px', background: '#e8e4ff', borderRadius: '8px', fontSize: '15px' }}>
+                                        Search → Find → Sort
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="split-panel">
-                                <div className="panel-title"><SvgIcon html={SVG_ICONS.penTool48} /> Generative AI</div>
-                                <p style={{ fontSize: '16px', color: '#666', textAlign: 'center', margin: '12px 0' }}>Creates new content</p>
-                                <div style={{ marginTop: '12px', padding: '16px', background: '#e8f8f5', borderRadius: '8px', fontSize: '15px' }}>
-                                    Prompt → Generate → Create
+                                <div className="split-panel">
+                                    <div className="panel-title"><SvgIcon html={SVG_ICONS.penTool48} /> Generative AI</div>
+                                    <p style={{ fontSize: '16px', color: '#666', textAlign: 'center', margin: '12px 0' }}>Creates new content</p>
+                                    <div style={{ marginTop: '12px', padding: '16px', background: '#e8f8f5', borderRadius: '8px', fontSize: '15px' }}>
+                                        Prompt → Generate → Create
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -882,13 +982,18 @@
                             {aiTypes.map((type) => (
                                 <div
                                     key={type.id}
-                                    className={`card ${selectedCard === type.id ? 'active' : ''}`}
+                                    className={`card disclosure-card-host ${selectedCard === type.id ? 'active expanded' : ''}`}
                                     onClick={() => setSelectedCard(selectedCard === type.id ? null : type.id)}
                                     style={{
                                         background: selectedCard === type.id ? P.primaryColor : 'linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%)',
                                         color: selectedCard === type.id ? '#fff' : '#333',
                                     }}
                                 >
+                                    <span className="disclosure-badge" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
+                                    </span>
                                     <div className="card-icon"><SvgIcon html={type.iconHtml} /></div>
                                     <div className="card-title">{type.title}</div>
                                     <div className="card-desc">{type.desc}</div>
@@ -906,6 +1011,133 @@
                         These AI types power most of the tech you use daily — from Netflix recommendations to spam filters
                     </div>
                 </>
+            );
+        }
+
+        function DecisionTree() {
+            const violet = '#6c5ce7';
+            const green = '#2ecc71';
+            const gray = '#999';
+            const arrowDt = 'arrow-dt';
+
+            const nodeW = 145;
+            const nodeH = 44;
+
+            // Node center positions
+            const root = { cx: 320, cy: 42 };
+            const genaiNode = { cx: 490, cy: 118 };
+            const predNode = { cx: 155, cy: 118 };
+            const regularNode = { cx: 82, cy: 194 };
+            const eitherNode = { cx: 248, cy: 194 };
+
+            function Node({ cx, cy, label, label2, color, fillColor }) {
+                return (
+                    <>
+                        <rect
+                            x={cx - nodeW / 2}
+                            y={cy - nodeH / 2}
+                            width={nodeW}
+                            height={nodeH}
+                            rx="8"
+                            fill={fillColor || '#f5f3ff'}
+                            stroke={color}
+                            strokeWidth="2"
+                        />
+                        {label2 ? (
+                            <>
+                                <text x={cx} y={cy - 3} fontFamily="DM Sans, sans-serif" fontSize="11" fontWeight="600" fill={color} textAnchor="middle">{label}</text>
+                                <text x={cx} y={cy + 13} fontFamily="DM Sans, sans-serif" fontSize="11" fontWeight="600" fill={color} textAnchor="middle">{label2}</text>
+                            </>
+                        ) : (
+                            <text x={cx} y={cy + 5} fontFamily="DM Sans, sans-serif" fontSize="11" fontWeight="600" fill={color} textAnchor="middle">{label}</text>
+                        )}
+                    </>
+                );
+            }
+
+            function Arrow({ x1, y1, x2, y2, label, labelSide }) {
+                const midX = (x1 + x2) / 2;
+                const midY = (y1 + y2) / 2;
+                const offset = labelSide === 'right' ? 10 : -10;
+                return (
+                    <>
+                        <path
+                            d={`M${x1},${y1} L${x2},${y2}`}
+                            stroke={violet}
+                            strokeWidth="1.5"
+                            fill="none"
+                            markerEnd={`url(#${arrowDt})`}
+                        />
+                        <text
+                            x={midX + offset}
+                            y={midY - 4}
+                            fontFamily="DM Sans, sans-serif"
+                            fontSize="10"
+                            fontWeight="700"
+                            fill={violet}
+                            textAnchor="middle"
+                        >
+                            {label}
+                        </text>
+                    </>
+                );
+            }
+
+            return (
+                <svg viewBox="0 0 640 230" width="100%" style={{ display: 'block', maxWidth: '640px', margin: '0 auto' }} aria-label="Decision tree for choosing Regular AI vs Generative AI">
+                    <defs>
+                        <marker id={arrowDt} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill={violet} />
+                        </marker>
+                    </defs>
+
+                    {/* Root node — 2-line label */}
+                    <Node cx={root.cx} cy={root.cy} label="Need new content" label2="created?" color={violet} />
+
+                    {/* YES → Generative AI */}
+                    <Arrow
+                        x1={root.cx + nodeW / 2}
+                        y1={root.cy}
+                        x2={genaiNode.cx - nodeW / 2}
+                        y2={genaiNode.cy}
+                        label="YES"
+                        labelSide="right"
+                    />
+                    <Node cx={genaiNode.cx} cy={genaiNode.cy} label="→ Generative AI" color={green} fillColor="#f0faf5" />
+
+                    {/* NO → Need a prediction? */}
+                    <Arrow
+                        x1={root.cx - nodeW / 2}
+                        y1={root.cy}
+                        x2={predNode.cx + nodeW / 2}
+                        y2={predNode.cy}
+                        label="NO"
+                        labelSide="left"
+                    />
+                    <Node cx={predNode.cx} cy={predNode.cy} label="Need a prediction?" color={violet} />
+
+                    {/* YES → Regular AI */}
+                    <Arrow
+                        x1={predNode.cx - nodeW / 2 + 20}
+                        y1={predNode.cy + nodeH / 2}
+                        x2={regularNode.cx}
+                        y2={regularNode.cy - nodeH / 2}
+                        label="YES"
+                        labelSide="left"
+                    />
+                    <Node cx={regularNode.cx} cy={regularNode.cy} label="→ Regular AI" color={violet} fillColor="#ede9ff" />
+
+                    {/* NO → Either works */}
+                    <Arrow
+                        x1={predNode.cx + nodeW / 2 - 20}
+                        y1={predNode.cy + nodeH / 2}
+                        x2={eitherNode.cx}
+                        y2={eitherNode.cy - nodeH / 2}
+                        label="NO"
+                        labelSide="right"
+                    />
+                    <Node cx={eitherNode.cx} cy={eitherNode.cy} label="→ Either works" color={gray} fillColor="#f5f5f5" />
+                </svg>
             );
         }
 
@@ -946,6 +1178,8 @@
                         Understanding when to use Regular AI vs GenAI is key — use the right tool for the right job
                     </p>
                     <div className="scene-card">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+                        <DecisionTree />
                         <div className="drag-area">
                             <div className="drop-zone">
                                 <div className="drop-zone-title"><SvgIcon html={SVG_ICONS.search24} /> Regular AI</div>
@@ -975,6 +1209,7 @@
                                         </div>
                                     ))}
                             </div>
+                        </div>
                         </div>
                     </div>
 
