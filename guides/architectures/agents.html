@@ -464,7 +464,7 @@
     function S1() {
       return (
         <>
-          <div><div className="stage-header">What is an Agent?</div></div>
+          <div><h2 className="stage-header">What is an Agent?</h2></div>
           <div className="explanation">
             An AI agent operates in a <strong>reasoning loop</strong> -- it observes the world, thinks about what to do, takes an action, checks the result, and decides the next step. Unlike a chatbot that gives one response and stops, an agent <strong>keeps going until the goal is achieved</strong>.
           </div>
@@ -612,18 +612,26 @@
 
       return (
         <>
-          <div><div className="stage-header">Three Core Capabilities</div></div>
+          <div><h2 className="stage-header">Three Core Capabilities</h2></div>
           <div className="explanation">
             Every capable AI agent shares three fundamental abilities. Remove any one and the system degrades from "agent" to something lesser -- a chatbot, a workflow, or a confused loop.
           </div>
           <div className="scene-card">
             <S2Diagram />
             <div className="capability-grid">
-              {capabilities.map(cap => (
+              {capabilities.map(cap => {
+                const isOpen = expanded === cap.id;
+                const toggle = () => setExpanded(isOpen ? null : cap.id);
+                return (
                 <div
                   key={cap.id}
-                  className={`capability-card disclosure-card-host ${expanded === cap.id ? 'expanded' : ''}`}
-                  onClick={() => setExpanded(expanded === cap.id ? null : cap.id)}
+                  className={`capability-card disclosure-card-host ${isOpen ? 'expanded' : ''}`}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`agents-capability-detail-${cap.id}`}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -633,9 +641,10 @@
                   <div className="capability-emoji">{cap.emoji}</div>
                   <div className="capability-title">{cap.title}</div>
                   <div className="capability-subtitle">{cap.subtitle}</div>
-                  <div className="capability-detail">{cap.detail}</div>
+                  <div className="capability-detail" id={`agents-capability-detail-${cap.id}`}>{cap.detail}</div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <InsightBlock>
@@ -672,7 +681,7 @@
 
       return (
         <>
-          <div><div className="stage-header">The ReAct Loop</div></div>
+          <div><h2 className="stage-header">The ReAct Loop</h2></div>
           <div className="explanation">
             <strong>ReAct</strong> (Reasoning + Acting) is the core pattern that makes agents work. The agent cycles through <strong>Thought</strong>, <strong>Action</strong>, and <strong>Observation</strong> until the goal is complete. Each cycle refines the approach.
           </div>
@@ -781,7 +790,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Tools & MCP</div></div>
+          <div><h2 className="stage-header">Tools & MCP</h2></div>
           <div className="explanation">
             Tools are what let agents <strong>act on the world</strong> rather than just talk about it. They fall into four categories depending on what they do. Browse the tabs below to explore each category.
           </div>
@@ -853,29 +862,38 @@
 
       return (
         <>
-          <div><div className="stage-header">Why Agents Fail</div></div>
+          <div><h2 className="stage-header">Why Agents Fail</h2></div>
           <div className="explanation">
             Only about <strong>1 in 9 enterprises</strong> experimenting with AI agents actually run them in production. Here are the three most common mistakes and a checklist for getting it right.
           </div>
           <div className="scene-card">
             <div style={{width: '100%'}}>
               <div style={{fontWeight: 700, fontSize: '16px', color: '#c0392b', marginBottom: '16px'}}>Common Mistakes (click to expand)</div>
-              {mistakes.map(m => (
+              {mistakes.map(m => {
+                const isOpen = expandedCard === m.id;
+                const toggle = () => setExpandedCard(isOpen ? null : m.id);
+                return (
                 <div
                   key={m.id}
-                  className={`failure-card ${expandedCard === m.id ? 'expanded' : ''}`}
-                  onClick={() => setExpandedCard(expandedCard === m.id ? null : m.id)}
+                  className={`failure-card ${isOpen ? 'expanded' : ''}`}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`agents-failure-content-${m.id}`}
                 >
                   <div className="failure-card-title">
                     <span>{m.emoji} {m.title}</span>
-                    <span style={{fontSize: '13px', color: '#999'}}>{expandedCard === m.id ? '\u25B2' : '\u25BC'}</span>
+                    <span style={{fontSize: '13px', color: '#999'}}>{isOpen ? '\u25B2' : '\u25BC'}</span>
                   </div>
                   <div style={{fontSize: '14px', color: '#666', marginTop: '4px'}}>{m.summary}</div>
-                  <div className="failure-card-content">
+                  <div className="failure-card-content" id={`agents-failure-content-${m.id}`}>
                     <div style={{fontSize: '14px', lineHeight: '1.7', color: '#333'}}>{m.detail}</div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div style={{width: '100%', marginTop: '24px'}}>
@@ -970,23 +988,31 @@
 
       return (
         <>
-          <div><div className="stage-header">Real-World Examples</div></div>
+          <div><h2 className="stage-header">Real-World Examples</h2></div>
           <div className="explanation">
             Agents shine when the task requires <strong>multiple steps</strong>, <strong>tool use</strong>, and <strong>adaptive decision-making</strong>. Click each card to see how an agent approaches a real goal.
           </div>
           <div className="scene-card">
             <div className="example-grid">
-              {examples.map(ex => (
+              {examples.map(ex => {
+                const isOpen = expandedExample === ex.id;
+                const toggle = () => setExpandedExample(isOpen ? null : ex.id);
+                return (
                 <div
                   key={ex.id}
-                  className={`example-card ${expandedExample === ex.id ? 'expanded' : ''}`}
-                  onClick={() => setExpandedExample(expandedExample === ex.id ? null : ex.id)}
+                  className={`example-card ${isOpen ? 'expanded' : ''}`}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`agents-example-detail-${ex.id}`}
                 >
                   <div className="example-card-emoji">{ex.emoji}</div>
                   <div className="example-card-title">{ex.title}</div>
                   <div className="example-card-desc">{ex.desc}</div>
-                  {expandedExample !== ex.id && <div className="example-card-hint">Click to see steps</div>}
-                  <div className="example-card-detail">
+                  {!isOpen && <div className="example-card-hint">Click to see steps</div>}
+                  <div className="example-card-detail" id={`agents-example-detail-${ex.id}`}>
                     {ex.steps.map((step, i) => (
                       <div key={i} style={{marginBottom: '6px'}}>
                         <span style={{fontWeight: 700, color: '#6c5ce7'}}>{i === 0 ? '\uD83C\uDFAF' : `${i}.`}</span> {step}
@@ -994,7 +1020,8 @@
                     ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div style={{width: '100%', marginTop: '24px'}}>
@@ -1079,7 +1106,7 @@
                 <div className="left-section">
                   <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
                   <span className="guide-number">5.5</span>
-                  <span className="title">AI Agents</span>
+                  <h1 className="title">AI Agents</h1>
                   <span className="badge">DEEP DIVE</span>
                 </div>
                 <div style={{display: 'flex', alignItems: 'center'}}>

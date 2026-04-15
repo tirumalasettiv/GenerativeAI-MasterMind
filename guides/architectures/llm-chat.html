@@ -633,7 +633,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">What is LLM Chat?</div>
+            <h2 className="stage-header">What is LLM Chat?</h2>
           </div>
           <div className="explanation">
             Direct conversation with AI using only its training knowledge &mdash; like texting a very smart friend who has read millions of books but can&rsquo;t look anything up in real time. No databases, no web search, no tools. Just the model and its learned knowledge.
@@ -704,7 +704,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">How It Works</div>
+            <h2 className="stage-header">How It Works</h2>
           </div>
           <div className="explanation">
             The LLM Chat pipeline has three components: your input goes in, the model processes it through billions of parameters, and generated text comes out. Temperature controls the creativity dial.
@@ -849,7 +849,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Why It&rsquo;s Underrated</div>
+            <h2 className="stage-header">Why It&rsquo;s Underrated</h2>
           </div>
           <div className="explanation">
             Teams routinely skip past direct LLM chat on their way to more complex architectures. But a well-crafted prompt that ships in a day beats a RAG pipeline that ships in a quarter.
@@ -955,19 +955,27 @@
       return (
         <>
           <div>
-            <div className="stage-header">Best Use Cases</div>
+            <h2 className="stage-header">Best Use Cases</h2>
           </div>
           <div className="explanation">
             LLM Chat excels in tasks that rely on general knowledge, language fluency, and creative reasoning. Here are six areas where it shines brightest.
           </div>
           <div className="scene-card">
             <div className="usecase-grid">
-              {useCases.map((uc, idx) => (
+              {useCases.map((uc, idx) => {
+                const isOpen = expandedCase === uc.id;
+                const toggle = () => setExpandedCase(isOpen ? null : uc.id);
+                return (
                 <div
                   key={uc.id}
-                  className={`usecase-card disclosure-card-host fade-in ${expandedCase === uc.id ? 'expanded' : ''}`}
+                  className={`usecase-card disclosure-card-host fade-in ${isOpen ? 'expanded' : ''}`}
                   style={{ animationDelay: `${0.08 * idx}s` }}
-                  onClick={() => setExpandedCase(expandedCase === uc.id ? null : uc.id)}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`llmchat-usecase-detail-${uc.id}`}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -977,12 +985,13 @@
                   <div className="usecase-emoji">{uc.emoji}</div>
                   <div className="usecase-title">{uc.title}</div>
                   <div className="usecase-desc">{uc.desc}</div>
-                  <div className="usecase-detail">
+                  <div className="usecase-detail" id={`llmchat-usecase-detail-${uc.id}`}>
                     <div className="usecase-prompt">{uc.prompt}</div>
                     <div className="usecase-tag">Best For: {uc.bestFor}</div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <InsightBlock>
@@ -1050,7 +1059,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Limitations &amp; Upgrade Path</div>
+            <h2 className="stage-header">Limitations &amp; Upgrade Path</h2>
           </div>
           <div className="explanation">
             Every architecture has boundaries. Understanding LLM Chat&rsquo;s limitations tells you exactly when to upgrade &mdash; and what to upgrade to. Click each card to reveal the solution.
@@ -1177,7 +1186,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">5.2</span>
-                    <div className="title">Basic LLM Chat</div>
+                    <h1 className="title">Basic LLM Chat</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">BEGINNER</div>

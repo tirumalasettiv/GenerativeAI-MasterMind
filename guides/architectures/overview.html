@@ -603,7 +603,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">The Spectrum</div>
+            <h2 className="stage-header">The Spectrum</h2>
           </div>
           <div className="explanation">
             There are 5 ways to build AI-powered solutions, ranging from simple to complex. Each architecture adds capabilities &mdash; and cost. Click any card to explore.
@@ -728,7 +728,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Simple Architectures</div>
+            <h2 className="stage-header">Simple Architectures</h2>
           </div>
           <div className="explanation">
             LLM Chat and RAG are the foundation of most AI applications today. Understanding the difference between these two is the first step in choosing the right architecture.
@@ -855,7 +855,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Orchestrated Pipelines</div>
+            <h2 className="stage-header">Orchestrated Pipelines</h2>
           </div>
           <div className="explanation">
             AI Workflows chain multiple AI steps in a fixed sequence &mdash; like a factory assembly line
@@ -867,12 +867,20 @@
                 <strong>5 Workflow Patterns</strong> &mdash; click any pattern to see how it works:
               </div>
               <div className="click-grid">
-                {patterns.map((p, idx) => (
+                {patterns.map((p, idx) => {
+                  const isOpen = expanded === p.id;
+                  const toggle = () => setExpanded(isOpen ? null : p.id);
+                  return (
                   <div
                     key={p.id}
-                    className={`click-card disclosure-card-host ${expanded === p.id ? 'expanded' : ''}`}
-                    style={idx === 4 && expanded !== p.id ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
-                    onClick={() => setExpanded(expanded === p.id ? null : p.id)}
+                    className={`click-card disclosure-card-host ${isOpen ? 'expanded' : ''}`}
+                    style={idx === 4 && !isOpen ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={`overview-pattern-detail-${p.id}`}
                   >
                     <span className="disclosure-badge" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -882,9 +890,10 @@
                     <div className="click-card-emoji">{p.emoji}</div>
                     <div className="click-card-title">{p.title}</div>
                     <div className="click-card-sub">{p.sub}</div>
-                    <div className="click-card-detail">{p.detail}</div>
+                    <div className="click-card-detail" id={`overview-pattern-detail-${p.id}`}>{p.detail}</div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div style={{ marginTop: '24px', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#888' }}>Common tools:</span>
@@ -931,7 +940,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Autonomous Agents</div>
+            <h2 className="stage-header">Autonomous Agents</h2>
           </div>
           <div className="explanation">
             Agents break free from fixed sequences. A single agent uses a ReAct loop (Reason, Act, Observe)
@@ -965,11 +974,19 @@
                 Agentic AI &mdash; 4 Collaboration Patterns
               </div>
               <div className="click-grid">
-                {collabs.map(c => (
+                {collabs.map(c => {
+                  const isOpen = expanded === c.id;
+                  const toggle = () => setExpanded(isOpen ? null : c.id);
+                  return (
                   <div
                     key={c.id}
-                    className={`click-card disclosure-card-host ${expanded === c.id ? 'expanded' : ''}`}
-                    onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                    className={`click-card disclosure-card-host ${isOpen ? 'expanded' : ''}`}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={`overview-collab-detail-${c.id}`}
                   >
                     <span className="disclosure-badge" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -979,9 +996,10 @@
                     <div className="click-card-emoji">{c.emoji}</div>
                     <div className="click-card-title">{c.title}</div>
                     <div className="click-card-sub">{c.sub}</div>
-                    <div className="click-card-detail">{c.detail}</div>
+                    <div className="click-card-detail" id={`overview-collab-detail-${c.id}`}>{c.detail}</div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div style={{ marginTop: '24px', textAlign: 'center' }}>
@@ -1031,7 +1049,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Choosing the Right Architecture</div>
+            <h2 className="stage-header">Choosing the Right Architecture</h2>
           </div>
           <div className="explanation">
             Walk through 5 decision gates to find the simplest architecture that meets your needs.
@@ -1158,7 +1176,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">5.1</span>
-                    <div className="title">Architecture Overview</div>
+                    <h1 className="title">Architecture Overview</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">INTERACTIVE</div>

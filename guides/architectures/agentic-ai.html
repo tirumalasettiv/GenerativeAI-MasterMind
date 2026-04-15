@@ -423,7 +423,7 @@
 
       return (
         <>
-          <div><div className="stage-header">What is Agentic AI?</div></div>
+          <div><h2 className="stage-header">What is Agentic AI?</h2></div>
           <div className="explanation">
             Multiple specialized AI agents working together as a team, each with different expertise, collaborating on complex projects. You would never ask one person to be researcher, writer, editor, and publisher simultaneously &mdash; and you should not ask one AI agent to do it either.
           </div>
@@ -522,17 +522,25 @@
 
       return (
         <>
-          <div><div className="stage-header">Four Patterns</div></div>
+          <div><h2 className="stage-header">Four Patterns</h2></div>
           <div className="explanation">
             Multi-agent systems are not one-size-fits-all. Four distinct collaboration patterns have emerged, each suited to different types of problems. Click each pattern to explore.
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
               <div className="pattern-grid">
-                {patterns.map(p => (
+                {patterns.map(p => {
+                  const isOpen = expanded === p.id;
+                  const toggle = () => setExpanded(isOpen ? null : p.id);
+                  return (
                   <div key={p.id}
-                    className={`pattern-card disclosure-card-host ${expanded === p.id ? 'expanded' : ''}`}
-                    onClick={() => setExpanded(expanded === p.id ? null : p.id)}
+                    className={`pattern-card disclosure-card-host ${isOpen ? 'expanded' : ''}`}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={`agentic-pattern-detail-${p.id}`}
                   >
                     <span className="disclosure-badge" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -541,14 +549,15 @@
                     </span>
                     <div className="pattern-label">{p.emoji} {p.title}</div>
                     <div className="pattern-description">{p.desc}</div>
-                    <div className="pattern-detail">
+                    <div className="pattern-detail" id={`agentic-pattern-detail-${p.id}`}>
                       {p.detail}
                       <div style={{ marginTop: '10px', padding: '8px 12px', background: '#e8e3f8', borderRadius: '6px', fontSize: '12px', fontWeight: 700, color: '#6c5ce7' }}>
                         Best for: {p.bestFor}
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -600,7 +609,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Product Launch Team</div></div>
+          <div><h2 className="stage-header">Product Launch Team</h2></div>
           <div className="explanation">
             A concrete example: a hybrid supervisor-pipeline for launching a marketing campaign. Four agents work in sequence with a supervisor oversight arc. The editing agent can kick work back &mdash; creating a review loop.
           </div>
@@ -721,17 +730,25 @@
 
       return (
         <>
-          <div><div className="stage-header">Building Multi-Agent Systems</div></div>
+          <div><h2 className="stage-header">Building Multi-Agent Systems</h2></div>
           <div className="explanation">
             The hardest part is not individual agents &mdash; it is coordination. Four design dimensions determine whether your multi-agent system works or falls apart. Click each card to explore.
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
               <div className="design-grid">
-                {designCards.map(card => (
+                {designCards.map(card => {
+                  const isOpen = expanded === card.id;
+                  const toggle = () => setExpanded(isOpen ? null : card.id);
+                  return (
                   <div key={card.id}
-                    className={`design-card disclosure-card-host ${expanded === card.id ? 'expanded' : ''}`}
-                    onClick={() => setExpanded(expanded === card.id ? null : card.id)}
+                    className={`design-card disclosure-card-host ${isOpen ? 'expanded' : ''}`}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={`agentic-design-detail-${card.id}`}
                   >
                     <span className="disclosure-badge" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -740,9 +757,10 @@
                     </span>
                     <div className="design-label">{card.emoji} {card.title}</div>
                     <div className="design-description">{card.desc}</div>
-                    <div className="design-detail">{card.detail}</div>
+                    <div className="design-detail" id={`agentic-design-detail-${card.id}`}>{card.detail}</div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -785,7 +803,7 @@
 
       return (
         <>
-          <div><div className="stage-header">Frameworks & Tools</div></div>
+          <div><h2 className="stage-header">Frameworks & Tools</h2></div>
           <div className="explanation">
             Three major frameworks have emerged for building multi-agent systems. Each serves a different use case. Below, also find the four most common gotchas that trip up builders.
           </div>
@@ -904,7 +922,7 @@
 
       return (
         <>
-          <div><div className="stage-header">When to Use Agentic AI</div></div>
+          <div><h2 className="stage-header">When to Use Agentic AI</h2></div>
           <div className="explanation">
             Agentic AI is powerful but expensive (~40,000 tokens per query). Use this decision checklist to determine if your problem truly needs a multi-agent approach, or if a simpler architecture will serve you better.
           </div>
@@ -1027,7 +1045,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">5.6</span>
-                    <div className="title">Agentic AI</div>
+                    <h1 className="title">Agentic AI</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">DEEP DIVE</div>

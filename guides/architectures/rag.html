@@ -590,7 +590,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">What is RAG?</div>
+            <h2 className="stage-header">What is RAG?</h2>
           </div>
           <div className="explanation">
             Retrieval-Augmented Generation (RAG) is an AI pattern where the model first searches your documents to find relevant information, then generates answers grounded in what it found. Think of it as a reference librarian who understands your question, walks to the right shelf, reads the relevant pages, and gives you a cited answer.
@@ -746,7 +746,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">The Five Components</div>
+            <h2 className="stage-header">The Five Components</h2>
           </div>
           <div className="explanation">
             Every RAG system is built from five core components that form a pipeline. Documents flow in one end, and grounded answers come out the other. Click each component to explore its role.
@@ -754,16 +754,24 @@
           <div className="scene-card">
             <S2Diagram />
             <div style={{ display: 'flex', gap: '12px', width: '100%', flexWrap: 'wrap' }}>
-              {components.map((comp, idx) => (
+              {components.map((comp, idx) => {
+                const isOpen = expanded === idx;
+                const toggle = () => setExpanded(isOpen ? null : idx);
+                return (
                 <div
                   key={idx}
-                  className={`component-card disclosure-card-host fade-in ${expanded === idx ? 'expanded' : ''}`}
+                  className={`component-card disclosure-card-host fade-in ${isOpen ? 'expanded' : ''}`}
                   style={{
                     animationDelay: `${idx * 0.1}s`,
-                    minWidth: expanded === idx ? '100%' : '140px',
-                    flex: expanded === idx ? '1 1 100%' : '1 1 140px'
+                    minWidth: isOpen ? '100%' : '140px',
+                    flex: isOpen ? '1 1 100%' : '1 1 140px'
                   }}
-                  onClick={() => setExpanded(expanded === idx ? null : idx)}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`rag-component-detail-${idx}`}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -773,7 +781,7 @@
                   <div style={{ fontSize: '28px' }}>{comp.icon}</div>
                   <div className="component-card-title">{comp.title}</div>
                   <div className="component-card-desc">{comp.desc}</div>
-                  <div className="component-card-detail">
+                  <div className="component-card-detail" id={`rag-component-detail-${idx}`}>
                     <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7', marginBottom: '12px' }}>
                       {comp.detail}
                     </div>
@@ -782,7 +790,8 @@
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
             <div className="pipeline-flow">
               {['Load', 'Chunk', 'Embed', 'Store', 'Retrieve', 'Generate'].map((step, i) => (
@@ -935,7 +944,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Under the Hood</div>
+            <h2 className="stage-header">Under the Hood</h2>
           </div>
           <div className="explanation">
             Walk through exactly what happens when you ask a RAG system a question. Click each step to follow the journey from query to grounded answer.
@@ -1013,7 +1022,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Chunking Deep Dive</div>
+            <h2 className="stage-header">Chunking Deep Dive</h2>
           </div>
           <div className="explanation">
             How you split documents determines what gets retrieved. Too large and you lose precision; too small and you lose context. Adjust the sliders to see how chunk size and overlap affect the output.
@@ -1135,7 +1144,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Retrieval &amp; Generation</div>
+            <h2 className="stage-header">Retrieval &amp; Generation</h2>
           </div>
           <div className="explanation">
             The retrieval step finds the most relevant chunks, and the generation step synthesizes them into a coherent answer. Adjust the Top-K slider to control how many chunks feed into the LLM.
@@ -1263,19 +1272,27 @@
       return (
         <>
           <div>
-            <div className="stage-header">Production Patterns</div>
+            <h2 className="stage-header">Production Patterns</h2>
           </div>
           <div className="explanation">
             Moving from a prototype RAG to a production system requires advanced patterns for query optimization, retrieval quality, and continuous evaluation. Click each pattern to explore how it works.
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
-              {patterns.map((p, idx) => (
+              {patterns.map((p, idx) => {
+                const isOpen = expanded === idx;
+                const toggle = () => setExpanded(isOpen ? null : idx);
+                return (
                 <div
                   key={idx}
-                  className={`pattern-card disclosure-card-host fade-in ${expanded === idx ? 'expanded' : ''}`}
+                  className={`pattern-card disclosure-card-host fade-in ${isOpen ? 'expanded' : ''}`}
                   style={{ animationDelay: `${idx * 0.1}s` }}
-                  onClick={() => setExpanded(expanded === idx ? null : idx)}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`rag-pattern-detail-${idx}`}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -1291,7 +1308,7 @@
                       </div>
                     </div>
                   </div>
-                  <div className="pattern-card-content">
+                  <div className="pattern-card-content" id={`rag-pattern-detail-${idx}`}>
                     <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7', marginBottom: '12px' }}>
                       {p.detail}
                     </div>
@@ -1303,7 +1320,8 @@
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
 
               <div style={{ marginTop: '24px' }}>
                 <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '12px' }}>
@@ -1411,7 +1429,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">5.3</span>
-                    <div className="title">RAG Architecture</div>
+                    <h1 className="title">RAG Architecture</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">DEEP DIVE</div>

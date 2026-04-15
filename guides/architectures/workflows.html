@@ -551,7 +551,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">What are Workflows?</div>
+            <h2 className="stage-header">What are Workflows?</h2>
           </div>
           <div className="explanation">
             A workflow chains multiple AI steps in a fixed sequence &mdash; like a factory assembly line.
@@ -631,7 +631,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">The Five Patterns</div>
+            <h2 className="stage-header">The Five Patterns</h2>
           </div>
           <div className="explanation">
             Most AI workflows fit into five proven patterns. Click each card to see a real-world example
@@ -639,12 +639,20 @@
           </div>
           <div className="scene-card">
             <div className="pattern-grid">
-              {patterns.map((p, i) => (
+              {patterns.map((p, i) => {
+                const isOpen = expanded === p.id;
+                const toggle = () => setExpanded(isOpen ? null : p.id);
+                return (
                 <div
                   key={p.id}
-                  className={`pattern-card disclosure-card-host fade-in ${expanded === p.id ? 'expanded' : ''}`}
+                  className={`pattern-card disclosure-card-host fade-in ${isOpen ? 'expanded' : ''}`}
                   style={{ animationDelay: `${0.1 * i}s` }}
-                  onClick={() => setExpanded(expanded === p.id ? null : p.id)}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`workflows-pattern-detail-${p.id}`}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
@@ -654,11 +662,12 @@
                   <div className="pattern-card-title">{i + 1}. {p.title}</div>
                   <div className="pattern-card-subtitle">{p.subtitle}</div>
                   <div className="pattern-card-desc">{p.desc}</div>
-                  <div className="pattern-card-example">
+                  <div className="pattern-card-example" id={`workflows-pattern-detail-${p.id}`}>
                     <strong>Example:</strong> {p.example}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <InsightBlock>
@@ -719,7 +728,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Real-World Examples</div>
+            <h2 className="stage-header">Real-World Examples</h2>
           </div>
           <div className="explanation">
             Here are three production workflows that teams use today. Each one chains simple steps into
@@ -868,7 +877,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Workflow vs Agent</div>
+            <h2 className="stage-header">Workflow vs Agent</h2>
           </div>
           <div className="explanation">
             A workflow is like a recipe &mdash; fixed steps, predictable results. An agent is like a chef &mdash;
@@ -980,7 +989,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Build Your First Workflow</div>
+            <h2 className="stage-header">Build Your First Workflow</h2>
           </div>
           <div className="explanation">
             Let&rsquo;s walk through building a <strong>Daily News Digest</strong> workflow step by step.
@@ -991,26 +1000,35 @@
               <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
                 Daily News Digest &mdash; 5 Steps
               </div>
-              {buildSteps.map((step, i) => (
+              {buildSteps.map((step, i) => {
+                const isOpen = openStep === step.id;
+                const toggle = () => setOpenStep(isOpen ? null : step.id);
+                return (
                 <div
                   key={step.id}
-                  className={`expand-step fade-in ${openStep === step.id ? 'open' : ''}`}
+                  className={`expand-step fade-in ${isOpen ? 'open' : ''}`}
                   style={{ animationDelay: `${0.08 * i}s` }}
-                  onClick={() => setOpenStep(openStep === step.id ? null : step.id)}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={`workflows-buildstep-body-${step.id}`}
                 >
                   <div className="expand-step-header">
                     <span>{step.title}</span>
                     <span style={{
                       fontSize: '18px', color: '#b0a6e8',
-                      transform: openStep === step.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                       transition: 'transform 0.3s ease', display: 'inline-block'
                     }}>&#9662;</span>
                   </div>
-                  <div className="expand-step-body">
+                  <div className="expand-step-body" id={`workflows-buildstep-body-${step.id}`}>
                     <div className="expand-step-content">{step.content}</div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div style={{ width: '100%', marginTop: '28px' }}>
@@ -1135,7 +1153,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">5.4</span>
-                    <div className="title">AI Workflows</div>
+                    <h1 className="title">AI Workflows</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">INTERACTIVE</div>
