@@ -775,6 +775,38 @@
       );
     }
 
+    function S1Diagram() {
+  const nodes = [
+    { label: 'LLM Chat',   analogy: 'Bicycle', color: '#6c5ce7', x: 60  },
+    { label: 'RAG',        analogy: 'Car',     color: '#3498db', x: 165 },
+    { label: 'Workflow',   analogy: 'Bus',     color: '#f39c12', x: 270 },
+    { label: 'Agent',      analogy: 'Taxi',    color: '#e74c3c', x: 375 },
+    { label: 'Agentic AI', analogy: 'Fleet',   color: '#e056a0', x: 480 },
+  ];
+  return (
+    <svg width="540" height="110" viewBox="0 0 540 110"
+      style={{ maxWidth: '100%', overflow: 'visible' }}
+      aria-label="Architecture spectrum from simple to complex">
+      <defs>
+        <linearGradient id="specGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#6c5ce7" />
+          <stop offset="100%" stopColor="#e056a0" />
+        </linearGradient>
+      </defs>
+      <text x="60" y="14" textAnchor="middle" fontSize="10" fontWeight="600" fill="#aaa" fontFamily="DM Sans">SIMPLE</text>
+      <text x="480" y="14" textAnchor="middle" fontSize="10" fontWeight="600" fill="#aaa" fontFamily="DM Sans">COMPLEX</text>
+      <line x1="60" y1="50" x2="480" y2="50" stroke="url(#specGrad)" strokeWidth="3" />
+      {nodes.map(n => (
+        <g key={n.label}>
+          <circle cx={n.x} cy="50" r="20" fill={n.color} />
+          <text x={n.x} y="82" textAnchor="middle" fontSize="11" fontWeight="600" fill="#1a1a1a" fontFamily="DM Sans">{n.label}</text>
+          <text x={n.x} y="96" textAnchor="middle" fontSize="10" fill="#888" fontFamily="DM Sans">{n.analogy}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
     /* Stage 1: The Spectrum */
     function S1() {
       const [selected, setSelected] = useState(null);
@@ -811,6 +843,7 @@
             There are 5 ways to build AI-powered solutions, ranging from simple to complex. Each architecture adds capabilities &mdash; and cost. Click any card to explore.
           </div>
           <div className="scene-card">
+            <S1Diagram />
             <div style={{ width: '100%' }}>
               <div style={{ fontSize: '14px', fontWeight: 700, color: '#6c5ce7', marginBottom: '16px', textAlign: 'center', letterSpacing: '0.5px' }}>
                 SIMPLE &rarr; COMPLEX
@@ -850,6 +883,58 @@
       );
     }
 
+    function S2Diagram() {
+  const llmNodes = [
+    { label: 'User',     bg: '#f5f3ff', color: '#6c5ce7', x: 70  },
+    { label: 'LLM',      bg: '#6c5ce7', color: 'white',   x: 230 },
+    { label: 'Response', bg: '#f5f3ff', color: '#6c5ce7', x: 390 },
+  ];
+  const ragNodes = [
+    { label: 'User',   bg: '#e0f0ff', color: '#3498db', x: 40  },
+    { label: 'Search', bg: '#3498db', color: 'white',   x: 140 },
+    { label: 'Chunks', bg: '#e0f0ff', color: '#3498db', x: 240 },
+    { label: 'LLM',    bg: '#3498db', color: 'white',   x: 340 },
+    { label: 'Answer', bg: '#e0f0ff', color: '#3498db', x: 440 },
+  ];
+  return (
+    <svg width="500" height="150" viewBox="0 0 500 150"
+      style={{ maxWidth: '100%', overflow: 'visible', marginBottom: '16px' }}
+      aria-label="LLM Chat vs RAG architecture comparison">
+      <defs>
+        <marker id="ovArrP" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#6c5ce7" />
+        </marker>
+        <marker id="ovArrB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#3498db" />
+        </marker>
+      </defs>
+      <text x="6" y="32" fontSize="11" fontWeight="700" fill="#6c5ce7" fontFamily="DM Sans">LLM Chat</text>
+      {llmNodes.map((n, i, arr) => (
+        <g key={n.label + 'l'}>
+          <rect x={n.x - 45} y="40" width="90" height="30" rx="10" fill={n.bg} stroke="#6c5ce7" strokeWidth="1.5" />
+          <text x={n.x} y="59" textAnchor="middle" fontSize="12" fontWeight="600" fill={n.color} fontFamily="DM Sans">{n.label}</text>
+          {i < arr.length - 1 && (
+            <line x1={n.x + 45} y1="55" x2={arr[i + 1].x - 45} y2="55"
+              stroke="#6c5ce7" strokeWidth="2" markerEnd="url(#ovArrP)" />
+          )}
+        </g>
+      ))}
+      <line x1="0" y1="86" x2="500" y2="86" stroke="#e0e0e0" strokeWidth="1" strokeDasharray="4 4" />
+      <text x="6" y="108" fontSize="11" fontWeight="700" fill="#3498db" fontFamily="DM Sans">RAG</text>
+      {ragNodes.map((n, i, arr) => (
+        <g key={n.label + 'r'}>
+          <rect x={n.x - 38} y="114" width="76" height="28" rx="8" fill={n.bg} stroke="#3498db" strokeWidth="1.5" />
+          <text x={n.x} y="132" textAnchor="middle" fontSize="11" fontWeight="600" fill={n.color} fontFamily="DM Sans">{n.label}</text>
+          {i < arr.length - 1 && (
+            <line x1={n.x + 38} y1="128" x2={arr[i + 1].x - 38} y2="128"
+              stroke="#3498db" strokeWidth="2" markerEnd="url(#ovArrB)" />
+          )}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
     /* Stage 2: Simple Architectures */
     function S2() {
       const [activeTab, setActiveTab] = useState('llm');
@@ -883,6 +968,7 @@
             LLM Chat and RAG are the foundation of most AI applications today. Understanding the difference between these two is the first step in choosing the right architecture.
           </div>
           <div className="scene-card">
+            <S2Diagram />
             <div style={{ width: '100%' }}>
               <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', justifyContent: 'center' }}>
                 {tabBtn('llm', 'LLM Chat', '#6c5ce7')}
