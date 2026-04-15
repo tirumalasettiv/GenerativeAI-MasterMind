@@ -1224,6 +1224,8 @@
 
       const stageIconComponents = [LightbulbIcon, TargetIcon, AlertIcon, UsersIcon, BookIcon];
 
+      const NEXT_GUIDE = { id: "3.2", title: "Mastering Context", module: "Module 3", href: "./mastering-context.html" };
+
       const stages = [
         { icon: LightbulbIcon, label: 'What is CE', component: S1 },
         { icon: TargetIcon, label: 'Why It Matters', component: S2 },
@@ -1322,6 +1324,19 @@
 
               <main id="main" className="content-area scrollbar-hide">
                 <CurrentComponent />
+                {currentStage === stages.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>

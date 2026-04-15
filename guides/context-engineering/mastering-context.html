@@ -1370,6 +1370,8 @@
         '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>',
       ];
 
+      const NEXT_GUIDE = { id: "3.3", title: "Context Engineering Quiz", module: "Module 3", href: "./quiz.html", isQuiz: true };
+
       const stages = [
         { icon: stageIcons[0], label: 'Memory', component: S1 },
         { icon: stageIcons[1], label: '3 Tiers', component: S2 },
@@ -1459,7 +1461,18 @@
                 )
               ),
               React.createElement('main', { id: 'main', className: 'content-area scrollbar-hide' },
-                React.createElement(CurrentComponent)
+                React.createElement(CurrentComponent),
+                currentStage === stages.length - 1 && React.createElement('div', { className: 'up-next-card', role: 'complementary', 'aria-label': 'Up next' },
+                  React.createElement('span', { className: 'up-next-label' }, 'UP NEXT'),
+                  React.createElement('a', { href: NEXT_GUIDE.href, className: 'up-next-link' },
+                    React.createElement('div', { className: 'up-next-meta' },
+                      React.createElement('span', { className: 'up-next-id' }, NEXT_GUIDE.id),
+                      React.createElement('span', { className: 'up-next-module' }, NEXT_GUIDE.module)
+                    ),
+                    React.createElement('div', { className: 'up-next-title' }, NEXT_GUIDE.title),
+                    React.createElement('span', { className: 'up-next-arrow', 'aria-hidden': 'true' }, '→')
+                  )
+                )
               )
             )
           )
