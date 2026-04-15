@@ -184,7 +184,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -226,8 +226,8 @@
       flex-direction: column;
       overflow-y: auto;
       scroll-behavior: smooth;
-      padding: 32px 48px;
-      gap: 30px;
+      padding: 24px 36px;
+      gap: 18px;
     }
 
     .explanation {
@@ -239,7 +239,7 @@
     .scene-card {
       background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
       border-radius: 16px;
-      padding: 40px;
+      padding: 28px;
       border: 1px solid #e8e3f8;
       min-height: auto;
       display: flex;
@@ -251,12 +251,12 @@
     .insight-box {
       background: #f0faf0;
       border-left: 4px solid #2ecc71;
-      padding: 24px;
+      padding: 16px 20px;
       border-radius: 8px;
       color: #1a5e3a;
       font-size: 17px;
       line-height: 1.7;
-      margin-top: 24px;
+      margin-top: 0;
       position: relative;
     }
 
@@ -321,6 +321,77 @@
       25%, 75% {
         opacity: 0;
       }
+    }
+
+    @keyframes drawCurve {
+      from { stroke-dashoffset: 800; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes barFill {
+      from { width: 0%; }
+      to { width: var(--bar-target); }
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(108, 92, 231, 0)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.4)); }
+    }
+
+    @keyframes dashMarch {
+      to { stroke-dashoffset: -16; }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .scale-in { animation: scaleIn 0.5s ease forwards; }
+
+    .node-pulse { animation: nodePulse 2s ease-in-out infinite; }
+
+    .memory-tier-wrap {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .memory-tier-row {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .memory-tier-bar {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .memory-tier-bar:hover {
+      transform: translateX(4px);
+    }
+
+    .memory-tier-bar.active {
+      border-color: currentColor;
+    }
+
+    .memory-tier-detail {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .memory-tier-detail.open {
+      max-height: 100px;
+      opacity: 1;
+      margin-top: 6px;
     }
 
     .fade-in {
@@ -406,6 +477,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .costar-box:hover {
@@ -474,6 +546,7 @@
       margin-bottom: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .decision-node:hover {
@@ -751,6 +824,43 @@
       color: #2ecc71;
       font-weight: 700;
     }
+
+    /* Disclosure badge */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      fill: none;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -772,6 +882,334 @@
       return React.createElement('span', { dangerouslySetInnerHTML: { __html: html } });
     }
 
+    function MemoryHierarchyDiagram() {
+      const [activeTier, setActiveTier] = React.useState(null);
+
+      const tiers = [
+        {
+          id: 'working', label: 'Working Memory', subtitle: 'Active context window',
+          color: '#6c5ce7', icon: '⚡',
+          detail: 'Everything currently in the context window. Fast access, expensive, cleared after session. ~200K tokens max.',
+          examples: 'Current conversation, open files, recent tool results'
+        },
+        {
+          id: 'episodic', label: 'Episodic Memory', subtitle: 'Session notes & summaries',
+          color: '#3498db', icon: '📝',
+          detail: 'Summaries and notes from past interactions. Written to files or memory tools. Survives across sessions.',
+          examples: 'CLAUDE.md, session notes, .memory/ files'
+        },
+        {
+          id: 'semantic', label: 'Semantic Memory', subtitle: 'Knowledge base',
+          color: '#00b894', icon: '🧠',
+          detail: 'Structured facts, domain knowledge, documentation. Retrieved via search or RAG when needed.',
+          examples: 'Codebase docs, API references, project wikis'
+        },
+        {
+          id: 'procedural', label: 'Procedural Memory', subtitle: 'Skills & patterns',
+          color: '#fdcb6e', icon: '⚙️',
+          detail: 'How to do things — baked into the model weights during training. Cannot be changed without fine-tuning.',
+          examples: 'Coding patterns, language understanding, reasoning skills'
+        },
+      ];
+
+      return (
+        <div className="memory-tier-wrap">
+          <div style={{ fontWeight: 700, fontSize: '14px', color: '#555', marginBottom: '14px', textAlign: 'center', letterSpacing: '0.5px' }}>
+            MEMORY ARCHITECTURE (FASTEST → MOST DURABLE)
+          </div>
+          {tiers.map((tier, idx) => (
+            <div key={tier.id} className="fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
+              <div
+                className={`memory-tier-bar ${activeTier === tier.id ? 'active' : ''}`}
+                style={{
+                  background: activeTier === tier.id ? tier.color + '20' : '#fafafa',
+                  borderColor: activeTier === tier.id ? tier.color : '#e0e0e0',
+                  color: tier.color
+                }}
+                onClick={() => setActiveTier(activeTier === tier.id ? null : tier.id)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '22px' }}>{tier.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: '15px', color: '#1a1a1a' }}>{tier.label}</div>
+                    <div style={{ fontSize: '12px', color: '#888', marginTop: '2px' }}>{tier.subtitle}</div>
+                  </div>
+                  <span style={{ color: '#bbb', fontSize: '18px', transition: 'transform 0.3s ease', transform: activeTier === tier.id ? 'rotate(180deg)' : 'none' }}>▾</span>
+                </div>
+              </div>
+              <div className={`memory-tier-detail ${activeTier === tier.id ? 'open' : ''}`}
+                style={{ paddingLeft: '16px', borderLeft: `3px solid ${tier.color}`, marginBottom: '4px' }}
+              >
+                <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.6', paddingTop: '8px' }}>{tier.detail}</div>
+                <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}><strong>Examples:</strong> {tier.examples}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    /* ── SVG Diagram Components ── */
+
+    function DiagramS1() {
+      const tiers = [
+        { label: '⚡ Working Memory',    speed: '⚡ fastest',  fill: '#f5f3ff', stroke: '#6c5ce7' },
+        { label: '📝 Episodic Memory',   speed: '🔄 session',  fill: '#edf5ff', stroke: '#3498db' },
+        { label: '🧠 Semantic Memory',   speed: '📚 retrieval',fill: '#f0fff8', stroke: '#2ecc71' },
+        { label: '⚙️ Procedural Memory', speed: '🐢 baked-in', fill: '#fffbf0', stroke: '#f39c12' },
+      ];
+      const barH = 28, gap = 6, startY = 10;
+      const totalH = tiers.length * barH + (tiers.length - 1) * gap;
+      const arrowTopY = startY + totalH + 10;
+      const arrowBotY = arrowTopY + 28;
+      const cwY = arrowBotY + 4;
+      const svgH = cwY + 40;
+
+      return (
+        <svg
+          viewBox={`0 0 500 ${svgH}`}
+          style={{ maxWidth: '100%', overflow: 'visible', display: 'block', margin: '0 auto' }}
+          aria-label="Four-tier memory hierarchy (Working, Episodic, Semantic, Procedural) feeding into context window"
+        >
+          <defs>
+            <marker id="arrowS1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M1,1 L7,4 L1,7 Z" fill="#6c5ce7" />
+            </marker>
+          </defs>
+          {tiers.map((t, i) => {
+            const y = startY + i * (barH + gap);
+            return (
+              <g key={i}>
+                <rect x="60" y={y} width="380" height={barH} rx="6"
+                  fill={t.fill} stroke={t.stroke} strokeWidth="2" />
+                <text x="74" y={y + barH / 2 + 5}
+                  fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="#1a1a1a">
+                  {t.label}
+                </text>
+                <text x="432" y={y + barH / 2 + 5}
+                  fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#888" textAnchor="end">
+                  {t.speed}
+                </text>
+              </g>
+            );
+          })}
+          {/* down arrow */}
+          <line x1="250" y1={arrowTopY} x2="250" y2={arrowBotY}
+            stroke="#6c5ce7" strokeWidth="2" markerEnd="url(#arrowS1)" />
+          {/* Context Window box */}
+          <rect x="140" y={cwY} width="220" height="36" rx="10"
+            fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="250" y={cwY + 23}
+            fontFamily="'DM Sans', sans-serif" fontSize="13" fontWeight="700" fill="#6c5ce7" textAnchor="middle">
+            Context Window
+          </text>
+        </svg>
+      );
+    }
+
+    function DiagramS2() {
+      return (
+        <svg
+          viewBox="0 0 480 150"
+          style={{ maxWidth: '100%', overflow: 'visible', display: 'block', margin: '0 auto' }}
+          aria-label="Three memory tiers cascading into LLM context window"
+        >
+          <defs>
+            <marker id="arrowS2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M1,1 L7,4 L1,7 Z" fill="#6c5ce7" />
+            </marker>
+          </defs>
+          {/* Box 1 – Project */}
+          <rect x="20" y="20" width="120" height="50" rx="10"
+            fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="80" y="42" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="700" fill="#6c5ce7" textAnchor="middle">Tier 1: Project</text>
+          <text x="80" y="58" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#888" textAnchor="middle">Shared</text>
+          {/* Box 2 – User */}
+          <rect x="90" y="50" width="120" height="50" rx="10"
+            fill="#edf5ff" stroke="#3498db" strokeWidth="2" />
+          <text x="150" y="72" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="700" fill="#3498db" textAnchor="middle">Tier 2: User</text>
+          <text x="150" y="88" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#888" textAnchor="middle">Personal</text>
+          {/* Box 3 – Dynamic */}
+          <rect x="160" y="80" width="120" height="50" rx="10"
+            fill="#f0fff8" stroke="#2ecc71" strokeWidth="2" />
+          <text x="220" y="102" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="700" fill="#2ecc71" textAnchor="middle">Tier 3: Dynamic</text>
+          <text x="220" y="118" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#888" textAnchor="middle">On-demand</text>
+          {/* Arrow from Box 3 → Context Window */}
+          <line x1="280" y1="105" x2="316" y2="75"
+            stroke="#6c5ce7" strokeWidth="2" markerEnd="url(#arrowS2)" />
+          {/* Context Window box */}
+          <rect x="316" y="53" width="144" height="44" rx="10"
+            fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="388" y="72" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="700" fill="#6c5ce7" textAnchor="middle">LLM Context</text>
+          <text x="388" y="88" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="700" fill="#6c5ce7" textAnchor="middle">Window</text>
+        </svg>
+      );
+    }
+
+    function DiagramS3() {
+      return (
+        <svg
+          viewBox="0 0 520 90"
+          style={{ maxWidth: '100%', overflow: 'visible', display: 'block', margin: '0 auto' }}
+          aria-label="Retrieval pipeline: query flows through relevance and recency filters into context window and LLM"
+        >
+          <defs>
+            <marker id="arrowS3" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto">
+              <path d="M1,1 L7,4 L1,7 Z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {/* Query circle */}
+          <circle cx="40" cy="45" r="22" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="40" y="49" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Query</text>
+          {/* Arrow 1 */}
+          <line x1="62" y1="45" x2="88" y2="45" stroke="#b0a6e8" strokeWidth="1.5" markerEnd="url(#arrowS3)" />
+          {/* Relevance Filter */}
+          <rect x="90" y="23" width="100" height="44" rx="10"
+            fill="#fff8f0" stroke="#f39c12" strokeWidth="2" />
+          <text x="140" y="43" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Relevance</text>
+          <text x="140" y="57" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Filter</text>
+          {/* Arrow 2 */}
+          <line x1="190" y1="45" x2="208" y2="45" stroke="#b0a6e8" strokeWidth="1.5" markerEnd="url(#arrowS3)" />
+          {/* Recency Filter */}
+          <rect x="210" y="23" width="100" height="44" rx="10"
+            fill="#edf5ff" stroke="#3498db" strokeWidth="2" />
+          <text x="260" y="43" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Recency</text>
+          <text x="260" y="57" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Filter</text>
+          {/* Arrow 3 */}
+          <line x1="310" y1="45" x2="328" y2="45" stroke="#b0a6e8" strokeWidth="1.5" markerEnd="url(#arrowS3)" />
+          {/* Context Window */}
+          <rect x="330" y="23" width="110" height="44" rx="10"
+            fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="385" y="43" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Context</text>
+          <text x="385" y="57" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Window</text>
+          {/* Arrow 4 */}
+          <line x1="440" y1="45" x2="446" y2="45" stroke="#b0a6e8" strokeWidth="1.5" markerEnd="url(#arrowS3)" />
+          {/* LLM circle */}
+          <circle cx="470" cy="45" r="22" fill="#6c5ce7" strokeWidth="0" />
+          <text x="470" y="49" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="white" textAnchor="middle">LLM</text>
+        </svg>
+      );
+    }
+
+    function DiagramS4() {
+      return (
+        <svg
+          viewBox="0 0 540 150"
+          style={{ maxWidth: '100%', overflow: 'visible', display: 'block', margin: '0 auto' }}
+          aria-label="Left: compression of conversation history to summary. Right: orchestrator with three isolated sub-agents"
+        >
+          <defs>
+            <marker id="arrowS4" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M1,1 L7,4 L1,7 Z" fill="#6c5ce7" />
+            </marker>
+          </defs>
+          {/* Divider */}
+          <line x1="270" y1="10" x2="270" y2="140" stroke="#e0e0e0" strokeWidth="1.5" strokeDasharray="4 4" />
+
+          {/* ── LEFT: Compression ── */}
+          {/* History stack – 4 small rects */}
+          {[0,1,2,3].map(i => (
+            <rect key={i} x="20" y={20 + i * 14} width="80" height="10" rx="3"
+              fill="#f5f5f5" stroke="#ccc" strokeWidth="1.5" />
+          ))}
+          <text x="60" y="85" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#888" textAnchor="middle">History</text>
+          {/* compress arrow */}
+          <line x1="106" y1="45" x2="145" y2="65" stroke="#6c5ce7" strokeWidth="2" markerEnd="url(#arrowS4)" />
+          <text x="122" y="53" fontFamily="'DM Sans', sans-serif" fontSize="9" fontWeight="600" fill="#6c5ce7" textAnchor="middle">compress</text>
+          {/* Summary rect */}
+          <rect x="148" y="55" width="88" height="40" rx="8"
+            fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="192" y="79" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="#6c5ce7" textAnchor="middle">Summary</text>
+          {/* Label */}
+          <text x="130" y="135" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="700" fill="#6c5ce7" textAnchor="middle">Compression</text>
+
+          {/* ── RIGHT: Isolation ── */}
+          {/* Orchestrator rect */}
+          <rect x="295" y="18" width="100" height="36" rx="8"
+            fill="#6c5ce7" strokeWidth="0" />
+          <text x="345" y="41" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="white" textAnchor="middle">Orchestrator</text>
+          {/* Dashed lines from orchestrator to agents */}
+          <line x1="315" y1="54" x2="305" y2="92" stroke="#b0a6e8" strokeWidth="1.5" strokeDasharray="3 3" />
+          <line x1="345" y1="54" x2="370" y2="92" stroke="#b0a6e8" strokeWidth="1.5" strokeDasharray="3 3" />
+          <line x1="375" y1="54" x2="435" y2="92" stroke="#b0a6e8" strokeWidth="1.5" strokeDasharray="3 3" />
+          {/* Agent A */}
+          <rect x="280" y="92" width="68" height="30" rx="6"
+            fill="#f0fff8" stroke="#2ecc71" strokeWidth="1.5" />
+          <text x="314" y="112" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Agent A</text>
+          {/* Agent B */}
+          <rect x="356" y="92" width="68" height="30" rx="6"
+            fill="#f0fff8" stroke="#2ecc71" strokeWidth="1.5" />
+          <text x="390" y="112" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Agent B</text>
+          {/* Agent C */}
+          <rect x="432" y="92" width="68" height="30" rx="6"
+            fill="#f0fff8" stroke="#2ecc71" strokeWidth="1.5" />
+          <text x="466" y="112" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">Agent C</text>
+          {/* Label */}
+          <text x="390" y="135" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="700" fill="#2ecc71" textAnchor="middle">Isolation</text>
+        </svg>
+      );
+    }
+
+    function DiagramS5() {
+      const nodes = [
+        { label: 'Identity',     x: 170, y: 30,  fill: '#f5f3ff', stroke: '#6c5ce7', textColor: '#6c5ce7' },
+        { label: 'Empowerment',  x: 340, y: 80,  fill: '#f0fff8', stroke: '#2ecc71', textColor: '#2ecc71' },
+        { label: 'Reasoning',    x: 170, y: 170, fill: '#edf5ff', stroke: '#3498db', textColor: '#3498db' },
+        { label: 'Boundaries',   x: 60,  y: 80,  fill: '#fff8f0', stroke: '#f39c12', textColor: '#f39c12' },
+      ];
+      const cx = 200, cy = 100;
+
+      return (
+        <svg
+          viewBox="0 0 400 210"
+          style={{ maxWidth: '100%', overflow: 'visible', display: 'block', margin: '0 auto' }}
+          aria-label="Four architectural principles (Identity, Empowerment, Reasoning, Boundaries) surrounding central Agent hub"
+        >
+          <defs>
+            <marker id="arrowS5" markerWidth="7" markerHeight="7" refX="4" refY="3.5" orient="auto">
+              <path d="M1,1 L6,3.5 L1,6 Z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {/* Lines from nodes to center */}
+          {nodes.map((n, i) => (
+            <line key={i}
+              x1={n.x} y1={n.y}
+              x2={cx} y2={cy}
+              stroke="#e0e0e0" strokeWidth="1" />
+          ))}
+          {/* Curved dashed arcs between adjacent nodes (clockwise) */}
+          {nodes.map((n, i) => {
+            const next = nodes[(i + 1) % nodes.length];
+            const midX = (n.x + next.x) / 2 + (i % 2 === 0 ? 20 : -20);
+            const midY = (n.y + next.y) / 2 + (i % 2 === 0 ? -20 : 20);
+            return (
+              <path key={`arc-${i}`}
+                d={`M${n.x},${n.y} Q${midX},${midY} ${next.x},${next.y}`}
+                fill="none" stroke="#b0a6e8" strokeWidth="1.5"
+                strokeDasharray="4 4"
+                style={{ animation: 'dashMarch 1.5s linear infinite' }}
+                markerEnd="url(#arrowS5)"
+              />
+            );
+          })}
+          {/* Center Agent hub */}
+          <circle cx={cx} cy={cy} r="32" fill="#6c5ce7" />
+          <text x={cx} y={cy - 4} fontFamily="'DM Sans', sans-serif" fontSize="13" fontWeight="700" fill="white" textAnchor="middle">Agent</text>
+          <text x={cx} y={cy + 12} fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle">hub</text>
+          {/* Outer nodes */}
+          {nodes.map((n, i) => (
+            <g key={`node-${i}`}>
+              <circle cx={n.x} cy={n.y} r="28" fill={n.fill} stroke={n.stroke} strokeWidth="2" />
+              <text x={n.x} y={n.y + 5}
+                fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#1a1a1a" textAnchor="middle">
+                {n.label}
+              </text>
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
     function S1() {
       return (
         <>
@@ -783,7 +1221,8 @@
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
-              <p style={{ fontSize: '16px', color: '#444', marginBottom: '20px', fontWeight: 500 }}>
+              <DiagramS1 />
+              <p style={{ fontSize: '16px', color: '#444', marginBottom: '20px', fontWeight: 500, marginTop: '24px' }}>
                 Think of it like how a company organizes knowledge:
               </p>
               <div className="tier-card fade-in">
@@ -809,6 +1248,13 @@
                   <div className="tier-card-title">Reference Library</div>
                   <div className="tier-card-desc">Specialized docs you pull in when needed</div>
                 </div>
+              </div>
+
+              <div style={{ width: '100%', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e8e3f8' }}>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
+                  Memory Architecture Deep Dive:
+                </div>
+                <MemoryHierarchyDiagram />
               </div>
             </div>
           </div>
@@ -869,16 +1315,20 @@
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
+              <DiagramS2 />
+              <div style={{ marginTop: '24px' }}>
               {tiers.map((tier, idx) => (
                 <div
                   key={tier.id}
-                  className={`costar-box ${expandedTier === tier.id ? 'expanded' : ''}`}
+                  className={`costar-box disclosure-card-host ${expandedTier === tier.id ? 'expanded' : ''}`}
                   onClick={() => setExpandedTier(expandedTier === tier.id ? null : tier.id)}
                   style={{ marginBottom: '16px', gridColumn: 'auto' }}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                  </span>
                   <div className="costar-label" style={{ fontSize: '16px' }}>{tier.title}</div>
                   <div className="costar-description">{tier.subtitle}</div>
-                  <div className="costar-hint">Click to explore</div>
                   <div className="costar-example">
                     <ul style={{ paddingLeft: '18px', marginBottom: '12px' }}>
                       {tier.details.map((d, i) => (
@@ -889,6 +1339,7 @@
                   </div>
                 </div>
               ))}
+              </div>
 
               <div className="tier-diagram">
                 <div className="tier-diagram-box" style={{ background: '#f5f3ff', border: '2px solid #6c5ce7', color: '#6c5ce7' }}>
@@ -931,6 +1382,8 @@
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
+              <DiagramS3 />
+              <div style={{ marginTop: '24px' }}>
               {mechanisms.map((m, idx) => (
                 <div className="mechanism-card fade-in" key={idx} style={{ animationDelay: `${idx * 0.1}s` }}>
                   <span style={{ fontSize: '20px', flexShrink: 0 }}>{m.emoji}</span>
@@ -963,6 +1416,7 @@
                   </tr>
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
           <div className="insight-box">
@@ -984,7 +1438,8 @@
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
-              <p style={{ fontSize: '16px', color: '#444', marginBottom: '20px', fontWeight: 500 }}>
+              <DiagramS4 />
+              <p style={{ fontSize: '16px', color: '#444', marginBottom: '20px', fontWeight: 500, marginTop: '24px' }}>
                 It&rsquo;s like writing a summary of a long meeting.
               </p>
               <div className="comparison-box">
@@ -1085,6 +1540,8 @@
           </div>
           <div className="scene-card">
             <div style={{ width: '100%' }}>
+              <DiagramS5 />
+              <div style={{ marginTop: '24px' }}>
               <div className="comparison-box" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                 <div className="comparison-item bad fade-in">
                   <div className="comparison-title">Too Specific</div>
@@ -1127,12 +1584,14 @@
                   {components.map((comp) => (
                     <div
                       key={comp.id}
-                      className={`decision-node ${expandedComponent === comp.id ? 'expanded' : ''}`}
+                      className={`decision-node disclosure-card-host ${expandedComponent === comp.id ? 'expanded' : ''}`}
                       onClick={() => setExpandedComponent(expandedComponent === comp.id ? null : comp.id)}
                     >
+                      <span className="disclosure-badge" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                      </span>
                       <div className="decision-question">
                         <span>{comp.id}. {comp.title}</span>
-                        <span className="expand-hint">&#9662;</span>
                       </div>
                       <div className="decision-answer">
                         <div className="answer-text">{comp.desc}</div>
@@ -1140,6 +1599,7 @@
                     </div>
                   ))}
                 </div>
+              </div>
               </div>
             </div>
           </div>

@@ -10,77 +10,600 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
-    #root { height: 100vh; overflow: hidden; }
-    .container { display: flex; height: 100vh; overflow: hidden; }
-    .sidebar { width: 120px; background: #f8f9fa; border-right: 1px solid #e0e0e0; padding: 80px 12px 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-    .step-btn { width: 64px; height: 64px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: all 0.3s ease; position: relative; flex-shrink: 0; }
-    .step-btn.active { background: #6c5ce7; border-color: #6c5ce7; color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
-    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
-    .step-btn-label { font-size: 11px; font-weight: 600; color: #999; margin-top: 4px; text-align: center; letter-spacing: 0.3px; transition: color 0.3s ease; }
-    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
-    .step-connector { width: 2px; height: 16px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
-    .step-connector.active { background: #6c5ce7; }
-    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1; background: white; flex-shrink: 0; }
-    .left-section { display: flex; align-items: center; gap: 20px; }
-    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
-    .back-link:hover { color: #2ecc71; }
-    .badge { display: inline-block; background: #e8e3f8; color: #6c5ce7; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
-    .progress-indicator { font-size: 13px; font-weight: 600; color: #6c5ce7; background: #f5f3ff; padding: 4px 12px; border-radius: 12px; margin-right: 12px; }
-    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
-    .title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; }
-    .stage-header { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
-    .nav-arrows { display: flex; gap: 12px; }
-    .arrow-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
-    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; padding: 32px 48px; gap: 30px; }
-    .explanation { font-size: 22px; line-height: 1.7; color: #2a2a2a; }
-    .scene-card { background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%); border-radius: 16px; padding: 40px; border: 1px solid #e8e3f8; min-height: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08); }
-    .insight-box { background: #f0faf0; border-left: 4px solid #2ecc71; padding: 24px; border-radius: 8px; color: #1a5e3a; font-size: 17px; line-height: 1.7; margin-top: 24px; position: relative; }
-    .insight-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #2ecc71; margin-bottom: 8px; text-transform: uppercase; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .fade-in { animation: fadeIn 0.6s ease forwards; }
-    .comparison-box { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
-    .comparison-item { padding: 24px; border-radius: 12px; border: 2px solid #e0e0e0; }
-    .comparison-item.bad { background: #fef5f5; border-color: #e74c3c; }
-    .comparison-item.good { background: #f0f8f0; border-color: #2ecc71; }
-    .comparison-item.neutral { background: #f8f9fa; border-color: #bbb; }
-    .comparison-title { font-weight: 700; margin-bottom: 12px; font-size: 15px; }
-    .comparison-item.bad .comparison-title { color: #c0392b; }
-    .comparison-item.good .comparison-title { color: #27ae60; }
-    .comparison-item.neutral .comparison-title { color: #555; }
-    .comparison-content { font-size: 15px; line-height: 1.6; color: #333; }
-    .context-source-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: white; border-radius: 8px; border: 1px solid #e8e3f8; margin-bottom: 8px; }
-    .context-source-emoji { font-size: 20px; flex-shrink: 0; }
-    .context-source-label { font-weight: 700; font-size: 14px; color: #1a1a1a; }
-    .context-source-desc { font-size: 13px; color: #666; margin-top: 2px; }
-    .decision-tree { width: 100%; }
-    .decision-node { padding: 24px; background: white; border: 2px solid #e0e0e0; border-radius: 12px; margin-bottom: 16px; cursor: pointer; transition: all 0.3s ease; }
-    .decision-node:hover { border-color: #6c5ce7; transform: translateY(-2px); }
-    .decision-question { font-weight: 700; font-size: 16px; color: #1a1a1a; margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; }
-    .expand-hint { font-size: 18px; color: #b0a6e8; transition: transform 0.3s ease; }
-    .decision-node.expanded .expand-hint { transform: rotate(180deg); }
-    .decision-answer { max-height: 0; overflow: hidden; transition: all 0.3s ease; }
-    .decision-node.expanded .decision-answer { max-height: 300px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd; }
-    .answer-text { font-size: 15px; color: #333; line-height: 1.7; }
-    .code-block { background: #1a1a2e; color: #a78bfa; padding: 16px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6; margin-top: 12px; white-space: pre-wrap; width: 100%; }
-    .summary-card { padding: 20px 24px; background: white; border-radius: 12px; border-left: 4px solid; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px; }
-    .summary-card-emoji { font-size: 24px; flex-shrink: 0; }
-    .summary-card-title { font-weight: 700; font-size: 16px; color: #1a1a1a; margin-bottom: 4px; }
-    .summary-card-desc { font-size: 14px; color: #555; line-height: 1.6; }
-    .bar-chart { width: 100%; max-width: 480px; }
-    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-    .bar-label { font-size: 13px; font-weight: 600; width: 120px; text-align: right; color: #555; }
-    .bar-track { flex: 1; height: 24px; background: #f0f0f0; border-radius: 6px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: 700; color: white; transition: width 0.8s ease; }
-    .plugin-row { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: white; border-radius: 10px; border: 1px solid #e8e3f8; margin-bottom: 8px; }
-    .plugin-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      height: 100vh;
+    }
+
+    #root {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 80px 12px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .step-btn.active {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .step-btn:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .step-btn-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .step-wrapper.active .step-btn-label {
+      color: #6c5ce7;
+    }
+
+    .step-connector {
+      width: 2px;
+      height: 16px;
+      background: #e0e0e0;
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+
+    .step-connector.active {
+      background: #6c5ce7;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 3px solid transparent;
+      border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .left-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-link {
+      color: #6c5ce7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: #2ecc71;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8e3f8;
+      color: #6c5ce7;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-right: 12px;
+    }
+
+    .guide-number {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b0a6e8;
+      margin-right: 8px;
+    }
+
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .stage-header {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .arrow-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 24px 36px;
+      gap: 18px;
+    }
+
+    .explanation {
+      font-size: 22px;
+      line-height: 1.7;
+      color: #2a2a2a;
+    }
+
+    .scene-card {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
+      border-radius: 16px;
+      padding: 28px;
+      border: 1px solid #e8e3f8;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    }
+
+    .insight-box {
+      background: #f0faf0;
+      border-left: 4px solid #2ecc71;
+      padding: 16px 20px;
+      border-radius: 8px;
+      color: #1a5e3a;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 0;
+      position: relative;
+    }
+
+    .insight-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #2ecc71;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes dashMarch {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes barFill {
+      from { width: 0%; }
+      to { width: var(--bar-target); }
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(108, 92, 231, 0)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.4)); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .scale-in { animation: scaleIn 0.5s ease forwards; }
+    .slide-in-right { animation: slideInRight 0.5s ease forwards; }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .comparison-item {
+      padding: 24px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .comparison-item.bad {
+      background: #fef5f5;
+      border-color: #e74c3c;
+    }
+
+    .comparison-item.good {
+      background: #f0f8f0;
+      border-color: #2ecc71;
+    }
+
+    .comparison-item.neutral {
+      background: #f8f9fa;
+      border-color: #bbb;
+    }
+
+    .comparison-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    .comparison-item.bad .comparison-title {
+      color: #c0392b;
+    }
+
+    .comparison-item.good .comparison-title {
+      color: #27ae60;
+    }
+
+    .comparison-item.neutral .comparison-title {
+      color: #555;
+    }
+
+    .comparison-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .context-source-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e8e3f8;
+      margin-bottom: 8px;
+    }
+
+    .context-source-emoji {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .context-source-label {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1a1a1a;
+    }
+
+    .context-source-desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .decision-tree {
+      width: 100%;
+    }
+
+    .decision-node {
+      padding: 24px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .decision-node:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+    }
+
+    .decision-question {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .expand-hint {
+      font-size: 18px;
+      color: #b0a6e8;
+      transition: transform 0.3s ease;
+    }
+
+    .decision-node.expanded .expand-hint {
+      transform: rotate(180deg);
+    }
+
+    .decision-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .decision-node.expanded .decision-answer {
+      max-height: 300px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    .answer-text {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.7;
+    }
+
+    .code-block {
+      background: #1a1a2e;
+      color: #a78bfa;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 12px;
+      white-space: pre-wrap;
+      width: 100%;
+    }
+
+    .summary-card {
+      padding: 20px 24px;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .summary-card-emoji {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .summary-card-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .summary-card-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .bar-chart {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .bar-label {
+      font-size: 13px;
+      font-weight: 600;
+      width: 120px;
+      text-align: right;
+      color: #555;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 24px;
+      background: #f0f0f0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      transition: width 0.8s ease;
+    }
+
+    .plugin-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e8e3f8;
+      margin-bottom: 8px;
+    }
+
+    .plugin-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Disclosure badge */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      fill: none;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -100,8 +623,265 @@
     );
 
     function InsightLabel() {
-      return React.createElement('div', { className: 'insight-label' }, insightSvg, ' INSIGHT');
+      return <div className="insight-label">{insightSvg} INSIGHT</div>;
     }
+
+    /* ── SVG Diagrams ─────────────────────────────────────────────────────── */
+
+    function S1Diagram() {
+      return (
+        <svg width="520" height="100" viewBox="0 0 520 100"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          aria-label="Context window bar chart showing four MCP servers consuming approximately 20 percent of available context"
+          role="img">
+          <defs>
+            <marker id="s1arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#e74c3c" />
+            </marker>
+          </defs>
+          {/* label */}
+          <text x="20" y="18" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#666">Context Window (200k tokens)</text>
+          {/* background track */}
+          <rect x="20" y="28" width="480" height="44" rx="8" fill="#f5f5f5" stroke="#e0e0e0" strokeWidth="1.5" />
+          {/* Server A */}
+          <rect x="20" y="28" width="90" height="44" rx="8" fill="#e74c3c" fillOpacity="0.85" />
+          <text x="65" y="54" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="white" textAnchor="middle">Server A</text>
+          {/* Server B */}
+          <rect x="110" y="28" width="70" height="44" fill="#f39c12" fillOpacity="0.85" />
+          <text x="145" y="54" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="white" textAnchor="middle">Server B</text>
+          {/* Server C */}
+          <rect x="180" y="28" width="60" height="44" fill="#3498db" fillOpacity="0.85" />
+          <text x="210" y="54" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="white" textAnchor="middle">Server C</text>
+          {/* Server D */}
+          <rect x="240" y="28" width="50" height="44" fill="#9b59b6" fillOpacity="0.85" />
+          <text x="265" y="54" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="white" textAnchor="middle">Server D</text>
+          {/* Available context segment */}
+          <rect x="290" y="28" width="210" height="44" rx="0" fill="#f0f0f0" stroke="#e0e0e0" strokeWidth="1" strokeDasharray="4 4"
+            style={{ borderRadius: '0 8px 8px 0' }} />
+          <rect x="290" y="28" width="210" height="44" fill="none" stroke="#e0e0e0" strokeWidth="1" strokeDasharray="4 4" />
+          <text x="395" y="54" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#aaa" textAnchor="middle">Available Context</text>
+          {/* annotation */}
+          <text x="20" y="90" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#e74c3c">~55k tokens consumed by tool definitions (20%)</text>
+        </svg>
+      );
+    }
+
+    function S2Diagram() {
+      const bars = [
+        { x: 40, height: 120, pct: '20%', label1: 'All', label2: 'Servers', fill: '#e74c3c' },
+        { x: 160, height: 15, pct: '2.4%', label1: 'Strict', label2: 'Config', fill: '#2ecc71' },
+        { x: 280, height: 19, pct: '3.2%', label1: 'Session', label2: 'Toggle', fill: '#2ecc71' },
+      ];
+      const baseY = 140;
+      return (
+        <svg width="400" height="160" viewBox="0 0 400 160"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          aria-label="Bar chart comparing context consumption: All Servers 20 percent, Strict Config 2.4 percent, Session Toggle 3.2 percent"
+          role="img">
+          {/* baseline */}
+          <line x1="20" y1={baseY} x2="380" y2={baseY} stroke="#e0e0e0" strokeWidth="1" />
+          {bars.map((b) => (
+            <g key={b.x}>
+              <rect x={b.x} y={baseY - b.height} width="80" height={b.height} rx="6" fill={b.fill} fillOpacity="0.85" />
+              <text x={b.x + 40} y={baseY - b.height - 6} fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="700"
+                fill={b.fill} textAnchor="middle">{b.pct}</text>
+              <text x={b.x + 40} y={baseY + 14} fontFamily="'DM Sans', sans-serif" fontSize="10" fill="#666" textAnchor="middle">{b.label1}</text>
+              <text x={b.x + 40} y={baseY + 26} fontFamily="'DM Sans', sans-serif" fontSize="10" fill="#666" textAnchor="middle">{b.label2}</text>
+            </g>
+          ))}
+          {/* savings annotation: vertical bracket + label */}
+          <line x1="135" y1={baseY - 120} x2="135" y2={baseY - 19} stroke="#2ecc71" strokeWidth="1.5" strokeDasharray="3 3" />
+          <line x1="130" y1={baseY - 120} x2="140" y2={baseY - 120} stroke="#2ecc71" strokeWidth="1.5" />
+          <line x1="130" y1={baseY - 19} x2="140" y2={baseY - 19} stroke="#2ecc71" strokeWidth="1.5" />
+          <text x="142" y={baseY - 66} fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="700" fill="#2ecc71">↓ 87% less</text>
+        </svg>
+      );
+    }
+
+    function S3Diagram() {
+      const cells = [
+        { label: '/ Commands', x: 50, y: 55, stroke: '#6c5ce7' },
+        { label: '🤖 Subagents', x: 162, y: 55, stroke: '#3498db' },
+        { label: '🔎 MCP Servers', x: 50, y: 113, stroke: '#2ecc71' },
+        { label: '⚙️ Hooks', x: 162, y: 113, stroke: '#f39c12' },
+      ];
+      return (
+        <svg width="460" height="140" viewBox="0 0 460 140"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          aria-label="Plugin package containing four bundled components: slash commands, subagents, MCP servers, and hooks"
+          role="img">
+          {/* outer package */}
+          <rect x="20" y="15" width="420" height="110" rx="16" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" strokeDasharray="6 3" />
+          <text x="230" y="34" fontFamily="'DM Sans', sans-serif" fontSize="13" fontWeight="700" fill="#6c5ce7" textAnchor="middle">Plugin Package</text>
+          {/* component boxes */}
+          {cells.map((c) => (
+            <g key={c.label}>
+              <rect x={c.x} y={c.y} width="88" height="44" rx="8" fill="white" stroke={c.stroke} strokeWidth="1.5" />
+              <text x={c.x + 44} y={c.y + 26} fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">{c.label}</text>
+            </g>
+          ))}
+          {/* install arrow */}
+          <defs>
+            <marker id="s3arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#2ecc71" />
+            </marker>
+          </defs>
+          <line x1="440" y1="70" x2="394" y2="70" stroke="#2ecc71" strokeWidth="2" markerEnd="url(#s3arr)" />
+          <circle cx="452" cy="70" r="12" fill="#2ecc71" />
+          <text x="452" y="74" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="700" fill="white" textAnchor="middle">✓</text>
+        </svg>
+      );
+    }
+
+    function S4Diagram() {
+      const nodes = [
+        { label: 'Context', label2: 'Pollution', x: 80, fill: '#fff5f5', stroke: '#e74c3c' },
+        { label: 'Ping-Pong', label2: 'Execution', x: 190, fill: '#fff8f0', stroke: '#f39c12' },
+        { label: 'Lang', label2: 'Mismatch', x: 300, fill: '#fff5f5', stroke: '#e74c3c' },
+        { label: 'Schema', label2: 'Limits', x: 410, fill: '#fff8f0', stroke: '#f39c12' },
+      ];
+      return (
+        <svg width="540" height="110" viewBox="0 0 540 110"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          aria-label="Four MCP drawbacks in pipeline: context pollution, ping-pong execution, language mismatch, schema limits"
+          role="img">
+          <defs>
+            <marker id="s4arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#b0a6e8" />
+            </marker>
+            <marker id="s4arrRed" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#e74c3c" />
+            </marker>
+          </defs>
+          {/* input circle */}
+          <circle cx="30" cy="55" r="20" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="30" y="51" fontFamily="'DM Sans', sans-serif" fontSize="8" fontWeight="700" fill="#6c5ce7" textAnchor="middle">MCP</text>
+          <text x="30" y="62" fontFamily="'DM Sans', sans-serif" fontSize="8" fontWeight="700" fill="#6c5ce7" textAnchor="middle">Call</text>
+          {/* arrow from input to first node */}
+          <line x1="50" y1="55" x2="75" y2="55" stroke="#b0a6e8" strokeWidth="1.5" markerEnd="url(#s4arr)" />
+          {/* bottleneck nodes */}
+          {nodes.map((n, i) => (
+            <g key={n.label}>
+              <rect x={n.x} y="31" width="90" height="48" rx="8" fill={n.fill} stroke={n.stroke} strokeWidth="1.5" />
+              <text x={n.x + 45} y="52" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">{n.label}</text>
+              <text x={n.x + 45} y="66" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#1a1a1a" textAnchor="middle">{n.label2}</text>
+              {/* warning triangle */}
+              <text x={n.x + 78} y="45" fontFamily="'DM Sans', sans-serif" fontSize="12" textAnchor="middle">⚠</text>
+              {/* arrow to next node */}
+              {i < nodes.length - 1 && (
+                <line x1={n.x + 90} y1="55" x2={n.x + 105} y2="55" stroke="#b0a6e8" strokeWidth="1.5" markerEnd="url(#s4arr)" />
+              )}
+            </g>
+          ))}
+          {/* final arrow */}
+          <line x1="500" y1="55" x2="510" y2="55" stroke="#e74c3c" strokeWidth="1.5" markerEnd="url(#s4arrRed)" />
+          {/* output circle */}
+          <circle cx="524" cy="55" r="16" fill="#fff5f5" stroke="#e74c3c" strokeWidth="1.5" />
+          <text x="524" y="51" fontFamily="'DM Sans', sans-serif" fontSize="7" fontWeight="700" fill="#e74c3c" textAnchor="middle">Degraded</text>
+          <text x="524" y="61" fontFamily="'DM Sans', sans-serif" fontSize="7" fontWeight="700" fill="#e74c3c" textAnchor="middle">Perf.</text>
+        </svg>
+      );
+    }
+
+    function S5Diagram() {
+      return (
+        <svg width="520" height="160" viewBox="0 0 520 160"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          aria-label="Traditional MCP requires three round trips between LLM and server. Code Mode requires only one."
+          role="img">
+          <defs>
+            <marker id="s5blueArr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#6c5ce7" />
+            </marker>
+            <marker id="s5greenArr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#2ecc71" />
+            </marker>
+            <marker id="s5redArr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#e74c3c" />
+            </marker>
+          </defs>
+          {/* dividing line */}
+          <line x1="260" y1="10" x2="260" y2="150" stroke="#e0e0e0" strokeWidth="1" strokeDasharray="4 4" />
+
+          {/* === LEFT: Traditional MCP === */}
+          <text x="130" y="18" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="700" fill="#666" textAnchor="middle">Traditional MCP</text>
+          {/* LLM box */}
+          <rect x="20" y="26" width="90" height="36" rx="8" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="65" y="49" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="#6c5ce7" textAnchor="middle">LLM</text>
+          {/* MCP Server box */}
+          <rect x="140" y="26" width="100" height="36" rx="8" fill="#f0fff8" stroke="#2ecc71" strokeWidth="2" />
+          <text x="190" y="49" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="#2ecc71" textAnchor="middle">MCP Server</text>
+          {/* 3 round-trip arrows */}
+          {[0, 1, 2].map((i) => {
+            const yDown = 72 + i * 20;
+            const yUp = 80 + i * 20;
+            return (
+              <g key={i}>
+                <line x1="110" y1={yDown} x2="138" y2={yDown} stroke="#e74c3c" strokeWidth="1.5" markerEnd="url(#s5redArr)" />
+                <line x1="138" y1={yUp} x2="110" y2={yUp} stroke="#6c5ce7" strokeWidth="1.5" markerEnd="url(#s5blueArr)" />
+              </g>
+            );
+          })}
+          <text x="130" y="150" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#e74c3c" textAnchor="middle">3 round trips</text>
+
+          {/* === RIGHT: Code Mode === */}
+          <text x="390" y="18" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="700" fill="#6c5ce7" textAnchor="middle">Code Mode</text>
+          {/* LLM box */}
+          <rect x="278" y="26" width="90" height="36" rx="8" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="323" y="49" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="#6c5ce7" textAnchor="middle">LLM</text>
+          {/* arrow to Execute Code */}
+          <line x1="368" y1="44" x2="396" y2="44" stroke="#2ecc71" strokeWidth="2" markerEnd="url(#s5greenArr)" />
+          {/* Execute Code box */}
+          <rect x="398" y="26" width="100" height="36" rx="8" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="448" y="44" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#6c5ce7" textAnchor="middle">Execute</text>
+          <text x="448" y="57" fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#6c5ce7" textAnchor="middle">Code</text>
+          {/* arrow down to Result */}
+          <line x1="448" y1="62" x2="448" y2="88" stroke="#2ecc71" strokeWidth="2" markerEnd="url(#s5greenArr)" />
+          {/* Result box */}
+          <rect x="408" y="90" width="80" height="32" rx="8" fill="#f0fff8" stroke="#2ecc71" strokeWidth="1.5" />
+          <text x="448" y="111" fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="600" fill="#2ecc71" textAnchor="middle">Result</text>
+          <text x="390" y="150" fontFamily="'DM Sans', sans-serif" fontSize="10" fontWeight="600" fill="#2ecc71" textAnchor="middle">1 round trip</text>
+        </svg>
+      );
+    }
+
+    function S6Diagram() {
+      const quadrants = [
+        { label: 'Code Mode', label2: '★ Recommended', x: 30, y: 30, fill: '#f5f3ff', stroke: '#6c5ce7', star: true },
+        { label: 'Hybrid', label2: 'High complexity', x: 210, y: 30, fill: '#edf5ff', stroke: '#3498db', star: false },
+        { label: 'Plugins', label2: 'Low complexity', x: 30, y: 120, fill: '#f0fff8', stroke: '#2ecc71', star: false },
+        { label: 'Vanilla MCP', label2: 'Low performance', x: 210, y: 120, fill: '#fff5f5', stroke: '#e74c3c', star: false },
+      ];
+      return (
+        <svg width="400" height="200" viewBox="0 0 400 200"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          aria-label="Decision matrix with axes Complexity and Performance showing Code Mode, Hybrid, Plugins, and Vanilla MCP in four quadrants"
+          role="img">
+          {/* axes */}
+          <line x1="10" y1="190" x2="390" y2="190" stroke="#e0e0e0" strokeWidth="1" />
+          <line x1="10" y1="10" x2="10" y2="190" stroke="#e0e0e0" strokeWidth="1" />
+          {/* midlines */}
+          <line x1="10" y1="100" x2="390" y2="100" stroke="#e0e0e0" strokeWidth="1" />
+          <line x1="200" y1="10" x2="200" y2="190" stroke="#e0e0e0" strokeWidth="1" />
+          {/* axis labels */}
+          <text x="200" y="200" fontFamily="'DM Sans', sans-serif" fontSize="11" fill="#666" textAnchor="middle">Complexity →</text>
+          <text x="6" y="100" fontFamily="'DM Sans', sans-serif" fontSize="11" fill="#666" textAnchor="middle"
+            transform="rotate(-90, 6, 100)">Performance ↑</text>
+          {/* quadrant rects */}
+          {quadrants.map((q) => (
+            <g key={q.label}>
+              <rect x={q.x} y={q.y} width="155" height="60" rx="8" fill={q.fill} stroke={q.stroke} strokeWidth="1.5" />
+              <text x={q.x + 77} y={q.y + 26} fontFamily="'DM Sans', sans-serif" fontSize="13" fontWeight="700" fill="#1a1a1a" textAnchor="middle">{q.label}</text>
+              <text x={q.x + 77} y={q.y + 43} fontFamily="'DM Sans', sans-serif" fontSize="10" fill="#555" textAnchor="middle">{q.label2}</text>
+            </g>
+          ))}
+          {/* star for Code Mode */}
+          <text x="176" y="52" fontFamily="'DM Sans', sans-serif" fontSize="16" fill="#6c5ce7" textAnchor="middle">★</text>
+        </svg>
+      );
+    }
+
+    /* ── Stage Components ─────────────────────────────────────────────────── */
 
     function S1() {
       return (
@@ -111,6 +891,9 @@
             Context is the most expensive and limited resource in agentic systems. Loading unnecessary MCP tool definitions bloats the context window and degrades agent performance.
           </div>
           <div className="scene-card">
+            <div style={{ width: '100%', marginBottom: '20px' }}>
+              <S1Diagram />
+            </div>
             <div style={{ width: '100%' }}>
               <div style={{ padding: '16px 20px', background: 'white', borderRadius: '10px', border: '1px solid #e8e3f8', marginBottom: '24px', fontSize: '14px', lineHeight: '1.7', color: '#555' }}>
                 <strong style={{ color: '#1a1a1a' }}>The Problem:</strong> Project-level MCP config loads <em>all</em> configured servers simultaneously. All tools from every server are present in the context window &mdash; consuming tens of thousands of tokens before the user even asks a question.
@@ -145,7 +928,7 @@
             </div>
           </div>
           <div className="insight-box">
-            {React.createElement(InsightLabel)}
+            <InsightLabel />
             Context engineering in MCP means matching available tools to the specific task &mdash; not loading everything &ldquo;just in case.&rdquo; Think toolbox, not hardware store.
           </div>
         </>
@@ -160,6 +943,9 @@
             Two strategies to tame context bloat: configuration-level control and session-level control. Both dramatically reduce wasted tokens.
           </div>
           <div className="scene-card">
+            <div style={{ width: '100%', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+              <S2Diagram />
+            </div>
             <div style={{ width: '100%' }}>
               <div className="comparison-box">
                 <div className="comparison-item good fade-in">
@@ -212,7 +998,7 @@
             </div>
           </div>
           <div className="insight-box">
-            {React.createElement(InsightLabel)}
+            <InsightLabel />
             A professional brings a curated toolbox to each job &mdash; not the entire store inventory. Match tools to the task.
           </div>
         </>
@@ -234,6 +1020,9 @@
             Plugins bundle slash commands, subagents, MCP servers, and hooks into shareable packages &mdash; enabling teams and communities to share complete AI workflows with a single install.
           </div>
           <div className="scene-card">
+            <div style={{ width: '100%', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+              <S3Diagram />
+            </div>
             <div style={{ width: '100%' }}>
               <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>What Plugins Bundle:</div>
               {pluginComponents.map((p, idx) => (
@@ -267,7 +1056,7 @@
             </div>
           </div>
           <div className="insight-box">
-            {React.createElement(InsightLabel)}
+            <InsightLabel />
             Plugins solve the &ldquo;IKEA without instructions&rdquo; problem. Instead of manually assembling tools from scattered sources, everything comes in one shareable package.
           </div>
         </>
@@ -315,18 +1104,23 @@
             MCP&rsquo;s drawbacks stem from context management and task execution approach &mdash; resulting in agents that can be slower, more expensive, and less capable than they could be.
           </div>
           <div className="scene-card">
+            <div style={{ width: '100%', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+              <S4Diagram />
+            </div>
             <div style={{ width: '100%' }}>
               <div className="decision-tree">
                 {drawbacks.map((d) => (
                   <div
                     key={d.id}
-                    className={`decision-node ${expandedDrawback === d.id ? 'expanded' : ''}`}
+                    className={`decision-node disclosure-card-host ${expandedDrawback === d.id ? 'expanded' : ''}`}
                     onClick={() => setExpandedDrawback(expandedDrawback === d.id ? null : d.id)}
                     style={{ borderColor: expandedDrawback === d.id ? d.color : '#e0e0e0' }}
                   >
+                    <span className="disclosure-badge" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                    </span>
                     <div className="decision-question">
                       <span>{d.title}</span>
-                      <span className="expand-hint" style={{ transform: expandedDrawback === d.id ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>&#9662;</span>
                     </div>
                     <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>{d.desc}</div>
                     <div className="decision-answer">
@@ -338,7 +1132,7 @@
             </div>
           </div>
           <div className="insight-box">
-            {React.createElement(InsightLabel)}
+            <InsightLabel />
             Understanding these drawbacks is essential for making informed architectural decisions. MCP is powerful but not perfect &mdash; the right approach depends on your use case.
           </div>
         </>
@@ -353,6 +1147,9 @@
             Code mode converts MCP tool definitions into a TypeScript API, letting the LLM generate and execute code instead of making individual tool calls &mdash; leveraging what LLMs do best.
           </div>
           <div className="scene-card">
+            <div style={{ width: '100%', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+              <S5Diagram />
+            </div>
             <div style={{ width: '100%' }}>
               <div className="comparison-box">
                 <div className="comparison-item bad fade-in">
@@ -398,7 +1195,7 @@
             </div>
           </div>
           <div className="insight-box">
-            {React.createElement(InsightLabel)}
+            <InsightLabel />
             LLMs are trained on millions of real-world code examples. Making them generate code (their native language) instead of synthetic tool-call tokens aligns with their strengths.
           </div>
         </>
@@ -420,6 +1217,9 @@
             Four advanced principles for mastering MCP in production.
           </div>
           <div className="scene-card">
+            <div style={{ width: '100%', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+              <S6Diagram />
+            </div>
             <div style={{ width: '100%' }}>
               {takeaways.map((t, idx) => (
                 <div className="summary-card fade-in" key={idx} style={{ borderLeftColor: t.color, animationDelay: `${idx * 0.15}s` }}>
@@ -433,7 +1233,7 @@
             </div>
           </div>
           <div className="insight-box">
-            {React.createElement(InsightLabel)}
+            <InsightLabel />
             MCP is a powerful standardization layer, but using it well requires context engineering discipline. Optimize aggressively, know the tradeoffs, and watch for emerging alternatives like code mode.
           </div>
         </>
@@ -472,60 +1272,63 @@
 
       const handleNext = () => { if (currentStage < stages.length - 1) setCurrentStage(currentStage + 1); };
       const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
-      const handleStageClick = (idx) => setCurrentStage(idx);
+
+      /* SVG icon content is hardcoded above — not user input */
+      const renderSidebarBtn = (stage, idx) => {
+        const svgContent = stage.icon;
+        const props = {
+          className: `step-btn ${currentStage === idx ? 'active' : ''}`,
+          onClick: () => setCurrentStage(idx),
+          dangerouslySetInnerHTML: { __html: svgContent }
+        };
+        return React.createElement('button', props);
+      };
 
       return (
-        React.createElement('div', { className: 'container' },
-          React.createElement('div', { className: 'sidebar scrollbar-hide' },
-            stages.map((stage, idx) =>
-              React.createElement(React.Fragment, { key: idx },
-                React.createElement('div', { className: `step-wrapper ${currentStage === idx ? 'active' : ''}` },
-                  React.createElement('button', {
-                    className: `step-btn ${currentStage === idx ? 'active' : ''}`,
-                    onClick: () => handleStageClick(idx),
-                    dangerouslySetInnerHTML: { __html: stage.icon }
-                  }),
-                  React.createElement('div', { className: 'step-btn-label' }, stage.label)
-                ),
-                idx < stages.length - 1 &&
-                  React.createElement('div', { className: `step-connector ${currentStage > idx ? 'active' : ''}` })
-              )
-            )
-          ),
-          React.createElement('div', { className: 'main-content' },
-            React.createElement('div', { className: 'top-bar' },
-              React.createElement('div', { className: 'left-section' },
-                React.createElement('a', { href: '../../index.html', className: 'back-link' }, '\u2190 Back to All Guides'),
-                React.createElement('span', { style: { marginLeft: '20px', fontSize: '14px', color: '#999' } }, '|'),
-                React.createElement('div', { style: { marginLeft: '12px', display: 'flex', alignItems: 'center' } },
-                  React.createElement('span', { className: 'guide-number' }, '4.2'),
-                  React.createElement('div', { className: 'title' }, 'Advanced MCP')
-                ),
-                React.createElement('div', { style: { marginLeft: '20px' } },
-                  React.createElement('div', { className: 'badge' }, 'DEEP DIVE')
-                )
-              ),
-              React.createElement('div', { style: { display: 'flex', alignItems: 'center' } },
-                React.createElement('span', { className: 'progress-indicator' }, `Page ${currentStage + 1} of 6`),
-                React.createElement('div', { className: 'nav-arrows' },
-                  React.createElement('button', {
-                    className: 'arrow-btn', onClick: handlePrev, disabled: currentStage === 0, title: 'Previous stage'
-                  }, '\u2190'),
-                  React.createElement('button', {
-                    className: 'arrow-btn', onClick: handleNext, disabled: currentStage === stages.length - 1, title: 'Next stage'
-                  }, '\u2192')
-                )
-              )
-            ),
-            React.createElement('div', { className: 'content-area scrollbar-hide' },
-              React.createElement(CurrentComponent)
-            )
-          )
-        )
+        <div className="container">
+          <div className="sidebar scrollbar-hide">
+            {stages.map((stage, idx) => (
+              <React.Fragment key={idx}>
+                <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                  {renderSidebarBtn(stage, idx)}
+                  <div className="step-btn-label">{stage.label}</div>
+                </div>
+                {idx < stages.length - 1 && (
+                  <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+          <div className="main-content">
+            <div className="top-bar">
+              <div className="left-section">
+                <a href="../../index.html" className="back-link">&#8592; Back to All Guides</a>
+                <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                  <span className="guide-number">4.2</span>
+                  <div className="title">Advanced MCP</div>
+                </div>
+                <div style={{ marginLeft: '20px' }}>
+                  <div className="badge">DEEP DIVE</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="progress-indicator">Page {currentStage + 1} of {stages.length}</span>
+                <div className="nav-arrows">
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentStage === 0} title="Previous stage">&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={currentStage === stages.length - 1} title="Next stage">&#8594;</button>
+                </div>
+              </div>
+            </div>
+            <div className="content-area scrollbar-hide">
+              <CurrentComponent />
+            </div>
+          </div>
+        </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(Guide));
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
   </script>
 </body>
 </html>

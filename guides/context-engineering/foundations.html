@@ -184,7 +184,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -226,8 +226,8 @@
       flex-direction: column;
       overflow-y: auto;
       scroll-behavior: smooth;
-      padding: 32px 48px;
-      gap: 30px;
+      padding: 24px 36px;
+      gap: 18px;
     }
 
     .explanation {
@@ -239,7 +239,7 @@
     .scene-card {
       background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
       border-radius: 16px;
-      padding: 40px;
+      padding: 28px;
       border: 1px solid #e8e3f8;
       min-height: auto;
       display: flex;
@@ -252,12 +252,12 @@
     .insight-box {
       background: #f0faf0;
       border-left: 4px solid #2ecc71;
-      padding: 24px;
+      padding: 16px 20px;
       border-radius: 8px;
       color: #1a5e3a;
       font-size: 17px;
       line-height: 1.7;
-      margin-top: 24px;
+      margin-top: 0;
       position: relative;
     }
 
@@ -322,6 +322,103 @@
       25%, 75% {
         opacity: 0;
       }
+    }
+
+    @keyframes drawCurve {
+      from { stroke-dashoffset: 800; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes barFill {
+      from { width: 0%; }
+      to { width: var(--bar-target); }
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(108, 92, 231, 0)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.4)); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes dashMarch { to { stroke-dashoffset: -16; } }
+
+    .scale-in { animation: scaleIn 0.5s ease forwards; }
+
+    .context-window-wrap {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .cw-track {
+      width: 100%;
+      height: 48px;
+      background: #f0f0f4;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid #e0e0e0;
+      position: relative;
+    }
+
+    .cw-segment {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.3px;
+      transition: all 0.4s ease;
+      cursor: pointer;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .cw-segment:hover {
+      filter: brightness(1.1);
+    }
+
+    .cw-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-top: 12px;
+      justify-content: center;
+    }
+
+    .cw-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .cw-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .cw-detail {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .cw-detail.open {
+      max-height: 80px;
+      opacity: 1;
+      margin-top: 12px;
     }
 
     .fade-in {
@@ -416,6 +513,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .costar-box:hover {
@@ -576,6 +674,7 @@
       margin-bottom: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .failure-card:hover {
@@ -635,6 +734,43 @@
       font-size: 14px;
       color: #555;
       line-height: 1.6;
+    }
+
+    /* Disclosure badge */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      fill: none;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
   </style>
 </head>
@@ -714,6 +850,364 @@
       );
     }
 
+    /* ── Stage SVG Diagrams ─────────────────────────────────── */
+
+    function S1Diagram() {
+      const blocks = [
+        { label: 'System Prompt', color: '#6c5ce7', w: 80 },
+        { label: 'Memory',        color: '#3498db', w: 80 },
+        { label: 'Tool Results',  color: '#f39c12', w: 80 },
+        { label: 'Conversation',  color: '#2ecc71', w: 80 },
+      ];
+      const totalFilled = blocks.reduce((s, b) => s + b.w, 0); // 320
+      const windowW = 480;
+      const barH = 60;
+      const availW = windowW - totalFilled; // 160
+
+      return (
+        <svg
+          width={windowW}
+          height={120}
+          viewBox={`0 0 ${windowW} 120`}
+          aria-label="Context window capacity showing four blocks filling 70% of available space"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          fontFamily="'DM Sans', sans-serif"
+        >
+          <defs>
+            <marker id="s1arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#6c5ce7" />
+            </marker>
+          </defs>
+
+          {/* outer window rect */}
+          <rect x={0} y={16} width={windowW} height={barH} rx={12} ry={12}
+            fill="#f5f3ff" stroke="#6c5ce7" strokeWidth={2} />
+
+          {/* colored blocks */}
+          {blocks.map((b, i) => {
+            const x = i * b.w;
+            return (
+              <g key={i}>
+                <rect x={x} y={16} width={b.w} height={barH}
+                  rx={i === 0 ? 10 : 0} ry={i === 0 ? 10 : 0}
+                  fill={b.color} />
+                <text x={x + b.w / 2} y={16 + barH / 2 + 1} textAnchor="middle" dominantBaseline="middle"
+                  fontSize={10} fontWeight="600" fill="white" fontFamily="'DM Sans', sans-serif">
+                  {b.label}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Available space block */}
+          <rect x={totalFilled} y={16} width={availW} height={barH}
+            rx={0} ry={0}
+            fill="none" stroke="#e0e0e0" strokeWidth={1.5} strokeDasharray="4 4" />
+          <text x={totalFilled + availW / 2} y={16 + barH / 2 + 1} textAnchor="middle" dominantBaseline="middle"
+            fontSize={11} fontWeight="600" fill="#b0b0b0" fontFamily="'DM Sans', sans-serif">
+            Available
+          </text>
+
+          {/* Right-end rounded clip — overlay to round right side */}
+          <rect x={windowW - 12} y={16} width={12} height={barH} rx={0} fill="#f5f3ff" />
+
+          {/* Bottom label */}
+          <text x={windowW / 2} y={96} textAnchor="middle" fontSize={12} fontWeight="600"
+            fill="#6c5ce7" fontFamily="'DM Sans', sans-serif">
+            Context Window (capacity overview)
+          </text>
+
+          {/* Percentage tick */}
+          <text x={totalFilled} y={10} textAnchor="middle" fontSize={11} fill="#6c5ce7" fontWeight="700"
+            fontFamily="'DM Sans', sans-serif">
+            70% used
+          </text>
+          <line x1={totalFilled} y1={12} x2={totalFilled} y2={16} stroke="#6c5ce7" strokeWidth={1.5} />
+        </svg>
+      );
+    }
+
+    function S2BookLines({ x, bookStroke }) {
+      const lineColor = bookStroke + 'aa';
+      return (
+        <>
+          <line x1={x + 16} y1={44} x2={x + 104} y2={44} stroke={lineColor} strokeWidth={1.5} />
+          <line x1={x + 16} y1={56} x2={x + 104} y2={56} stroke={lineColor} strokeWidth={1.5} />
+          <line x1={x + 16} y1={68} x2={x + 88} y2={68} stroke={lineColor} strokeWidth={1.5} />
+        </>
+      );
+    }
+
+    function S2Diagram() {
+      const books = [
+        { x: 20,  label: '✓ Good Context',   sub: 'High Quality',  fillBg: '#f5f3ff', stroke: '#6c5ce7', subColor: '#2ecc71', subBg: '#f0fff8' },
+        { x: 180, label: '✗ Missing Pages',  sub: 'Incomplete',    fillBg: '#fff5f5', stroke: '#e74c3c', subColor: '#e74c3c', subBg: '#fff5f5' },
+        { x: 340, label: '✗ Contradictory',  sub: 'Conflicting',   fillBg: '#fff8f0', stroke: '#f39c12', subColor: '#f39c12', subBg: '#fff8f0' },
+      ];
+
+      return (
+        <svg
+          width={480}
+          height={130}
+          viewBox="0 0 480 130"
+          aria-label="Three context quality scenarios: good context, missing pages, contradictory notes"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          fontFamily="'DM Sans', sans-serif"
+        >
+          {books.map((b) => (
+            <g key={b.x}>
+              {/* Book rect */}
+              <rect x={b.x} y={16} width={120} height={80} rx={10} ry={10}
+                fill={b.fillBg} stroke={b.stroke} strokeWidth={2} />
+              {/* Title */}
+              <text x={b.x + 60} y={34} textAnchor="middle" fontSize={11} fontWeight="700"
+                fill="#1a1a1a" fontFamily="'DM Sans', sans-serif">
+                {b.label}
+              </text>
+              {/* Text lines */}
+              <S2BookLines x={b.x} bookStroke={b.stroke} />
+              {/* Badge */}
+              <rect x={b.x + 20} y={104} width={80} height={20} rx={6}
+                fill={b.subBg} stroke={b.stroke} strokeWidth={1.5} />
+              <text x={b.x + 60} y={118} textAnchor="middle" fontSize={10} fontWeight="700"
+                fill={b.subColor} fontFamily="'DM Sans', sans-serif">
+                {b.sub}
+              </text>
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
+    function S3Diagram() {
+      const nodes = [
+        { x: 20,  label: 'Context Poisoning', icon: '☠', fillBg: '#fff5f5', stroke: '#e74c3c' },
+        { x: 165, label: 'Context Confusion',  icon: '?', fillBg: '#fff8f0', stroke: '#f39c12' },
+        { x: 310, label: 'Context Clash',      icon: '⚡', fillBg: '#fff5f5', stroke: '#e74c3c' },
+      ];
+      const arrowY = 70;
+
+      return (
+        <svg
+          width={520}
+          height={110}
+          viewBox="0 0 520 110"
+          aria-label="Three context failure modes leading to degraded output"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          fontFamily="'DM Sans', sans-serif"
+        >
+          <defs>
+            <marker id="s3arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+
+          {/* Main failure nodes */}
+          {nodes.map((n) => (
+            <g key={n.x}>
+              <rect x={n.x} y={20} width={110} height={60} rx={10} ry={10}
+                fill={n.fillBg} stroke={n.stroke} strokeWidth={2} />
+              {/* Icon */}
+              <text x={n.x + 55} y={52} textAnchor="middle" dominantBaseline="middle"
+                fontSize={18} fontFamily="'DM Sans', sans-serif" fill={n.stroke}>
+                {n.icon}
+              </text>
+              {/* Label */}
+              <text x={n.x + 55} y={90} textAnchor="middle" fontSize={11} fontWeight="600"
+                fill="#1a1a1a" fontFamily="'DM Sans', sans-serif">
+                {n.label}
+              </text>
+            </g>
+          ))}
+
+          {/* Arrows between failure nodes */}
+          <line x1={130} y1={arrowY} x2={163} y2={arrowY}
+            stroke="#b0a6e8" strokeWidth={1.5} markerEnd="url(#s3arr)" />
+          <line x1={275} y1={arrowY} x2={308} y2={arrowY}
+            stroke="#b0a6e8" strokeWidth={1.5} markerEnd="url(#s3arr)" />
+
+          {/* Arrow to degraded output */}
+          <line x1={420} y1={arrowY} x2={448} y2={arrowY}
+            stroke="#b0a6e8" strokeWidth={1.5} markerEnd="url(#s3arr)" />
+
+          {/* Degraded Output node */}
+          <rect x={450} y={38} width={62} height={36} rx={8} ry={8}
+            fill="#f5f5f5" stroke="#999" strokeWidth={1.5} />
+          <text x={481} y={52} textAnchor="middle" fontSize={9} fontWeight="600"
+            fill="#555" fontFamily="'DM Sans', sans-serif">Degraded</text>
+          <text x={481} y={64} textAnchor="middle" fontSize={9} fontWeight="600"
+            fill="#555" fontFamily="'DM Sans', sans-serif">Output</text>
+        </svg>
+      );
+    }
+
+    function S4Diagram() {
+      const spokes = [
+        { cx: 80,  cy: 60,  icon: '👩‍💻', label: 'Developer', stroke: '#6c5ce7', fillBg: '#f5f3ff' },
+        { cx: 320, cy: 60,  icon: '👤',   label: 'User',      stroke: '#2ecc71', fillBg: '#f0fff8' },
+        { cx: 200, cy: 175, icon: '👥',   label: 'Team',      stroke: '#f39c12', fillBg: '#fff8f0' },
+      ];
+
+      return (
+        <svg
+          width={400}
+          height={210}
+          viewBox="0 0 400 210"
+          aria-label="Hub and spoke diagram showing AI connected to Developer, User, and Team roles"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          fontFamily="'DM Sans', sans-serif"
+        >
+          {/* Spoke lines */}
+          {spokes.map((s) => (
+            <line key={s.label}
+              x1={200} y1={100} x2={s.cx} y2={s.cy}
+              stroke="#b0a6e8" strokeWidth={1.5} strokeDasharray="4 4" />
+          ))}
+
+          {/* Spoke nodes */}
+          {spokes.map((s) => (
+            <g key={s.label}>
+              <circle cx={s.cx} cy={s.cy} r={26}
+                fill={s.fillBg} stroke={s.stroke} strokeWidth={2} />
+              <text x={s.cx} y={s.cy} textAnchor="middle" dominantBaseline="middle"
+                fontSize={14} fontFamily="'DM Sans', sans-serif">
+                {s.icon}
+              </text>
+              <text x={s.cx} y={s.cy + 38} textAnchor="middle" fontSize={11}
+                fill="#666" fontFamily="'DM Sans', sans-serif">
+                {s.label}
+              </text>
+            </g>
+          ))}
+
+          {/* Center AI node */}
+          <circle cx={200} cy={100} r={30} fill="#6c5ce7" />
+          <text x={200} y={100} textAnchor="middle" dominantBaseline="middle"
+            fontSize={14} fontWeight="700" fill="white" fontFamily="'DM Sans', sans-serif">
+            AI
+          </text>
+        </svg>
+      );
+    }
+
+    function S5Diagram() {
+      return (
+        <svg
+          width={480}
+          height={140}
+          viewBox="0 0 480 140"
+          aria-label="Comparison of static prompts versus dynamic context showing quality outcomes"
+          style={{ maxWidth: '100%', overflow: 'visible' }}
+          fontFamily="'DM Sans', sans-serif"
+        >
+          <defs>
+            <marker id="s5arr-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#e74c3c" />
+            </marker>
+            <marker id="s5arr-grn" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#2ecc71" />
+            </marker>
+          </defs>
+
+          {/* Dividing line */}
+          <line x1={240} y1={4} x2={240} y2={136} stroke="#e0e0e0" strokeWidth={1.5} strokeDasharray="4 4" />
+
+          {/* Left: Static Prompts header */}
+          <rect x={20} y={10} width={200} height={50} rx={8} ry={8}
+            fill="#f5f5f5" stroke="#ccc" strokeWidth={1.5} />
+          <text x={120} y={32} textAnchor="middle" fontSize={13} fontWeight="600"
+            fill="#555" fontFamily="'DM Sans', sans-serif">Static Prompts</text>
+          <text x={120} y={50} textAnchor="middle" fontSize={11} fill="#999"
+            fontFamily="'DM Sans', sans-serif">Fixed instruction text</text>
+
+          {/* Right: Dynamic Context header */}
+          <rect x={260} y={10} width={200} height={50} rx={8} ry={8}
+            fill="#f5f3ff" stroke="#6c5ce7" strokeWidth={2} />
+          <text x={360} y={32} textAnchor="middle" fontSize={13} fontWeight="700"
+            fill="#6c5ce7" fontFamily="'DM Sans', sans-serif">Dynamic Context</text>
+          <text x={360} y={50} textAnchor="middle" fontSize={11} fill="#b0a6e8"
+            fontFamily="'DM Sans', sans-serif">Assembled at runtime</text>
+
+          {/* Left arrow down */}
+          <line x1={120} y1={60} x2={120} y2={84}
+            stroke="#e74c3c" strokeWidth={1.5} markerEnd="url(#s5arr-red)" />
+
+          {/* Right arrow down */}
+          <line x1={360} y1={60} x2={360} y2={84}
+            stroke="#2ecc71" strokeWidth={1.5} markerEnd="url(#s5arr-grn)" />
+
+          {/* Left outcome */}
+          <rect x={20} y={86} width={200} height={40} rx={8} ry={8}
+            fill="#fff5f5" stroke="#e74c3c" strokeWidth={1.5} />
+          <text x={120} y={111} textAnchor="middle" dominantBaseline="middle"
+            fontSize={13} fontWeight="700" fill="#e74c3c" fontFamily="'DM Sans', sans-serif">
+            ⚠ Inconsistent
+          </text>
+
+          {/* Right outcome */}
+          <rect x={260} y={86} width={200} height={40} rx={8} ry={8}
+            fill="#f0fff8" stroke="#2ecc71" strokeWidth={1.5} />
+          <text x={360} y={111} textAnchor="middle" dominantBaseline="middle"
+            fontSize={13} fontWeight="700" fill="#2ecc71" fontFamily="'DM Sans', sans-serif">
+            ✓ Optimal
+          </text>
+        </svg>
+      );
+    }
+
+    /* ── End Stage SVG Diagrams ─────────────────────────────── */
+
+    function ContextWindowDiagram() {
+      const [activeSegment, setActiveSegment] = React.useState(null);
+
+      const segments = [
+        { id: 'sys',   label: 'System',     pct: 12, color: '#6c5ce7', desc: 'Instructions, persona, rules — sets the AI\'s behavior for the entire session.' },
+        { id: 'tools', label: 'Tools',       pct: 18, color: '#3498db', desc: 'MCP tool definitions, function schemas — consumed even before any message is sent.' },
+        { id: 'files', label: 'File Context', pct: 25, color: '#00b894', desc: 'Codebase snippets, documents, data you\'ve injected — the "working memory" for the task.' },
+        { id: 'hist',  label: 'History',     pct: 30, color: '#fdcb6e', desc: 'Previous turns in the conversation — grows with every exchange, never shrinks.' },
+        { id: 'user',  label: 'User Input',  pct: 15, color: '#2ecc71', desc: 'Your current message — often just 0.5–2% of the window in a long session.' },
+      ];
+
+      return (
+        <div className="context-window-wrap">
+          <div style={{ fontWeight: 700, fontSize: '14px', color: '#555', marginBottom: '10px', letterSpacing: '0.5px', textAlign: 'center' }}>
+            CONTEXT WINDOW (200K TOKENS)
+          </div>
+          <div className="cw-track">
+            {segments.map((seg) => (
+              <div
+                key={seg.id}
+                className="cw-segment"
+                style={{ width: `${seg.pct}%`, background: seg.color }}
+                onClick={() => setActiveSegment(activeSegment === seg.id ? null : seg.id)}
+                title={seg.label}
+              >
+                {seg.pct > 12 ? seg.label : ''}
+              </div>
+            ))}
+          </div>
+          <div className="cw-legend">
+            {segments.map((seg) => (
+              <div key={seg.id} className="cw-legend-item" onClick={() => setActiveSegment(activeSegment === seg.id ? null : seg.id)} style={{ cursor: 'pointer' }}>
+                <div className="cw-legend-dot" style={{ background: seg.color }} />
+                <span>{seg.label} ({seg.pct}%)</span>
+              </div>
+            ))}
+          </div>
+          {segments.map((seg) => (
+            <div key={seg.id} className={`cw-detail ${activeSegment === seg.id ? 'open' : ''}`}
+              style={{ padding: activeSegment === seg.id ? '12px 16px' : '0', background: seg.color + '18', borderLeft: `4px solid ${seg.color}`, borderRadius: '8px', fontSize: '14px', color: '#333', lineHeight: '1.6' }}
+            >
+              <strong style={{ color: seg.color }}>{seg.label}:</strong> {seg.desc}
+            </div>
+          ))}
+          <div style={{ fontSize: '12px', color: '#aaa', textAlign: 'center', marginTop: '8px' }}>
+            Click a segment to learn more
+          </div>
+        </div>
+      );
+    }
+
     function S1() {
       const contextSources = [
         { emoji: "\uD83D\uDD27", label: "Developer-provided context", desc: "System prompts, instructions, rules" },
@@ -732,7 +1226,8 @@
             Context engineering is the discipline of designing dynamic systems that provide the right information, at the right time, to an LLM &mdash; so it can produce the best possible output. It&rsquo;s the next evolution beyond prompt engineering.
           </div>
           <div className="scene-card">
-            <div className="comparison-box">
+            <S1Diagram />
+            <div className="comparison-box" style={{ marginTop: '24px' }}>
               <div className="comparison-item neutral fade-in">
                 <div className="comparison-title">Prompt Engineering</div>
                 <div className="comparison-content">
@@ -761,6 +1256,13 @@
                 </div>
               ))}
             </div>
+
+            <div style={{ width: '100%', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e8e3f8' }}>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#1a1a1a', marginBottom: '16px' }}>
+                How a Context Window Fills Up:
+              </div>
+              <ContextWindowDiagram />
+            </div>
           </div>
           <InsightBlock>
             Prompts are static. But context is extremely dynamic &mdash; and if the context is dynamic, then the system that constructs it must be dynamic too.
@@ -785,7 +1287,8 @@
             Garbage in, garbage out &mdash; an LLM can only be as good as the context it receives. Context engineering is like preparing for an open-book exam.
           </div>
           <div className="scene-card">
-            <div style={{ width: '100%' }}>
+            <S2Diagram />
+            <div style={{ width: '100%', marginTop: '24px' }}>
               <div style={{ fontSize: '15px', lineHeight: '1.7', color: '#333', marginBottom: '24px' }}>
                 <strong>The &ldquo;Open-Book Exam&rdquo; analogy:</strong> Having the right textbook, opened to the right page, with the right notes highlighted &mdash; that determines your score. The smartest student will fail if their book is:
               </div>
@@ -847,7 +1350,8 @@
             As AI agents work on longer tasks, three types of context failure can degrade their performance &mdash; poisoning, confusion, and clash.
           </div>
           <div className="scene-card">
-            <div style={{ width: '100%' }}>
+            <S3Diagram />
+            <div style={{ width: '100%', marginTop: '24px' }}>
               <div style={{
                 padding: '16px 20px',
                 background: 'white',
@@ -864,7 +1368,7 @@
               {failureTypes.map((failure, idx) => (
                 <div
                   key={failure.id}
-                  className={`failure-card fade-in ${expandedFailure === failure.id ? 'expanded' : ''}`}
+                  className={`failure-card fade-in disclosure-card-host ${expandedFailure === failure.id ? 'expanded' : ''}`}
                   style={{
                     background: failure.bg,
                     borderColor: expandedFailure === failure.id ? failure.border : '#e0e0e0',
@@ -872,12 +1376,11 @@
                   }}
                   onClick={() => setExpandedFailure(expandedFailure === failure.id ? null : failure.id)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                  </span>
                   <div className="failure-card-title">
                     <span>{failure.title}</span>
-                    <span className="expand-hint" style={{
-                      transform: expandedFailure === failure.id ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease'
-                    }}>&#9662;</span>
                   </div>
                   <div className="failure-card-content">
                     <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.7' }}>
@@ -934,17 +1437,20 @@
             Context engineering isn&rsquo;t just for developers building AI agents. It matters for everyone interacting with AI.
           </div>
           <div className="scene-card">
-            <div className="costar-grid">
+            <S4Diagram />
+            <div className="costar-grid" style={{ marginTop: '24px', width: '100%' }}>
               {roles.map((role, idx) => (
                 <div
                   key={role.id}
-                  className={`costar-box ${expandedRole === role.id ? 'expanded' : ''}`}
+                  className={`costar-box disclosure-card-host ${expandedRole === role.id ? 'expanded' : ''}`}
                   style={idx === 2 && expandedRole !== role.id ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
                   onClick={() => setExpandedRole(expandedRole === role.id ? null : role.id)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                  </span>
                   <div className="costar-label">{role.emoji} {role.title}</div>
                   <div className="costar-description">{role.desc}</div>
-                  <div className="costar-hint">Click to explore</div>
                   <div className="costar-example">
                     {role.detail}
                   </div>
@@ -990,7 +1496,8 @@
             Three foundational principles to remember about context engineering.
           </div>
           <div className="scene-card">
-            <div style={{ width: '100%' }}>
+            <S5Diagram />
+            <div style={{ width: '100%', marginTop: '24px' }}>
               {summaries.map((item, idx) => (
                 <div
                   className="summary-card fade-in"

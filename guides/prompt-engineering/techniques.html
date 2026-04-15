@@ -4,41 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-  <title>Master 12 Prompt Engineering Techniques</title>
+  <title>Master 10 Prompt Engineering Techniques</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: #ffffff;
-      color: #1a1a1a;
-      height: 100vh;
-    }
-
-    #root {
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .container {
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1a1a1a; height: 100vh; }
+    #root { height: 100vh; overflow: hidden; }
+    .container { display: flex; height: 100vh; overflow: hidden; }
 
     .sidebar {
       width: 120px;
       background: #f8f9fa;
       border-right: 1px solid #e0e0e0;
-      padding: 80px 12px 40px;
+      padding: 40px 12px 40px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -46,80 +27,53 @@
       gap: 4px;
     }
 
-    .step-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex-shrink: 0;
-    }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
 
     .step-btn {
-      width: 64px;
-      height: 64px;
+      width: 56px; height: 56px;
       border-radius: 50%;
       background: white;
       border: 2px solid #e0e0e0;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
+      display: flex; align-items: center; justify-content: center;
       transition: all 0.3s ease;
       position: relative;
       flex-shrink: 0;
+      padding: 14px;
+      color: #6c5ce7;
     }
 
     .step-btn.active {
       background: #6c5ce7;
       border-color: #6c5ce7;
       color: white;
-      transform: scale(1.1);
+      transform: scale(1.08);
       box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
     }
 
-    .step-btn:hover {
-      border-color: #6c5ce7;
-      transform: translateY(-2px);
-    }
+    .step-btn:hover { border-color: #6c5ce7; transform: translateY(-2px); }
 
     .step-btn-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: #999;
       margin-top: 4px;
       text-align: center;
       letter-spacing: 0.3px;
       transition: color 0.3s ease;
+      max-width: 92px;
+      line-height: 1.2;
     }
 
-    .step-wrapper.active .step-btn-label {
-      color: #6c5ce7;
-    }
+    .step-wrapper.active .step-btn-label { color: #6c5ce7; }
 
-    .step-connector {
-      width: 2px;
-      height: 16px;
-      background: #e0e0e0;
-      margin: 2px 0;
-      flex-shrink: 0;
-    }
+    .step-connector { width: 2px; height: 12px; background: #e0e0e0; margin: 2px 0; flex-shrink: 0; }
+    .step-connector.active { background: #6c5ce7; }
 
-    .step-connector.active {
-      background: #6c5ce7;
-    }
-
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
+    .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
     .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 20px 40px;
       border-bottom: 3px solid transparent;
       border-image: linear-gradient(90deg, #6c5ce7, #a78bfa, #2ecc71) 1;
@@ -127,410 +81,469 @@
       flex-shrink: 0;
     }
 
-    .left-section {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    .left-section { display: flex; align-items: center; gap: 20px; }
 
-    .back-link {
-      color: #6c5ce7;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .back-link:hover {
-      color: #2ecc71;
-    }
+    .back-link { color: #6c5ce7; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+    .back-link:hover { color: #2ecc71; }
 
     .badge {
-      display: inline-block;
-      background: #e8e3f8;
-      color: #6c5ce7;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      display: inline-block; background: #e8e3f8; color: #6c5ce7;
+      padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
     }
 
-    .guide-number {
-      font-family: 'Fraunces', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #b0a6e8;
-      margin-right: 8px;
-    }
+    .guide-number { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #b0a6e8; margin-right: 8px; }
+    .title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: #1a1a1a; }
 
-    .title {
-      font-family: 'Fraunces', serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1a1a;
-    }
+    .stage-header { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
 
-    .stage-header {
-      font-family: 'Fraunces', serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 8px;
-    }
-
-    .nav-arrows {
-      display: flex;
-      gap: 12px;
-    }
-
+    .nav-arrows { display: flex; gap: 12px; }
     .arrow-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      border: 1px solid #e0e0e0;
-      background: white;
-      cursor: pointer;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
+      width: 40px; height: 40px; border-radius: 12px;
+      border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
     }
-
-    .arrow-btn:hover {
-      border-color: #6c5ce7;
-      color: #6c5ce7;
-      transform: translateY(-2px);
-    }
-
-    .arrow-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .arrow-btn:hover { border-color: #6c5ce7; color: #6c5ce7; transform: translateY(-2px); }
+    .arrow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .content-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      scroll-behavior: smooth;
-      padding: 32px 48px;
-      gap: 30px;
+      flex: 1; display: flex; flex-direction: column;
+      overflow-y: auto; scroll-behavior: smooth;
+      padding: 24px 36px;
+      gap: 18px;
     }
 
-    .explanation {
-      font-size: 22px;
-      line-height: 1.7;
-      color: #2a2a2a;
-    }
-
-    .scene-card {
-      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
-      border-radius: 16px;
-      padding: 40px;
-      border: 1px solid #e8e3f8;
-      min-height: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
-    }
+    .explanation { font-size: 18px; line-height: 1.7; color: #2a2a2a; }
 
     .insight-box {
       background: #f0faf0;
       border-left: 4px solid #2ecc71;
-      padding: 24px;
+      padding: 20px 24px;
       border-radius: 8px;
       color: #1a5e3a;
-      font-size: 17px;
+      font-size: 15px;
       line-height: 1.7;
-      margin-top: 24px;
-      position: relative;
+      margin-top: 4px;
     }
 
     .insight-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
       color: #2ecc71;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       text-transform: uppercase;
     }
 
     .progress-indicator {
-      font-size: 13px;
-      font-weight: 600;
-      color: #6c5ce7;
-      background: #f5f3ff;
-      padding: 4px 12px;
-      border-radius: 12px;
+      font-size: 13px; font-weight: 600; color: #6c5ce7;
+      background: #f5f3ff; padding: 4px 12px; border-radius: 12px;
       margin-right: 12px;
     }
 
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+    /* ---------- Overview Cards ---------- */
+    .overview-intro {
+      font-size: 16px; line-height: 1.7; color: #555;
+      max-width: 760px;
     }
 
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
     }
 
-    /* Technique-specific styles */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+    .tech-card {
+      background: white;
+      border: 2px solid #e8e8f0;
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 200px;
+    }
+
+    .tech-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(108, 92, 231, 0.12);
+      border-color: #c9bdf3;
+    }
+
+    .tech-card.expanded {
+      border-color: #6c5ce7;
+      background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+      box-shadow: 0 12px 28px rgba(108, 92, 231, 0.18);
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-icon-wrap {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      flex-shrink: 0;
+      padding: 9px;
+    }
+
+    .card-number {
+      font-family: 'Fraunces', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #b0a6e8;
+      background: #f5f3ff;
+      padding: 3px 9px;
+      border-radius: 10px;
+    }
+
+    .card-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.25;
+    }
+
+    .card-tagline {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .card-complexity-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: auto;
+    }
+
+    .card-complexity-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #999;
+      letter-spacing: 0.6px;
+    }
+
+    .card-complexity-bar {
+      flex: 1;
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .card-complexity-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+    }
+
+    .card-complexity-value {
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    .card-reveal {
+      background: #f5f3ff;
+      border-left: 3px solid #6c5ce7;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #3a2f7a;
+      animation: revealIn 0.35s ease;
+    }
+
+    .card-reveal-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6c5ce7;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+
+    .card-cta:hover { color: #2ecc71; }
+
+    @keyframes revealIn {
+      from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .tabs {
+    .overview-legend {
       display: flex;
-      gap: 12px;
-      border-bottom: 1px solid #e9ecef;
-      margin-bottom: 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
     }
 
-    .tab {
-      padding: 12px 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
+    .legend-dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* ---------- Detail Page ---------- */
+    .detail-hero {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 100%);
+      border: 1px solid #e8e3f8;
+      border-radius: 16px;
+    }
+
+    .detail-icon {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; flex-shrink: 0;
+      padding: 14px;
+    }
+
+    .detail-title-block { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+    .detail-rank {
+      font-family: 'Fraunces', serif;
       font-size: 14px;
-      font-weight: 500;
-      color: #999;
-      border-bottom: 2px solid transparent;
-      transition: all 0.3s ease;
-    }
-
-    .tab.active {
+      font-weight: 700;
       color: #6c5ce7;
-      border-bottom-color: #6c5ce7;
+      letter-spacing: 0.5px;
     }
 
-    .code-block {
+    .detail-title {
+      font-family: 'Fraunces', serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.15;
+    }
+
+    .detail-tagline { font-size: 15px; color: #666; line-height: 1.5; }
+
+    .detail-complexity-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      min-width: 140px;
+    }
+
+    .detail-complexity-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #999;
+    }
+
+    .detail-complexity-bar {
+      width: 140px;
+      height: 8px;
+      background: #e8e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .detail-complexity-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .usage-card {
+      padding: 20px 22px;
+      border-radius: 14px;
+      border: 1px solid;
+    }
+
+    .usage-card.good { background: #f0faf3; border-color: #c5ebd1; }
+    .usage-card.bad  { background: #fef5f5; border-color: #f0c4c4; }
+
+    .usage-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .usage-card.good .usage-header { color: #1a5e3a; }
+    .usage-card.bad  .usage-header { color: #8b2020; }
+
+    .usage-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .usage-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .usage-card.good .usage-list li { color: #2d5016; }
+    .usage-card.bad  .usage-list li { color: #5a2020; }
+
+    .bullet-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .bullet-icon.good { background: #2ecc71; }
+    .bullet-icon.bad  { background: #e74c3c; }
+
+    .example-block {
+      background: white;
+      border: 1px solid #e8e8f0;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .example-title {
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .example-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: #6c5ce7;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .example-prompt {
       background: #2c3e50;
       color: #ecf0f1;
-      padding: 16px;
+      padding: 14px 16px;
       border-radius: 8px;
       font-family: 'Courier New', monospace;
       font-size: 13px;
-      line-height: 1.5;
-      overflow-x: auto;
-      margin: 12px 0;
+      line-height: 1.55;
+      white-space: pre-wrap;
     }
 
-    .code-output {
-      background: #ecf0f1;
-      color: #2c3e50;
-      padding: 12px;
+    .example-output {
+      background: #f0faf0;
+      color: #1a5e3a;
+      padding: 14px 16px;
+      border-left: 3px solid #2ecc71;
       border-radius: 8px;
       font-family: 'Courier New', monospace;
-      font-size: 12px;
-      margin-top: 8px;
-      border-left: 3px solid #6c5ce7;
-    }
-
-    .interactive-demo {
-      display: flex;
-      gap: 20px;
-      flex-direction: column;
-    }
-
-    .demo-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .demo-label {
-      font-weight: 600;
-      color: #2c3e50;
-      font-size: 14px;
-    }
-
-    .constraint-builder {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .constraint-input {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .constraint-box {
-      flex: 1;
-      padding: 12px;
-      border: 1px solid #e9ecef;
-      border-radius: 6px;
-      background: white;
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.55;
+      margin-top: 12px;
+      white-space: pre-wrap;
     }
 
-    .add-btn {
-      background: #6c5ce7;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-
-    .add-btn:hover {
-      background: #5a4cb8;
-    }
-
-    .remove-btn {
-      background: #ff6b6b;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s ease;
-    }
-
-    .remove-btn:hover {
-      background: #ee5a52;
-    }
-
-    .pipeline-viz {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .pipeline-box {
-      background: #e0d4ff;
-      border: 2px solid #6c5ce7;
+    .protip-box {
+      background: #fef7e6;
+      border-left: 4px solid #f39c12;
       padding: 16px 20px;
       border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #6c5ce7;
-      text-align: center;
-      min-width: 120px;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      color: #6b4a05;
+      font-size: 14px;
+      line-height: 1.65;
     }
 
-    .pipeline-box:hover {
-      background: #6c5ce7;
-      color: white;
-      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    .protip-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+      color: #b37a08;
+      margin-bottom: 6px;
+      text-transform: uppercase;
     }
 
-    .pipeline-arrow {
-      font-size: 20px;
-      color: #999;
-    }
-
-    .role-selector {
+    /* Disclosure badge */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 12px 0;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
     }
-
-    .role-btn {
-      padding: 10px 16px;
-      border: 1px solid #e9ecef;
-      background: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.2s ease;
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      fill: none;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
     }
-
-    .role-btn.selected {
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
       background: #6c5ce7;
-      color: white;
-      border-color: #6c5ce7;
+      border-color: transparent;
     }
-
-    .response-box {
-      background: white;
-      border: 1px solid #e9ecef;
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #555;
-    }
-
-    .analysis-paths {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin: 12px 0;
-    }
-
-    .analysis-path {
-      background: white;
-      border: 1px solid #e9ecef;
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .consensus-panel {
-      background: #f0faf0;
-      border: 2px solid #2ecc71;
-      padding: 16px;
-      border-radius: 8px;
-      margin-top: 12px;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #2d5016;
-    }
-
-    .key-takeaways {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-top: 12px;
-    }
-
-    .takeaway-card {
-      background: white;
-      border: 1px solid #e9ecef;
-      padding: 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .takeaway-card:hover {
-      border-color: #6c5ce7;
-      box-shadow: 0 2px 8px rgba(108, 92, 231, 0.15);
-    }
-
-    .takeaway-title {
-      font-weight: 600;
-      color: #6c5ce7;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    .takeaway-content {
-      font-size: 13px;
-      line-height: 1.5;
-      color: #666;
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
     }
   </style>
 </head>
@@ -538,452 +551,480 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState } = React;
 
-    const A = "#6c5ce7", G = "#2ecc71", GD = "#1a9456";
-
-    // Stage 1: Zero-Shot & Few-Shot
-    const S1 = () => {
-      const [mode, setMode] = useState('zero');
-      return (
-        <>
-          <div><div className="stage-header">Zero-Shot &amp; Few-Shot</div></div>
-          <div className="explanation">
-            Zero-Shot and Few-Shot prompting are foundational techniques that control how much context and examples you provide to the AI.
-          </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div className="tabs">
-              <button className={`tab ${mode === 'zero' ? 'active' : ''}`} onClick={() => setMode('zero')}>Zero-Shot</button>
-              <button className={`tab ${mode === 'few' ? 'active' : ''}`} onClick={() => setMode('few')}>Few-Shot</button>
-            </div>
-            {mode === 'zero' ? (
-              <div style={{ width: '100%' }}>
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Prompt:</div>
-                  <div className="code-block">Explain Python's try-except-finally in 3 sentences</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>AI Response:</div>
-                  <div className="code-output">try-except-finally is Python's error handling mechanism where try runs code that might fail, except catches specific errors, and finally runs cleanup code regardless of success or failure. The try block attempts execution, except blocks define what happens when specific exceptions occur, and the finally block guarantees execution for resource cleanup. This structure prevents crashes and ensures proper cleanup.</div>
-                </div>
-              </div>
-            ) : (
-              <div style={{ width: '100%' }}>
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Examples (showing context):</div>
-                  <div className="code-block">{`Input: "Book flight to NYC"
-Output: {"type": "flight", "destination": "NYC"}`}</div>
-                  <div className="code-block" style={{ marginTop: '8px' }}>{`Input: "Reserve hotel in Paris"
-Output: {"type": "hotel", "location": "Paris"}`}</div>
-                </div>
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Your Task:</div>
-                  <div className="code-block">Extract booking details from: "Reserve 2 hotel rooms in Tokyo for 5 nights"</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Expected Output:</div>
-                  <div className="code-output">{`{"type": "hotel", "location": "Tokyo", "quantity": 2, "nights": 5}`}</div>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Zero-shot works for simple tasks, but Few-Shot dramatically improves accuracy by showing the AI the exact format and patterns you want.
-          </div>
-        </>
-      );
+    /* Static, trusted SVG markup below. Content is never user-supplied — injected via React for rendering only. */
+    const ICONS = {
+      lightning:  '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+      list:       '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6"  x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6"  x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+      brain:      '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08A2.5 2.5 0 014 15.5a2.5 2.5 0 01-.16-3.97A2.5 2.5 0 013 9.5a2.5 2.5 0 013.16-2.41 2.5 2.5 0 012-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08A2.5 2.5 0 0020 15.5a2.5 2.5 0 00.16-3.97A2.5 2.5 0 0021 9.5a2.5 2.5 0 00-3.16-2.41 2.5 2.5 0 00-2-3A2.5 2.5 0 0014.5 2z"/></svg>',
+      refresh:    '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
+      user:       '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      link:       '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>',
+      shield:     '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+      code:       '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+      layers:     '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+      tree:       '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="14" r="2"/><circle cx="19" cy="14" r="2"/><circle cx="5" cy="20" r="1.5"/><circle cx="19" cy="20" r="1.5"/><path d="M12 6v2M12 8l-5 4M12 8l5 4M5 16v2M19 16v2"/></svg>',
+      grid:       '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+      bulb:       '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
+      check:      '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+      cross:      '<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
     };
 
-    // Stage 2: Chain-of-Thought & ReAct
-    const S2 = () => {
-      const [mode, setMode] = useState('cot');
+    /* Renders trusted inline SVG. The markup source is the local ICONS constant only. */
+    function SvgIcon({ markup, className, style }) {
+      return <span className={className} style={style} dangerouslySetInnerHTML={{ __html: markup }} />;
+    }
+
+    const TECHNIQUES = [
+      {
+        id: 'zero-shot',
+        name: 'Zero-Shot Prompting',
+        short: 'Zero-Shot',
+        tagline: 'Ask the model directly — no examples, no demos.',
+        complexity: 10,
+        color: '#95a5a6',
+        icon: ICONS.lightning,
+        bestFor: 'Simple, well-defined tasks the model already knows how to handle (summarize, translate, classify).',
+        description: 'You give the model nothing but an instruction. It relies entirely on pretrained knowledge to produce the answer. Fast, cheap, and surprisingly capable — but unpredictable when format or style matters.',
+        whenToUse: [
+          'Task is common and well-understood (summarize, translate, explain).',
+          'A quick, ad-hoc answer is good enough — no strict schema needed.',
+          'Low latency or low token cost is a priority.',
+          'You are exploring what the model already knows before adding examples.'
+        ],
+        whenNotToUse: [
+          'You need a strict output format (JSON schema, CSV columns).',
+          'Domain-specific tone or vocabulary is critical.',
+          'Task has unusual conventions the model likely has not seen.',
+          'You need the same shape of answer across many calls.'
+        ],
+        example: {
+          prompt: 'Summarize the French Revolution in three sentences.',
+          output: 'The French Revolution (1789-1799) overthrew the Bourbon monarchy and abolished feudal privileges in France. It was driven by Enlightenment ideals, widespread financial crisis, and resentment of aristocratic power. Its legacy reshaped Europe politically and inspired democratic movements worldwide.'
+        },
+        proTip: 'Always try zero-shot first. If the output is good enough, do not burn tokens on examples. Upgrade only when you see drift, format errors, or inconsistency.'
+      },
+      {
+        id: 'few-shot',
+        name: 'Few-Shot Prompting',
+        short: 'Few-Shot',
+        tagline: 'Teach by example — show 2 to 5 input/output pairs.',
+        complexity: 30,
+        color: '#3498db',
+        icon: ICONS.list,
+        bestFor: 'Tasks where output format, style, or quality bar matters. Examples teach faster than instructions.',
+        description: 'Before the real task, you show the model a handful of example inputs paired with the exact outputs you want. The model infers the pattern from the demonstrations rather than your words.',
+        whenToUse: [
+          'You need a specific output shape (JSON schema, label set, style).',
+          'Consistency across many calls is important.',
+          'Task is unusual enough that instructions alone drift.',
+          'Edge cases matter (classification with ambiguous inputs).'
+        ],
+        whenNotToUse: [
+          'Task is trivial — examples just waste tokens.',
+          'Only one narrow example is available and it may bias output.',
+          'Examples are long and context budget is tight.',
+          'You want creative variation, not pattern repetition.'
+        ],
+        example: {
+          prompt: 'Classify sentiment as positive, negative, neutral, or mixed.\n\nText: "The food was great but service was slow."\nSentiment: mixed\n\nText: "Absolutely loved it, best meal this year!"\nSentiment: positive\n\nText: "Waited 40 minutes for cold soup."\nSentiment:',
+          output: 'negative'
+        },
+        proTip: 'Include one tricky or ambiguous example. It tells the model how to handle the grey zone — which is where most failures live.'
+      },
+      {
+        id: 'cot',
+        name: 'Chain-of-Thought (CoT)',
+        short: 'CoT',
+        tagline: 'Force the model to reason step-by-step before answering.',
+        complexity: 50,
+        color: '#f39c12',
+        icon: ICONS.brain,
+        bestFor: 'Math, logic, multi-step reasoning, or any problem where you want a traceable rationale.',
+        description: 'Instead of asking for an answer, ask for the reasoning leading to the answer. A simple "Let\'s think step by step" can dramatically improve accuracy on problems that require intermediate computation.',
+        whenToUse: [
+          'Math word problems or numeric reasoning.',
+          'Multi-step logic, planning, or cause-effect analysis.',
+          'You need an auditable trail showing how the model arrived at the answer.',
+          'The task trips up the model when asked for an answer directly.'
+        ],
+        whenNotToUse: [
+          'Trivial lookups or direct factual recall — wastes tokens.',
+          'Creative writing where explicit reasoning breaks flow.',
+          'Real-time chat UX where long rationale hurts latency.',
+          'Final output must be concise — use CoT then hide the steps.'
+        ],
+        example: {
+          prompt: 'A campaign spent $10,000 and generated $45,000 in revenue, 60% attributed to marketing. What is the marketing ROI? Think step by step.',
+          output: 'Step 1: Attributed revenue = $45,000 × 0.60 = $27,000.\nStep 2: Profit = $27,000 − $10,000 = $17,000.\nStep 3: ROI = ($17,000 / $10,000) × 100 = 170%.\n\nAnswer: 170%.'
+        },
+        proTip: 'For production apps, do CoT internally, then ask the model to output only the final answer. Best of both: better accuracy, clean UX.'
+      },
+      {
+        id: 'react',
+        name: 'ReAct (Reason + Act)',
+        short: 'ReAct',
+        tagline: 'Interleave thinking, tool calls, and observations in a loop.',
+        complexity: 95,
+        color: '#2ecc71',
+        icon: ICONS.refresh,
+        bestFor: 'Agent tasks that need to look up real-world data or call tools — search, APIs, databases.',
+        description: 'The model alternates Thought → Action → Observation until the task is done. "Thought" plans, "Action" calls a tool, "Observation" records the result. It is the backbone of most agent frameworks.',
+        whenToUse: [
+          'Task needs live data (weather, prices, search, internal APIs).',
+          'Multi-step workflow where each step depends on the previous result.',
+          'You want an auditable trace of actions taken.',
+          'Tools are available and wiring them in is worth the complexity.'
+        ],
+        whenNotToUse: [
+          'No tools to call — ReAct adds overhead for nothing.',
+          'Simple one-shot Q&A the model can answer from memory.',
+          'You need deterministic output and cannot tolerate loop variance.',
+          'Latency and cost budgets are tight (agents are slow and expensive).'
+        ],
+        example: {
+          prompt: 'Question: What is the weather in NYC and what outdoor activity fits it?',
+          output: 'Thought: I need current weather for NYC.\nAction: search("NYC weather today")\nObservation: 72°F, partly cloudy, light wind.\n\nThought: Pleasant weather — outdoor activities are viable.\nAction: search("outdoor activities NYC mild weather")\nObservation: Central Park walks, Brooklyn Bridge, rooftop cafes.\n\nAnswer: It is 72°F and partly cloudy. A walk through Central Park or across the Brooklyn Bridge is ideal.'
+        },
+        proTip: 'Cap the number of action steps. Unbounded ReAct loops are the #1 cause of runaway agent costs and infinite-retry failures.'
+      },
+      {
+        id: 'role',
+        name: 'Role-Based / Persona Prompting',
+        short: 'Role',
+        tagline: 'Assign the model a role: "You are a senior X..."',
+        complexity: 40,
+        color: '#6c5ce7',
+        icon: ICONS.user,
+        bestFor: 'Steering tone, vocabulary, and domain lens — consistent expertise across responses.',
+        description: 'A role primes the model to answer from a particular viewpoint. "You are a senior security engineer" produces very different output than "You are a friendly tutor" for the same question.',
+        whenToUse: [
+          'Answer should reflect a specific domain expertise (legal framing, engineering, medical literacy).',
+          'Tone needs to stay consistent across a conversation.',
+          'You want to narrow the model from generalist to specialist vocabulary.',
+          'Audience persona differs from writer persona (teach a 5-year-old vs a CFO).'
+        ],
+        whenNotToUse: [
+          'Task is objective and needs neutral factual output.',
+          'Role could imply unwarranted authority (e.g., pretending to be a licensed doctor).',
+          'Persona adds noise but no real behavior change.',
+          'You need many perspectives — one role collapses the range.'
+        ],
+        example: {
+          prompt: 'You are a senior staff engineer reviewing a junior developer\'s PR. Be specific, kind, and focus on correctness over style.\n\nReview: "Added a try/except around the DB call that returns None on any exception."',
+          output: 'A few concerns:\n1. Catching every exception hides real bugs (e.g., schema errors). Narrow it to the exceptions you actually expect.\n2. Returning None silently changes the caller contract — callers cannot tell "no rows" from "error." Consider raising, or returning a Result type.\n3. Add a log line so we can see the suppressed error in production.\n\nGood instinct protecting the caller — let us just make the failure mode explicit.'
+        },
+        proTip: 'Pair the role with constraints ("be concise", "focus on X"). A role alone is a vibe; a role plus rules is a contract.'
+      },
+      {
+        id: 'chaining',
+        name: 'Prompt Chaining',
+        short: 'Chain',
+        tagline: 'Break a big task into a sequence of smaller prompts.',
+        complexity: 65,
+        color: '#e67e22',
+        icon: ICONS.link,
+        bestFor: 'Multi-stage workflows: research → draft → edit → format. Each stage passes its output to the next.',
+        description: 'Rather than cramming everything into one prompt, you split the task into ordered steps. Step 1\'s output becomes Step 2\'s input. Often combined with validation between steps.',
+        whenToUse: [
+          'Task has clearly distinct phases (outline → draft → polish).',
+          'Intermediate output is worth reviewing or storing.',
+          'Each step needs different instructions or even different models.',
+          'A single prompt hits context limits or quality ceilings.'
+        ],
+        whenNotToUse: [
+          'Task fits comfortably in a single prompt.',
+          'Added latency between calls breaks the UX.',
+          'Steps are so tightly coupled that splitting loses context.',
+          'No human or automated check between stages — chain errors compound.'
+        ],
+        example: {
+          prompt: 'Step 1: "Outline a blog post on vector databases — 5 sections, one line each."\n\nStep 2: "Here is the outline: {step1_output}. Expand section 3 into 250 words."\n\nStep 3: "Here is the draft: {step2_output}. Shorten to 180 words and remove jargon."',
+          output: 'Each stage produces a clean, focused artifact. The final draft is tighter than a single "write a blog post" prompt, and you can inspect / fix each stage independently.'
+        },
+        proTip: 'Write the chain as named functions, not raw prompt strings. It turns prompts into composable, testable units — and you can swap stages without rewriting everything.'
+      },
+      {
+        id: 'constraints',
+        name: 'Constraints & Negative Prompting',
+        short: 'Constraints',
+        tagline: 'Spell out what MUST and MUST NOT appear in the output.',
+        complexity: 25,
+        color: '#e74c3c',
+        icon: ICONS.shield,
+        bestFor: 'Narrowing the solution space — hard requirements, forbidden content, length limits.',
+        description: 'Constraints say what the output must contain (quantified metrics, bullet list, ≤100 words). Negative prompts say what it must NOT contain (no apologies, no marketing fluff, no Python print statements). Explicit beats hopeful.',
+        whenToUse: [
+          'Output must satisfy specific rules (length, format, vocabulary).',
+          'The model has a known bad habit you want to suppress (apologies, disclaimers).',
+          'Regulated or brand-sensitive output (no medical claims, no competitor mentions).',
+          'You are repeatedly re-prompting to fix the same mistake.'
+        ],
+        whenNotToUse: [
+          'Creative exploration — too many constraints kill novelty.',
+          'Constraints contradict each other (watch for silent conflicts).',
+          'Over-constraining when a simpler prompt already works.',
+          'Negative prompts that name the unwanted thing so vividly they cause it.'
+        ],
+        example: {
+          prompt: 'Write a product update for our API launch.\n\nMUST include: release version, 2 quantified metrics, a one-line CTA.\nMUST NOT include: "revolutionary", "game-changing", exclamation marks, apologies.\nLength: 80 words max.',
+          output: 'v2.1 of the Payments API is live. P99 latency dropped from 210ms to 85ms (a 60% improvement), and the new idempotency-key header removes duplicate charges — the top-ranked support issue last quarter.\n\nUpgrade your SDK to version 4.3 to pick up both changes automatically; the old endpoints stay active for 90 days.\n\nTry it in staging today.'
+        },
+        proTip: 'If a negative prompt keeps failing, flip it. Instead of "do not be verbose", say "use at most 80 words". Positive constraints with numbers are easier for the model to follow.'
+      },
+      {
+        id: 'format',
+        name: 'Output Formatting',
+        short: 'Format',
+        tagline: 'Pin the output shape — JSON, CSV, Markdown, XML.',
+        complexity: 20,
+        color: '#16a085',
+        icon: ICONS.code,
+        bestFor: 'Anything a downstream program will parse. Structured output prevents regex-golf.',
+        description: 'You tell the model not just what to answer, but the exact structure of the answer. Pair with a schema or example, and the output drops cleanly into code.',
+        whenToUse: [
+          'Downstream code parses the result (JSON, CSV, YAML).',
+          'You need uniform fields across many records.',
+          'API integrations or data-extraction pipelines.',
+          'Tabular comparison of options where columns matter.'
+        ],
+        whenNotToUse: [
+          'Output is for a human reader — structure can feel clinical.',
+          'Creative writing where format constraints kill voice.',
+          'Free-form exploration or brainstorming.',
+          'The model cannot hold the schema in its working memory reliably.'
+        ],
+        example: {
+          prompt: 'Extract contact info from the email below. Return JSON with keys: name (string), email (string), phone (string or null), company (string or null).\n\nEmail: "Hi, this is Jordan Lee from Acme Corp (jordan@acme.com). Feel free to call anytime."',
+          output: '{\n  "name": "Jordan Lee",\n  "email": "jordan@acme.com",\n  "phone": null,\n  "company": "Acme Corp"\n}'
+        },
+        proTip: 'For production, use JSON mode or structured-output features when the provider supports them. They reject malformed JSON at the model level — no more 3am parser crashes.'
+      },
+      {
+        id: 'decomposition',
+        name: 'Decomposition (Least-to-Most)',
+        short: 'Decompose',
+        tagline: 'Split a hard problem into named sub-problems you can solve separately.',
+        complexity: 75,
+        color: '#9b59b6',
+        icon: ICONS.layers,
+        bestFor: 'Problems that are too big or too fuzzy to solve in one shot — design, planning, migrations.',
+        description: 'Instead of asking "solve X", you first ask "what are the sub-problems of X?". Then you solve each sub-problem (sometimes with its own technique) and integrate. Forces the model to surface hidden assumptions.',
+        whenToUse: [
+          'Problem spans multiple concerns (data, UX, auth, perf).',
+          'You suspect the model is skipping important parts.',
+          'You want each piece verifiable before combining.',
+          'Hand-off to humans at any sub-step is valuable.'
+        ],
+        whenNotToUse: [
+          'Problem is atomic — splitting creates artificial seams.',
+          'Sub-problems are too tightly coupled to solve independently.',
+          'Speed matters more than correctness.',
+          'You already know the decomposition — just ask for the solution.'
+        ],
+        example: {
+          prompt: 'Design a recommendation engine. First, list the sub-problems to solve. Then solve each.',
+          output: 'Sub-problems:\n  1. How do we collect user preferences?\n  2. What algorithm ranks items by relevance?\n  3. How do we handle cold-start (new users / items)?\n  4. How do we evaluate quality offline and online?\n\n1. Collect: implicit signals (clicks, dwell) + explicit (ratings).\n2. Rank: hybrid collaborative filtering + content embeddings.\n3. Cold-start: content-based fallback for users; popularity prior for items.\n4. Evaluate: offline NDCG@10; online A/B on CTR and 7-day retention.'
+        },
+        proTip: 'Ask for the sub-problems first, STOP, read them, then ask to solve. The decomposition itself is often where the insight is — and editing it early is cheap.'
+      },
+      {
+        id: 'tot',
+        name: 'Tree of Thoughts / Multi-Path',
+        short: 'Tree',
+        tagline: 'Explore several solution paths, compare, then pick or combine.',
+        complexity: 85,
+        color: '#e84393',
+        icon: ICONS.tree,
+        bestFor: 'Problems with multiple valid approaches — strategy, architecture, planning decisions.',
+        description: 'You ask the model to generate 2-4 distinct paths (not variations), reason about each, then select or merge. It prevents tunnel vision and surfaces tradeoffs you would have missed.',
+        whenToUse: [
+          'Multiple reasonable approaches exist and tradeoffs matter.',
+          'The first answer the model gives usually feels too "obvious".',
+          'Architecture or strategy decisions where you need to defend the choice.',
+          'You want a consensus synthesis that borrows from several angles.'
+        ],
+        whenNotToUse: [
+          'A single correct answer exists (math, factual lookup).',
+          'Token budget is tight — ToT triples or quadruples output size.',
+          'Decision is low-stakes and exploration is overkill.',
+          'Paths collapse into the same approach anyway.'
+        ],
+        example: {
+          prompt: 'We need to improve user retention. Generate 3 distinct strategies (engagement, community, value), evaluate each in 2 sentences, then recommend a combined plan.',
+          output: 'Path A — Engagement: drive habit via notifications and tutorials. Measurable by DAU; risk: annoying users.\nPath B — Community: build social connection and groups. Measurable by referrals; risk: slow to seed.\nPath C — Value: improve core product quality. Measurable by NPS; risk: long payoff.\n\nRecommendation: lead with C (no point retaining users on a weak product), layer B for stickiness once value is solid, and use A tactically only where it supports B and C.'
+        },
+        proTip: 'Force the paths to be structurally different, not three flavors of the same idea. "Generate 3 distinct strategies" yields far better results than "generate 3 options".'
+      }
+    ];
+
+    function OverviewStage({ onNavigate }) {
+      const [expanded, setExpanded] = useState(null);
       return (
         <>
-          <div><div className="stage-header">Chain-of-Thought &amp; ReAct</div></div>
-          <div className="explanation">
-            Chain-of-Thought reasoning breaks complex problems into steps. ReAct extends this by adding actions and observations for tool use.
+          <div><div className="stage-header">The Top 10 Prompt Engineering Techniques</div></div>
+          <div className="overview-intro">
+            Every technique below is a tool — not a winner. Pick by the shape of the problem, not by how sophisticated it sounds. Click any card to see what it is best used for, then open the detailed page from the sidebar or the card.
           </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div className="tabs">
-              <button className={`tab ${mode === 'cot' ? 'active' : ''}`} onClick={() => setMode('cot')}>Chain-of-Thought</button>
-              <button className={`tab ${mode === 'react' ? 'active' : ''}`} onClick={() => setMode('react')}>ReAct</button>
-            </div>
-            {mode === 'cot' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Marketing ROI Calculation (Step by Step):</div>
-                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                  <strong>Step 1:</strong> Revenue from campaign = $45,000
-                </div>
-                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                  <strong>Step 2:</strong> Attribute to marketing: 60% = $45,000 × 0.60 = $27,000
-                </div>
-                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                  <strong>Step 3:</strong> Marketing cost = $10,000
-                </div>
-                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                  <strong>Step 4:</strong> ROI = (Profit / Cost) × 100 = ($27,000 - $10,000) / $10,000 × 100 = 170%
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#2c3e50' }}>Web Search Loop:</div>
-                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
-                  <strong style={{ color: A }}>Thought:</strong> I need current weather for NYC. Let me search.
-                </div>
-                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
-                  <strong style={{ color: A }}>Action:</strong> search("NYC weather today")
-                </div>
-                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                  <strong style={{ color: GD }}>Observation:</strong> Weather API returned: 72°F, partly cloudy, 15mph wind
-                </div>
-                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
-                  <strong style={{ color: A }}>Thought:</strong> I have the weather. User might want activity recommendations.
-                </div>
-                <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2c3e50' }}>
-                  <strong style={{ color: A }}>Action:</strong> search("outdoor activities NYC pleasant weather")
-                </div>
-                <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#2d5016' }}>
-                  <strong style={{ color: GD }}>Observation:</strong> Central Park, Brooklyn Bridge walk, outdoor cafes recommended
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Explicit step-by-step reasoning dramatically improves accuracy on math, logic, and multi-step problems. ReAct adds tool integration for real-world actions.
-          </div>
-        </>
-      );
-    };
 
-    // Stage 3: Role-Based & Prompt Chaining
-    const S3 = () => {
-      const [role, setRole] = useState('engineer');
-      const roles = {
-        engineer: { title: 'Data Engineer', response: 'Design a scalable pipeline using Apache Spark for batch processing, Kafka for streaming, and PostgreSQL for the warehouse. Implement incremental loading with change data capture to minimize load times and ensure data consistency across systems.' },
-        legal: { title: 'Legal Expert', response: 'Review data governance policies for compliance with GDPR, CCPA, and local regulations. Establish clear data retention policies, access controls, and audit trails. Ensure contracts include proper data processing agreements with third parties.' },
-        product: { title: 'Product Manager', response: 'Focus on data that drives user engagement metrics and revenue. Prioritize analytics for A/B testing, user funnel analysis, and retention cohorts. Ensure dashboards surface insights that directly impact product decisions.' }
-      };
-
-      return (
-        <>
-          <div><div className="stage-header">Role-Based &amp; Prompt Chaining</div></div>
-          <div className="explanation">
-            Role-based prompting gives the AI a persona to adopt. Prompt chaining breaks complex tasks into sequential prompts, each building on the previous.
+          <div className="overview-legend">
+            <span><span className="legend-dot" style={{ background: '#95a5a6' }}></span>Simple</span>
+            <span><span className="legend-dot" style={{ background: '#3498db' }}></span>Moderate</span>
+            <span><span className="legend-dot" style={{ background: '#f39c12' }}></span>Advanced</span>
+            <span><span className="legend-dot" style={{ background: '#2ecc71' }}></span>Agent-grade</span>
           </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-            <div className="role-selector">
-              {Object.entries(roles).map(([key, val]) => (
-                <button
-                  key={key}
-                  className={`role-btn ${role === key ? 'selected' : ''}`}
-                  onClick={() => setRole(key)}
+
+          <div className="cards-grid">
+            {TECHNIQUES.map((t, idx) => {
+              const isOpen = expanded === idx;
+              return (
+                <div
+                  key={t.id}
+                  className={`tech-card disclosure-card-host ${isOpen ? 'expanded' : ''}`}
+                  onClick={() => setExpanded(isOpen ? null : idx)}
                 >
-                  {val.title}
-                </button>
-              ))}
-            </div>
-            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50', width: '100%' }}>Question: How should we build our data infrastructure?</div>
-            <div className="response-box">
-              {roles[role].response}
-            </div>
-          </div>
-          <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Assign specific personas and constraints to get highly tailored responses. Chaining prompts helps break down complex projects into manageable steps.
-          </div>
-        </>
-      );
-    };
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                  </span>
+                  <div className="card-top-row">
+                    <SvgIcon markup={t.icon} className="card-icon-wrap" style={{ background: t.color, color: 'white' }} />
+                    <span className="card-number">#{idx + 1}</span>
+                  </div>
+                  <div className="card-title">{t.name}</div>
+                  <div className="card-tagline">{t.tagline}</div>
 
-    // Stage 4: Constraints & Negative Prompting
-    const S4 = () => {
-      const [constraints, setConstraints] = useState([
-        'Must include quantified metrics (numbers, percentages)',
-        'No marketing fluff or hype language'
-      ]);
-      const [negatives, setNegatives] = useState([
-        'DO NOT include apologies or disclaimers',
-        'DO NOT use print statements'
-      ]);
-
-      const addConstraint = () => setConstraints([...constraints, 'New constraint...']);
-      const removeConstraint = (i) => setConstraints(constraints.filter((_, idx) => idx !== i));
-      const addNegative = () => setNegatives([...negatives, 'New negative constraint...']);
-      const removeNegative = (i) => setNegatives(negatives.filter((_, idx) => idx !== i));
-
-      return (
-        <>
-          <div><div className="stage-header">Constraints &amp; Negative Prompting</div></div>
-          <div className="explanation">
-            Constraints and negative prompting narrow the solution space by explicitly defining what you DO want and what you DON'T want.
-          </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>MUST Include:</div>
-                <div className="constraint-builder">
-                  {constraints.map((c, i) => (
-                    <div key={i} className="constraint-input">
-                      <input type="text" value={c} readOnly className="constraint-box" />
-                      <button className="remove-btn" onClick={() => removeConstraint(i)}>×</button>
+                  <div className="card-complexity-row">
+                    <span className="card-complexity-label">COMPLEXITY</span>
+                    <div className="card-complexity-bar">
+                      <div className="card-complexity-fill" style={{ width: `${t.complexity}%`, background: t.color }} />
                     </div>
-                  ))}
-                  <button className="add-btn" onClick={addConstraint}>+ Add Constraint</button>
+                    <span className="card-complexity-value">{t.complexity}</span>
+                  </div>
+
+                  {isOpen && (
+                    <>
+                      <div className="card-reveal">
+                        <span className="card-reveal-label">Best used for</span>
+                        {t.bestFor}
+                      </div>
+                      <span className="card-cta" onClick={(e) => { e.stopPropagation(); onNavigate(idx + 1); }}>
+                        Open deep dive →
+                      </span>
+                    </>
+                  )}
                 </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>MUST NOT Do:</div>
-                <div className="constraint-builder">
-                  {negatives.map((n, i) => (
-                    <div key={i} className="constraint-input">
-                      <input type="text" value={n} readOnly className="constraint-box" />
-                      <button className="remove-btn" onClick={() => removeNegative(i)}>×</button>
-                    </div>
-                  ))}
-                  <button className="add-btn" onClick={addNegative}>+ Add Negative</button>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
+
           <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Clear constraints prevent bad outputs. Negative prompting ("don't apologize") often works better than hoping the AI infers your preferences.
+            <div className="insight-label">
+              <SvgIcon markup={ICONS.bulb} style={{ width: 14, height: 14, color: '#2ecc71', display: 'inline-flex' }} />
+              HOW TO CHOOSE
+            </div>
+            Start with the simplest technique that could work. Move up only when the output drifts, misses format, or skips reasoning. The best real-world prompts stack 2–3 of these — not all 10.
           </div>
         </>
       );
-    };
+    }
 
-    // Stage 5: Recursive Reasoning
-    const S5 = () => {
-      const [activeTab, setActiveTab] = useState('decompose');
+    function DetailStage({ index }) {
+      const t = TECHNIQUES[index];
       return (
         <>
-          <div><div className="stage-header">Recursive Reasoning</div></div>
-          <div className="explanation">
-            Recursive reasoning breaks a complex problem into smaller sub-problems, solves each independently, then combines results. Multi-path analysis evaluates multiple solution routes.
-          </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-            <div className="tabs">
-              <button className={`tab ${activeTab === 'decompose' ? 'active' : ''}`} onClick={() => setActiveTab('decompose')}>Decomposition</button>
-              <button className={`tab ${activeTab === 'multipath' ? 'active' : ''}`} onClick={() => setActiveTab('multipath')}>Multi-Path</button>
+          <div className="detail-hero">
+            <SvgIcon markup={t.icon} className="detail-icon" style={{ background: t.color, color: 'white' }} />
+            <div className="detail-title-block">
+              <div className="detail-rank">TECHNIQUE #{index + 1}</div>
+              <div className="detail-title">{t.name}</div>
+              <div className="detail-tagline">{t.tagline}</div>
             </div>
-            {activeTab === 'decompose' ? (
-              <div style={{ width: '100%' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>Problem: Design a recommendation engine</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2c3e50' }}>
-                    <strong style={{ color: A }}>Sub-problem 1:</strong> How do we collect user preferences?
-                  </div>
-                  <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2c3e50' }}>
-                    <strong style={{ color: A }}>Sub-problem 2:</strong> What algorithm ranks items by relevance?
-                  </div>
-                  <div style={{ background: '#ecf0f1', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2c3e50' }}>
-                    <strong style={{ color: A }}>Sub-problem 3:</strong> How do we handle cold-start users?
-                  </div>
-                  <div style={{ background: '#f0faf0', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#2d5016', marginTop: '12px' }}>
-                    <strong style={{ color: GD }}>Integration:</strong> Combine collaborative filtering + content-based + cold-start strategy
-                  </div>
-                </div>
+            <div className="detail-complexity-wrap">
+              <span className="detail-complexity-label">COMPLEXITY</span>
+              <div className="detail-complexity-bar">
+                <div style={{ width: `${t.complexity}%`, height: '100%', background: t.color, borderRadius: 4, transition: 'width 0.8s ease' }} />
               </div>
-            ) : (
-              <div style={{ width: '100%' }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>Problem: Improve user retention</div>
-                <div className="analysis-paths">
-                  <div className="analysis-path">
-                    <strong style={{ color: A, display: 'block', marginBottom: '8px' }}>Path A: Engagement Focus</strong>
-                    Increase feature usage through notifications and tutorials. Measurable by daily active users.
-                  </div>
-                  <div className="analysis-path">
-                    <strong style={{ color: A, display: 'block', marginBottom: '8px' }}>Path B: Community Focus</strong>
-                    Build social connections. Measurable by referral rate and group activity.
-                  </div>
-                  <div className="analysis-path">
-                    <strong style={{ color: A, display: 'block', marginBottom: '8px' }}>Path C: Value Focus</strong>
-                    Improve core product value. Measurable by Net Promoter Score.
-                  </div>
-                </div>
-                <div className="consensus-panel">
-                  <strong>Consensus:</strong> Combine all three. Path B (community) creates stickiness that enables Path A (engagement). Path C ensures there's actual value to engage with.
-                </div>
-              </div>
-            )}
+              <span className="detail-complexity-value">{t.complexity} / 100</span>
+            </div>
           </div>
-          <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Breaking hard problems into pieces reveals missing assumptions. Exploring multiple paths prevents tunnel vision and finds better integrated solutions.
+
+          <div className="explanation">{t.description}</div>
+
+          <div className="two-col">
+            <div className="usage-card good">
+              <div className="usage-header">
+                <SvgIcon markup={ICONS.check} style={{ width: 22, height: 22, display: 'inline-flex' }} />
+                When to use it
+              </div>
+              <ul className="usage-list">
+                {t.whenToUse.map((item, i) => (
+                  <li key={i}><span className="bullet-icon good">✓</span>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="usage-card bad">
+              <div className="usage-header">
+                <SvgIcon markup={ICONS.cross} style={{ width: 22, height: 22, display: 'inline-flex' }} />
+                When NOT to use it
+              </div>
+              <ul className="usage-list">
+                {t.whenNotToUse.map((item, i) => (
+                  <li key={i}><span className="bullet-icon bad">✗</span>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="example-block">
+            <div className="example-title">
+              <SvgIcon markup={ICONS.code} style={{ width: 18, height: 18, color: t.color, display: 'inline-flex' }} />
+              Example in action
+            </div>
+            <div className="example-label">Prompt</div>
+            <div className="example-prompt">{t.example.prompt}</div>
+            <div className="example-label" style={{ marginTop: 14 }}>Output</div>
+            <div className="example-output">{t.example.output}</div>
+          </div>
+
+          <div className="protip-box">
+            <div className="protip-label">
+              <SvgIcon markup={ICONS.bulb} style={{ width: 14, height: 14, color: '#b37a08', display: 'inline-flex' }} />
+              Pro tip
+            </div>
+            {t.proTip}
           </div>
         </>
       );
-    };
-
-    // Stage 6: Output Formatting & Structure
-    const S6 = () => {
-      const [format, setFormat] = useState('json');
-      const examples = {
-        json: { label: 'JSON', code: '{"name": "Alice", "department": "Engineering", "yearsAtCompany": 3}' },
-        csv: { label: 'CSV', code: 'Name,Department,Years\nAlice,Engineering,3' },
-        markdown: { label: 'Markdown', code: '### Alice\n- Department: Engineering\n- Tenure: 3 years' }
-      };
-
-      return (
-        <>
-          <div><div className="stage-header">Output Formatting</div></div>
-          <div className="explanation">
-            Specifying output format ensures the AI responds in a way your downstream code can easily parse and process.
-          </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-            <div className="tabs">
-              {Object.entries(examples).map(([key, val]) => (
-                <button
-                  key={key}
-                  className={`tab ${format === key ? 'active' : ''}`}
-                  onClick={() => setFormat(key)}
-                >
-                  {val.label}
-                </button>
-              ))}
-            </div>
-            <div style={{ width: '100%' }}>
-              <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Prompt:</div>
-              <div className="code-block">Extract employee information into {examples[format].label} format</div>
-              <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '12px', marginBottom: '8px', color: '#2c3e50' }}>Expected Output:</div>
-              <div className="code-output">{examples[format].code}</div>
-            </div>
-          </div>
-          <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Specify format explicitly: JSON, CSV, Markdown, XML. The AI will structure output correctly, saving you parsing headaches downstream.
-          </div>
-        </>
-      );
-    };
-
-    // Stage 7: Few-Shot Examples & Guardrails
-    const S7 = () => {
-      return (
-        <>
-          <div><div className="stage-header">Few-Shot Examples &amp; Guardrails</div></div>
-          <div className="explanation">
-            Few-shot examples show the AI the exact style and quality bar you expect. This is more powerful than lengthy instructions.
-          </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-            <div style={{ width: '100%' }}>
-              <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#2c3e50' }}>Example 1 (Good):</div>
-              <div className="code-block" style={{ background: '#f0faf0', color: '#2d5016', fontFamily: 'inherit' }}>
-                "The report shows 15% growth in Q2 revenue, driven by a 22% increase in enterprise customers."
-              </div>
-              <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '12px', marginBottom: '8px', color: '#2c3e50' }}>Example 2 (Good):</div>
-              <div className="code-block" style={{ background: '#f0faf0', color: '#2d5016', fontFamily: 'inherit' }}>
-                "Marketing spend was $450K, generating $1.2M in attributed revenue (2.7x ROI)."
-              </div>
-              <div style={{ fontSize: '13px', fontWeight: '600', marginTop: '12px', marginBottom: '8px', color: '#2c3e50' }}>Example 3 (Avoid):</div>
-              <div style={{ background: '#fef5f5', color: '#8b3a3a', padding: '12px', borderRadius: '6px', fontFamily: 'inherit', fontSize: '13px', border: '1px solid #e9b0b0' }}>
-                "Our amazing product absolutely crushed it this quarter with incredible results!" (vague, no metrics)
-              </div>
-            </div>
-          </div>
-          <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Show 2-3 high-quality examples of what you want, plus 1 example of what to avoid. The AI learns your style and quality bar from examples better than instructions.
-          </div>
-        </>
-      );
-    };
-
-    // Stage 8: Summary
-    const S8 = () => {
-      const takeaways = [
-        { title: 'Few-Shot > Zero-Shot', content: 'Always provide examples for consistent, high-quality output.' },
-        { title: 'Chain Your Thinking', content: 'Explicit step-by-step reasoning beats hoping for the right answer.' },
-        { title: 'Assign a Role', content: 'Give the AI a persona to get domain-specific, tailored responses.' },
-        { title: 'Be Explicit', content: 'Constraints, format specs, and negative prompts prevent bad outputs.' },
-        { title: 'Break It Down', content: 'Decompose complex problems into sub-problems to improve accuracy.' },
-        { title: 'Test Multiple Paths', content: 'Explore alternative solutions and combine the best parts.' }
-      ];
-
-      return (
-        <>
-          <div><div className="stage-header">Key Takeaways</div></div>
-          <div className="explanation">
-            Mastering prompt engineering means combining these techniques strategically. The best prompts use multiple methods together.
-          </div>
-          <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-            <div className="key-takeaways">
-              {takeaways.map((takeaway, idx) => (
-                <div key={idx} className="takeaway-card">
-                  <div className="takeaway-title">{takeaway.title}</div>
-                  <div className="takeaway-content">{takeaway.content}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="insight-box">
-            <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
-            Prompt engineering is iterative. Test your prompts, measure results, and refine. Small tweaks often yield dramatic improvements in output quality.
-          </div>
-        </>
-      );
-    };
+    }
 
     function Guide() {
       const [currentStage, setCurrentStage] = useState(0);
+      const totalStages = TECHNIQUES.length + 1;
 
-      const stageIcons = [
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>',
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h10z"/></svg>',
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/><circle cx="12" cy="12" r="3"/></svg>',
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 7l-5-5-5 5M7 17l5 5 5-5"/></svg>',
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"/></svg>'
+      const sidebarSteps = [
+        { icon: ICONS.grid, label: 'Overview' },
+        ...TECHNIQUES.map(t => ({ icon: t.icon, label: t.short }))
       ];
 
-      const stages = [
-        { icon: stageIcons[0], label: 'Zero vs Few-Shot', component: S1 },
-        { icon: stageIcons[1], label: 'Chain-of-Thought', component: S2 },
-        { icon: stageIcons[2], label: 'Role-Based', component: S3 },
-        { icon: stageIcons[3], label: 'Constraints', component: S4 },
-        { icon: stageIcons[4], label: 'Recursive', component: S5 },
-        { icon: stageIcons[5], label: 'Formatting', component: S6 },
-        { icon: stageIcons[6], label: 'Few-Shot', component: S7 },
-        { icon: stageIcons[7], label: 'Summary', component: S8 },
-      ];
-
-      const CurrentComponent = stages[currentStage].component;
-
-      const handleNext = () => {
-        if (currentStage < stages.length - 1) {
-          setCurrentStage(currentStage + 1);
-        }
-      };
-
-      const handlePrev = () => {
-        if (currentStage > 0) {
-          setCurrentStage(currentStage - 1);
-        }
-      };
-
-      const handleStageClick = (idx) => {
-        setCurrentStage(idx);
-      };
+      const handleNext = () => { if (currentStage < totalStages - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
 
       return (
         <div className="container">
           <div className="sidebar scrollbar-hide">
-            {stages.map((stage, idx) => (
+            {sidebarSteps.map((step, idx) => (
               <React.Fragment key={idx}>
                 <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
                   <button
                     className={`step-btn ${currentStage === idx ? 'active' : ''}`}
-                    onClick={() => handleStageClick(idx)}
-                    dangerouslySetInnerHTML={{__html: stage.icon}}
+                    onClick={() => setCurrentStage(idx)}
+                    dangerouslySetInnerHTML={{ __html: step.icon }}
                   />
-                  <div className="step-btn-label">{stage.label}</div>
+                  <div className="step-btn-label">{step.label}</div>
                 </div>
-                {idx < stages.length - 1 && (
+                {idx < sidebarSteps.length - 1 && (
                   <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
                 )}
               </React.Fragment>
@@ -1005,30 +1046,18 @@ Output: {"type": "hotel", "location": "Paris"}`}</div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span className="progress-indicator">Page {currentStage + 1} of {stages.length}</span>
+                <span className="progress-indicator">Page {currentStage + 1} of {totalStages}</span>
                 <div className="nav-arrows">
-                  <button
-                    className="arrow-btn"
-                    onClick={handlePrev}
-                    disabled={currentStage === 0}
-                    title="Previous stage"
-                  >
-                    &#8592;
-                  </button>
-                  <button
-                    className="arrow-btn"
-                    onClick={handleNext}
-                    disabled={currentStage === stages.length - 1}
-                    title="Next stage"
-                  >
-                    &#8594;
-                  </button>
+                  <button className="arrow-btn" onClick={handlePrev} disabled={currentStage === 0} title="Previous">&#8592;</button>
+                  <button className="arrow-btn" onClick={handleNext} disabled={currentStage === totalStages - 1} title="Next">&#8594;</button>
                 </div>
               </div>
             </div>
 
-            <div className="content-area scrollbar-hide">
-              <CurrentComponent />
+            <div className="content-area scrollbar-hide" key={currentStage}>
+              {currentStage === 0
+                ? <OverviewStage onNavigate={setCurrentStage} />
+                : <DetailStage index={currentStage - 1} />}
             </div>
           </div>
         </div>

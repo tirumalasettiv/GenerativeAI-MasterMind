@@ -184,7 +184,7 @@
 
     .stage-header {
       font-family: 'Fraunces', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a1a1a;
       margin-bottom: 8px;
@@ -226,8 +226,8 @@
       flex-direction: column;
       overflow-y: auto;
       scroll-behavior: smooth;
-      padding: 32px 48px;
-      gap: 30px;
+      padding: 24px 36px;
+      gap: 18px;
     }
 
     .explanation {
@@ -239,7 +239,7 @@
     .scene-card {
       background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%);
       border-radius: 16px;
-      padding: 40px;
+      padding: 28px;
       border: 1px solid #e8e3f8;
       min-height: auto;
       display: flex;
@@ -321,6 +321,58 @@
       25%, 75% {
         opacity: 0;
       }
+    }
+
+    @keyframes drawCurve {
+      from { stroke-dashoffset: 800; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes barFill {
+      from { width: 0%; }
+      to { width: var(--bar-target); }
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(108, 92, 231, 0)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.4)); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .scale-in { animation: scaleIn 0.5s ease forwards; }
+    .node-pulse { animation: nodePulse 2s ease-in-out infinite; }
+
+    .costar-diagram-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .costar-node {
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .costar-node:hover .costar-node-circle {
+      filter: drop-shadow(0 4px 12px rgba(108, 92, 231, 0.4));
+    }
+
+    .costar-node-detail {
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.3s ease;
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .costar-node-detail.open {
+      max-height: 120px;
+      opacity: 1;
     }
 
     .fade-in {
@@ -427,6 +479,7 @@
     }
 
     .costar-box {
+      position: relative;
       padding: 20px;
       background: white;
       border: 2px solid #e0e0e0;
@@ -566,6 +619,7 @@
     }
 
     .decision-node {
+      position: relative;
       padding: 24px;
       background: white;
       border: 2px solid #e0e0e0;
@@ -627,6 +681,44 @@
     .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
+
+    /* Disclosure badge — pulsing chevron on expandable cards */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      fill: none;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+      animation: none;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -634,6 +726,150 @@
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
+
+    function CostarFrameworkDiagram() {
+      const [activeNode, setActiveNode] = React.useState(null);
+      const nodes = [
+        { key: 'C', label: 'Context', color: '#6c5ce7', desc: 'Background information that helps the AI understand your situation and constraints.' },
+        { key: 'O', label: 'Objective', color: '#2ecc71', desc: 'The specific goal or outcome you want the AI to achieve with this prompt.' },
+        { key: 'S', label: 'Style',   color: '#3498db', desc: 'The writing style — formal, casual, technical, creative, journalistic, etc.' },
+        { key: 'T', label: 'Tone',    color: '#f39c12', desc: 'The emotional register — encouraging, authoritative, empathetic, direct, etc.' },
+        { key: 'A', label: 'Audience', color: '#e74c3c', desc: 'Who will read or use the output — experts, beginners, executives, customers.' },
+        { key: 'R', label: 'Response', color: '#9b59b6', desc: 'The output format — JSON, bullet list, paragraph, table, code block, email.' },
+      ];
+
+      const cx = 280, cy = 130, r = 90;
+      const positions = nodes.map((_, i) => {
+        const angle = (i / nodes.length) * 2 * Math.PI - Math.PI / 2;
+        return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+      });
+
+      return (
+        <div className="costar-diagram-wrap">
+          <svg width="560" height="260" viewBox="0 0 560 260" style={{ maxWidth: '100%', overflow: 'visible' }}>
+            <circle cx={cx} cy={cy} r={34} fill="#6c5ce7" />
+            <text x={cx} y={cy - 6} textAnchor="middle" fill="white" fontSize="11" fontWeight="700">YOUR</text>
+            <text x={cx} y={cy + 9} textAnchor="middle" fill="white" fontSize="11" fontWeight="700">PROMPT</text>
+            {positions.map((pos, i) => (
+              <line key={i}
+                x1={cx + (pos.x - cx) * 0.28} y1={cy + (pos.y - cy) * 0.28}
+                x2={cx + (pos.x - cx) * 0.72} y2={cy + (pos.y - cy) * 0.72}
+                stroke={nodes[i].color} strokeWidth="2" strokeDasharray="4 3" opacity="0.6"
+              />
+            ))}
+            {nodes.map((node, i) => (
+              <g key={node.key}
+                className="costar-node"
+                onClick={() => setActiveNode(activeNode === node.key ? null : node.key)}
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                <circle
+                  className="costar-node-circle"
+                  cx={positions[i].x} cy={positions[i].y} r={28}
+                  fill={activeNode === node.key ? node.color : 'white'}
+                  stroke={node.color} strokeWidth="2"
+                  style={{ transition: 'all 0.3s ease' }}
+                />
+                <text x={positions[i].x} y={positions[i].y - 4}
+                  textAnchor="middle" fill={activeNode === node.key ? 'white' : node.color}
+                  fontSize="14" fontWeight="800" style={{ transition: 'fill 0.3s ease' }}
+                >{node.key}</text>
+                <text x={positions[i].x} y={positions[i].y + 10}
+                  textAnchor="middle" fill={activeNode === node.key ? 'rgba(255,255,255,0.85)' : '#555'}
+                  fontSize="9" fontWeight="600" style={{ transition: 'fill 0.3s ease' }}
+                >{node.label}</text>
+              </g>
+            ))}
+          </svg>
+          {nodes.map(node => (
+            <div key={node.key}
+              className={`costar-node-detail ${activeNode === node.key ? 'open' : ''}`}
+              style={{ background: node.color + '15', borderLeft: `4px solid ${node.color}`, borderRadius: '8px', padding: activeNode === node.key ? '14px 18px' : '0 18px', width: '100%', maxWidth: '520px' }}
+            >
+              <div style={{ fontWeight: 700, color: node.color, marginBottom: '4px', fontSize: '15px' }}>{node.key} — {node.label}</div>
+              <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.6' }}>{node.desc}</div>
+            </div>
+          ))}
+          <div style={{ fontSize: '13px', color: '#888', textAlign: 'center', marginTop: '4px' }}>
+            Click any component to learn more
+          </div>
+        </div>
+      );
+    }
+
+    function MetaPromptFlowDiagram() {
+      const [activeStep, setActiveStep] = React.useState(null);
+
+      const steps = [
+        { id: 'goal',   emoji: '🎯', label: 'Your Goal',     color: '#3498db', desc: 'You know what you want to achieve — a PRD, an email, a plan — but you\'re unsure how to phrase the request.' },
+        { id: 'ask',    emoji: '💬', label: 'Ask the AI',    color: '#6c5ce7', desc: 'Tell the AI: "Help me write the best prompt to accomplish this goal." You hand over the prompt-engineering job.' },
+        { id: 'craft',  emoji: '🤖', label: 'AI Structures', color: '#e67e22', desc: 'The AI draws on its knowledge of what works — context, tone, format, constraints — and drafts an optimized prompt for you.' },
+        { id: 'output', emoji: '✨', label: 'Better Output',  color: '#2ecc71', desc: 'You submit the AI-crafted prompt and receive a dramatically more targeted, high-quality response.' },
+      ];
+
+      const svgW = 560, nodeY = 100, nodeR = 34;
+      const xs = [80, 213, 347, 480];
+
+      return (
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+          <svg width={svgW} height="180" viewBox={`0 0 ${svgW} 180`} style={{ maxWidth: '100%', overflow: 'visible' }}>
+            {/* Connector lines */}
+            {steps.slice(0, -1).map((step, i) => (
+              <g key={`conn-${i}`}>
+                <line
+                  x1={xs[i] + nodeR} y1={nodeY}
+                  x2={xs[i + 1] - nodeR} y2={nodeY}
+                  stroke="#ddd" strokeWidth="2"
+                />
+                <polygon
+                  points={`${xs[i+1]-nodeR-2},${nodeY-5} ${xs[i+1]-nodeR-2},${nodeY+5} ${xs[i+1]-nodeR+7},${nodeY}`}
+                  fill={steps[i + 1].color}
+                />
+              </g>
+            ))}
+
+            {/* Step circles */}
+            {steps.map((step, i) => (
+              <g key={step.id}
+                onClick={() => setActiveStep(activeStep === step.id ? null : step.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <circle
+                  cx={xs[i]} cy={nodeY} r={nodeR}
+                  fill={activeStep === step.id ? step.color : 'white'}
+                  stroke={step.color} strokeWidth="2.5"
+                  style={{ transition: 'all 0.3s ease', filter: activeStep === step.id ? `drop-shadow(0 4px 12px ${step.color}55)` : 'none' }}
+                />
+                <text x={xs[i]} y={nodeY + 6} textAnchor="middle" fontSize="22" style={{ userSelect: 'none' }}>{step.emoji}</text>
+                <text x={xs[i]} y={nodeY + nodeR + 18} textAnchor="middle" fontSize="11" fontWeight="600" fill={activeStep === step.id ? step.color : '#666'} style={{ transition: 'fill 0.3s ease' }}>{step.label}</text>
+              </g>
+            ))}
+          </svg>
+
+          {/* Detail cards */}
+          {steps.map(step => (
+            <div key={step.id} style={{
+              display: activeStep === step.id ? 'block' : 'none',
+              background: step.color + '15',
+              borderLeft: `4px solid ${step.color}`,
+              borderRadius: '8px',
+              padding: '14px 18px',
+              width: '100%',
+              maxWidth: '520px',
+            }}>
+              <div style={{ fontWeight: 700, color: step.color, marginBottom: '4px', fontSize: '15px' }}>
+                {step.emoji} {step.label}
+              </div>
+              <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.6' }}>{step.desc}</div>
+            </div>
+          ))}
+
+          <div style={{ fontSize: '13px', color: '#888', textAlign: 'center', marginTop: '4px' }}>
+            Click any step to learn more
+          </div>
+        </div>
+      );
+    }
 
     function S1() {
       return (
@@ -645,20 +881,7 @@
             Prompt engineering is about structuring your instructions to get the best possible outputs from AI. Think of it like giving directions &mdash; &ldquo;go somewhere nice&rdquo; gets you lost, but &ldquo;take I-95 North to Exit 12, turn left at the light&rdquo; gets you exactly where you want to go.
           </div>
           <div className="scene-card">
-            <div className="comparison-box">
-              <div className="comparison-item bad fade-in">
-                <div className="comparison-title">&#10060; Vague Prompt</div>
-                <div className="comparison-content">
-                  &ldquo;Write an email&rdquo;
-                </div>
-              </div>
-              <div className="comparison-item good fade-in" style={{ animationDelay: '0.2s' }}>
-                <div className="comparison-title">&#10003; Structured Prompt</div>
-                <div className="comparison-content">
-                  &ldquo;Write a professional rejection email to a candidate, emphasizing their strengths and offering feedback&rdquo;
-                </div>
-              </div>
-            </div>
+            <CostarFrameworkDiagram />
           </div>
           <div className="insight-box">
             <div className="insight-label"><span dangerouslySetInnerHTML={{__html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>'}} /> INSIGHT</div>
@@ -674,12 +897,20 @@
 
       const presets = [
         {
-          goal: 'Write a PRD for account payable automation',
-          prompt: 'You are an expert product manager. Create a comprehensive Product Requirements Document for an account payable automation tool. Include: business case, user personas, key features, acceptance criteria, and success metrics. Format as a professional document suitable for engineering stakeholders.'
+          label: 'Template Prompt',
+          isTemplate: true,
+          goal: 'Task: [Write a PRD for account payable automation].\n\nAct as an expert Prompt Engineer. Please write the best possible prompt that I can use to get a world-class response from you.\nInclude any necessary context, role-playing personas, or constraints that will make the output high-quality.',
+          prompt: 'You are a seasoned product manager with 10+ years of experience delivering enterprise SaaS platforms in the fintech and ERP space.\n\nCreate a comprehensive Product Requirements Document (PRD) for an Accounts Payable (AP) Automation tool. Structure your response as follows:\n\n1. Executive Summary — business case and strategic fit\n2. Problem Statement — current pain points in manual AP processes\n3. User Personas — AP clerks, finance managers, CFOs, and approvers\n4. Core Features — invoice capture (OCR/AI), 3-way matching, approval workflows, ERP integrations, and audit trail\n5. Non-Functional Requirements — security, compliance (SOX/GDPR), and performance SLAs\n6. Acceptance Criteria — measurable done-definition per feature\n7. Success Metrics — KPIs such as invoice cycle time, straight-through processing rate, and exception rate\n\nTone: precise and professional. Format: structured document with headers, sub-sections, and bullet points. Target audience: senior engineering and product stakeholders.'
         },
         {
+          label: 'Example 1',
+          goal: 'Write a PRD for account payable automation',
+          prompt: 'You are a Senior Product Manager with 10+ years of experience in enterprise fintech and ERP systems, specializing in accounts payable (AP) automation platforms. You have led AP automation products at companies like Tipalti, Coupa, and SAP Concur, and you understand the pain points of finance teams ranging from 5-person startups to Fortune 500 enterprises.\n\nWrite a comprehensive Product Requirements Document (PRD) for an AI-powered Accounts Payable Automation platform. The PRD should be investor-ready and engineering-actionable.\n\nContext & Constraints\n- Target users: Mid-market companies (100–2,000 employees) with 500–10,000 invoices/month\n- The product must integrate with existing ERP systems (NetSuite, SAP, QuickBooks) and banking rails\n- Assume a v1.0 launch with a 6-month engineering timeline and a team of 8 engineers\n- Regulatory compliance: SOC 2 Type II, GDPR, and PCI-DSS are non-negotiable\n- AI/ML capabilities should include OCR/ICR for invoice ingestion, anomaly detection, and intelligent GL coding\n\nPRD Structure (follow this exactly)\n1. Executive Summary — 3-sentence elevator pitch of the product\n2. Problem Statement — Quantify the pain (cost of manual AP, error rates, cycle times). Use industry benchmarks.\n3. Target Personas — Define 3 primary personas with goals, frustrations, and JTBD (Jobs to Be Done)\n4. Product Vision & Success Metrics — North-star metric + 5 KPIs with specific numeric targets\n5. Functional Requirements — Organized by module (Invoice Ingestion, Approval Workflows, Payment Execution, Reporting & Analytics, Integrations). For each: user story, acceptance criteria, priority (P0/P1/P2)\n6. Non-Functional Requirements — Performance, security, scalability, accessibility, uptime SLAs\n7. AI/ML Specifications — Models used, training data strategy, accuracy targets, human-in-the-loop fallback design\n8. Integration Architecture — High-level data flow diagram (describe in text), API design principles, webhook strategy\n9. Phased Roadmap — v1.0 (MVP), v1.5, v2.0 with feature groupings and estimated timelines\n10. Risk Register — Top 5 risks with likelihood, impact, and mitigation strategies\n11. Appendix — Glossary of AP terms, competitive landscape summary (Tipalti, Bill.com, Stampli, Coupa)\n\nQuality Guidelines\n- Use specific numbers, not vague language ("reduce processing time from 14 days to 3 days," not "significantly faster")\n- Write user stories in standard format: "As a [persona], I want [action] so that [outcome]"\n- Acceptance criteria should be testable (Given/When/Then format)\n- Prioritize ruthlessly — not everything is P0\n- Think like a PM who must defend every feature to a skeptical CTO and CFO\n\nOutput format: Well-structured markdown with clear headings, tables where appropriate (e.g., for requirements, risk register), and callout boxes for key decisions or open questions.'
+        },
+        {
+          label: 'Example 2',
           goal: 'Design API documentation',
-          prompt: 'You are a technical writer specializing in API docs. Create clear, concise API documentation for a payment processing endpoint. Include: endpoint description, parameters, response format, error codes, and practical code examples. Use a structured, beginner-friendly approach.'
+          prompt: 'You are a Senior Technical Writer and API Design Lead with 10+ years of experience building developer-facing documentation at companies like Stripe, Twilio, and Plaid. You\'ve designed docs that onboard 100K+ developers, reduced support tickets by 40%, and won "Best API Documentation" recognition in developer surveys. You think in terms of Developer Experience (DX) first.\n\nWrite comprehensive API Documentation for a RESTful API platform. The documentation should be production-ready, developer-loved, and support-deflecting.\n\nContext & Constraints\n- Target audience: Backend developers (mid to senior level) integrating your API into Python, Node.js, and Java applications\n- API style: RESTful with JSON payloads, OAuth 2.0 + API key authentication\n- Scale: 50+ endpoints across 8 resource domains\n- The docs must support both "quick-start explorers" (5-minute time-to-first-call) and "deep-dive architects" (building production integrations)\n- Assume OpenAPI 3.1 spec exists — the docs layer on top of it with narrative, guides, and examples\n- Must address: versioning strategy, rate limiting, pagination, error handling, idempotency, and webhook delivery\n\nDocumentation Structure (follow this exactly)\n1. Documentation Strategy Overview — Philosophy statement: what makes great API docs, the DX principles guiding this documentation (max 5 bullet points)\n2. Information Architecture — Full sitemap/navigation tree with page hierarchy. Organize into: Getting Started, Guides, API Reference, SDKs, Changelog, Support. Justify grouping decisions.\n3. Getting Started Section — Design a 3-step quick-start guide that takes a developer from zero to first successful API call in under 5 minutes. Include: signup → get API key → make first request → parse response. Provide exact code samples in Python and Node.js.\n4. Authentication Guide — Cover OAuth 2.0 flows (client credentials, authorization code + PKCE), API key usage, token refresh logic, scope definitions. Include a decision matrix: "Which auth flow should I use?"\n5. Core Concepts Page — Explain the domain model, resource relationships, and mental model developers need BEFORE reading reference docs. Use an analogy to make the data model intuitive.\n6. API Reference Template — Design the standard template for a single endpoint page. Include: HTTP method + path, description, authentication requirements, request parameters (path, query, body) with types and constraints, response schema with field descriptions, code samples in 3 languages, error responses with resolution steps, rate limit info, and a "Try It" interactive section spec.\n7. Error Handling Guide — Design a structured error taxonomy (error codes, HTTP status mapping, machine-readable error body schema). Include a troubleshooting table: error code → likely cause → fix. Cover: 4xx client errors, 5xx server errors, webhook delivery failures.\n8. Pagination, Filtering & Sorting Guide — Cursor-based vs offset pagination decision and implementation. Query parameter conventions. Include copy-paste code for iterating through all pages.\n9. Webhooks Documentation — Event catalog design, payload schema, signature verification guide, retry policy, idempotency handling, and a "testing webhooks locally" tutorial (ngrok/CLI approach).\n10. Rate Limiting & Best Practices — Rate limit tiers, headers (X-RateLimit-*), backoff strategies with code samples, bulk operation patterns to minimize calls.\n11. Versioning & Migration Guide — Versioning scheme (URL path vs header), deprecation policy timeline, changelog format, and a migration checklist template for breaking changes.\n12. SDK & Code Samples Strategy — Which languages to support first (with justification), SDK design principles, auto-generation approach (OpenAPI → SDK pipeline), and a sample README for the Python SDK.\n13. Documentation Tooling & Maintenance Plan — Recommended doc stack (e.g., Mintlify/Redocly/ReadMe), CI/CD pipeline for docs (linting, link checking, spec validation), contribution guidelines, freshness audit schedule.\n14. Metrics & Success Framework — 5 documentation KPIs with numeric targets (e.g., time-to-first-call < 5 min, support ticket deflection > 30%). How to instrument docs for measurement (analytics events, feedback widgets).\n15. Appendix — Competitive docs audit summary (Stripe, Twilio, Plaid, Square), glossary of API terminology, sample OpenAPI snippet for one resource.\n\nQuality Guidelines\n- Use specific numbers, not vague language ("retry with exponential backoff starting at 1s, max 30s, with jitter" not "retry after some time")\n- Every code sample must be copy-paste runnable — no pseudocode, no placeholder ellipses, no "// add your logic here"\n- Write for scanning: developers don\'t read docs linearly. Use headers, code blocks, callout boxes (Warning, Tip, Note) strategically\n- Error messages should be actionable: tell the developer WHAT went wrong AND HOW to fix it\n- Think like a developer who is frustrated at 11 PM trying to ship a feature — what would make them not hate you?\n- Apply the "3-click rule": any piece of information should be reachable in 3 navigation clicks or less\n\nAnti-Patterns to Avoid\n- Don\'t write walls of text before showing code — lead with examples\n- Don\'t document internal implementation details that leak abstraction\n- Don\'t assume the reader has read previous pages — each page should be self-sufficient for its task\n- Don\'t mix tutorial-style with reference-style on the same page — separate concerns\n- Don\'t use jargon without defining it on first use\n\nOutput format: Well-structured markdown with clear headings, tables where appropriate (e.g., for error codes, auth decision matrix, KPI targets), code blocks with language tags, and callout boxes for warnings and tips.'
         }
       ];
 
@@ -692,6 +923,9 @@
             Meta prompting is asking the AI to write the prompt for you. Instead of struggling to structure a complex request, you tell the AI your goal and let it be your prompt engineer.
           </div>
           <div className="scene-card">
+            <MetaPromptFlowDiagram />
+          </div>
+          <div className="scene-card">
             <div className="meta-demo">
               <div className="demo-presets">
                 {presets.map((preset, idx) => (
@@ -702,14 +936,38 @@
                       setSelectedPreset(idx);
                       setShowPrompt(false);
                     }}
+                    style={preset.isTemplate && selectedPreset !== idx ? { borderColor: '#e67e22', color: '#e67e22' } : {}}
                   >
-                    Example {idx + 1}
+                    {preset.label}
                   </button>
                 ))}
               </div>
-              <div className="demo-input" style={{ cursor: 'default' }}>
-                {presets[selectedPreset].goal}
-              </div>
+
+              {presets[selectedPreset].isTemplate ? (
+                <div style={{
+                  width: '100%',
+                  padding: '16px 18px',
+                  background: '#fffbf5',
+                  border: '2px dashed #e67e22',
+                  borderRadius: '8px',
+                  fontFamily: 'DM Sans, sans-serif',
+                  fontSize: '14px',
+                  lineHeight: '1.75',
+                  color: '#333',
+                  whiteSpace: 'pre-wrap',
+                  marginBottom: '16px',
+                }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#e67e22', marginBottom: '8px', textTransform: 'uppercase' }}>
+                    📋 Meta Prompt Template
+                  </div>
+                  {presets[selectedPreset].goal}
+                </div>
+              ) : (
+                <div className="demo-input" style={{ cursor: 'default' }}>
+                  {presets[selectedPreset].goal}
+                </div>
+              )}
+
               <button
                 className="preset-btn"
                 onClick={() => setShowPrompt(!showPrompt)}
@@ -721,7 +979,7 @@
               >
                 {showPrompt ? '✍️ Optimized Prompt' : '✨ Generate Optimized Prompt'}
               </button>
-              <div className={`generated-prompt ${showPrompt ? 'show' : ''}`} style={{ animationDelay: '0.2s' }}>
+              <div className={`generated-prompt ${showPrompt ? 'show' : ''}`} style={{ animationDelay: '0.2s', whiteSpace: 'pre-wrap' }}>
                 <strong>AI-Generated Optimized Prompt:</strong>
                 <br /><br />
                 {presets[selectedPreset].prompt}
@@ -791,12 +1049,14 @@
               {costarComponents.map((comp, idx) => (
                 <div
                   key={comp.id}
-                  className={`costar-box ${expandedBox === comp.id ? 'expanded' : ''}`}
+                  className={`costar-box disclosure-card-host ${expandedBox === comp.id ? 'expanded' : ''}`}
                   onClick={() => setExpandedBox(expandedBox === comp.id ? null : comp.id)}
                 >
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                  </span>
                   <div className="costar-label">{comp.id}</div>
                   <div className="costar-description">{comp.label}</div>
-                  <div className="costar-hint">Click to explore</div>
                   <div className="costar-example">
                     <strong>{comp.label}:</strong> {comp.description}
                     <br /><br />
@@ -815,18 +1075,35 @@
     }
 
     function S4() {
-      const [compare, setCompare] = useState(false);
-
-      const examples = {
-        bad: {
-          prompt: 'Write a rejection email to a candidate.',
-          output: 'Dear Candidate,\n\nWe have decided to move forward with other candidates. Thank you for your interest.\n\nBest regards'
-        },
-        good: {
-          prompt: "Context: We're rejecting a talented engineer who fit our technical needs but not our fast-paced culture. Objective: Write a rejection email that preserves the relationship and offers constructive feedback. Style: Professional yet warm. Tone: Empathetic and encouraging. Audience: An experienced senior engineer. Response: Email format, 3-4 paragraphs.",
-          output: "Dear [Name],\n\nThank you for the time and effort you invested in our interview process. Your technical skills are genuinely impressive, and we were impressed by your portfolio.\n\nAfter careful consideration, we've decided to move in a different direction. This wasn't about your qualifications — it's about finding the right cultural fit for our high-velocity environment. Your thoughtful, methodical approach is a strength; it may simply align better with teams that value that style.\n\nWe'd love to stay connected. Companies like ours often hire great people years later, and we see potential collaboration ahead.\n\nBest regards"
-        }
+      const bad = {
+        prompt: 'Write a rejection email to a candidate.',
+        output: 'Dear Candidate,\n\nWe have decided to move forward with other candidates. Thank you for your interest.\n\nBest regards'
       };
+      const good = {
+        prompt: "Context: We're rejecting a talented engineer who fit our technical needs but not our fast-paced culture. Objective: Write a rejection email that preserves the relationship and offers constructive feedback. Style: Professional yet warm. Tone: Empathetic and encouraging. Audience: An experienced senior engineer. Response: Email format, 3-4 paragraphs.",
+        output: "Dear [Name],\n\nThank you for the time and effort you invested in our interview process. Your technical skills are genuinely impressive, and we were impressed by your portfolio.\n\nAfter careful consideration, we've decided to move in a different direction. This wasn't about your qualifications — it's about finding the right cultural fit for our high-velocity environment. Your thoughtful, methodical approach is a strength; it may simply align better with teams that value that style.\n\nWe'd love to stay connected. Companies like ours often hire great people years later, and we see potential collaboration ahead.\n\nBest regards"
+      };
+
+      const blockStyle = (color, bg) => ({
+        padding: '14px 16px',
+        background: bg,
+        borderLeft: `4px solid ${color}`,
+        borderRadius: '6px',
+        fontSize: '13px',
+        lineHeight: '1.65',
+        color: '#333',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+      });
+
+      const labelStyle = (color) => ({
+        fontWeight: 700,
+        fontSize: '12px',
+        color,
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '6px',
+      });
 
       return (
         <>
@@ -836,56 +1113,34 @@
           <div className="explanation">
             See the dramatic difference COSTAR makes. The same task &mdash; write a rejection email &mdash; produces completely different results.
           </div>
-          <div className="scene-card">
-            <div style={{ width: '100%', maxWidth: '700px' }}>
-              <div style={{ marginBottom: '16px', textAlign: 'center' }}>
-                <button
-                  className="preset-btn"
-                  onClick={() => setCompare(!compare)}
-                  style={{
-                    background: compare ? '#2ecc71' : 'white',
-                    color: compare ? 'white' : '#2ecc71',
-                    border: '2px solid #2ecc71'
-                  }}
-                >
-                  {compare ? '✓ COSTAR Version' : '✗ Vague Version'}
-                </button>
+          <div className="scene-card" style={{ alignItems: 'stretch' }}>
+            <div style={{ width: '100%', display: 'flex', gap: '24px', alignItems: 'stretch' }}>
+
+              {/* Vague column */}
+              <div style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '13px', letterSpacing: '0.4px', textTransform: 'uppercase', color: '#e74c3c' }}>
+                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#fde8e8', border: '1.5px solid #e74c3c', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#e74c3c', fontWeight: 800, flexShrink: 0 }}>✗</span>
+                  Vague Prompt
+                </div>
+                <div style={blockStyle('#e74c3c', '#fef5f5')}>{bad.prompt}</div>
+                <div style={labelStyle('#e74c3c')}>Output</div>
+                <div style={{ ...blockStyle('#e74c3c', '#fef5f5'), flex: 1 }}>{bad.output}</div>
               </div>
-              <div className={compare ? 'slide-in-right' : 'slide-in-left'}>
-                <div style={{ marginBottom: '12px' }}>
-                  <strong style={{ color: compare ? '#2ecc71' : '#e74c3c' }}>
-                    Prompt: {compare ? '(COSTAR)' : '(Vague)'}
-                  </strong>
+
+              {/* Divider */}
+              <div style={{ width: '1px', background: 'linear-gradient(to bottom, transparent, #ddd 20%, #ddd 80%, transparent)', flexShrink: 0 }} />
+
+              {/* COSTAR column */}
+              <div style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '13px', letterSpacing: '0.4px', textTransform: 'uppercase', color: '#2ecc71' }}>
+                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#e8f8ee', border: '1.5px solid #2ecc71', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#2ecc71', fontWeight: 800, flexShrink: 0 }}>✓</span>
+                  COSTAR Prompt
                 </div>
-                <div style={{
-                  padding: '12px',
-                  background: compare ? '#f0f8f0' : '#fef5f5',
-                  borderLeft: `4px solid ${compare ? '#2ecc71' : '#e74c3c'}`,
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  marginBottom: '20px',
-                  lineHeight: '1.5'
-                }}>
-                  {compare ? examples.good.prompt : examples.bad.prompt}
-                </div>
-                <div style={{ marginBottom: '12px' }}>
-                  <strong style={{ color: compare ? '#2ecc71' : '#e74c3c' }}>
-                    Output:
-                  </strong>
-                </div>
-                <div style={{
-                  padding: '12px',
-                  background: compare ? '#f0f8f0' : '#fef5f5',
-                  borderLeft: `4px solid ${compare ? '#2ecc71' : '#e74c3c'}`,
-                  borderRadius: '4px',
-                  fontSize: '13px',
-                  lineHeight: '1.6',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word'
-                }}>
-                  {compare ? examples.good.output : examples.bad.output}
-                </div>
+                <div style={blockStyle('#2ecc71', '#f0faf4')}>{good.prompt}</div>
+                <div style={labelStyle('#2ecc71')}>Output</div>
+                <div style={{ ...blockStyle('#2ecc71', '#f0faf4'), flex: 1 }}>{good.output}</div>
               </div>
+
             </div>
           </div>
           <div className="insight-box">
@@ -933,10 +1188,13 @@
               {decisions.map((decision, idx) => (
                 <div
                   key={decision.id}
-                  className={`decision-node ${expandedNode === decision.id ? 'expanded' : ''}`}
+                  className={`decision-node disclosure-card-host ${expandedNode === decision.id ? 'expanded' : ''}`}
                   onClick={() => setExpandedNode(expandedNode === decision.id ? null : decision.id)}
                 >
-                  <div className="decision-question"><span>{decision.question}</span><span className="expand-hint">&#9662;</span></div>
+                  <span className="disclosure-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
+                  </span>
+                  <div className="decision-question"><span>{decision.question}</span></div>
                   <div className="decision-answer">
                     <div className="answer-text">
                       {decision.answer.split('\n').map((line, i) => (
