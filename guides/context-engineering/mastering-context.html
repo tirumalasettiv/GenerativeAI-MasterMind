@@ -613,16 +613,25 @@
           <div style={{ fontWeight: 700, fontSize: '14px', color: '#555', marginBottom: '14px', textAlign: 'center', letterSpacing: '0.5px' }}>
             MEMORY ARCHITECTURE (FASTEST → MOST DURABLE)
           </div>
-          {tiers.map((tier, idx) => (
+          {tiers.map((tier, idx) => {
+            const isActive = activeTier === tier.id;
+            const panelId = `memory-tier-panel-${tier.id}`;
+            const toggle = () => setActiveTier(activeTier === tier.id ? null : tier.id);
+            return (
             <div key={tier.id} className="fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
               <div
-                className={`memory-tier-bar ${activeTier === tier.id ? 'active' : ''}`}
+                className={`memory-tier-bar ${isActive ? 'active' : ''}`}
                 style={{
-                  background: activeTier === tier.id ? tier.color + '20' : '#fafafa',
-                  borderColor: activeTier === tier.id ? tier.color : '#e0e0e0',
+                  background: isActive ? tier.color + '20' : '#fafafa',
+                  borderColor: isActive ? tier.color : '#e0e0e0',
                   color: tier.color
                 }}
-                onClick={() => setActiveTier(activeTier === tier.id ? null : tier.id)}
+                onClick={toggle}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isActive}
+                aria-controls={panelId}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ fontSize: '22px' }}>{tier.icon}</span>
@@ -630,17 +639,18 @@
                     <div style={{ fontWeight: 700, fontSize: '15px', color: '#1a1a1a' }}>{tier.label}</div>
                     <div style={{ fontSize: '12px', color: '#888', marginTop: '2px' }}>{tier.subtitle}</div>
                   </div>
-                  <span style={{ color: '#bbb', fontSize: '18px', transition: 'transform 0.3s ease', transform: activeTier === tier.id ? 'rotate(180deg)' : 'none' }}>▾</span>
+                  <span style={{ color: '#bbb', fontSize: '18px', transition: 'transform 0.3s ease', transform: isActive ? 'rotate(180deg)' : 'none' }}>▾</span>
                 </div>
               </div>
-              <div className={`memory-tier-detail ${activeTier === tier.id ? 'open' : ''}`}
+              <div id={panelId} className={`memory-tier-detail ${isActive ? 'open' : ''}`}
                 style={{ paddingLeft: '16px', borderLeft: `3px solid ${tier.color}`, marginBottom: '4px' }}
               >
                 <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.6', paddingTop: '8px' }}>{tier.detail}</div>
                 <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}><strong>Examples:</strong> {tier.examples}</div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       );
     }
@@ -910,7 +920,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Architecting Memory: The Three-Tier Hierarchy</div>
+            <h2 className="stage-header">Architecting Memory: The Three-Tier Hierarchy</h2>
           </div>
           <div className="explanation">
             Effective context engineering uses a layered memory system &mdash; shared project knowledge, personal preferences, and dynamic imports &mdash; so the right context is always available.
@@ -1004,7 +1014,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">The Three Memory Tiers in Detail</div>
+            <h2 className="stage-header">The Three Memory Tiers in Detail</h2>
           </div>
           <div className="explanation">
             Each tier serves a different purpose and operates at a different scope.
@@ -1013,11 +1023,20 @@
             <div style={{ width: '100%' }}>
               <DiagramS2 />
               <div style={{ marginTop: '24px' }}>
-              {tiers.map((tier, idx) => (
+              {tiers.map((tier, idx) => {
+                const isExpanded = expandedTier === tier.id;
+                const panelId = `tier-panel-${tier.id}`;
+                const toggle = () => setExpandedTier(expandedTier === tier.id ? null : tier.id);
+                return (
                 <div
                   key={tier.id}
-                  className={`costar-box disclosure-card-host ${expandedTier === tier.id ? 'expanded' : ''}`}
-                  onClick={() => setExpandedTier(expandedTier === tier.id ? null : tier.id)}
+                  className={`costar-box disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                   style={{ marginBottom: '16px', gridColumn: 'auto' }}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
@@ -1025,7 +1044,7 @@
                   </span>
                   <div className="costar-label" style={{ fontSize: '16px' }}>{tier.title}</div>
                   <div className="costar-description">{tier.subtitle}</div>
-                  <div className="costar-example">
+                  <div id={panelId} className="costar-example">
                     <ul style={{ paddingLeft: '18px', marginBottom: '12px' }}>
                       {tier.details.map((d, i) => (
                         <li key={i} style={{ marginBottom: '4px' }}>{d}</li>
@@ -1034,7 +1053,8 @@
                     <div className="code-block">{tier.code}</div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
               </div>
 
               <div className="tier-diagram">
@@ -1071,7 +1091,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Strategy 1: Intelligent Context Retrieval</div>
+            <h2 className="stage-header">Strategy 1: Intelligent Context Retrieval</h2>
           </div>
           <div className="explanation">
             Instead of dumping everything into the context, the system selectively retrieves what&rsquo;s most relevant &mdash; like a smart assistant who knows what to put on your desk before you ask.
@@ -1127,7 +1147,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Strategies 2 &amp; 3: Compression &amp; Isolation</div>
+            <h2 className="stage-header">Strategies 2 &amp; 3: Compression &amp; Isolation</h2>
           </div>
           <div className="explanation">
             As conversations grow, you need ways to keep the essential information without the bloat, and to keep different tasks from contaminating each other&rsquo;s context.
@@ -1229,7 +1249,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">System Prompts: The Goldilocks Zone</div>
+            <h2 className="stage-header">System Prompts: The Goldilocks Zone</h2>
           </div>
           <div className="explanation">
             The best system prompts are &ldquo;not too specific, not too vague, but just right&rdquo; &mdash; they provide principles and reasoning frameworks rather than rigid flowcharts. It&rsquo;s like training a new employee.
@@ -1277,11 +1297,20 @@
               <div style={{ marginTop: '32px' }}>
                 <p style={{ fontSize: '15px', fontWeight: 600, color: '#6c5ce7', marginBottom: '16px' }}>4 Components of Optimal System Prompts</p>
                 <div className="decision-tree">
-                  {components.map((comp) => (
+                  {components.map((comp) => {
+                    const isExpanded = expandedComponent === comp.id;
+                    const panelId = `system-prompt-panel-${comp.id}`;
+                    const toggle = () => setExpandedComponent(expandedComponent === comp.id ? null : comp.id);
+                    return (
                     <div
                       key={comp.id}
-                      className={`decision-node disclosure-card-host ${expandedComponent === comp.id ? 'expanded' : ''}`}
-                      onClick={() => setExpandedComponent(expandedComponent === comp.id ? null : comp.id)}
+                      className={`decision-node disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                      onClick={toggle}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isExpanded}
+                      aria-controls={panelId}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                     >
                       <span className="disclosure-badge" aria-hidden="true">
                         <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
@@ -1289,11 +1318,12 @@
                       <div className="decision-question">
                         <span>{comp.id}. {comp.title}</span>
                       </div>
-                      <div className="decision-answer">
+                      <div id={panelId} className="decision-answer">
                         <div className="answer-text">{comp.desc}</div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
               </div>
@@ -1332,7 +1362,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Key Takeaways</div>
+            <h2 className="stage-header">Key Takeaways</h2>
           </div>
           <div className="explanation">
             Three advanced principles to master context engineering.
@@ -1432,7 +1462,7 @@
                   React.createElement('span', { style: { marginLeft: '20px', fontSize: '14px', color: '#999' } }, '|'),
                   React.createElement('div', { style: { marginLeft: '12px', display: 'flex', alignItems: 'center' } },
                     React.createElement('span', { className: 'guide-number' }, '3.2'),
-                    React.createElement('div', { className: 'title' }, 'Mastering Context')
+                    React.createElement('h1', { className: 'title' }, 'Mastering Context')
                   ),
                   React.createElement('div', { style: { marginLeft: '20px' } },
                     React.createElement('div', { className: 'badge' }, 'DEEP DIVE')

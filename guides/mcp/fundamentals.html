@@ -786,7 +786,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Why Do We Need MCP?</div>
+            <h2 className="stage-header">Why Do We Need MCP?</h2>
           </div>
           <div className="explanation">
             MCP (Model Context Protocol) is a standardization layer that lets developers build a tool integration once and have it work across every AI application that supports the protocol.
@@ -800,21 +800,31 @@
                 <strong style={{ color: '#1a1a1a' }}>The Problem MCP Solves:</strong> Before MCP, connecting AI agents to external tools was a mess of custom code and duplication. Click each card to learn more.
               </div>
               <div className="costar-grid">
-                {problems.map((p, idx) => (
+                {problems.map((p, idx) => {
+                  const isExpanded = expandedProblem === p.id;
+                  const panelId = `problem-panel-${p.id}`;
+                  const toggle = () => setExpandedProblem(expandedProblem === p.id ? null : p.id);
+                  return (
                   <div
                     key={p.id}
-                    className={`costar-box disclosure-card-host ${expandedProblem === p.id ? 'expanded' : ''}`}
-                    style={idx === 2 && expandedProblem !== p.id ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
-                    onClick={() => setExpandedProblem(expandedProblem === p.id ? null : p.id)}
+                    className={`costar-box disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                    style={idx === 2 && !isExpanded ? { gridColumn: '1 / -1', maxWidth: '50%', justifySelf: 'center' } : {}}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isExpanded}
+                    aria-controls={panelId}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                   >
                     <span className="disclosure-badge" aria-hidden="true">
                       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
                     </span>
                     <div className="costar-label">{p.emoji} {p.title}</div>
                     <div className="costar-description">{p.desc}</div>
-                    <div className="costar-example">{p.detail}</div>
+                    <div id={panelId} className="costar-example">{p.detail}</div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="comparison-box" style={{ marginTop: '32px' }}>
@@ -857,7 +867,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">How MCP Works: Architecture</div>
+            <h2 className="stage-header">How MCP Works: Architecture</h2>
           </div>
           <div className="explanation">
             MCP uses a client-server architecture where AI applications (hosts) contain clients that communicate with external MCP servers through a standardized protocol.
@@ -905,7 +915,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">MCP in Action</div>
+            <h2 className="stage-header">MCP in Action</h2>
           </div>
           <div className="explanation">
             MCP transforms AI assistants from general knowledge tools into action-capable agents that interact with real-world services &mdash; from checking weather to ordering food.
@@ -983,7 +993,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Setting Up MCP</div>
+            <h2 className="stage-header">Setting Up MCP</h2>
           </div>
           <div className="explanation">
             Setting up an MCP server can be as simple as a single CLI command. Here&rsquo;s how it works with Context7, a remote MCP that provides up-to-date documentation for AI packages.
@@ -1064,7 +1074,7 @@ claude mcp add context7 --transport http \\
       return (
         <>
           <div>
-            <div className="stage-header">Key Foundations</div>
+            <h2 className="stage-header">Key Foundations</h2>
           </div>
           <div className="explanation">
             Three foundational principles to remember about the Model Context Protocol.
@@ -1157,7 +1167,7 @@ claude mcp add context7 --transport http \\
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">4.1</span>
-                    <div className="title">MCP Fundamentals</div>
+                    <h1 className="title">MCP Fundamentals</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">BEGINNER</div>

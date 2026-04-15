@@ -569,7 +569,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">What is Prompt Engineering?</div>
+            <h2 className="stage-header">What is Prompt Engineering?</h2>
           </div>
           <div className="explanation">
             Prompt engineering is about structuring your instructions to get the best possible outputs from AI. Think of it like giving directions &mdash; &ldquo;go somewhere nice&rdquo; gets you lost, but &ldquo;take I-95 North to Exit 12, turn left at the light&rdquo; gets you exactly where you want to go.
@@ -611,7 +611,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Meta Prompting</div>
+            <h2 className="stage-header">Meta Prompting</h2>
           </div>
           <div className="explanation">
             Meta prompting is asking the AI to write the prompt for you. Instead of struggling to structure a complex request, you tell the AI your goal and let it be your prompt engineer.
@@ -663,8 +663,11 @@
               )}
 
               <button
+                type="button"
                 className="preset-btn"
                 onClick={() => setShowPrompt(!showPrompt)}
+                aria-expanded={showPrompt}
+                aria-controls="meta-generated-prompt"
                 style={{
                   background: showPrompt ? '#6c5ce7' : 'white',
                   color: showPrompt ? 'white' : '#6c5ce7',
@@ -673,7 +676,7 @@
               >
                 {showPrompt ? '✍️ Optimized Prompt' : '✨ Generate Optimized Prompt'}
               </button>
-              <div className={`generated-prompt ${showPrompt ? 'show' : ''}`} style={{ animationDelay: '0.2s', whiteSpace: 'pre-wrap' }}>
+              <div id="meta-generated-prompt" className={`generated-prompt ${showPrompt ? 'show' : ''}`} style={{ animationDelay: '0.2s', whiteSpace: 'pre-wrap' }}>
                 <strong>AI-Generated Optimized Prompt:</strong>
                 <br /><br />
                 {presets[selectedPreset].prompt}
@@ -733,31 +736,41 @@
       return (
         <>
           <div>
-            <div className="stage-header">The COSTAR Framework</div>
+            <h2 className="stage-header">The COSTAR Framework</h2>
           </div>
           <div className="explanation">
             COSTAR breaks prompts into 6 key components: Context, Objective, Style, Tone, Audience, Response. When you fill all 6, the AI understands not just WHAT to do, but HOW, for WHOM, and in what FORMAT.
           </div>
           <div className="scene-card">
             <div className="costar-grid">
-              {costarComponents.map((comp, idx) => (
+              {costarComponents.map((comp, idx) => {
+                const isExpanded = expandedBox === comp.id;
+                const panelId = `costar-panel-${comp.id}`;
+                const toggle = () => setExpandedBox(expandedBox === comp.id ? null : comp.id);
+                return (
                 <div
                   key={comp.id}
-                  className={`costar-box disclosure-card-host ${expandedBox === comp.id ? 'expanded' : ''}`}
-                  onClick={() => setExpandedBox(expandedBox === comp.id ? null : comp.id)}
+                  className={`costar-box disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
                   </span>
                   <div className="costar-label">{comp.id}</div>
                   <div className="costar-description">{comp.label}</div>
-                  <div className="costar-example">
+                  <div id={panelId} className="costar-example">
                     <strong>{comp.label}:</strong> {comp.description}
                     <br /><br />
                     <em>Example: {comp.example}</em>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <div className="insight-box">
@@ -802,7 +815,7 @@
       return (
         <>
           <div>
-            <div className="stage-header">Before vs After COSTAR</div>
+            <h2 className="stage-header">Before vs After COSTAR</h2>
           </div>
           <div className="explanation">
             See the dramatic difference COSTAR makes. The same task &mdash; write a rejection email &mdash; produces completely different results.
@@ -872,24 +885,33 @@
       return (
         <>
           <div>
-            <div className="stage-header">Which Should You Use?</div>
+            <h2 className="stage-header">Which Should You Use?</h2>
           </div>
           <div className="explanation">
             Neither meta prompting nor COSTAR is universally better. Choose based on your situation: when you know your destination, use COSTAR; when you&rsquo;re lost, use Meta Prompting.
           </div>
           <div className="scene-card">
             <div className="decision-tree">
-              {decisions.map((decision, idx) => (
+              {decisions.map((decision, idx) => {
+                const isExpanded = expandedNode === decision.id;
+                const panelId = `decision-panel-${decision.id}`;
+                const toggle = () => setExpandedNode(expandedNode === decision.id ? null : decision.id);
+                return (
                 <div
                   key={decision.id}
-                  className={`decision-node disclosure-card-host ${expandedNode === decision.id ? 'expanded' : ''}`}
-                  onClick={() => setExpandedNode(expandedNode === decision.id ? null : decision.id)}
+                  className={`decision-node disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
                   </span>
                   <div className="decision-question"><span>{decision.question}</span></div>
-                  <div className="decision-answer">
+                  <div id={panelId} className="decision-answer">
                     <div className="answer-text">
                       {decision.answer.split('\n').map((line, i) => (
                         <div key={i}>{line}</div>
@@ -899,7 +921,8 @@
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <div className="insight-box">
@@ -981,7 +1004,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">2.1</span>
-                    <div className="title">Meta Prompting & COSTAR</div>
+                    <h1 className="title">Meta Prompting & COSTAR</h1>
                   </div>
                   <div style={{ marginLeft: '20px' }}>
                     <div className="badge">INTERACTIVE</div>

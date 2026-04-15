@@ -743,7 +743,7 @@
       const [expanded, setExpanded] = useState(null);
       return (
         <>
-          <div><div className="stage-header">The Top 10 Prompt Engineering Techniques</div></div>
+          <div><h2 className="stage-header">The Top 10 Prompt Engineering Techniques</h2></div>
           <div className="overview-intro">
             Every technique below is a tool — not a winner. Pick by the shape of the problem, not by how sophisticated it sounds. Click any card to see what it is best used for, then open the detailed page from the sidebar or the card.
           </div>
@@ -758,11 +758,18 @@
           <div className="cards-grid">
             {TECHNIQUES.map((t, idx) => {
               const isOpen = expanded === idx;
+              const panelId = `tech-panel-${t.id}`;
+              const toggle = () => setExpanded(isOpen ? null : idx);
               return (
                 <div
                   key={t.id}
                   className={`tech-card disclosure-card-host ${isOpen ? 'expanded' : ''}`}
-                  onClick={() => setExpanded(isOpen ? null : idx)}
+                  onClick={toggle}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
                 >
                   <span className="disclosure-badge" aria-hidden="true">
                     <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25"><polyline points="6 9 12 15 18 9" /></svg>
@@ -783,7 +790,7 @@
                   </div>
 
                   {isOpen && (
-                    <>
+                    <div id={panelId}>
                       <div className="card-reveal">
                         <span className="card-reveal-label">Best used for</span>
                         {t.bestFor}
@@ -791,7 +798,7 @@
                       <span className="card-cta" onClick={(e) => { e.stopPropagation(); onNavigate(idx + 1); }}>
                         Open deep dive →
                       </span>
-                    </>
+                    </div>
                   )}
                 </div>
               );
@@ -923,7 +930,7 @@
                   <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
                   <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                     <span className="guide-number">2.2</span>
-                    <div className="title">Prompt Techniques Toolkit</div>
+                    <h1 className="title">Prompt Techniques Toolkit</h1>
                   </div>
                   <div style={{ marginLeft: '16px' }}>
                     <div className="badge">DEEP DIVE</div>
