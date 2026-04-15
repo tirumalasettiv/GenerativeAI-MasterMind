@@ -449,6 +449,8 @@
       );
     }
 
+    const NEXT_GUIDE = { id: "5.6", title: "Agentic AI", module: "Module 5", href: "./agentic-ai.html" };
+
     const STAGES = [
       { id: 1, label: 'What', icon: RobotIcon },
       { id: 2, label: 'Skills', icon: BrainIcon },
@@ -1109,6 +1111,19 @@
                 <div className="fade-in" key={currentStage}>
                   <StageComponent />
                 </div>
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>

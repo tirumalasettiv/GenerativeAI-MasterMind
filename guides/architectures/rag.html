@@ -1355,6 +1355,8 @@
       const [currentStage, setCurrentStage] = useState(0);
       const contentRef = useRef(null);
 
+      const NEXT_GUIDE = { id: "5.4", title: "Workflows", module: "Module 5", href: "./workflows.html" };
+
       const stages = [
         { icon: SearchIcon, label: 'What is RAG', component: S1 },
         { icon: LayersIcon, label: 'Components', component: S2 },
@@ -1447,6 +1449,19 @@
                 <div className="fade-in" key={currentStage}>
                   <CurrentComponent />
                 </div>
+                {currentStage === stages.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>
