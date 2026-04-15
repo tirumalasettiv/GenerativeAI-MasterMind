@@ -98,6 +98,7 @@
     const SIDEBAR_ICONS = [SVG.factory24, SVG.lock24, SVG.unlock24, SVG.phone24, SVG.chart24];
     const CONTENT_ICONS = [SVG.factory48, SVG.lock48, SVG.unlock48, SVG.phone48, SVG.chart48];
 
+    const NEXT_GUIDE = { id: "1.5", title: "Limitations", module: "Module 1", href: "./limitations.html" };
     const STAGES = [
       { label: "Foundation", title: "Foundational Models", sub: "The AI engines that power everything" },
       { label: "Proprietary", title: "Proprietary Models", sub: "Secret recipe, API access only" },
@@ -1316,6 +1317,19 @@
                 </div>
                 <div>{getInsight()}</div>
               </div>
+              {stage === STAGES.length - 1 && (
+                <div className="up-next-card" role="complementary" aria-label="Up next">
+                  <span className="up-next-label">UP NEXT</span>
+                  <a href={NEXT_GUIDE.href} className="up-next-link">
+                    <div className="up-next-meta">
+                      <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                      <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                    </div>
+                    <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                    <span className="up-next-arrow" aria-hidden="true">→</span>
+                  </a>
+                </div>
+              )}
             </main>
           </div>
         </div>

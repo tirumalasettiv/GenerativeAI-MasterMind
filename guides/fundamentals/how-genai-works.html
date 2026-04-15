@@ -493,6 +493,7 @@
             textMuted: '#666'
         };
 
+        const NEXT_GUIDE = { id: "1.4", title: "AI Model Types", module: "Module 1", href: "./ai-model-types.html" };
         const STAGES = [
             { id: 1, name: 'Training', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>' },
             { id: 2, name: 'Parameters', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-8.66-3.34l2.83-2.83m11.31-11.31l2.83-2.83M1 12h4m14 0h4M4.34 4.34l2.83 2.83m11.31 11.31l2.83 2.83"/></svg>' },
@@ -1207,6 +1208,19 @@
             return (
                 <main id="main" className="content-area">
                     {renderStage()}
+                    {currentStage === STAGES.length && (
+                        <div className="up-next-card" role="complementary" aria-label="Up next">
+                            <span className="up-next-label">UP NEXT</span>
+                            <a href={NEXT_GUIDE.href} className="up-next-link">
+                                <div className="up-next-meta">
+                                    <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                                    <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                                </div>
+                                <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                                <span className="up-next-arrow" aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    )}
                 </main>
             );
         };

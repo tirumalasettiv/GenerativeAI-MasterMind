@@ -406,6 +406,7 @@
       })
     };
 
+    const NEXT_GUIDE = { id: "1.7", title: "Fundamentals Quiz", module: "Module 1", href: "./quiz.html", isQuiz: true };
     const STAGES = [
       { svgKey: "overview", label: "Overview", title: "The VERIFY Framework", sub: "6 steps to use AI responsibly" },
       { svgKey: "validate", label: "Validate", title: "V — Validate", sub: "Check outputs against trusted sources" },
@@ -1558,6 +1559,19 @@
 
               <main id="main" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                 {renderStage()}
+                {current === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>

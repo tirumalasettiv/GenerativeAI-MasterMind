@@ -104,6 +104,7 @@
       });
     }
 
+    const NEXT_GUIDE = { id: "1.6", title: "VERIFY Framework", module: "Module 1", href: "./verify-framework.html" };
     const STAGES = [
       { svgSm: SVG_OVERVIEW_SM, svg: SVG_OVERVIEW, label: "Overview", title: "The Three Weaknesses", sub: "What GenAI gets wrong" },
       { svgSm: SVG_GHOST_SM, svg: SVG_GHOST, label: "Hallucinate", title: "Hallucinations", sub: "Confidently making things up" },
@@ -938,6 +939,19 @@
 
               <main id="main" style={P.content}>
                 <CurrentStage onNavigate={handleNavigate} />
+                {stage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                )}
               </main>
             </div>
           </div>
