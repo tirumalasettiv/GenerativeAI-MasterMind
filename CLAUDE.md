@@ -51,7 +51,7 @@ Guides keep only guide-specific component styles in their inline `<style>` block
 6. **Final Exam** (`guides/final-exam/`) — 1 quiz: 50 questions spanning all five modules
 
 ### Docs (`docs/`)
-Supplementary content: RAG explainer pages (`rag-explainer.html`, `rag-internals.html`), a curriculum markdown, and the master `GenAI Concepts .md` reference document. The `docs/assets/` images are referenced from the GenAI Concepts markdown.
+Supplementary content: a 14-day curriculum markdown (`14-Day-Generative-AI-Training-Curriculum.md`) and the master `GenAI Concepts .md` reference document. The `docs/assets/` images are referenced from the GenAI Concepts markdown.
 
 ## Key Conventions
 
