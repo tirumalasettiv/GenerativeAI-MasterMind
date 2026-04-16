@@ -832,23 +832,23 @@
       const patterns = [
         {
           id: 'chaining', emoji: '\uD83C\uDFED', title: 'Prompt Chaining', sub: 'Assembly Line',
-          detail: 'Each step transforms the output of the previous step. Example: Outline an article, then write each section, then edit for tone. Each step is a separate LLM call with a focused instruction.'
+          detail: 'Each step transforms the output of the previous step \u2014 like stations on an assembly line.'
         },
         {
           id: 'routing', emoji: '\uD83C\uDFA9', title: 'Routing', sub: 'Sorting Hat',
-          detail: 'A classifier examines the input and sends it to the right specialized handler. Example: A support system routes billing questions to one prompt, technical issues to another, and feedback to a third.'
+          detail: 'A classifier sends the input to the right specialist \u2014 like a sorting hat picking the best handler.'
         },
         {
           id: 'parallel', emoji: '\uD83D\uDEE3\uFE0F', title: 'Parallelization', sub: 'Multi-Lane Highway',
-          detail: 'Multiple LLM calls run simultaneously on different aspects of the same task. Example: Analyze a document for sentiment, extract entities, and summarize key points all at once, then merge results.'
+          detail: 'Multiple LLM calls run at once on different aspects \u2014 like a multi-lane highway processing in parallel.'
         },
         {
           id: 'orchestrator', emoji: '\uD83D\uDCCB', title: 'Orchestrator-Workers', sub: 'Project Manager',
-          detail: 'A central LLM breaks a task into subtasks and delegates to specialized workers. Example: A coding assistant decomposes "build a web app" into frontend, backend, and database tasks, assigns each to a worker, then integrates.'
+          detail: 'A central LLM breaks tasks apart and delegates to specialized workers \u2014 like a project manager coordinating a team.'
         },
         {
           id: 'evaluator', emoji: '\uD83D\uDD0D', title: 'Evaluator-Optimizer', sub: 'QA Inspector',
-          detail: 'One LLM generates output, another evaluates it, and the cycle repeats until quality thresholds are met. Example: Generate marketing copy, evaluate for brand voice, regenerate if needed.'
+          detail: 'One LLM generates, another critiques, and they iterate until quality is met \u2014 like a writer with a QA reviewer.'
         }
       ];
 
@@ -902,6 +902,9 @@
                     {tool}
                   </span>
                 ))}
+              </div>
+              <div className="deep-dive-link">
+                See each pattern broken down step-by-step in <a href="workflows.html">Guide 5.4: AI Workflows &rarr;</a>
               </div>
             </div>
           </div>
