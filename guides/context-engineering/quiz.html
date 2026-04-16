@@ -8,7 +8,7 @@
   <meta property="og:title" content="Module 3 Quiz — Context Engineering">
   <meta property="og:description" content="Test your context engineering knowledge with this interactive Module 3 quiz.">
   <meta property="og:type" content="article">
-  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta property="og:image" content="../../assets/og-module-3.svg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Module 3 Quiz — Context Engineering">
   <meta name="twitter:description" content="Test your context engineering knowledge with this interactive Module 3 quiz.">
@@ -16,9 +16,9 @@
   <title>Module 3 Quiz &mdash; Context Engineering</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../assets/guide-shared.css">
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
   <style>
     .option-card {
       padding: 18px 24px;
@@ -199,6 +199,26 @@
 
     .scale-in {
       animation: scaleIn 0.5s ease forwards;
+    }
+
+    @media (max-width: 768px) {
+      .option-card { padding: 14px 16px; font-size: 15px; gap: 12px; }
+      .option-letter { width: 32px; height: 32px; font-size: 13px; }
+      .submit-btn { padding: 12px 32px; font-size: 15px; }
+      .score-ring { width: 140px; height: 140px; }
+      .score-ring svg { width: 140px; height: 140px; }
+      .score-number { font-size: 36px; }
+      .result-card { padding: 14px 16px; gap: 12px; }
+    }
+    @media (max-width: 480px) {
+      .option-card { padding: 12px 14px; font-size: 14px; gap: 10px; }
+      .option-letter { width: 28px; height: 28px; font-size: 12px; }
+      .submit-btn { padding: 10px 24px; font-size: 14px; }
+      .section-tag { font-size: 10px; padding: 3px 10px; }
+      .score-ring { width: 120px; height: 120px; }
+      .score-ring svg { width: 120px; height: 120px; }
+      .score-number { font-size: 30px; }
+      .result-card { padding: 12px; gap: 10px; flex-wrap: wrap; }
     }
   </style>
 </head>

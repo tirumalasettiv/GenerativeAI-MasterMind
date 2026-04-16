@@ -2,3 +2,5 @@
 .playwright-mcp/
 .worktrees/
 .superpowers/
+node_modules/
+*.log

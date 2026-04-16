@@ -18,10 +18,10 @@
     <text x="60" y="290" font-family="DM Sans, sans-serif" font-weight="500" font-size="28" fill="#666">Interactive Generative AI Learning Platform</text>
     <g transform="translate(60,350)">
       <circle cx="30" cy="30" r="28" fill="#6c5ce7"/>
-      <text x="30" y="38" text-anchor="middle" font-family="Fraunces, serif" font-weight="700" font-size="24" fill="#fff">5</text>
+      <text x="30" y="38" text-anchor="middle" font-family="Fraunces, serif" font-weight="700" font-size="24" fill="#fff">7</text>
       <text x="80" y="38" font-family="DM Sans, sans-serif" font-weight="600" font-size="22" fill="#2a2a2a">Modules</text>
       <circle cx="240" cy="30" r="28" fill="#2ecc71"/>
-      <text x="240" y="38" text-anchor="middle" font-family="Fraunces, serif" font-weight="700" font-size="22" fill="#fff">24</text>
+      <text x="240" y="38" text-anchor="middle" font-family="Fraunces, serif" font-weight="700" font-size="22" fill="#fff">40</text>
       <text x="290" y="38" font-family="DM Sans, sans-serif" font-weight="600" font-size="22" fill="#2a2a2a">Guides</text>
       <circle cx="470" cy="30" r="28" fill="#f39c12"/>
       <text x="470" y="38" text-anchor="middle" font-family="DM Sans, sans-serif" font-weight="700" font-size="20" fill="#fff">AI</text>

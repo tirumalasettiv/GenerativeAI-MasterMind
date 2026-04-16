@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="The final exam — 50 questions spanning all five modules of GenerativeAI MasterMind.">
+  <meta name="description" content="The final exam — 70 questions spanning all seven modules of GenerativeAI MasterMind.">
   <meta name="theme-color" content="#6c5ce7">
   <meta property="og:title" content="Final Exam — GenerativeAI MasterMind">
-  <meta property="og:description" content="The final exam — 50 questions spanning all five modules of GenerativeAI MasterMind.">
+  <meta property="og:description" content="The final exam — 70 questions spanning all seven modules of GenerativeAI MasterMind.">
   <meta property="og:type" content="article">
-  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta property="og:image" content="../../assets/og-exam.svg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Final Exam — GenerativeAI MasterMind">
-  <meta name="twitter:description" content="The final exam — 50 questions spanning all five modules of GenerativeAI MasterMind.">
+  <meta name="twitter:description" content="The final exam — 70 questions spanning all seven modules of GenerativeAI MasterMind.">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
   <title>Course Final Exam — GenAI MasterMind</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../assets/guide-shared.css">
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
   <style>
     .option-card { padding: 18px 24px; background: white; border: 2px solid #e0e0e0; border-radius: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 16px; font-size: 16px; line-height: 1.5; }
     .option-card:hover { border-color: #6c5ce7; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108, 92, 231, 0.1); }
@@ -45,6 +45,26 @@
     .result-card:hover { border-color: #6c5ce7; box-shadow: 0 4px 16px rgba(108, 92, 231, 0.08); }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     .scale-in { animation: scaleIn 0.5s ease forwards; }
+
+    @media (max-width: 768px) {
+      .option-card { padding: 14px 16px; font-size: 15px; gap: 12px; }
+      .option-letter { width: 32px; height: 32px; font-size: 13px; }
+      .submit-btn { padding: 12px 32px; font-size: 15px; }
+      .score-ring { width: 140px; height: 140px; }
+      .score-ring svg { width: 140px; height: 140px; }
+      .score-number { font-size: 36px; }
+      .result-card { padding: 14px 16px; gap: 12px; }
+    }
+    @media (max-width: 480px) {
+      .option-card { padding: 12px 14px; font-size: 14px; gap: 10px; }
+      .option-letter { width: 28px; height: 28px; font-size: 12px; }
+      .submit-btn { padding: 10px 24px; font-size: 14px; }
+      .section-tag { font-size: 10px; padding: 3px 10px; }
+      .score-ring { width: 120px; height: 120px; }
+      .score-ring svg { width: 120px; height: 120px; }
+      .score-number { font-size: 30px; }
+      .result-card { padding: 12px; gap: 10px; flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>
@@ -59,6 +79,8 @@
       3: { name: "Context Engineering", color: "#00b894", bg: "#e6f9f3", emoji: "\uD83D\uDDC2\uFE0F" },
       4: { name: "MCP", color: "#0984e3", bg: "#e0f0ff", emoji: "\uD83D\uDD0C" },
       5: { name: "Architectures", color: "#d63031", bg: "#fde8e8", emoji: "\uD83C\uDFD7\uFE0F" },
+      6: { name: "Role Labs", color: "#1abc9c", bg: "#e8f8f5", emoji: "\uD83D\uDCCB" },
+      7: { name: "Build Labs", color: "#e67e22", bg: "#fef5e7", emoji: "\uD83D\uDD28" },
     };
 
     const QUESTIONS = [
@@ -717,6 +739,166 @@
         correct: 2,
         explanation: "The Golden Rule: start with the simplest architecture that could work (often LLM Chat), measure its performance, and upgrade only when you have evidence the current approach isn't sufficient. Over-engineering wastes time and money."
       },
+      {
+        id: 51, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "When using the COSTAR framework to generate user stories, what does the 'S' (Style) parameter control?",
+        options: ["The programming language of the output", "The format and tone of the AI's response", "The size of the generated document", "The speed of the AI's processing"],
+        correct: 1,
+        explanation: "In the COSTAR framework, Style controls the format and tone of the AI's output \u2014 for example, specifying 'Agile user story format with acceptance criteria' ensures the response matches your team's conventions."
+      },
+      {
+        id: 52, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "What is the primary benefit of using AI for competitive analysis as a product manager?",
+        options: ["AI eliminates the need for human market research", "AI can access competitors' internal databases", "AI rapidly synthesizes publicly available information into structured comparisons", "AI predictions about competitors are always accurate"],
+        correct: 2,
+        explanation: "AI excels at quickly synthesizing publicly available information \u2014 product pages, reviews, pricing, feature lists \u2014 into structured comparison grids. It accelerates research but doesn't replace human judgment about strategic implications."
+      },
+      {
+        id: 53, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "When generating a PRD with AI, which approach produces the most useful output?",
+        options: ["Ask AI to write the entire PRD from a one-line description", "Provide detailed context about users, constraints, and goals, then iterate on sections", "Copy a competitor's PRD and ask AI to modify it", "Let AI decide the product requirements based on market trends"],
+        correct: 1,
+        explanation: "AI-generated PRDs improve dramatically with rich context. Providing user personas, business constraints, technical limitations, and success metrics lets the AI generate focused, relevant requirements rather than generic boilerplate."
+      },
+      {
+        id: 54, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "What is a key risk when using AI to estimate time savings for PM workflows?",
+        options: ["AI always underestimates time savings", "AI estimates may not account for review, iteration, and quality assurance overhead", "AI cannot understand PM workflows", "Time savings estimates are never useful"],
+        correct: 1,
+        explanation: "AI can dramatically speed up draft generation, but the total time for a task includes review, revision, stakeholder feedback, and quality assurance. Raw AI output rarely ships without human refinement, so time-savings estimates should account for the full workflow."
+      },
+      {
+        id: 55, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "In the citizen coder workflow, what is the recommended first step before asking AI to generate code?",
+        options: ["Learn the programming language syntax", "Define the data model and entities clearly", "Set up a development environment", "Write unit tests"],
+        correct: 1,
+        explanation: "Starting with a clear data model \u2014 entities, their attributes, and relationships \u2014 gives the AI the structural foundation to generate coherent code. Without this, AI-generated code tends to be inconsistent about how data is organized."
+      },
+      {
+        id: 56, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "What does AI-assisted 'UI screen specification' help a citizen coder accomplish?",
+        options: ["Automatically deploy a web application", "Generate pixel-perfect designs without a designer", "Translate feature requirements into structured screen layouts and component descriptions", "Replace the need for user testing"],
+        correct: 2,
+        explanation: "UI screen specification translates high-level feature ideas into structured descriptions of screens, components, and interactions. This gives AI code generators a clear blueprint to work from, resulting in more usable interfaces."
+      },
+      {
+        id: 57, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "When using AI to generate workflow logic, what is the most important context to provide?",
+        options: ["The brand colors of the application", "The exact input data format, expected transformations, and desired output format", "The programming language preferences", "The deployment timeline"],
+        correct: 1,
+        explanation: "Workflow logic generation depends on precise data context: what the inputs look like, what transformations are needed, and what the output should be. Providing sample data and expected results helps AI generate accurate formulas and automation rules."
+      },
+      {
+        id: 58, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "What is the 'two-output' pattern used in citizen coder labs?",
+        options: ["Generating code in two programming languages simultaneously", "Asking AI to produce both the implementation and an explanation of how it works", "Running the same prompt twice for consistency", "Creating both a mobile and desktop version"],
+        correct: 1,
+        explanation: "The two-output pattern asks AI to generate both the working code AND an explanation of what it does and why. This helps citizen coders learn from the output rather than treating AI as a black box, building their understanding over time."
+      },
+      {
+        id: 59, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "Why is iterative prompting more effective than single-prompt generation for complex PM deliverables?",
+        options: ["AI models have strict output length limits", "Breaking complex deliverables into sections allows focused refinement and maintains coherence", "Single prompts are not supported by modern AI models", "Iterative prompting is always faster"],
+        correct: 1,
+        explanation: "Complex deliverables like PRDs or competitive analyses benefit from section-by-section generation because each section can be reviewed and refined independently. This prevents quality degradation that occurs when AI tries to generate everything at once."
+      },
+      {
+        id: 60, module: 6,
+        section: "Module 6 \u2014 Role Labs",
+        question: "What distinguishes a 'citizen coder' from a traditional developer in the context of AI-assisted building?",
+        options: ["Citizen coders use different programming languages", "Citizen coders rely on AI to bridge the gap between intent and implementation", "Citizen coders cannot create functional applications", "Citizen coders only work on mobile applications"],
+        correct: 1,
+        explanation: "A citizen coder uses AI as a translation layer between what they want to build (intent) and working code (implementation). They focus on clearly describing requirements, data models, and workflows, while AI handles the syntax and implementation details."
+      },
+      {
+        id: 61, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "When building a RAG system, what is the primary purpose of 'chunking' documents?",
+        options: ["To reduce storage costs", "To split documents into semantically meaningful pieces that fit the model's context window", "To encrypt sensitive information", "To convert documents to a different format"],
+        correct: 1,
+        explanation: "Chunking splits documents into pieces that are both semantically coherent and small enough to fit in the model's context window. Chunk size affects retrieval quality \u2014 too large misses precision, too small loses context."
+      },
+      {
+        id: 62, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "In RAG evaluation, what does a 'partial' score on a test query indicate?",
+        options: ["The system crashed mid-response", "The retrieved documents were from the wrong collection", "The answer contained some correct information but was incomplete or included inaccuracies", "The query was malformed"],
+        correct: 2,
+        explanation: "A 'partial' score means the RAG system retrieved relevant documents and generated a response with some correct information, but the answer was either incomplete, contained minor inaccuracies, or missed key details."
+      },
+      {
+        id: 63, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "What is the most critical step in designing a multi-step AI workflow?",
+        options: ["Choosing the most expensive model for each step", "Defining clear inputs and outputs for each node so failures can be isolated", "Running all steps in parallel for speed", "Using the same prompt template for every step"],
+        correct: 1,
+        explanation: "Clear input/output contracts between workflow nodes are essential. When each step has well-defined expectations, failures can be traced to specific nodes, outputs can be validated between steps, and individual nodes can be tested independently."
+      },
+      {
+        id: 64, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "When debugging a failing workflow step, what should you check first?",
+        options: ["The model's training data", "The input data format and whether it matches the step's expected schema", "The cost per token", "The workflow's visual design"],
+        correct: 1,
+        explanation: "Most workflow failures stem from data format mismatches between steps. Checking whether the input to a failing step matches its expected schema catches the most common category of errors."
+      },
+      {
+        id: 65, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "What role do 'tool descriptions' play in an AI agent's prompt?",
+        options: ["They are marketing text shown to end users", "They tell the agent when and how to use each tool, guiding its tool selection decisions", "They are only needed for debugging purposes", "They control the agent's response speed"],
+        correct: 1,
+        explanation: "Tool descriptions are critical for agent performance. They tell the agent what each tool does, when to use it, what parameters it accepts, and what it returns. Poorly written tool descriptions lead to agents choosing wrong tools or passing incorrect parameters."
+      },
+      {
+        id: 66, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "What is the biggest risk when an AI agent enters a reasoning loop?",
+        options: ["The agent produces better answers", "The agent consumes unlimited tokens/cost while making no progress toward the goal", "The agent's output becomes more creative", "The agent automatically stops after one loop"],
+        correct: 1,
+        explanation: "Reasoning loops (the agent repeatedly calling the same tools or re-planning without progress) are a major failure mode. They consume tokens/cost without advancing the task. Production agents need loop detection and maximum-step limits as safety guardrails."
+      },
+      {
+        id: 67, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "In a multi-agent system, what distinguishes the 'supervisor' pattern from the 'debate' pattern?",
+        options: ["Supervisors are faster; debate is slower", "A supervisor orchestrates and delegates to specialist agents; debate has agents critique each other's outputs", "Supervisors use more tokens; debate uses fewer", "There is no meaningful difference"],
+        correct: 1,
+        explanation: "The supervisor pattern has a central orchestrator that delegates sub-tasks to specialist agents and synthesizes their outputs. The debate pattern has multiple agents independently address the same problem and critique each other's answers."
+      },
+      {
+        id: 68, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "What is the purpose of a 'handoff protocol' in multi-agent systems?",
+        options: ["To transfer user authentication between agents", "To define what information and context is passed when one agent transfers work to another", "To measure agent performance", "To encrypt communications between agents"],
+        correct: 1,
+        explanation: "Handoff protocols define the format and content of information passed between agents when work transfers. This includes task context, completed work, constraints, and expected next steps. Poor handoffs cause agents to lose context or repeat work."
+      },
+      {
+        id: 69, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "In the capstone architecture decision process, when should you choose a RAG architecture over a simple LLM chat?",
+        options: ["When you need faster response times", "When the task requires accurate answers grounded in specific, up-to-date documents", "When you want cheaper API costs", "When the user base is very large"],
+        correct: 1,
+        explanation: "RAG is the right upgrade from LLM chat when accuracy matters and the task requires grounding in specific documents \u2014 company policies, technical documentation, recent data. Plain LLM chat relies solely on training data, which may be outdated."
+      },
+      {
+        id: 70, module: 7,
+        section: "Module 7 \u2014 Build Labs",
+        question: "What is the 'start simple, measure, upgrade' principle in AI architecture selection?",
+        options: ["Always begin with the most advanced architecture to future-proof", "Start with the simplest viable architecture, measure its performance, and add complexity only when data shows it's needed", "Use simple architectures for small companies and complex ones for large enterprises", "Upgrade architectures on a fixed quarterly schedule"],
+        correct: 1,
+        explanation: "This principle prevents over-engineering. Many tasks that seem to need agents actually work fine with RAG or even LLM chat. Starting simple, measuring against real requirements, and upgrading only with evidence saves significant development time and cost."
+      },
     ];
 
     const MODULE_ICONS = {
@@ -725,6 +907,8 @@
       3: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 8h2"/><path d="M7 11h5"/></svg>',
       4: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6"/><path d="M12 16v6"/><circle cx="12" cy="12" r="2"/><path d="M4.93 4.93l4.24 4.24"/><path d="M14.83 14.83l4.24 4.24"/><path d="M2 12h6"/><path d="M16 12h6"/></svg>',
       5: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+      6: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>',
+      7: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
     };
 
     /* SVG icon used in explanation boxes - static developer-controlled content, no user input */
@@ -852,7 +1036,7 @@
             <div style={{ fontFamily: "'Fraunces', serif", fontSize: 32, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
               {grade.label}
             </div>
-            <div style={{ fontSize: 16, color: '#999' }}>Course Final Exam \u2014 All 5 Modules</div>
+            <div style={{ fontSize: 16, color: '#999' }}>Course Final Exam \u2014 All 7 Modules</div>
           </div>
 
           <div className="scene-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 48, flexWrap: 'wrap' }}>
@@ -876,7 +1060,7 @@
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 320 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0, width: '100%', maxWidth: 400 }}>
               {Object.entries(moduleScores).map(([mod, data]) => {
                 const meta = MODULE_META[mod];
                 return (

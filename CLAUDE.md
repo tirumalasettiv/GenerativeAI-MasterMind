@@ -15,7 +15,7 @@ GenerativeAI-MasterMind is a static educational platform teaching Generative AI 
 ## Architecture
 
 ### Tech Stack
-- React 18.2.0 + ReactDOM (CDN: unpkg.com)
+- React 18.2.0 + ReactDOM (CDN: cdnjs.cloudflare.com)
 - Babel Standalone 7.23.9 (in-browser JSX compilation via `<script type="text/babel">`)
 - Google Fonts: DM Sans (body) + Fraunces (headings)
 - No npm, no bundler, no TypeScript
@@ -50,7 +50,7 @@ Guides keep only guide-specific component styles in their inline `<style>` block
 5. **Architectures** (`guides/architectures/`) — 7 guides: overview, llm-chat, rag, workflows, agents, agentic-ai, quiz
 6. **Role Labs** (`guides/role-labs/`) — 3 guides: pm-lab, citizen-coder-lab, quiz
 7. **Build Labs & Capstone** (`guides/build-labs/`) — 6 guides: rag-build, workflow-build, agent-build, multi-agent-build, capstone, quiz
-8. **Final Exam** (`guides/final-exam/`) — 1 quiz: 50 questions spanning all five modules
+8. **Final Exam** (`guides/final-exam/`) — 1 quiz: 70 questions spanning all seven modules
 
 ### Docs (`docs/`)
 Supplementary content: a 14-day curriculum markdown (`14-Day-Generative-AI-Training-Curriculum.md`) and the master `GenAI Concepts .md` reference document. The `docs/assets/` images are referenced from the GenAI Concepts markdown.
