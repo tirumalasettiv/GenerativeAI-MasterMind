@@ -16,6 +16,11 @@
   <title>GenAI MasterMind — Master Generative AI</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/guide-shared.css">
+  <style>
+    @media (max-width: 768px) {
+      #root { height: auto !important; overflow: visible !important; }
+    }
+  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
@@ -482,9 +487,9 @@
               flexWrap: "wrap",
             }}>
               {[
-                { num: "5", label: "Modules" },
-                { num: "24", label: "Interactive Guides" },
-                { num: "50", label: "Exam Questions" },
+                { num: "7", label: "Modules" },
+                { num: "40", label: "Interactive Guides" },
+                { num: "70", label: "Exam Questions" },
               ].map((stat, i) => (
                 <div key={i} style={{
                   display: "flex", alignItems: "center", gap: 8,
@@ -691,7 +696,7 @@
                   Built for learning modern generative AI concepts and techniques
                 </p>
                 <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", margin: 0 }}>
-                  5 Modules &middot; 24 Guides &middot; 50-Question Final Exam
+                  7 Modules &middot; 40 Guides &middot; 70-Question Final Exam
                 </p>
               </div>
             </div>
