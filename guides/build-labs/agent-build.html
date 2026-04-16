@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hands-on lab: build an AI agent with tool use. Define goals, write system prompts, select tools, test with real queries, and analyze failure modes.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="Agent Build — Build Labs">
+  <meta property="og:description" content="Hands-on lab: build an AI agent with tool use. Define goals, write system prompts, select tools, test with real queries, and analyze failure modes.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Agent Build — Build Labs">
+  <meta name="twitter:description" content="Hands-on lab: build an AI agent with tool use. Define goals, write system prompts, select tools, test with real queries, and analyze failure modes.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Agent Build - Build Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── Disclosure badge (shared across all click-to-expand cards) ── */
+    .disclosure-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
+
+    /* ── S1: Agent loop SVG wrapper ── */
+    .agent-flow-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .agent-flow-wrap svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 700px;
+      width: 100%;
+      height: auto;
+    }
+
+    /* ── S1: Example persona cards ── */
+    .persona-cards {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .persona-card {
+      flex: 1;
+      min-width: 220px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .persona-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .persona-emoji { font-size: 24px; }
+    .persona-name { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+    .persona-field {
+      margin-bottom: 8px;
+    }
+    .persona-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .persona-field-value {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    /* ── S1: Agent vs Workflow comparison table ── */
+    .compare-table-wrap { width: 100%; overflow-x: auto; margin-top: 4px; }
+    .compare-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      min-width: 420px;
+    }
+    .compare-table th {
+      background: #6c5ce7;
+      color: white;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+    }
+    .compare-table th:first-child { width: 34%; }
+    .compare-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+      color: #333;
+      vertical-align: top;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table tr:nth-child(even) td { background: #fafafe; }
+    .compare-row-label {
+      font-weight: 700;
+      color: #1a1a1a;
+      font-size: 13px;
+    }
+
+    /* ── S2: Design card sections ── */
+    .design-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .design-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .design-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .design-card-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .design-textarea {
+      width: 100%;
+      min-height: 76px;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a1a;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .design-textarea:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S2: Tool toggles ── */
+    .tool-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .tool-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 24px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .tool-toggle:hover {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+    }
+    .tool-toggle.active {
+      border-color: #6c5ce7;
+      background: #6c5ce7;
+      color: white;
+    }
+    .tool-toggle-emoji { font-size: 16px; }
+    .tool-count {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+      font-style: italic;
+    }
+
+    /* ── S2: Example toggle ── */
+    .example-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      padding: 8px 16px;
+      border: 2px solid #6c5ce7;
+      border-radius: 8px;
+      background: white;
+      color: #6c5ce7;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .example-toggle-btn:hover { background: #f5f3ff; }
+    .example-toggle-btn.active { background: #6c5ce7; color: white; }
+    .example-box {
+      margin-top: 14px;
+      background: #f5f3ff;
+      border: 2px solid #c9c2f5;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .example-box-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #6c5ce7;
+      margin-bottom: 10px;
+    }
+    .example-box-row {
+      margin-bottom: 8px;
+    }
+    .example-box-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .example-box-value {
+      font-size: 13px;
+      color: #333;
+      line-height: 1.55;
+    }
+
+    /* ── S3: Prompt builder sections ── */
+    .prompt-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .prompt-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .prompt-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+    .prompt-section-prefix {
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+      margin-bottom: 2px;
+    }
+    .prompt-section-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+      min-height: 56px;
+    }
+    .prompt-section-textarea:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S3: Prompt preview ── */
+    .prompt-preview {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    .prompt-preview pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #e0d9ff;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    .prompt-preview-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #a29bfe;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── S4: Test rows ── */
+    .test-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .test-row {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .test-row-header {
+      font-weight: 700;
+      font-size: 14px;
+      color: #6c5ce7;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .test-row-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .test-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+    .test-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .test-field-textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+      min-height: 52px;
+    }
+    .test-field-textarea:focus { border-color: #6c5ce7; outline: none; }
+    .test-field-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .test-field-input:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S4: Rating circles ── */
+    .rating-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .rating-circles {
+      display: flex;
+      gap: 8px;
+    }
+    .rating-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid #e0e0e0;
+      background: white;
+      font-size: 13px;
+      font-weight: 700;
+      color: #999;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .rating-circle:hover { border-color: #6c5ce7; color: #6c5ce7; transform: scale(1.1); }
+    .rating-circle.selected {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+      transform: scale(1.08);
+    }
+
+    /* ── S4: Summary bar ── */
+    .test-summary {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      padding: 14px 18px;
+      background: #f5f3ff;
+      border: 2px solid #c9c2f5;
+      border-radius: 10px;
+    }
+    .test-summary-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 80px;
+    }
+    .test-summary-num {
+      font-size: 28px;
+      font-weight: 700;
+      color: #6c5ce7;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .test-summary-label {
+      font-size: 12px;
+      color: #888;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* ── S5: Failure cards ── */
+    .failure-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .failure-card {
+      position: relative;
+      padding: 16px 18px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .failure-card:hover { border-color: #e74c3c; transform: translateX(3px); }
+    .failure-card.selected { border-color: #e74c3c; background: #fef5f5; }
+    .failure-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .failure-card-emoji { font-size: 24px; flex-shrink: 0; }
+    .failure-card-title { font-weight: 700; font-size: 15px; color: #1a1a1a; flex: 1; }
+    .failure-card-desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      margin-left: 36px;
+      line-height: 1.5;
+    }
+    .failure-fix {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.65;
+      margin-left: 36px;
+    }
+    .failure-card.selected .failure-fix {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f5c6c6;
+    }
+    .failure-fix-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e74c3c;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .failure-selected-count {
+      font-size: 13px;
+      color: #666;
+      font-style: italic;
+      margin-top: 10px;
+    }
+
+    /* ── Section-title helper ── */
+    .section-mini-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+    .section-mini-title:first-child { margin-top: 0; }
+
+    /* ── Sidebar icon SVGs ── */
+    .step-btn svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* ── Shared: InsightBlock ── */
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2">
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
+              <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+            </svg>
+            {' '}INSIGHT
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    /* ── Shared: ChevronSvg ── */
+    function ChevronSvg() {
+      return (
+        <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      );
+    }
+
+    /* ── Sidebar step icons ── */
+    function IconOverview() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v4l3 3" />
+        </svg>
+      );
+    }
+    function IconDefine() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
+      );
+    }
+    function IconPrompt() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+        </svg>
+      );
+    }
+    function IconTest() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <polyline points="9 11 12 14 22 4" />
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+      );
+    }
+    function IconFailures() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 1 – Overview: What You'll Build
+    ════════════════════════════════════════ */
+
+    const PERSONAS = [
+      {
+        emoji: '📊',
+        name: 'Market Research Agent',
+        role: 'PM',
+        goal: 'Research a competitor and summarize their product positioning, pricing, and recent announcements',
+        tools: 'Web search, file reader, summarization',
+        output: 'A structured brief: 3 key findings, pricing table, and 2 strategic takeaways',
+      },
+      {
+        emoji: '💻',
+        name: 'Code Helper Agent',
+        role: 'Coder',
+        goal: 'Review a codebase, identify bugs and improvement areas, then generate a prioritized fix plan',
+        tools: 'Code interpreter, file reader, web search',
+        output: 'Annotated diff with severity ratings and suggested fixes per issue',
+      },
+    ];
+
+    const COMPARE_ROWS = [
+      {
+        criterion: 'Decision-making',
+        agent: 'Decides its own next step based on results',
+        workflow: 'Fixed sequence — steps are predetermined',
+      },
+      {
+        criterion: 'Tool use',
+        agent: 'Picks tools dynamically from available options',
+        workflow: 'Calls specific tools at specific steps',
+      },
+      {
+        criterion: 'Best for',
+        agent: 'Tasks where the path to the answer is unclear',
+        workflow: 'Tasks where the process is known and repeatable',
+      },
+    ];
+
+    function AgentLoopSVG() {
+      const nodes = [
+        { x: 20,  label: 'User',    sub: 'Goal',    color: '#6c5ce7', fill: '#f5f3ff' },
+        { x: 160, label: 'Agent',   sub: 'Brain',   color: '#6c5ce7', fill: '#f5f3ff' },
+        { x: 300, label: 'Tools',   sub: 'Execute', color: '#f39c12', fill: '#fef9ec' },
+        { x: 440, label: 'Decide',  sub: 'Done?',   color: '#6c5ce7', fill: '#f5f3ff' },
+        { x: 580, label: 'Output',  sub: 'Answer',  color: '#2ecc71', fill: '#f0fbf4' },
+      ];
+      const NW = 110, NH = 56, cy = 50;
+      const W = 720, H = 130;
+      const mainArrows = [
+        { x1: nodes[0].x + NW, y1: cy, x2: nodes[1].x, y2: cy, label: 'task' },
+        { x1: nodes[1].x + NW, y1: cy, x2: nodes[2].x, y2: cy, label: 'call' },
+        { x1: nodes[2].x + NW, y1: cy, x2: nodes[3].x, y2: cy, label: 'result' },
+        { x1: nodes[3].x + NW, y1: cy, x2: nodes[4].x, y2: cy, label: 'done' },
+      ];
+      // Loop-back arrow from Decide back to Agent
+      const loopY = 105;
+      const loopX1 = nodes[3].x + NW / 2;
+      const loopX2 = nodes[1].x + NW / 2;
+
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg"
+             aria-label="Agent loop: User sends goal to Agent Brain, which calls Tools, sees results, Decides if done — if not, loops back to Agent; if done, produces Output">
+          <defs>
+            <marker id="ag-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+            <marker id="ag-loop-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#e74c3c" />
+            </marker>
+          </defs>
+
+          {/* Main flow arrows */}
+          {mainArrows.map((a, i) => (
+            <g key={i}>
+              <line x1={a.x1 + 4} y1={a.y1} x2={a.x2 - 4} y2={a.y2}
+                    stroke="#b0a6e8" strokeWidth="2"
+                    strokeDasharray="5 3"
+                    markerEnd="url(#ag-arrow)" />
+              <text x={(a.x1 + a.x2) / 2} y={cy - 10} textAnchor="middle"
+                    fontSize="10" fill="#999" fontFamily="DM Sans">{a.label}</text>
+            </g>
+          ))}
+
+          {/* Loop-back path */}
+          <path
+            d={`M ${loopX1} ${cy + NH / 2 + 2} Q ${loopX1} ${loopY} ${(loopX1 + loopX2) / 2} ${loopY} Q ${loopX2} ${loopY} ${loopX2} ${cy + NH / 2 + 2}`}
+            fill="none"
+            stroke="#e74c3c"
+            strokeWidth="1.8"
+            strokeDasharray="5 3"
+            markerEnd="url(#ag-loop-arrow)"
+          />
+          <text x={(loopX1 + loopX2) / 2} y={loopY + 13} textAnchor="middle"
+                fontSize="10" fill="#e74c3c" fontFamily="DM Sans">continue</text>
+
+          {/* Nodes */}
+          {nodes.map((n, i) => (
+            <g key={i}>
+              <rect x={n.x} y={cy - NH / 2} width={NW} height={NH} rx={10}
+                    fill={n.fill} stroke={n.color} strokeWidth={2} />
+              <text x={n.x + NW / 2} y={cy - 5} textAnchor="middle"
+                    fontSize="12" fontWeight="700" fontFamily="DM Sans" fill={n.color}>
+                {n.label}
+              </text>
+              <text x={n.x + NW / 2} y={cy + 12} textAnchor="middle"
+                    fontSize="10" fontFamily="DM Sans" fill="#666">
+                {n.sub}
+              </text>
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
+    function S1() {
+      return (
+        <>
+          <div><h2 className="stage-header">What You&rsquo;ll Build</h2></div>
+          <div className="explanation">
+            By the end of this lab you&rsquo;ll have a fully designed AI agent: a clear goal, a curated toolset, a system prompt, and documented test results. You&rsquo;ll also catalog the failure modes your agent is most likely to hit and know how to fix them.
+          </div>
+          <div className="scene-card">
+            <div className="section-mini-title">The Agent Loop</div>
+            <div className="agent-flow-wrap">
+              <AgentLoopSVG />
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>Example Agents</div>
+            <div className="persona-cards">
+              {PERSONAS.map((p, i) => (
+                <div className="persona-card" key={i}>
+                  <div className="persona-card-header">
+                    <span className="persona-emoji">{p.emoji}</span>
+                    <span className="persona-name">{p.name}</span>
+                  </div>
+                  <div className="persona-field">
+                    <div className="persona-field-label">Role</div>
+                    <div className="persona-field-value">{p.role}</div>
+                  </div>
+                  <div className="persona-field">
+                    <div className="persona-field-label">Goal</div>
+                    <div className="persona-field-value">{p.goal}</div>
+                  </div>
+                  <div className="persona-field">
+                    <div className="persona-field-label">Tools</div>
+                    <div className="persona-field-value">{p.tools}</div>
+                  </div>
+                  <div className="persona-field">
+                    <div className="persona-field-label">Output</div>
+                    <div className="persona-field-value">{p.output}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>Agent vs. Workflow — When to Use Which</div>
+            <div className="compare-table-wrap">
+              <table className="compare-table" aria-label="Agent versus workflow comparison">
+                <thead>
+                  <tr>
+                    <th>Criterion</th>
+                    <th>Agent</th>
+                    <th>Workflow</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARE_ROWS.map((r, i) => (
+                    <tr key={i}>
+                      <td><span className="compare-row-label">{r.criterion}</span></td>
+                      <td>{r.agent}</td>
+                      <td>{r.workflow}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <InsightBlock>
+            An agent is a workflow that can improvise. That&rsquo;s its power and its risk &mdash; it might find a creative solution, or it might go in circles.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 2 – Define: Design Your Agent
+    ════════════════════════════════════════ */
+
+    const TOOL_OPTIONS = [
+      { id: 'web-search',       emoji: '🔍', label: 'Web Search'       },
+      { id: 'calculator',       emoji: '🧮', label: 'Calculator'       },
+      { id: 'database',         emoji: '🗄️', label: 'Database'         },
+      { id: 'file-reader',      emoji: '📄', label: 'File Reader'      },
+      { id: 'apis',             emoji: '🔗', label: 'APIs'             },
+      { id: 'code-interpreter', emoji: '💻', label: 'Code Interpreter' },
+    ];
+
+    const EXAMPLE_AGENT = {
+      goal: 'Research a named competitor and produce a structured brief: their product positioning, pricing tiers, and 3 recent announcements.',
+      activeTools: new Set(['web-search', 'file-reader']),
+      constraints: 'Only use publicly available sources. Do not speculate on internal strategy. Keep the brief under 500 words. Always cite the source URL for each claim.',
+    };
+
+    function S2({ agentDesign, setAgentDesign }) {
+      const [showExample, setShowExample] = useState(false);
+
+      const toggleTool = (id) => {
+        setAgentDesign(prev => {
+          const next = new Set(prev.activeTools);
+          if (next.has(id)) { next.delete(id); } else { next.add(id); }
+          return { ...prev, activeTools: next };
+        });
+      };
+
+      const applyExample = () => {
+        if (!showExample) {
+          setAgentDesign({
+            goal: EXAMPLE_AGENT.goal,
+            activeTools: new Set(EXAMPLE_AGENT.activeTools),
+            constraints: EXAMPLE_AGENT.constraints,
+          });
+        }
+        setShowExample(v => !v);
+      };
+
+      const toolCount = agentDesign.activeTools.size;
+
+      return (
+        <>
+          <div><h2 className="stage-header">Design Your Agent</h2></div>
+          <div className="explanation">
+            A well-designed agent has three things nailed down before you write a single line of prompt: a concrete goal, a curated tool list, and explicit constraints. Fill in the cards below. Use &ldquo;Show Example&rdquo; if you want a starting point.
+          </div>
+
+          <button
+            type="button"
+            className={'example-toggle-btn' + (showExample ? ' active' : '')}
+            onClick={applyExample}
+            aria-pressed={showExample}
+          >
+            {showExample ? '✓ Example loaded' : '💡 Show Example'}
+          </button>
+          {showExample && (
+            <div className="example-box" aria-live="polite">
+              <div className="example-box-title">Market Research Agent — example pre-filled below</div>
+              <div className="example-box-row">
+                <div className="example-box-label">Agent Type</div>
+                <div className="example-box-value">Market intelligence gatherer for product managers</div>
+              </div>
+              <div className="example-box-row">
+                <div className="example-box-label">Why these tools?</div>
+                <div className="example-box-value">Web Search to find current info; File Reader to ingest any uploaded competitor materials. Calculator and code interpreter aren&rsquo;t needed for this task.</div>
+              </div>
+            </div>
+          )}
+
+          <div className="design-cards" style={{ marginTop: '20px' }}>
+            <div className="design-card">
+              <div className="design-card-title">
+                <div className="design-card-num" aria-hidden="true">1</div>
+                Goal
+              </div>
+              <textarea
+                className="design-textarea"
+                placeholder="What should your agent accomplish? Be specific — describe the deliverable, not just the topic. Example: 'Research Competitor X and write a 300-word brief with their pricing and 3 key differentiators.'"
+                value={agentDesign.goal}
+                onChange={(e) => setAgentDesign(prev => ({ ...prev, goal: e.target.value }))}
+                aria-label="Agent goal"
+                rows={4}
+              />
+            </div>
+
+            <div className="design-card">
+              <div className="design-card-title">
+                <div className="design-card-num" aria-hidden="true">2</div>
+                Tools
+              </div>
+              <div className="tool-toggles" role="group" aria-label="Select agent tools">
+                {TOOL_OPTIONS.map((t) => {
+                  const isActive = agentDesign.activeTools.has(t.id);
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={'tool-toggle' + (isActive ? ' active' : '')}
+                      aria-pressed={isActive}
+                      onClick={() => toggleTool(t.id)}
+                    >
+                      <span className="tool-toggle-emoji" aria-hidden="true">{t.emoji}</span>
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+              {toolCount === 0 && (
+                <div className="tool-count">No tools selected — agents need at least one tool to act.</div>
+              )}
+              {toolCount > 0 && (
+                <div className="tool-count">
+                  {toolCount} tool{toolCount > 1 ? 's' : ''} selected. More tools = more power, but also more ways to fail.
+                </div>
+              )}
+            </div>
+
+            <div className="design-card">
+              <div className="design-card-title">
+                <div className="design-card-num" aria-hidden="true">3</div>
+                Constraints
+              </div>
+              <textarea
+                className="design-textarea"
+                placeholder="What should your agent never do? What limits apply? Example: 'Only use public sources. Do not speculate. Keep output under 500 words. Always cite URLs.'"
+                value={agentDesign.constraints}
+                onChange={(e) => setAgentDesign(prev => ({ ...prev, constraints: e.target.value }))}
+                aria-label="Agent constraints"
+                rows={4}
+              />
+            </div>
+          </div>
+          <InsightBlock>
+            The goal is the most important part of agent design. Vague goals produce wandering agents. &ldquo;Research X and summarize with sources&rdquo; beats &ldquo;help me with X.&rdquo;
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 3 – Prompt: Write the System Prompt
+    ════════════════════════════════════════ */
+
+    const PROMPT_SECTIONS_CONFIG = [
+      {
+        id: 'role',
+        label: 'Role',
+        prefix: 'You are a...',
+        placeholder: 'e.g. market research specialist who gathers competitive intelligence from public sources',
+      },
+      {
+        id: 'goal',
+        label: 'Goal',
+        prefix: 'Your task is to...',
+        placeholder: 'e.g. research the named competitor and produce a structured brief with their positioning, pricing, and 3 recent announcements',
+      },
+      {
+        id: 'tools',
+        label: 'Tools',
+        prefix: 'You have access to...',
+        placeholder: 'e.g. web search (to find current public information) and a file reader (to ingest uploaded documents)',
+      },
+      {
+        id: 'constraints',
+        label: 'Constraints',
+        prefix: 'Never... Always...',
+        placeholder: 'e.g. Never speculate about internal strategy. Always cite source URLs. Keep the brief under 500 words.',
+      },
+      {
+        id: 'outputFormat',
+        label: 'Output Format',
+        prefix: 'Respond with...',
+        placeholder: 'e.g. a brief in this structure: (1) Positioning Summary, (2) Pricing Tiers table, (3) Recent Announcements, (4) Sources list',
+      },
+    ];
+
+    function S3({ promptFields, setPromptFields }) {
+      const updateField = (id, val) => setPromptFields(prev => ({ ...prev, [id]: val }));
+
+      const role        = promptFields.role        || '[your role]';
+      const goal        = promptFields.goal        || '[your task]';
+      const tools       = promptFields.tools       || '[your tools]';
+      const constraints = promptFields.constraints || '[your constraints]';
+      const outputFmt   = promptFields.outputFormat || '[your output format]';
+
+      const assembled =
+        'You are a ' + role + '.\n\n' +
+        'Your task is to ' + goal + '.\n\n' +
+        'You have access to ' + tools + '.\n\n' +
+        'Constraints:\n' +
+        constraints + '\n\n' +
+        'Output Format:\n' +
+        'Respond with ' + outputFmt;
+
+      return (
+        <>
+          <div><h2 className="stage-header">Write the System Prompt</h2></div>
+          <div className="explanation">
+            Fill in each section to build your agent&rsquo;s system prompt. Think of it as onboarding instructions for a new employee: here&rsquo;s who you are, what you&rsquo;re doing, what tools you have, what to avoid, and what done looks like.
+          </div>
+          <div className="scene-card">
+            <div className="prompt-sections">
+              {PROMPT_SECTIONS_CONFIG.map((sec) => (
+                <div className="prompt-section" key={sec.id}>
+                  <div className="prompt-section-label">{sec.label}</div>
+                  <div className="prompt-section-prefix">{sec.prefix}</div>
+                  <textarea
+                    className="prompt-section-textarea"
+                    id={'prompt-sec-' + sec.id}
+                    placeholder={sec.placeholder}
+                    value={promptFields[sec.id] || ''}
+                    onChange={(e) => updateField(sec.id, e.target.value)}
+                    aria-label={sec.label + ' section of system prompt'}
+                    rows={3}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>Assembled System Prompt</div>
+            <div className="prompt-preview">
+              <div className="prompt-preview-label">Auto-assembled from sections above</div>
+              <pre>{assembled}</pre>
+            </div>
+          </div>
+          <InsightBlock>
+            A good agent system prompt reads like onboarding instructions for a new employee: here&rsquo;s your role, here are your tools, here&rsquo;s what done looks like, here&rsquo;s what to avoid.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 4 – Test: Run Three Queries
+    ════════════════════════════════════════ */
+
+    const INITIAL_TEST_ROWS = [
+      { label: 'Query 1', queryPlaceholder: 'e.g. Research Competitor X\'s pricing and write a brief', responsePlaceholder: 'Summarize what the agent returned', notesPlaceholder: 'What worked? What was missing?' },
+      { label: 'Query 2', queryPlaceholder: 'e.g. Find their 3 most recent blog posts and extract key themes', responsePlaceholder: 'Summarize what the agent returned', notesPlaceholder: 'Did it use the right tools? Did it stay on task?' },
+      { label: 'Query 3', queryPlaceholder: 'e.g. Compare Competitor X and Competitor Y on enterprise features', responsePlaceholder: 'Summarize what the agent returned', notesPlaceholder: 'Was the output format correct? Any hallucinations?' },
+    ];
+
+    function S4({ testRows, setTestRows }) {
+      const updateRow = (idx, field, val) => {
+        setTestRows(prev => {
+          const next = [...prev];
+          next[idx] = { ...next[idx], [field]: val };
+          return next;
+        });
+      };
+
+      const setRating = (idx, val) => {
+        setTestRows(prev => {
+          const next = [...prev];
+          const current = next[idx].rating;
+          next[idx] = { ...next[idx], rating: current === val ? null : val };
+          return next;
+        });
+      };
+
+      const ratedRows = testRows.filter(r => r.rating !== null && r.rating !== undefined);
+      const avgRating = ratedRows.length > 0
+        ? (ratedRows.reduce((sum, r) => sum + r.rating, 0) / ratedRows.length).toFixed(1)
+        : '—';
+      const highRated = ratedRows.filter(r => r.rating >= 4).length;
+
+      return (
+        <>
+          <div><h2 className="stage-header">Run Three Queries</h2></div>
+          <div className="explanation">
+            Run your agent against three real queries. For each one, write the query, summarize what the agent returned, rate it 1&ndash;5, and note what you observed. This surfaces the obvious failure modes before you scale up.
+          </div>
+          <div className="scene-card">
+            <div className="test-rows">
+              {INITIAL_TEST_ROWS.map((cfg, idx) => {
+                const row = testRows[idx];
+                return (
+                  <div className="test-row" key={idx}>
+                    <div className="test-row-header">
+                      <div className="test-row-num" aria-hidden="true">{idx + 1}</div>
+                      {cfg.label}
+                    </div>
+
+                    <div className="test-field">
+                      <label className="test-field-label" htmlFor={'query-' + idx}>Query</label>
+                      <textarea
+                        id={'query-' + idx}
+                        className="test-field-textarea"
+                        placeholder={cfg.queryPlaceholder}
+                        value={row.query || ''}
+                        onChange={(e) => updateRow(idx, 'query', e.target.value)}
+                        aria-label={'Query ' + (idx + 1)}
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="test-field">
+                      <label className="test-field-label" htmlFor={'response-' + idx}>Response Summary</label>
+                      <textarea
+                        id={'response-' + idx}
+                        className="test-field-textarea"
+                        placeholder={cfg.responsePlaceholder}
+                        value={row.response || ''}
+                        onChange={(e) => updateRow(idx, 'response', e.target.value)}
+                        aria-label={'Response summary for query ' + (idx + 1)}
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="rating-row">
+                      <div className="test-field-label" id={'rating-label-' + idx}>Rating (1–5)</div>
+                      <div className="rating-circles" role="group" aria-labelledby={'rating-label-' + idx}>
+                        {[1, 2, 3, 4, 5].map((val) => (
+                          <button
+                            key={val}
+                            type="button"
+                            className={'rating-circle' + (row.rating === val ? ' selected' : '')}
+                            aria-pressed={row.rating === val}
+                            aria-label={'Rating ' + val + ' out of 5'}
+                            onClick={() => setRating(idx, val)}
+                          >
+                            {val}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="test-field" style={{ marginBottom: 0 }}>
+                      <label className="test-field-label" htmlFor={'notes-' + idx}>Notes</label>
+                      <textarea
+                        id={'notes-' + idx}
+                        className="test-field-textarea"
+                        placeholder={cfg.notesPlaceholder}
+                        value={row.notes || ''}
+                        onChange={(e) => updateRow(idx, 'notes', e.target.value)}
+                        aria-label={'Notes for query ' + (idx + 1)}
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '24px' }}>Summary</div>
+            <div className="test-summary" aria-live="polite" aria-label="Test results summary">
+              <div className="test-summary-stat">
+                <div className="test-summary-num">{avgRating}</div>
+                <div className="test-summary-label">Avg Rating</div>
+              </div>
+              <div className="test-summary-stat">
+                <div className="test-summary-num">{ratedRows.length} / 3</div>
+                <div className="test-summary-label">Rated</div>
+              </div>
+              <div className="test-summary-stat">
+                <div className="test-summary-num">{highRated}</div>
+                <div className="test-summary-label">Rated ≥ 4</div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Three queries isn&rsquo;t enough to trust an agent &mdash; but it&rsquo;s enough to find the obvious failure modes. Fix those before scaling up.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 5 – Failures: Analyze and Improve
+    ════════════════════════════════════════ */
+
+    const FAILURE_CARDS = [
+      {
+        id: 'loops',
+        emoji: '🔄',
+        title: 'Loops',
+        desc: 'The agent calls the same tool repeatedly without making progress.',
+        fix: 'Add an explicit step-limit constraint to your system prompt: "If you have tried the same approach more than twice without new information, stop and report what you found." Also check if the goal is specific enough — vague goals produce aimless loops.',
+      },
+      {
+        id: 'wrong-tool',
+        emoji: '🔧',
+        title: 'Wrong Tool',
+        desc: 'The agent uses a tool that doesn\'t fit the subtask, producing poor or irrelevant results.',
+        fix: 'Add per-tool guidance to your system prompt describing when each tool is appropriate: "Use web search for current facts. Use the file reader only for uploaded documents." Also reduce the tool list — more tools means more chances to pick the wrong one.',
+      },
+      {
+        id: 'hallucination',
+        emoji: '🌫️',
+        title: 'Hallucination',
+        desc: 'The agent states facts that are not in any retrieved source.',
+        fix: 'Add an explicit constraints line: "Only report facts you retrieved from a tool. If you do not have a source, say so." Consider requiring the agent to cite the source URL for every claim in the output format section.',
+      },
+      {
+        id: 'scope-creep',
+        emoji: '📐',
+        title: 'Scope Creep',
+        desc: 'The agent goes beyond the goal — adding analysis, opinions, or tangential research you didn\'t ask for.',
+        fix: 'Tighten the goal statement to specify exact deliverables and word limits. Add a constraint: "Do not include analysis, opinions, or information beyond what is explicitly requested." Review your output format section — vague formats invite scope creep.',
+      },
+      {
+        id: 'gives-up',
+        emoji: '🏳️',
+        title: 'Gives Up',
+        desc: 'The agent stops early and returns a partial result or refuses to continue.',
+        fix: 'Check that your goal is achievable with the tools you\'ve given — an agent that can\'t find a public price page will give up if web search is its only tool. Add a fallback instruction: "If you cannot find the information, report what you did find and explain what\'s missing."',
+      },
+    ];
+
+    function S5() {
+      const [selected, setSelected] = useState(new Set());
+
+      const toggle = (id) => {
+        setSelected(prev => {
+          const next = new Set(prev);
+          if (next.has(id)) { next.delete(id); } else { next.add(id); }
+          return next;
+        });
+      };
+
+      return (
+        <>
+          <div><h2 className="stage-header">Analyze and Improve</h2></div>
+          <div className="explanation">
+            Click the failure modes your agent hit during testing. Each card reveals the fix strategy. You can select multiple. Every failure is a signal about the gap between your intent and the agent&rsquo;s understanding.
+          </div>
+          <div className="scene-card">
+            <div className="failure-cards">
+              {FAILURE_CARDS.map((f) => {
+                const isSel = selected.has(f.id);
+                return (
+                  <div
+                    key={f.id}
+                    className={'failure-card' + (isSel ? ' selected' : '')}
+                    onClick={() => toggle(f.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(f.id); } }}
+                    aria-pressed={isSel}
+                    aria-expanded={isSel}
+                    aria-controls={'failure-fix-' + f.id}
+                  >
+                    <div className="failure-card-header">
+                      <span className="failure-card-emoji" aria-hidden="true">{f.emoji}</span>
+                      <span className="failure-card-title">{f.title}</span>
+                    </div>
+                    <div className="failure-card-desc">{f.desc}</div>
+                    <div className="failure-fix" id={'failure-fix-' + f.id}>
+                      <div className="failure-fix-label">Fix Strategy</div>
+                      {f.fix}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {selected.size > 0 && (
+              <p className="failure-selected-count" aria-live="polite">
+                {selected.size} failure mode{selected.size > 1 ? 's' : ''} identified &mdash; review each fix strategy above, then revisit your Stage 2 goal and Stage 3 prompt.
+              </p>
+            )}
+          </div>
+          <InsightBlock>
+            Every agent failure teaches you something about the gap between what you asked for and what the agent understood. The fix is almost always a clearer prompt.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       NEXT_GUIDE + STAGES
+    ════════════════════════════════════════ */
+
+    const NEXT_GUIDE = { id: '7.4', title: 'Multi-Agent Design', module: 'Module 7', href: './multi-agent-build.html' };
+
+    const STAGES = [
+      { label: 'Overview',  Icon: IconOverview  },
+      { label: 'Define',    Icon: IconDefine    },
+      { label: 'Prompt',    Icon: IconPrompt    },
+      { label: 'Test',      Icon: IconTest      },
+      { label: 'Failures',  Icon: IconFailures  },
+    ];
+
+    /* ════════════════════════════════════════
+       Main Guide Shell
+    ════════════════════════════════════════ */
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      // Lifted state so S2 writes and S3 reads (goal/tools feed into prompt)
+      const [agentDesign, setAgentDesign] = useState({
+        goal: '',
+        activeTools: new Set(),
+        constraints: '',
+      });
+
+      // Lifted prompt fields — S3 writes, S3 reads assembled preview
+      const [promptFields, setPromptFields] = useState({
+        role: '',
+        goal: '',
+        tools: '',
+        constraints: '',
+        outputFormat: '',
+      });
+
+      // Lifted test rows — S4 writes
+      const [testRows, setTestRows] = useState([
+        { query: '', response: '', rating: null, notes: '' },
+        { query: '', response: '', rating: null, notes: '' },
+        { query: '', response: '', rating: null, notes: '' },
+      ]);
+
+      const handleNext = () => { if (currentStage < STAGES.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
+
+      const renderStage = () => {
+        if (currentStage === 0) return <S1 />;
+        if (currentStage === 1) return <S2 agentDesign={agentDesign} setAgentDesign={setAgentDesign} />;
+        if (currentStage === 2) return <S3 promptFields={promptFields} setPromptFields={setPromptFields} />;
+        if (currentStage === 3) return <S4 testRows={testRows} setTestRows={setTestRows} />;
+        return <S5 />;
+      };
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar" aria-label="Guide sections">
+              {STAGES.map((stage, idx) => {
+                const { Icon } = stage;
+                return (
+                  <React.Fragment key={idx}>
+                    <div className={'step-wrapper' + (currentStage === idx ? ' active' : '')}>
+                      <button
+                        type="button"
+                        className={'step-btn' + (currentStage === idx ? ' active' : '')}
+                        aria-label={'Step ' + (idx + 1) + ': ' + stage.label}
+                        aria-current={currentStage === idx ? 'step' : undefined}
+                        onClick={() => setCurrentStage(idx)}
+                      >
+                        <Icon />
+                      </button>
+                      <div className="step-btn-label">{stage.label}</div>
+                    </div>
+                    {idx < STAGES.length - 1 && (
+                      <div className={'step-connector' + (currentStage > idx ? ' active' : '')} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">7.3</span>
+                    <h1 className="title">Agent Build</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">USE CASE</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of {STAGES.length}</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      aria-label="Previous section"
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handleNext}
+                      disabled={currentStage === STAGES.length - 1}
+                      aria-label="Next section"
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area">
+                {renderStage()}
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>
