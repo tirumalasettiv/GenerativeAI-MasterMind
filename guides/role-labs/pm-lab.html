@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hands-on lab: apply AI to product management workflows. Generate user stories, build competitive analysis, draft PRDs, and transform changelogs into release notes.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="PM Lab — Role Labs">
+  <meta property="og:description" content="Hands-on lab: apply AI to product management workflows. Generate user stories, build competitive analysis, draft PRDs, and transform changelogs into release notes.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PM Lab — Role Labs">
+  <meta name="twitter:description" content="Hands-on lab: apply AI to product management workflows. Generate user stories, build competitive analysis, draft PRDs, and transform changelogs into release notes.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>PM Lab - Role Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* Disclosure cards (S1) */
+    .use-case-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .use-case-card {
+      position: relative;
+      padding: 18px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .use-case-card:hover {
+      border-color: #6c5ce7;
+      transform: translateX(3px);
+    }
+
+    .use-case-card.expanded {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .use-case-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .use-case-emoji {
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .use-case-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      flex: 1;
+    }
+
+    .use-case-savings {
+      font-size: 13px;
+      font-weight: 700;
+      color: #2ecc71;
+      background: #e8f8f0;
+      border: 1px solid #b0e8cc;
+      border-radius: 20px;
+      padding: 3px 10px;
+      white-space: nowrap;
+    }
+
+    .use-case-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.65;
+    }
+
+    .use-case-card.expanded .use-case-detail {
+      max-height: 300px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #ddd;
+    }
+
+    .use-case-row {
+      margin-bottom: 6px;
+    }
+
+    .use-case-label {
+      font-weight: 700;
+      color: #6c5ce7;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    /* Disclosure badge */
+    .disclosure-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
+
+    /* Prompt builder (S2) */
+    .prompt-builder {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .builder-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .builder-textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 12px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a1a;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .builder-textarea:focus {
+      border-color: #6c5ce7;
+      outline: none;
+    }
+
+    .costar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .costar-field {
+      background: #f9f8ff;
+      border: 1px solid #e8e3f8;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .costar-key {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .costar-value {
+      font-size: 13px;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .builder-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .builder-btn-primary {
+      background: #6c5ce7;
+      color: white;
+    }
+
+    .builder-btn-primary:hover {
+      background: #5b4bc8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(108, 92, 231, 0.3);
+    }
+
+    .builder-btn-secondary {
+      background: white;
+      color: #6c5ce7;
+      border: 2px solid #d5cff5 !important;
+    }
+
+    .builder-btn-secondary:hover {
+      background: #f5f3ff;
+      border-color: #6c5ce7 !important;
+      transform: translateY(-1px);
+    }
+
+    .prompt-preview {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 18px 20px;
+      overflow-x: auto;
+    }
+
+    .prompt-preview pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #e0d9ff;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    .example-panel {
+      background: #f0f8f0;
+      border: 2px solid #2ecc71;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .example-panel-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1a9456;
+      margin-bottom: 12px;
+    }
+
+    .user-story-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .user-story-item {
+      padding: 10px 14px;
+      background: white;
+      border: 1px solid #b0e8cc;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #1a1a1a;
+    }
+
+    /* Competitive grid (S3) */
+    .comp-grid-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .comp-grid {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      min-width: 520px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
+
+    .comp-grid th {
+      background: #6c5ce7;
+      color: white;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      letter-spacing: 0.3px;
+    }
+
+    .comp-grid th:first-child {
+      background: #5b4bc8;
+      width: 120px;
+    }
+
+    .comp-grid td {
+      padding: 2px 6px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+
+    .comp-grid tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comp-grid tr:nth-child(even) td {
+      background: #fafafe;
+    }
+
+    .comp-grid td:first-child {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6c5ce7;
+      background: #f5f3ff;
+      padding: 10px 14px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .comp-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: transparent;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+      min-height: 56px;
+      resize: vertical;
+    }
+
+    .comp-input:focus {
+      border-color: #6c5ce7;
+      background: white;
+      outline: none;
+    }
+
+    .prompt-template-card {
+      background: linear-gradient(135deg, #f9f8ff 0%, #f0edfa 100%);
+      border: 1px solid #e8e3f8;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .prompt-template-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .prompt-template-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12.5px;
+      color: #333;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    /* Tabs (S4) */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      color: #555;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn[aria-selected="true"] {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+    }
+
+    .tab-btn:hover:not([aria-selected="true"]) {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+    }
+
+    /* Your Turn (S5) */
+    .task-picker {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-radio-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    .task-radio-label:hover {
+      border-color: #6c5ce7;
+      background: #f9f8ff;
+    }
+
+    .task-radio-label.selected {
+      border-color: #6c5ce7;
+      background: #f5f3ff;
+    }
+
+    .task-radio-label input[type="radio"] {
+      accent-color: #6c5ce7;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .task-emoji {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .auto-summary-card {
+      background: linear-gradient(135deg, #f0f8ff 0%, #e8e3f8 100%);
+      border: 2px solid #6c5ce7;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .auto-summary-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .auto-summary-body {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #333;
+    }
+
+    .auto-summary-highlight {
+      font-weight: 700;
+      color: #6c5ce7;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* Shared insight block */
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2">
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
+              <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+            </svg>
+            {' '}INSIGHT
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    /* Chevron SVG for disclosure badges */
+    function ChevronSvg() {
+      return (
+        <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      );
+    }
+
+    /* Stage 1: Use Cases */
+    const USE_CASES = [
+      {
+        id: 'user-stories',
+        emoji: '\uD83D\uDCCB',
+        title: 'User Story Generation',
+        savings: '80% faster',
+        task: 'Turn a rough feature brief into a structured backlog of INVEST-compliant user stories with acceptance criteria.',
+        aiValue: 'AI converts vague requirements into the standard "As a [user], I want [feature] so that [benefit]" format at scale — generating 5–10 stories in seconds instead of 30 minutes.',
+      },
+      {
+        id: 'competitive',
+        emoji: '\uD83D\uDD0D',
+        title: 'Competitive Analysis',
+        savings: '60% faster',
+        task: 'Structure and synthesize competitive intelligence across multiple dimensions: pricing, features, target market, strengths, and weaknesses.',
+        aiValue: 'AI can organize your existing research into comparison frameworks instantly, freeing you to focus on interpretation and strategy rather than formatting.',
+      },
+      {
+        id: 'prds',
+        emoji: '\uD83D\uDCC4',
+        title: 'PRD Drafting',
+        savings: '70% faster',
+        task: 'Transform a list of feature bullets into structured PRD sections: problem statement, user personas, success metrics, and technical requirements.',
+        aiValue: 'AI handles the blank-page problem — draft a complete PRD section from bullet points in under 2 minutes, then spend your time refining rather than starting.',
+      },
+      {
+        id: 'release-notes',
+        emoji: '\uD83D\uDE80',
+        title: 'Release Notes',
+        savings: '90% faster',
+        task: 'Convert a technical git changelog into customer-facing release notes that highlight value rather than implementation details.',
+        aiValue: 'AI excels at translation: technical → customer-friendly. Provide the audience and tone, and it reframes "fixed IndexOutOfBoundsException" as "improved reliability."',
+      },
+      {
+        id: 'meeting',
+        emoji: '\uD83D\uDDD2\uFE0F',
+        title: 'Meeting Summaries',
+        savings: '75% faster',
+        task: 'Transform raw meeting transcripts into structured summaries with decisions made, action items, and open questions.',
+        aiValue: 'AI can extract signal from noise in meeting transcripts — turning a 60-minute discussion into a structured document with owners and due dates in under 30 seconds.',
+      },
+    ];
+
+    function S1() {
+      const [expanded, setExpanded] = useState(null);
+
+      return (
+        <>
+          <div><h2 className="stage-header">Where AI Supercharges PM Work</h2></div>
+          <div className="explanation">
+            Product managers spend enormous time on communication tasks &mdash; writing, structuring, and translating. AI excels at exactly these. Click each use case to see the task, AI value, and time savings.
+          </div>
+          <div className="scene-card">
+            <div className="use-case-grid">
+              {USE_CASES.map((uc) => {
+                const isOpen = expanded === uc.id;
+                const handleToggle = () => setExpanded(isOpen ? null : uc.id);
+                return (
+                  <div
+                    key={uc.id}
+                    className={`use-case-card disclosure-card-host${isOpen ? ' expanded' : ''}`}
+                    onClick={handleToggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleToggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={`pm-uc-detail-${uc.id}`}
+                  >
+                    <span className="disclosure-badge" aria-hidden="true"><ChevronSvg /></span>
+                    <div className="use-case-header">
+                      <span className="use-case-emoji">{uc.emoji}</span>
+                      <span className="use-case-title">{uc.title}</span>
+                      <span className="use-case-savings">{uc.savings}</span>
+                    </div>
+                    <div className="use-case-detail" id={`pm-uc-detail-${uc.id}`}>
+                      <div className="use-case-row">
+                        <div className="use-case-label">The Task</div>
+                        <div>{uc.task}</div>
+                      </div>
+                      <div className="use-case-row" style={{ marginTop: '10px' }}>
+                        <div className="use-case-label">AI Value</div>
+                        <div>{uc.aiValue}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <InsightBlock>
+            AI doesn&rsquo;t replace PM judgment &mdash; it eliminates the blank page. Getting from zero to a first draft in seconds means you spend your time refining, not starting.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 2: User Stories */
+    function buildCostar(brief) {
+      return {
+        context: brief
+          ? 'You are an experienced product manager working on: ' + brief
+          : 'You are an experienced product manager working on the feature described below.',
+        objective: 'Generate 5 distinct user stories in the format: "As a [user type], I want [feature] so that [benefit]." Each story must include 3 acceptance criteria.',
+        style: 'Use clear, non-technical language. Each user story should be independently valuable and testable (INVEST criteria).',
+        tone: 'Professional and concise. No filler language.',
+        audience: 'Engineering team and product stakeholders who will use these for sprint planning.',
+        response: 'Return exactly 5 user stories, numbered, each followed by acceptance criteria as a bulleted list.',
+      };
+    }
+
+    const EXAMPLE_BRIEF = 'One-click checkout for e-commerce: allow returning customers to complete a purchase in a single tap using their saved payment and shipping details.';
+
+    const EXAMPLE_STORIES = [
+      'As a returning customer, I want to complete my purchase in one tap so that I can buy without re-entering payment details. AC: \u2022 Saved card is pre-selected \u2022 Order confirmation appears within 2s \u2022 Customer receives email receipt immediately',
+      'As a mobile user, I want one-click checkout to work on my phone so that I can buy on the go without friction. AC: \u2022 Button is thumb-accessible \u2022 Works on iOS Safari and Android Chrome \u2022 Loads in under 1.5s on 4G',
+      'As a security-conscious shopper, I want to confirm my identity before one-click purchase so that unauthorized charges cannot occur. AC: \u2022 Biometric/PIN prompt appears \u2022 Failed auth redirects to full checkout \u2022 No card details shown in plain text',
+      'As a guest who just created an account, I want to opt in to one-click checkout during setup so that future purchases are faster. AC: \u2022 Opt-in presented post-registration \u2022 Clear explanation of what is saved \u2022 Easy path to opt out in account settings',
+      'As a customer with multiple addresses, I want to choose my delivery address before one-click so that items go to the right place. AC: \u2022 Default address pre-selected \u2022 Change address option visible \u2022 Selection persists for 30 days',
+    ];
+
+    function S2() {
+      const [brief, setBrief] = useState('');
+      const [showPreview, setShowPreview] = useState(false);
+      const [showExample, setShowExample] = useState(false);
+
+      const costar = buildCostar(brief.trim());
+
+      const promptLines = [
+        'CONTEXT: ' + costar.context,
+        '\nOBJECTIVE: ' + costar.objective,
+        '\nSTYLE: ' + costar.style,
+        '\nTONE: ' + costar.tone,
+        '\nAUDIENCE: ' + costar.audience,
+        '\nRESPONSE FORMAT: ' + costar.response,
+        brief.trim()
+          ? '\n\nFEATURE BRIEF:\n' + brief.trim()
+          : '\n\nFEATURE BRIEF:\n[Paste your feature brief above]',
+      ];
+      const promptText = promptLines.join('');
+
+      return (
+        <>
+          <div><h2 className="stage-header">From Brief to Backlog in Seconds</h2></div>
+          <div className="explanation">
+            Enter a feature brief below. The COSTAR prompt template auto-fills with your context. Hit &ldquo;Generate Preview&rdquo; to see the full prompt you&rsquo;d send to an AI, then copy it into ChatGPT or Claude.
+          </div>
+          <div className="scene-card">
+            <div className="prompt-builder">
+              <div>
+                <div className="builder-section-label">Step 1 &mdash; Your Feature Brief</div>
+                <textarea
+                  className="builder-textarea"
+                  placeholder="Describe the feature in 1–3 sentences. Example: Add a dark mode toggle to our web app so users can switch to a low-brightness theme for nighttime use."
+                  value={brief}
+                  onChange={(e) => { setBrief(e.target.value); setShowPreview(false); }}
+                  aria-label="Feature brief input"
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <div className="builder-section-label">Step 2 &mdash; COSTAR Template (auto-fills from your brief)</div>
+                <div className="costar-grid">
+                  <div className="costar-field">
+                    <div className="costar-key">C &mdash; Context</div>
+                    <div className="costar-value">{costar.context}</div>
+                  </div>
+                  <div className="costar-field">
+                    <div className="costar-key">O &mdash; Objective</div>
+                    <div className="costar-value">{costar.objective}</div>
+                  </div>
+                  <div className="costar-field">
+                    <div className="costar-key">S &mdash; Style</div>
+                    <div className="costar-value">{costar.style}</div>
+                  </div>
+                  <div className="costar-field">
+                    <div className="costar-key">T &mdash; Tone</div>
+                    <div className="costar-value">{costar.tone}</div>
+                  </div>
+                  <div className="costar-field">
+                    <div className="costar-key">A &mdash; Audience</div>
+                    <div className="costar-value">{costar.audience}</div>
+                  </div>
+                  <div className="costar-field">
+                    <div className="costar-key">R &mdash; Response Format</div>
+                    <div className="costar-value">{costar.response}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="builder-btn builder-btn-primary"
+                  onClick={() => setShowPreview(true)}
+                  aria-label="Generate prompt preview"
+                >
+                  Generate Preview
+                </button>
+                <button
+                  type="button"
+                  className="builder-btn builder-btn-secondary"
+                  onClick={() => setShowExample(!showExample)}
+                  aria-label={showExample ? 'Hide example' : 'Show Example'}
+                >
+                  {showExample ? 'Hide Example' : 'Show Example'}
+                </button>
+              </div>
+
+              {showPreview && (
+                <div>
+                  <div className="builder-section-label">Step 3 &mdash; Your Full Prompt (copy into ChatGPT or Claude)</div>
+                  <div className="prompt-preview">
+                    <pre>{promptText}</pre>
+                  </div>
+                </div>
+              )}
+
+              {showExample && (
+                <div className="example-panel">
+                  <div className="example-panel-title">Example: E-commerce One-Click Checkout &rarr; 5 User Stories</div>
+                  <div style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>
+                    <strong>Brief used:</strong> {EXAMPLE_BRIEF}
+                  </div>
+                  <ul className="user-story-list">
+                    {EXAMPLE_STORIES.map((story, i) => (
+                      <li key={i} className="user-story-item">
+                        <strong>Story {i + 1}:</strong> {story}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+          <InsightBlock>
+            The feature brief IS the context. The more specific your brief, the more specific your user stories. Garbage in, garbage out applies to AI prompts too.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 3: Competitive Analysis */
+    const DIMENSIONS = ['Pricing', 'Key Features', 'Target Market', 'Strengths', 'Weaknesses'];
+    const COMPETITORS = ['Asana', 'Monday.com', 'Notion'];
+
+    const DEFAULT_GRID = {
+      'Asana': {
+        'Pricing': 'Free, Premium $10.99/mo, Business $24.99/mo',
+        'Key Features': 'Task assignments, timelines, workload view, integrations',
+        'Target Market': 'Mid-size teams, project-heavy orgs',
+        'Strengths': 'Mature product, rich integrations, strong enterprise support',
+        'Weaknesses': 'Complex UI, expensive at scale, steep learning curve',
+      },
+      'Monday.com': {
+        'Pricing': 'Free, Basic $9/mo, Standard $12/mo, Pro $19/mo',
+        'Key Features': 'Visual boards, automations, dashboards, CRM add-on',
+        'Target Market': 'Marketing teams, agencies, operations',
+        'Strengths': 'Highly visual, easy onboarding, flexible use cases',
+        'Weaknesses': 'Can become expensive, limited free tier, report depth',
+      },
+      'Notion': {
+        'Pricing': 'Free, Plus $8/mo, Business $15/mo',
+        'Key Features': 'Docs, wikis, databases, AI writing, linked views',
+        'Target Market': 'Startups, individual contributors, knowledge workers',
+        'Strengths': 'All-in-one, flexible, strong AI features, great UX',
+        'Weaknesses': 'Can feel unstructured, slow on large workspaces',
+      },
+    };
+
+    const COMP_PROMPT = 'CONTEXT: You are a senior PM conducting competitive research.\n\nOBJECTIVE: Complete this competitive analysis framework based on publicly available information. For each competitor, fill in: pricing model, 3\u20135 key features, target market, top 3 strengths, and top 3 weaknesses.\n\nCOMPETITORS: [list your competitors]\n\nDIMENSIONS: Pricing | Key Features | Target Market | Strengths | Weaknesses\n\nSTYLE: Factual, concise bullet points. Max 2 lines per cell.\n\nTONE: Analytical and neutral \u2014 no marketing language.\n\nAUDIENCE: Product and strategy team for quarterly review.\n\nRESPONSE FORMAT: Return a markdown table with competitors as columns and dimensions as rows.';
+
+    function S3() {
+      const [grid, setGrid] = useState(() => {
+        const init = {};
+        COMPETITORS.forEach(c => {
+          init[c] = {};
+          DIMENSIONS.forEach(d => { init[c][d] = DEFAULT_GRID[c][d]; });
+        });
+        return init;
+      });
+
+      const updateCell = (competitor, dimension, value) => {
+        setGrid(prev => ({
+          ...prev,
+          [competitor]: { ...prev[competitor], [dimension]: value },
+        }));
+      };
+
+      return (
+        <>
+          <div><h2 className="stage-header">Build a Competitive Analysis Framework</h2></div>
+          <div className="explanation">
+            The grid below is pre-filled with a sample analysis of three project-management tools. Edit any cell to add your own data, then use the prompt template to have AI complete the gaps.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="comp-grid-wrapper">
+                <table className="comp-grid" aria-label="Competitive analysis grid">
+                  <thead>
+                    <tr>
+                      <th scope="col">Dimension</th>
+                      {COMPETITORS.map(c => <th key={c} scope="col">{c}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DIMENSIONS.map(dim => (
+                      <tr key={dim}>
+                        <td>{dim}</td>
+                        {COMPETITORS.map(comp => (
+                          <td key={comp}>
+                            <textarea
+                              className="comp-input"
+                              value={grid[comp][dim]}
+                              onChange={(e) => updateCell(comp, dim, e.target.value)}
+                              aria-label={comp + ' ' + dim}
+                              rows={3}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="prompt-template-card">
+                <div className="prompt-template-title">Prompt Template &mdash; Use to Fill Gaps with AI</div>
+                <pre className="prompt-template-text">{COMP_PROMPT}</pre>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Competitive analysis is where AI shines brightest for PMs &mdash; it can structure your thinking even when it can&rsquo;t do the research (yet).
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 4: PRD & Release Notes */
+    const RELEASE_PROMPT = 'CONTEXT: You are a technical writer translating engineering changes into customer communications.\n\nOBJECTIVE: Convert the changelog entries below into customer-facing release notes. Focus on value delivered to users, not implementation details.\n\nSTYLE: Friendly and clear. Translate technical jargon into plain English.\n\nTONE: Upbeat and confident, as if presenting to a product launch audience.\n\nAUDIENCE: End users and customers \u2014 not engineers. They care about what changed for them, not how.\n\nRESPONSE FORMAT: Use a bulleted list with an emoji for each item. Group into: "What\'s New", "Improvements", "Fixes". Lead each bullet with the user benefit.\n\nCHANGELOG:\n[Paste your git log or Jira changelog here]';
+
+    const PRD_PROMPT = 'CONTEXT: You are a senior PM drafting a Product Requirements Document section for an upcoming sprint.\n\nOBJECTIVE: Expand the feature bullets below into a complete PRD section including: (1) Problem Statement, (2) User Personas, (3) Success Metrics, (4) Functional Requirements, (5) Out of Scope.\n\nSTYLE: Structured and precise. Use headers, numbered lists, and tables where appropriate.\n\nTONE: Professional and specific \u2014 avoid vague language like "improve" or "enhance."\n\nAUDIENCE: Engineering leads and design team who will use this to build the feature.\n\nRESPONSE FORMAT: Return each section with a clear H2 heading, followed by the content. Include 2\u20133 measurable success metrics in table format.\n\nFEATURE BULLETS:\n[Paste your feature bullet points here]';
+
+    function S4() {
+      const [activeTab, setActiveTab] = useState(0);
+      const [changelog, setChangelog] = useState('');
+      const [prdBullets, setPrdBullets] = useState('');
+
+      const tabs = [
+        { label: 'Release Notes', id: 'release-notes' },
+        { label: 'PRD Section', id: 'prd-section' },
+      ];
+
+      return (
+        <>
+          <div><h2 className="stage-header">Draft Documents That Ship</h2></div>
+          <div className="explanation">
+            Two of the most time-consuming PM writing tasks &mdash; release notes and PRD sections &mdash; both follow a predictable pattern. That makes them perfect for AI. Use the tabs to explore each workflow.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%' }}>
+              <div className="tab-bar" role="tablist" aria-label="Document type">
+                {tabs.map((tab, idx) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className="tab-btn"
+                    role="tab"
+                    aria-selected={activeTab === idx}
+                    aria-controls={'pm-tabpanel-' + tab.id}
+                    id={'pm-tab-' + tab.id}
+                    onClick={() => setActiveTab(idx)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {activeTab === 0 && (
+                <div role="tabpanel" id="pm-tabpanel-release-notes" aria-labelledby="pm-tab-release-notes">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
+                      <div className="builder-section-label">Your Changelog (paste git log or Jira entries)</div>
+                      <textarea
+                        className="builder-textarea"
+                        placeholder={'Example:\n- fix: IndexOutOfBoundsException in cart when item count > 99\n- feat: add Apple Pay support to checkout flow\n- perf: reduce dashboard load time by 40%\n- fix: email notifications delayed by up to 6h'}
+                        value={changelog}
+                        onChange={(e) => setChangelog(e.target.value)}
+                        aria-label="Changelog input"
+                        rows={6}
+                        style={{ minHeight: '130px' }}
+                      />
+                    </div>
+                    <div className="prompt-template-card">
+                      <div className="prompt-template-title">Prompt Template &mdash; Release Notes</div>
+                      <pre className="prompt-template-text">{RELEASE_PROMPT}</pre>
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#888', fontStyle: 'italic' }}>
+                      Copy the template above, replace the [CHANGELOG] placeholder with your entries, and paste into ChatGPT or Claude.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 1 && (
+                <div role="tabpanel" id="pm-tabpanel-prd-section" aria-labelledby="pm-tab-prd-section">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
+                      <div className="builder-section-label">Your Feature Bullets (paste a rough feature list)</div>
+                      <textarea
+                        className="builder-textarea"
+                        placeholder={'Example:\n- Users can save unlimited shipping addresses\n- Default address shown first at checkout\n- Delete address with confirmation dialog\n- Address validation on save'}
+                        value={prdBullets}
+                        onChange={(e) => setPrdBullets(e.target.value)}
+                        aria-label="Feature bullets input"
+                        rows={6}
+                        style={{ minHeight: '130px' }}
+                      />
+                    </div>
+                    <div className="prompt-template-card">
+                      <div className="prompt-template-title">Prompt Template &mdash; PRD Section</div>
+                      <pre className="prompt-template-text">{PRD_PROMPT}</pre>
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#888', fontStyle: 'italic' }}>
+                      Copy the template above, replace the [FEATURE BULLETS] placeholder with your list, and paste into ChatGPT or Claude.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <InsightBlock>
+            Release notes are a translation exercise: technical changelog &rarr; customer value. AI is excellent at translation when you specify the audience clearly.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stage 5: Your Turn */
+    const YOUR_TURN_TASKS = [
+      { id: 'user-stories',  emoji: '\uD83D\uDCCB', label: 'User Story Generation' },
+      { id: 'competitive',   emoji: '\uD83D\uDD0D', label: 'Competitive Analysis' },
+      { id: 'prds',          emoji: '\uD83D\uDCC4', label: 'PRD Drafting' },
+      { id: 'release-notes', emoji: '\uD83D\uDE80', label: 'Release Notes' },
+      { id: 'meeting',       emoji: '\uD83D\uDDD2\uFE0F', label: 'Meeting Summaries' },
+    ];
+
+    const TASK_SUMMARIES = {
+      'user-stories': {
+        focus: 'User Story Generation',
+        tip: 'Make your brief specific: name the user type, the feature behavior, and the business goal. The COSTAR template handles structure — you provide the substance.',
+        starter: 'Use the COSTAR prompt template from Stage 2 as your base.',
+      },
+      'competitive': {
+        focus: 'Competitive Analysis',
+        tip: 'List your competitors and the exact dimensions you care about. AI works best when you define the framework — it fills in the data.',
+        starter: 'Use the prompt template from Stage 3 and substitute your competitors.',
+      },
+      'prds': {
+        focus: 'PRD Section Drafting',
+        tip: 'Bullet points are enough to start. Give AI your rough bullets and let it expand into full sections — then edit for accuracy.',
+        starter: 'Use the PRD template from Stage 4 with your own feature bullets.',
+      },
+      'release-notes': {
+        focus: 'Release Notes',
+        tip: 'Specify the audience explicitly — "our customers are non-technical SMB owners" changes the output dramatically compared to no audience guidance.',
+        starter: 'Use the Release Notes template from Stage 4 with your changelog.',
+      },
+      'meeting': {
+        focus: 'Meeting Summaries',
+        tip: 'Paste the raw transcript (or rough notes) and specify what you need: decisions, action items, open questions, or all three.',
+        starter: 'Prompt: "Summarize this meeting transcript. Extract: (1) Decisions Made, (2) Action Items with owners, (3) Open Questions. Audience: team Slack post."',
+      },
+    };
+
+    function S5() {
+      const [selectedTask, setSelectedTask] = useState(null);
+      const [promptText, setPromptText] = useState('');
+
+      const summary = selectedTask ? TASK_SUMMARIES[selectedTask] : null;
+      const wordCount = promptText.trim() ? promptText.trim().split(/\s+/).length : 0;
+
+      let wordHint = '';
+      if (wordCount > 0) {
+        if (wordCount < 20) wordHint = 'try adding more context';
+        else if (wordCount < 50) wordHint = 'decent start, consider adding audience or format';
+        else wordHint = 'good length \u2014 specificity beats brevity';
+      }
+
+      return (
+        <>
+          <div><h2 className="stage-header">Apply to Your Own Work</h2></div>
+          <div className="explanation">
+            Pick a task from your real PM work this week, write a prompt for it below, and get a personalized tip on how to make it more effective.
+          </div>
+          <div className="scene-card">
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <div className="builder-section-label">Step 1 &mdash; Pick Your Task</div>
+                <div className="task-picker" role="radiogroup" aria-label="Select a PM task">
+                  {YOUR_TURN_TASKS.map((task) => (
+                    <label
+                      key={task.id}
+                      className={'task-radio-label' + (selectedTask === task.id ? ' selected' : '')}
+                    >
+                      <input
+                        type="radio"
+                        name="pm-task"
+                        value={task.id}
+                        checked={selectedTask === task.id}
+                        onChange={() => setSelectedTask(task.id)}
+                        aria-label={task.label}
+                      />
+                      <span className="task-emoji">{task.emoji}</span>
+                      <span>{task.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="builder-section-label">Step 2 &mdash; Write Your Prompt</div>
+                <textarea
+                  className="builder-textarea"
+                  placeholder="Write the prompt you'd actually use for this task. Don't aim for perfection — a rough draft is fine. You'll see feedback below."
+                  value={promptText}
+                  onChange={(e) => setPromptText(e.target.value)}
+                  aria-label="Your prompt"
+                  rows={5}
+                  style={{ minHeight: '110px' }}
+                />
+                {wordCount > 0 && (
+                  <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                    {wordCount} words &mdash; {wordHint}
+                  </div>
+                )}
+              </div>
+
+              {summary && promptText.trim().length > 5 && (
+                <div className="auto-summary-card">
+                  <div className="auto-summary-title">Personalized Tip &mdash; {summary.focus}</div>
+                  <div className="auto-summary-body">
+                    <div style={{ marginBottom: '10px' }}>
+                      <span className="auto-summary-highlight">Pro tip: </span>{summary.tip}
+                    </div>
+                    <div>
+                      <span className="auto-summary-highlight">Quick start: </span>{summary.starter}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!selectedTask && (
+                <div style={{ fontSize: '14px', color: '#999', fontStyle: 'italic', textAlign: 'center' }}>
+                  Select a task above to unlock personalized guidance.
+                </div>
+              )}
+            </div>
+          </div>
+          <InsightBlock>
+            The best AI prompts come from real work, not exercises. The prompt you just wrote is more valuable than any example we could give you.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* Stages definition */
+    const STAGES = [
+      {
+        label: 'Use Cases',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h4"/></svg>',
+        component: S1,
+      },
+      {
+        label: 'User Stories',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+        component: S2,
+      },
+      {
+        label: 'Competitive',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        component: S3,
+      },
+      {
+        label: 'PRD & Release',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>',
+        component: S4,
+      },
+      {
+        label: 'Your Turn',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        component: S5,
+      },
+    ];
+
+    const NEXT_GUIDE = { id: '6.2', title: 'Citizen Coder Lab', module: 'Module 6', href: './citizen-coder-lab.html' };
+
+    /* Main Guide Shell */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const handleNext = () => { if (currentStage < STAGES.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
+
+      const CurrentComponent = STAGES[currentStage].component;
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar" aria-label="Guide sections">
+              {STAGES.map((stage, idx) => (
+                <React.Fragment key={idx}>
+                  <div className={'step-wrapper' + (currentStage === idx ? ' active' : '')}>
+                    <button
+                      type="button"
+                      className={'step-btn' + (currentStage === idx ? ' active' : '')}
+                      aria-label={'Step ' + (idx + 1) + ': ' + stage.label}
+                      aria-current={currentStage === idx ? 'step' : undefined}
+                      onClick={() => setCurrentStage(idx)}
+                      dangerouslySetInnerHTML={{ __html: stage.icon }}
+                    />
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < STAGES.length - 1 && (
+                    <div className={'step-connector' + (currentStage > idx ? ' active' : '')} />
+                  )}
+                </React.Fragment>
+              ))}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">6.1</span>
+                    <h1 className="title">PM Lab</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">USE CASE</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of {STAGES.length}</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      aria-label="Previous section"
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handleNext}
+                      disabled={currentStage === STAGES.length - 1}
+                      aria-label="Next section"
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area">
+                <CurrentComponent />
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>
