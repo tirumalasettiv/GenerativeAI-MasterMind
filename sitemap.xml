@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
+  <url>
+    <loc>SITE_URL/index.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Module 1: Fundamentals (10 guides) -->
+  <url>
+    <loc>SITE_URL/guides/fundamentals/what-is-genai.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/regular-vs-genai.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/how-genai-works.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/ai-model-types.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/limitations.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/verify-framework.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/embeddings.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/safety-alignment.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/evaluation.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/fundamentals/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Module 2: Prompt Engineering (3 guides) -->
+  <url>
+    <loc>SITE_URL/guides/prompt-engineering/costar-meta.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/prompt-engineering/techniques.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/prompt-engineering/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Module 3: Context Engineering (3 guides) -->
+  <url>
+    <loc>SITE_URL/guides/context-engineering/foundations.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/context-engineering/mastering-context.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/context-engineering/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Module 4: MCP (3 guides) -->
+  <url>
+    <loc>SITE_URL/guides/mcp/fundamentals.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/mcp/advanced.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/mcp/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Module 5: Architectures (7 guides) -->
+  <url>
+    <loc>SITE_URL/guides/architectures/overview.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/architectures/llm-chat.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/architectures/rag.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/architectures/workflows.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/architectures/agents.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/architectures/agentic-ai.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/architectures/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Module 6: Role Labs (3 guides) -->
+  <url>
+    <loc>SITE_URL/guides/role-labs/pm-lab.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/role-labs/citizen-coder-lab.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/role-labs/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Module 7: Build Labs (6 guides) -->
+  <url>
+    <loc>SITE_URL/guides/build-labs/rag-build.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/build-labs/workflow-build.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/build-labs/agent-build.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/build-labs/multi-agent-build.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/build-labs/capstone.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>SITE_URL/guides/build-labs/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Final Exam -->
+  <url>
+    <loc>SITE_URL/guides/final-exam/quiz.html</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+</urlset>
