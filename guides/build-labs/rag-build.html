@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hands-on lab: build a RAG-powered Q&A system. Upload documents, configure retrieval, write system prompts, test with real questions, and refine for accuracy.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="RAG Build — Build Labs">
+  <meta property="og:description" content="Hands-on lab: build a RAG-powered Q&A system. Upload documents, configure retrieval, write system prompts, test with real questions, and refine for accuracy.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RAG Build — Build Labs">
+  <meta name="twitter:description" content="Hands-on lab: build a RAG-powered Q&A system. Upload documents, configure retrieval, write system prompts, test with real questions, and refine for accuracy.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>RAG Build - Build Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── Disclosure badge (shared across all click-to-expand cards) ── */
+    .disclosure-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
+
+    /* ── S1: RAG architecture diagram ── */
+    .rag-flow-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .rag-flow-wrap svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 660px;
+      width: 100%;
+      height: auto;
+    }
+
+    /* ── S1: Tool comparison cards ── */
+    .tool-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .tool-card {
+      position: relative;
+      padding: 18px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .tool-card:hover { border-color: #6c5ce7; transform: translateX(3px); }
+    .tool-card.expanded { border-color: #6c5ce7; background: #f5f3ff; }
+    .tool-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .tool-card-emoji { font-size: 26px; flex-shrink: 0; }
+    .tool-card-name { font-weight: 700; font-size: 16px; color: #1a1a1a; flex: 1; }
+    .tool-card-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6c5ce7;
+      background: #ece9fd;
+      border: 1px solid #c9c2f5;
+      border-radius: 20px;
+      padding: 3px 10px;
+      white-space: nowrap;
+    }
+    .tool-card-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.65;
+    }
+    .tool-card.expanded .tool-card-detail {
+      max-height: 200px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #ddd;
+    }
+    .tool-detail-row { margin-bottom: 6px; }
+    .tool-detail-label {
+      font-weight: 700;
+      color: #6c5ce7;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    /* ── S2: Document checklist ── */
+    .doc-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .doc-check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      user-select: none;
+    }
+    .doc-check-row:hover { border-color: #6c5ce7; background: #f9f8ff; }
+    .doc-check-row.checked { border-color: #2ecc71; background: #f0fbf4; }
+    .doc-check-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .doc-check-row.checked .doc-check-box {
+      background: #2ecc71;
+      border-color: #2ecc71;
+    }
+    .doc-count {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #666;
+      font-style: italic;
+    }
+
+    /* ── S2: Chunking disclosure cards ── */
+    .chunk-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .chunk-card {
+      position: relative;
+      padding: 16px 18px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .chunk-card:hover { border-color: #6c5ce7; }
+    .chunk-card.expanded { border-color: #6c5ce7; background: #f5f3ff; }
+    .chunk-card-title { font-weight: 700; font-size: 15px; color: #1a1a1a; padding-right: 36px; }
+    .chunk-card-subtitle { font-size: 13px; color: #888; margin-top: 4px; }
+    .chunk-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.65;
+    }
+    .chunk-card.expanded .chunk-detail {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+    }
+
+    /* ── S2: System prompt template fields ── */
+    .spt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .spt-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .spt-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+    .spt-input {
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .spt-input:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S3: Tabs ── */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      color: #555;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .tab-btn[aria-selected="true"] {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+    }
+    .tab-btn:hover:not([aria-selected="true"]) {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+    }
+
+    /* ── S3: Walkthrough steps ── */
+    .walkthrough {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .wt-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .wt-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .wt-body { flex: 1; }
+    .wt-title { font-weight: 700; font-size: 15px; color: #1a1a1a; margin-bottom: 4px; }
+    .wt-desc { font-size: 14px; color: #444; line-height: 1.6; }
+
+    /* ── S3: System prompt preview ── */
+    .prompt-preview {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    .prompt-preview pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #e0d9ff;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    .prompt-preview-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #a29bfe;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── S4: Scorecard ── */
+    .scorecard-wrap { width: 100%; overflow-x: auto; }
+    .scorecard-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      min-width: 540px;
+    }
+    .scorecard-table th {
+      background: #6c5ce7;
+      color: white;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+    }
+    .scorecard-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+      font-size: 13px;
+      color: #333;
+    }
+    .scorecard-table tr:last-child td { border-bottom: none; }
+    .scorecard-table tr:nth-child(even) td { background: #fafafe; }
+    .sc-type {
+      font-weight: 700;
+      color: #6c5ce7;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .sc-example { font-size: 12px; color: #555; line-height: 1.4; }
+    .sc-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .sc-btn {
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .sc-btn:hover { transform: translateY(-1px); }
+    .sc-btn.correct { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .sc-btn.partial { background: #f39c12; border-color: #f39c12; color: white; }
+    .sc-btn.wrong   { background: #e74c3c; border-color: #e74c3c; color: white; }
+
+    /* ── S4: Summary stats ── */
+    .sc-summary {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .sc-stat {
+      flex: 1;
+      min-width: 80px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      background: white;
+    }
+    .sc-stat.correct-stat { border-color: #2ecc71; background: #f0fbf4; }
+    .sc-stat.partial-stat { border-color: #f39c12; background: #fef9ec; }
+    .sc-stat.wrong-stat   { border-color: #e74c3c; background: #fef5f5; }
+    .sc-stat-num { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .sc-stat.correct-stat .sc-stat-num { color: #1a9456; }
+    .sc-stat.partial-stat .sc-stat-num { color: #c77d0a; }
+    .sc-stat.wrong-stat   .sc-stat-num { color: #c0392b; }
+    .sc-stat-label { font-size: 12px; color: #888; font-weight: 600; }
+
+    /* ── S5: Reflection cards ── */
+    .reflect-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .reflect-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .reflect-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reflect-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a1a;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .reflect-textarea:focus { border-color: #6c5ce7; outline: none; }
+    .improve-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .improve-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .improve-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .improve-input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .improve-input:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S5: Deep-dive link ── */
+    .deepdive-link-card {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ece9fd 100%);
+      border: 2px solid #c9c2f5;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s ease;
+      margin-top: 8px;
+    }
+    .deepdive-link-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.15);
+    }
+    .deepdive-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #6c5ce7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .deepdive-body { flex: 1; }
+    .deepdive-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .deepdive-title { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+    .deepdive-arrow { font-size: 20px; color: #6c5ce7; font-weight: 700; }
+
+    /* ── Section-title helper ── */
+    .section-mini-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+    .section-mini-title:first-child { margin-top: 0; }
+
+    /* ── Sidebar icon SVGs ── */
+    .step-btn svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* ── Shared: InsightBlock ── */
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2">
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
+              <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+            </svg>
+            {' '}INSIGHT
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    /* ── Shared: ChevronSvg ── */
+    function ChevronSvg() {
+      return (
+        <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      );
+    }
+
+    /* ── Sidebar step icons (inline JSX SVGs) ── */
+    function IconOverview() {
+      return (
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+      );
+    }
+    function IconDocuments() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+      );
+    }
+    function IconBuild() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    }
+    function IconTest() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <polyline points="9 11 12 14 22 4" />
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+      );
+    }
+    function IconResults() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 1 – Overview: What You'll Build
+    ════════════════════════════════════════ */
+
+    const TOOLS = [
+      {
+        id: 'chatgpt',
+        emoji: '🤖',
+        name: 'ChatGPT File Upload',
+        tag: 'No-code',
+        setupTime: '~5 minutes',
+        customization: 'Low — limited to UI controls',
+        bestFor: 'Quick demos, personal projects, non-technical users',
+        detail: 'Upload PDFs, DOCX, or TXT directly in the ChatGPT interface. The model automatically chunks and indexes your content. Great for fast prototyping — no infrastructure needed.',
+      },
+      {
+        id: 'dify',
+        emoji: '⚡',
+        name: 'Dify.ai',
+        tag: 'Low-code',
+        setupTime: '~30 minutes',
+        customization: 'Medium — chunk size, retrieval settings, custom prompts',
+        bestFor: 'Teams building internal knowledge bases and chatbots',
+        detail: 'Open-source platform with a visual workflow builder. You control chunk size, embedding model, retrieval top-k, and can craft detailed system prompts. Deployable on-premise or cloud.',
+      },
+      {
+        id: 'langchain',
+        emoji: '🔗',
+        name: 'LangChain',
+        tag: 'Pro-code',
+        setupTime: '~2 hours',
+        customization: 'Full — every component is configurable',
+        bestFor: 'Production systems with complex retrieval logic',
+        detail: 'Python/JS framework for building LLM applications. Full control over document loaders, text splitters, embedding models, vector stores (Chroma, Pinecone, Weaviate), and retrieval strategies.',
+      },
+    ];
+
+    function RagArchSVG() {
+      const nodes = [
+        { x: 30,  label: 'User',           sub: 'Question', color: '#6c5ce7', fill: '#f5f3ff' },
+        { x: 175, label: 'Retriever',      sub: 'Search',   color: '#6c5ce7', fill: '#f5f3ff' },
+        { x: 320, label: 'Knowledge Base', sub: 'Docs',     color: '#2ecc71', fill: '#f0fbf4' },
+        { x: 465, label: 'LLM',            sub: 'Generate', color: '#6c5ce7', fill: '#f5f3ff' },
+        { x: 610, label: 'Output',         sub: 'Answer',   color: '#6c5ce7', fill: '#f5f3ff' },
+      ];
+      const NW = 120, NH = 60, cy = 55;
+      const W = 760, H = 110;
+      const arrows = [
+        { x1: nodes[0].x + NW, y1: cy, x2: nodes[1].x, y2: cy, label: 'query' },
+        { x1: nodes[1].x + NW, y1: cy, x2: nodes[2].x, y2: cy, label: 'lookup' },
+        { x1: nodes[2].x + NW, y1: cy, x2: nodes[3].x, y2: cy, label: 'context' },
+        { x1: nodes[3].x + NW, y1: cy, x2: nodes[4].x, y2: cy, label: 'answer' },
+      ];
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" aria-label="RAG pipeline: User sends question to Retriever, which looks up the Knowledge Base, passes context to LLM, which produces the Output answer">
+          <defs>
+            <marker id="rag-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {arrows.map((a, i) => (
+            <g key={i}>
+              <line x1={a.x1 + 4} y1={a.y1} x2={a.x2 - 4} y2={a.y2}
+                    stroke="#b0a6e8" strokeWidth="2"
+                    strokeDasharray="5 3"
+                    markerEnd="url(#rag-arrowhead)" />
+              <text x={(a.x1 + a.x2) / 2} y={cy - 9} textAnchor="middle"
+                    fontSize="10" fill="#999" fontFamily="DM Sans">{a.label}</text>
+            </g>
+          ))}
+          {nodes.map((n, i) => (
+            <g key={i}>
+              <rect x={n.x} y={cy - NH / 2} width={NW} height={NH} rx={10}
+                    fill={n.fill} stroke={n.color} strokeWidth={2} />
+              <text x={n.x + NW / 2} y={cy - 4} textAnchor="middle"
+                    fontSize="12" fontWeight="700" fontFamily="DM Sans" fill={n.color}>
+                {n.label}
+              </text>
+              <text x={n.x + NW / 2} y={cy + 12} textAnchor="middle"
+                    fontSize="10" fontFamily="DM Sans" fill="#666">
+                {n.sub}
+              </text>
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
+    function S1() {
+      const [expanded, setExpanded] = useState(null);
+      return (
+        <>
+          <div><h2 className="stage-header">What You&rsquo;ll Build</h2></div>
+          <div className="explanation">
+            By the end of this lab you&rsquo;ll have a working RAG-powered Q&amp;A system that answers questions from your own documents. You&rsquo;ll pick a tool, prepare a knowledge base, write a system prompt, and run a structured test suite.
+          </div>
+          <div className="scene-card">
+            <div className="section-mini-title">RAG Pipeline</div>
+            <div className="rag-flow-wrap">
+              <RagArchSVG />
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>Choose Your Tool</div>
+            <div className="tool-cards">
+              {TOOLS.map((t) => {
+                const isOpen = expanded === t.id;
+                const toggle = () => setExpanded(isOpen ? null : t.id);
+                return (
+                  <div
+                    key={t.id}
+                    className={'tool-card disclosure-card-host' + (isOpen ? ' expanded' : '')}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={'tool-detail-' + t.id}
+                  >
+                    <span className="disclosure-badge" aria-hidden="true"><ChevronSvg /></span>
+                    <div className="tool-card-header">
+                      <span className="tool-card-emoji">{t.emoji}</span>
+                      <span className="tool-card-name">{t.name}</span>
+                      <span className="tool-card-tag">{t.tag}</span>
+                    </div>
+                    <div className="tool-card-detail" id={'tool-detail-' + t.id}>
+                      <div className="tool-detail-row">
+                        <div className="tool-detail-label">Setup Time</div>
+                        <div>{t.setupTime}</div>
+                      </div>
+                      <div className="tool-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="tool-detail-label">Customization</div>
+                        <div>{t.customization}</div>
+                      </div>
+                      <div className="tool-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="tool-detail-label">Best For</div>
+                        <div>{t.bestFor}</div>
+                      </div>
+                      <div className="tool-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="tool-detail-label">How It Works</div>
+                        <div>{t.detail}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <InsightBlock>
+            RAG doesn&rsquo;t make AI smarter &mdash; it makes AI informed. The quality of your answers is bounded by the quality of your documents.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 2 – Documents: Prepare Your Knowledge Base
+    ════════════════════════════════════════ */
+
+    const DOC_TYPES = [
+      { id: 'faq',         label: 'FAQ document (Q&A pairs)' },
+      { id: 'manual',      label: 'Product or service manual' },
+      { id: 'policy',      label: 'Policy or compliance docs' },
+      { id: 'kb',          label: 'Internal knowledge base articles' },
+      { id: 'reports',     label: 'Research reports or whitepapers' },
+      { id: 'transcripts', label: 'Meeting transcripts or interview notes' },
+    ];
+
+    const CHUNK_STRATEGIES = [
+      {
+        id: 'fixed',
+        title: 'Fixed-Size Chunking',
+        subtitle: '~500 tokens, 10% overlap — good default',
+        detail: 'Split documents into equal-sized token windows. Simple, predictable, and works well for most document types. Start here if you\'re unsure. The overlap ensures a retrieval query near a chunk boundary still captures relevant context from both sides.',
+      },
+      {
+        id: 'paragraph',
+        title: 'Paragraph-Based Chunking',
+        subtitle: 'Split on double newlines — preserves natural units',
+        detail: 'Use document structure (paragraph breaks, headings) as natural chunk boundaries. Works well for structured docs like manuals, FAQs, and policy documents where each paragraph is semantically self-contained. Variable chunk sizes can cause uneven retrieval performance.',
+      },
+      {
+        id: 'semantic',
+        title: 'Semantic Chunking',
+        subtitle: 'Embedding-similarity splits — highest quality',
+        detail: 'Use embedding similarity to detect topic shifts and split at semantic boundaries. The most accurate approach but requires an additional pass with an embedding model. Best for long-form content like research papers where topics flow gradually across sections.',
+      },
+    ];
+
+    /* S2 is rendered via S2Wrapper so sptFields can be lifted to Guide */
+    function S2Inner({ sptFields, setSptFields }) {
+      const [checked, setChecked] = useState({});
+      const [chunkOpen, setChunkOpen] = useState(null);
+
+      const toggleDoc = (id) => setChecked(prev => ({ ...prev, [id]: !prev[id] }));
+      const checkedCount = Object.values(checked).filter(Boolean).length;
+      const updateField = (k, v) => setSptFields(prev => ({ ...prev, [k]: v }));
+
+      return (
+        <>
+          <div><h2 className="stage-header">Prepare Your Knowledge Base</h2></div>
+          <div className="explanation">
+            Good RAG starts with good documents. Select the types you&rsquo;ll include, choose a chunking strategy, and fill in your system prompt template &mdash; it will auto-assemble in the next stage.
+          </div>
+          <div className="scene-card">
+            <div className="section-mini-title">Step 1 &mdash; Select Your Document Types</div>
+            <div className="doc-checklist" role="group" aria-label="Document types checklist">
+              {DOC_TYPES.map((d) => (
+                <div
+                  key={d.id}
+                  className={'doc-check-row' + (checked[d.id] ? ' checked' : '')}
+                  onClick={() => toggleDoc(d.id)}
+                  role="checkbox"
+                  aria-checked={!!checked[d.id]}
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDoc(d.id); } }}
+                >
+                  <div className="doc-check-box" aria-hidden="true">
+                    {checked[d.id] && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                  {d.label}
+                </div>
+              ))}
+            </div>
+            {checkedCount > 0 && (
+              <div className="doc-count">
+                {checkedCount} type{checkedCount > 1 ? 's' : ''} selected &mdash; make sure all docs are clean, plain text where possible.
+              </div>
+            )}
+
+            <div className="section-mini-title">Step 2 &mdash; Pick a Chunking Strategy</div>
+            <div className="chunk-cards">
+              {CHUNK_STRATEGIES.map((cs) => {
+                const isOpen = chunkOpen === cs.id;
+                const toggle = () => setChunkOpen(isOpen ? null : cs.id);
+                return (
+                  <div
+                    key={cs.id}
+                    className={'chunk-card disclosure-card-host' + (isOpen ? ' expanded' : '')}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={'chunk-detail-' + cs.id}
+                  >
+                    <span className="disclosure-badge" aria-hidden="true"><ChevronSvg /></span>
+                    <div className="chunk-card-title">{cs.title}</div>
+                    <div className="chunk-card-subtitle">{cs.subtitle}</div>
+                    <div className="chunk-detail" id={'chunk-detail-' + cs.id}>{cs.detail}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="section-mini-title">Step 3 &mdash; System Prompt Template</div>
+            <div className="spt-grid">
+              <div className="spt-field">
+                <label className="spt-label" htmlFor="spt-role">Role</label>
+                <input
+                  id="spt-role"
+                  type="text"
+                  className="spt-input"
+                  placeholder="e.g. Customer support specialist"
+                  value={sptFields.role}
+                  onChange={(e) => updateField('role', e.target.value)}
+                  aria-label="Bot role"
+                />
+              </div>
+              <div className="spt-field">
+                <label className="spt-label" htmlFor="spt-scope">Knowledge Scope</label>
+                <input
+                  id="spt-scope"
+                  type="text"
+                  className="spt-input"
+                  placeholder="e.g. Our product documentation only"
+                  value={sptFields.scope}
+                  onChange={(e) => updateField('scope', e.target.value)}
+                  aria-label="Knowledge scope"
+                />
+              </div>
+              <div className="spt-field">
+                <label className="spt-label" htmlFor="spt-style">Answer Style</label>
+                <input
+                  id="spt-style"
+                  type="text"
+                  className="spt-input"
+                  placeholder="e.g. Concise bullet points, max 150 words"
+                  value={sptFields.style}
+                  onChange={(e) => updateField('style', e.target.value)}
+                  aria-label="Answer style"
+                />
+              </div>
+              <div className="spt-field">
+                <label className="spt-label" htmlFor="spt-citation">Citation Format</label>
+                <input
+                  id="spt-citation"
+                  type="text"
+                  className="spt-input"
+                  placeholder='e.g. Source: [doc name], page X'
+                  value={sptFields.citation}
+                  onChange={(e) => updateField('citation', e.target.value)}
+                  aria-label="Citation format"
+                />
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Chunking is the most underrated part of RAG. Too large and the LLM gets confused; too small and it loses context. Start with 500-token chunks and adjust.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 3 – Build: Configure and Connect
+    ════════════════════════════════════════ */
+
+    const TAB_DATA = {
+      chatgpt: {
+        label: 'ChatGPT',
+        steps: [
+          { title: 'Create a Project', desc: 'In ChatGPT, click "Explore GPTs" then "Create". Name your GPT and give it a brief description of its purpose.' },
+          { title: 'Upload Documents', desc: 'Under "Configure" → "Knowledge", click "Upload files". Add your PDFs, DOCX, or TXT files. ChatGPT auto-chunks them.' },
+          { title: 'Set Instructions', desc: 'Paste your system prompt (assembled below) into the "Instructions" field. Be explicit about domain scope and what to say when the answer is not found.' },
+          { title: 'Test and Publish', desc: 'Use the preview panel on the right to ask test questions. When satisfied, click "Save" and choose visibility: private, link-only, or public.' },
+        ],
+      },
+      dify: {
+        label: 'Dify.ai',
+        steps: [
+          { title: 'Create a Knowledge Base', desc: 'Log in to Dify → "Knowledge" → "Create Knowledge". Upload documents and configure chunk size (recommended: 512 tokens, 50-token overlap).' },
+          { title: 'Create a Chatbot App', desc: 'Go to "Studio" → "Create App" → "Chatbot". Select "Context-Aware Conversation" mode and link your knowledge base.' },
+          { title: 'Configure Retrieval', desc: 'Set "Retrieval Top-K" to 3–5. Enable "Score Threshold" (0.5 is a good start) to filter out low-relevance results.' },
+          { title: 'Write System Prompt', desc: 'Paste your system prompt (assembled below) into the prompt field. Test in the Preview panel, then deploy via the "Publish" button.' },
+        ],
+      },
+      langchain: {
+        label: 'LangChain',
+        steps: [
+          { title: 'Load and Split Documents', desc: 'Use PyPDFLoader or DirectoryLoader to ingest files. Split with RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50).' },
+          { title: 'Create Vector Store', desc: 'Embed chunks with OpenAIEmbeddings() or HuggingFaceEmbeddings(). Store in Chroma.from_documents(docs, embedding) locally or Pinecone for production.' },
+          { title: 'Build Retrieval Chain', desc: 'Create a retriever: vectorstore.as_retriever(search_kwargs={"k": 4}). Wrap with RetrievalQA.from_chain_type() using your system prompt template.' },
+          { title: 'Invoke and Iterate', desc: 'Call chain.invoke({"query": user_question}). Log retrieved chunks and answers. Tune k, chunk size, and embedding model based on your test scorecard results.' },
+        ],
+      },
+    };
+
+    function S3({ sptFields }) {
+      const [activeTab, setActiveTab] = useState('chatgpt');
+      const tabOrder = ['chatgpt', 'dify', 'langchain'];
+      const current = TAB_DATA[activeTab];
+
+      const role     = sptFields.role     || '[your role]';
+      const scope    = sptFields.scope    || '[your knowledge scope]';
+      const style    = sptFields.style    || '[your answer style]';
+      const citation = sptFields.citation || '[your citation format]';
+
+      const promptPreview =
+        'You are a ' + role + ' who answers questions strictly from ' + scope + '.\n\n' +
+        'Answer Style: ' + style + '\n\n' +
+        'Citation: ' + citation + '\n\n' +
+        'Rules:\n' +
+        '- Only use information from the provided context.\n' +
+        '- If the answer is not in the context, say "I don\'t have information on that in my knowledge base."\n' +
+        '- Never fabricate facts or cite sources you were not given.';
+
+      return (
+        <>
+          <div><h2 className="stage-header">Configure and Connect</h2></div>
+          <div className="explanation">
+            Pick your tool and follow the 4-step walkthrough. Your system prompt from Stage 2 auto-assembles in the preview below the steps.
+          </div>
+          <div className="scene-card">
+            <div className="tab-bar" role="tablist" aria-label="RAG tool walkthroughs">
+              {tabOrder.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  className="tab-btn"
+                  aria-selected={activeTab === key}
+                  onClick={() => setActiveTab(key)}
+                >
+                  {TAB_DATA[key].label}
+                </button>
+              ))}
+            </div>
+
+            <div role="tabpanel" aria-label={current.label + ' walkthrough'}>
+              <div className="walkthrough">
+                {current.steps.map((step, i) => (
+                  <div className="wt-step" key={i}>
+                    <div className="wt-num" aria-hidden="true">{i + 1}</div>
+                    <div className="wt-body">
+                      <div className="wt-title">{step.title}</div>
+                      <div className="wt-desc">{step.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>System Prompt Preview</div>
+            <div className="prompt-preview">
+              <div className="prompt-preview-label">Assembled from Stage 2 fields</div>
+              <pre>{promptPreview}</pre>
+            </div>
+          </div>
+          <InsightBlock>
+            Your system prompt is the personality of your Q&amp;A bot. &ldquo;You are a helpful assistant&rdquo; is not enough &mdash; specify the domain, the citation style, and what to say when it doesn&rsquo;t know.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 4 – Test: Run Your Test Suite
+    ════════════════════════════════════════ */
+
+    const TEST_ROWS = [
+      { type: 'Factual',      example: 'What is the refund policy for digital products?' },
+      { type: 'Comparative',  example: 'How does Plan A differ from Plan B in terms of storage?' },
+      { type: 'Multi-doc',    example: 'Which products are mentioned in both the FAQ and the pricing sheet?' },
+      { type: 'Edge case',    example: 'What happens if I cancel mid-billing cycle on a legacy plan?' },
+      { type: 'Out-of-scope', example: 'What is the current stock price of this company?' },
+      { type: 'Ambiguous',    example: 'How do I upgrade?' },
+      { type: 'Follow-up',    example: "What if I already tried that and it didn't work?" },
+      { type: 'Multi-hop',    example: "If I'm on Plan B and want the feature from Plan A, what's the cost difference?" },
+      { type: 'Temporal',     example: 'What changed in the last policy update?' },
+      { type: 'Opinion',      example: 'Which plan would you recommend for a 10-person team?' },
+    ];
+
+    function S4() {
+      const [scores, setScores] = useState(Array(10).fill(null));
+
+      const setScore = (rowIdx, val) => {
+        setScores(prev => {
+          const next = [...prev];
+          next[rowIdx] = prev[rowIdx] === val ? null : val;
+          return next;
+        });
+      };
+
+      const correct  = scores.filter(s => s === 'correct').length;
+      const partial  = scores.filter(s => s === 'partial').length;
+      const wrong    = scores.filter(s => s === 'wrong').length;
+      const untested = scores.filter(s => s === null).length;
+
+      return (
+        <>
+          <div><h2 className="stage-header">Run Your Test Suite</h2></div>
+          <div className="explanation">
+            Ask each question to your RAG system. Score each response: Correct (full answer, right source), Partial (incomplete or missing citation), Wrong (hallucinated or off-topic). Click a lit button again to clear it.
+          </div>
+          <div className="scene-card">
+            <div className="scorecard-wrap">
+              <table className="scorecard-table" aria-label="RAG system test scorecard">
+                <thead>
+                  <tr>
+                    <th style={{ width: '110px' }}>Type</th>
+                    <th>Example Question</th>
+                    <th style={{ width: '200px' }}>Your Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {TEST_ROWS.map((row, idx) => (
+                    <tr key={idx}>
+                      <td><span className="sc-type">{row.type}</span></td>
+                      <td><span className="sc-example">{row.example}</span></td>
+                      <td>
+                        <div className="sc-btns" role="group" aria-label={'Score for ' + row.type + ' question'}>
+                          <button
+                            type="button"
+                            className={'sc-btn' + (scores[idx] === 'correct' ? ' correct' : '')}
+                            onClick={() => setScore(idx, 'correct')}
+                            aria-pressed={scores[idx] === 'correct'}
+                            aria-label="Mark correct"
+                          >
+                            &#10003; Correct
+                          </button>
+                          <button
+                            type="button"
+                            className={'sc-btn' + (scores[idx] === 'partial' ? ' partial' : '')}
+                            onClick={() => setScore(idx, 'partial')}
+                            aria-pressed={scores[idx] === 'partial'}
+                            aria-label="Mark partial"
+                          >
+                            ~ Partial
+                          </button>
+                          <button
+                            type="button"
+                            className={'sc-btn' + (scores[idx] === 'wrong' ? ' wrong' : '')}
+                            onClick={() => setScore(idx, 'wrong')}
+                            aria-pressed={scores[idx] === 'wrong'}
+                            aria-label="Mark wrong"
+                          >
+                            &#10007; Wrong
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="sc-summary" aria-live="polite" aria-label="Test score summary">
+              <div className="sc-stat correct-stat">
+                <div className="sc-stat-num">{correct}</div>
+                <div className="sc-stat-label">Correct</div>
+              </div>
+              <div className="sc-stat partial-stat">
+                <div className="sc-stat-num">{partial}</div>
+                <div className="sc-stat-label">Partial</div>
+              </div>
+              <div className="sc-stat wrong-stat">
+                <div className="sc-stat-num">{wrong}</div>
+                <div className="sc-stat-label">Wrong</div>
+              </div>
+              <div className="sc-stat" style={{ borderColor: '#ccc' }}>
+                <div className="sc-stat-num" style={{ color: '#999' }}>{untested}</div>
+                <div className="sc-stat-label">Untested</div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Test with questions you KNOW the answer to. You can&rsquo;t evaluate accuracy on questions where you&rsquo;d need the RAG system to find the answer.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 5 – Results: Document and Improve
+    ════════════════════════════════════════ */
+
+    function S5() {
+      const [worked, setWorked] = useState('');
+      const [failed, setFailed] = useState('');
+      const [imps, setImps] = useState(['', '', '']);
+
+      const setImp = (i, v) => setImps(prev => { const next = [...prev]; next[i] = v; return next; });
+
+      return (
+        <>
+          <div><h2 className="stage-header">Document and Improve</h2></div>
+          <div className="explanation">
+            Capture what you learned from the test suite. Good systems evolve from real results &mdash; document your findings and commit to three concrete improvements.
+          </div>
+          <div className="scene-card">
+            <div className="reflect-cards">
+              <div className="reflect-card">
+                <div className="reflect-card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  What Worked
+                </div>
+                <textarea
+                  className="reflect-textarea"
+                  placeholder="Which question types did your RAG system handle well? What factors contributed to correct answers?"
+                  value={worked}
+                  onChange={(e) => setWorked(e.target.value)}
+                  aria-label="What worked in your RAG system"
+                  rows={3}
+                />
+              </div>
+
+              <div className="reflect-card">
+                <div className="reflect-card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                  What Failed
+                </div>
+                <textarea
+                  className="reflect-textarea"
+                  placeholder="Which question types produced wrong or partial answers? Did the system hallucinate? Were citations missing?"
+                  value={failed}
+                  onChange={(e) => setFailed(e.target.value)}
+                  aria-label="What failed in your RAG system"
+                  rows={3}
+                />
+              </div>
+
+              <div className="reflect-card">
+                <div className="reflect-card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+                  </svg>
+                  3 Improvements to Make
+                </div>
+                <div className="improve-inputs">
+                  {imps.map((v, i) => (
+                    <div className="improve-row" key={i}>
+                      <div className="improve-num" aria-hidden="true">{i + 1}</div>
+                      <input
+                        type="text"
+                        className="improve-input"
+                        placeholder={[
+                          'e.g. Reduce chunk size from 1000 to 500 tokens',
+                          'e.g. Add a "not found" fallback sentence to system prompt',
+                          'e.g. Ingest 5 more FAQ documents to fill gaps',
+                        ][i]}
+                        value={v}
+                        onChange={(e) => setImp(i, e.target.value)}
+                        aria-label={'Improvement ' + (i + 1)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>Go Deeper</div>
+            <a
+              href="../architectures/rag.html"
+              className="deepdive-link-card"
+              aria-label="Deep dive: How RAG Works — Architecture guide"
+            >
+              <div className="deepdive-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
+                </svg>
+              </div>
+              <div className="deepdive-body">
+                <div className="deepdive-label">Architecture Deep Dive</div>
+                <div className="deepdive-title">How RAG Works &mdash; Module 5 Guide</div>
+              </div>
+              <div className="deepdive-arrow" aria-hidden="true">&rarr;</div>
+            </a>
+          </div>
+          <InsightBlock>
+            A RAG system is never &ldquo;done&rdquo; &mdash; it&rsquo;s always &ldquo;good enough for now.&rdquo; The best systems improve continuously based on real user questions.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stages configuration
+    ════════════════════════════════════════ */
+
+    const NEXT_GUIDE = { id: '7.2', title: 'Workflow Build', module: 'Module 7', href: './workflow-build.html' };
+
+    const STAGES = [
+      { label: 'Overview',  Icon: IconOverview  },
+      { label: 'Documents', Icon: IconDocuments },
+      { label: 'Build',     Icon: IconBuild     },
+      { label: 'Test',      Icon: IconTest      },
+      { label: 'Results',   Icon: IconResults   },
+    ];
+
+    /* ════════════════════════════════════════
+       Main Guide Shell
+    ════════════════════════════════════════ */
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+      // sptFields lifted so S2 writes and S3 reads them
+      const [sptFields, setSptFields] = useState({ role: '', scope: '', style: '', citation: '' });
+
+      const handleNext = () => { if (currentStage < STAGES.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
+
+      const renderStage = () => {
+        if (currentStage === 1) return <S2Inner sptFields={sptFields} setSptFields={setSptFields} />;
+        if (currentStage === 2) return <S3 sptFields={sptFields} />;
+        if (currentStage === 0) return <S1 />;
+        if (currentStage === 3) return <S4 />;
+        return <S5 />;
+      };
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar" aria-label="Guide sections">
+              {STAGES.map((stage, idx) => {
+                const { Icon } = stage;
+                return (
+                  <React.Fragment key={idx}>
+                    <div className={'step-wrapper' + (currentStage === idx ? ' active' : '')}>
+                      <button
+                        type="button"
+                        className={'step-btn' + (currentStage === idx ? ' active' : '')}
+                        aria-label={'Step ' + (idx + 1) + ': ' + stage.label}
+                        aria-current={currentStage === idx ? 'step' : undefined}
+                        onClick={() => setCurrentStage(idx)}
+                      >
+                        <Icon />
+                      </button>
+                      <div className="step-btn-label">{stage.label}</div>
+                    </div>
+                    {idx < STAGES.length - 1 && (
+                      <div className={'step-connector' + (currentStage > idx ? ' active' : '')} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">7.1</span>
+                    <h1 className="title">RAG Build</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">USE CASE</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of {STAGES.length}</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      aria-label="Previous section"
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handleNext}
+                      disabled={currentStage === STAGES.length - 1}
+                      aria-label="Next section"
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area">
+                {renderStage()}
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>

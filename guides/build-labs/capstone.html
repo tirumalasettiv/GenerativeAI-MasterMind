@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Design your AI-powered solution from scratch. Choose a problem, select an architecture, design components, plan implementation, and build your pitch — all in one interactive canvas.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="Capstone — Build Labs">
+  <meta property="og:description" content="Design your AI-powered solution from scratch. Choose a problem, select an architecture, design components, plan implementation, and build your pitch — all in one interactive canvas.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Capstone — Build Labs">
+  <meta name="twitter:description" content="Design your AI-powered solution from scratch. Choose a problem, select an architecture, design components, plan implementation, and build your pitch — all in one interactive canvas.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Capstone - Build Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── Capstone fillable card ── */
+    .cap-card {
+      background: white;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      transition: border-color 0.25s ease;
+    }
+    .cap-card.filled {
+      border-color: var(--color-success);
+    }
+    .cap-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cap-card-title .card-icon {
+      font-size: 20px;
+    }
+    .filled-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-success);
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .cap-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #1a1a1a;
+      resize: vertical;
+      min-height: 80px;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+      line-height: 1.55;
+    }
+    .cap-textarea:focus {
+      border-color: var(--color-primary);
+      outline: none;
+    }
+
+    /* ── S1: Time estimate row ── */
+    .time-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .time-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .time-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-primary);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .time-input {
+      width: 120px;
+      padding: 9px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+    }
+    .time-input:focus {
+      border-color: var(--color-primary);
+      outline: none;
+    }
+    .savings-badge {
+      padding: 9px 18px;
+      background: #f0fbf4;
+      border: 2px solid var(--color-success);
+      border-radius: 24px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a9456;
+      white-space: nowrap;
+    }
+    .savings-badge.inactive {
+      background: #f5f5f5;
+      border-color: #e0e0e0;
+      color: #aaa;
+    }
+
+    /* ── S2: Decision tree ── */
+    .decision-tree {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .decision-step {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .decision-connector {
+      width: 2px;
+      height: 24px;
+      background: #e0e0e0;
+      margin: 0 auto;
+      transition: background 0.25s ease;
+    }
+    .decision-connector.active {
+      background: var(--color-primary);
+    }
+    .decision-node {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .decision-node.answered {
+      border-color: var(--color-primary);
+      background: #f5f3ff;
+    }
+    .decision-node.result-node {
+      border-color: var(--color-success);
+      background: #f0fbf4;
+    }
+    .decision-q {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .decision-result-name {
+      font-weight: 700;
+      font-size: 17px;
+      color: #1a9456;
+      margin-bottom: 6px;
+    }
+    .decision-result-rationale {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .decision-btns {
+      display: flex;
+      gap: 10px;
+    }
+    .decision-btn {
+      flex: 1;
+      padding: 9px 0;
+      border-radius: var(--radius-sm);
+      border: 2px solid #e0e0e0;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .decision-btn:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .decision-answer-chip {
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+    }
+    .decision-answer-chip.yes {
+      background: var(--color-primary);
+    }
+    .decision-answer-chip.no {
+      background: #6c7aeb;
+    }
+    .reset-tree-btn {
+      margin-top: 14px;
+      padding: 7px 18px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #e0e0e0;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .reset-tree-btn:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    /* ── S3: Tool toggles ── */
+    .tool-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .tool-toggle {
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .tool-toggle:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .tool-toggle.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+    }
+
+    /* ── S3: Prompt fields ── */
+    .prompt-field {
+      background: #f9f8ff;
+      border: 1.5px solid #e8e3f8;
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .prompt-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-primary);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .prompt-name-input {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1a1a;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+      background: white;
+      transition: border-color 0.2s ease;
+    }
+    .prompt-name-input:focus {
+      border-color: var(--color-primary);
+      outline: none;
+    }
+
+    /* ── S4: Week cards ── */
+    .week-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .week-card {
+      border: 2px solid #e0e0e0;
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      background: white;
+      transition: border-color 0.25s ease;
+    }
+    .week-card.filled {
+      border-color: var(--color-success);
+    }
+    .week-label {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+    .week-sublabel {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+
+    /* ── S5: Pitch slide ── */
+    .pitch-slide {
+      background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+      border-radius: var(--radius-xl);
+      padding: 32px 36px;
+      color: white;
+      margin-bottom: 24px;
+    }
+    .pitch-slide-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 8px;
+    }
+    .pitch-slide-title {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 24px;
+    }
+    .pitch-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .pitch-field {
+      background: rgba(255,255,255,0.15);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+    .pitch-field-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+    .pitch-field-value {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+      opacity: 0.95;
+    }
+    .pitch-field-value.empty {
+      opacity: 0.45;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .pitch-savings-chip {
+      display: inline-block;
+      background: rgba(46, 204, 113, 0.3);
+      border: 1.5px solid rgba(46, 204, 113, 0.6);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #b8ffda;
+      margin-top: 10px;
+    }
+
+    /* ── S5: Coaching bullets ── */
+    .coaching-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .coaching-bullet {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      background: white;
+      border: 2px solid #e8e3f8;
+      border-radius: var(--radius-md);
+    }
+    .coaching-bullet-num {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-primary);
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .coaching-bullet-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+    .coaching-bullet-text {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.55;
+    }
+
+    /* ── Sidebar icon sizing ── */
+    .step-btn svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    @media (max-width: 600px) {
+      .pitch-row { grid-template-columns: 1fr; }
+      .time-row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* ════════════════════════════════════════
+       Icon components (inline JSX SVGs)
+    ════════════════════════════════════════ */
+    const IconProblem = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    );
+    const IconArchitecture = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    );
+    const IconSolution = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+    );
+    const IconPlan = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    );
+    const IconPitch = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polygon points="23 7 16 12 23 17 23 7"/>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+      </svg>
+    );
+    const IconInsight = () => (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M9 18h6"/>
+        <path d="M10 22h4"/>
+        <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/>
+      </svg>
+    );
+
+    /* ════════════════════════════════════════
+       Constants
+    ════════════════════════════════════════ */
+    const NEXT_GUIDE = { id: '7.6', title: 'Module 7 Quiz', module: 'Module 7', href: './quiz.html', isQuiz: true };
+
+    const STAGES = [
+      { label: 'Problem',      Icon: IconProblem      },
+      { label: 'Architecture', Icon: IconArchitecture },
+      { label: 'Solution',     Icon: IconSolution     },
+      { label: 'Plan',         Icon: IconPlan         },
+      { label: 'Pitch',        Icon: IconPitch        },
+    ];
+
+    const DECISION_QUESTIONS = [
+      { id: 'ownData',    q: 'Does your solution need your own data — documents, databases, or proprietary knowledge?' },
+      { id: 'multiStep',  q: 'Does the task require multiple steps — routing, transforming, or combining information?' },
+      { id: 'knownSteps', q: 'Are the steps known in advance and predictable every time?' },
+      { id: 'multiExp',   q: 'Do different steps require very different expertise — e.g., one step for research, another for writing?' },
+    ];
+
+    const TOOL_OPTIONS = [
+      { id: 'web_search',  label: 'Web Search'       },
+      { id: 'database',    label: 'Database Query'   },
+      { id: 'email',       label: 'Email / Calendar' },
+      { id: 'file_rw',     label: 'File Read/Write'  },
+      { id: 'ext_api',     label: 'External API'     },
+      { id: 'code_exec',   label: 'Code Execution'   },
+    ];
+
+    const INSIGHTS = [
+      'Pick a problem you actually have — not one that sounds impressive. The best capstone projects solve real annoyances, not hypothetical grand challenges.',
+      'The decision tree isn\'t prescriptive — it\'s a starting point. If your gut says "agent" but the tree says "workflow," trust the tree for now. You can upgrade later.',
+      'Three prompts is a design constraint, not a limitation. If your solution needs more than 3 AI prompts, it might be too complex for a first iteration. Simplify.',
+      'Week 1 is the only week that matters right now. If you can\'t build the core in a week, scope down until you can. Ship something small, then iterate.',
+      'You just went from "I should use AI for something" to "Here\'s my architecture, components, and timeline." That\'s the real skill — not prompting, but designing AI solutions.',
+    ];
+
+    /* ════════════════════════════════════════
+       Decision tree helper
+    ════════════════════════════════════════ */
+    function deriveArchitecture(path) {
+      if (path.length < 2) return null;
+      const [ownData, multiStep, knownSteps, multiExp] = path;
+
+      if (ownData === 'no'  && multiStep === 'no')  return { name: 'LLM Chat', rationale: 'Your problem is a direct conversation with an AI model — no external data and no multi-step logic needed. This is the simplest, fastest architecture to ship: one prompt, one response.' };
+      if (ownData === 'yes' && multiStep === 'no')  return { name: 'RAG (Retrieval-Augmented Generation)', rationale: 'You need your own data but the task is a single lookup-and-answer. RAG retrieves relevant chunks from your knowledge base and feeds them into a single LLM call — powerful without complexity.' };
+      if (ownData === 'no'  && multiStep === 'yes' && path.length >= 3 && knownSteps === 'yes') return { name: 'Workflow', rationale: 'Multiple steps, but they\'re predictable — perfect for a deterministic workflow. You define each step in code, chain them together, and the AI executes each one reliably. No surprises.' };
+      if (ownData === 'no'  && multiStep === 'yes' && path.length >= 3 && knownSteps === 'no')  return { name: 'Agent', rationale: 'The steps aren\'t predictable, so you need an agent that decides what to do next at runtime. The AI chooses tools, evaluates results, and adapts — more powerful, but plan for careful testing.' };
+      if (ownData === 'yes' && multiStep === 'yes' && path.length >= 4 && knownSteps === 'yes' && multiExp === 'no')  return { name: 'Agentic RAG Workflow', rationale: 'You need your own data plus multi-step logic with predictable steps — a RAG pipeline wired into a workflow. Each stage retrieves relevant context, processes it, and hands off cleanly.' };
+      if (ownData === 'yes' && multiStep === 'yes' && path.length >= 4 && (knownSteps === 'no' || multiExp === 'yes')) return { name: 'Multi-Agent System', rationale: 'Complex enough to need multiple specialized agents working together — one might handle retrieval, another reasoning, another output formatting. Design clear handoffs and guard rails.' };
+      if (ownData === 'yes' && multiStep === 'yes' && path.length === 3) return null; // need one more question
+      return null;
+    }
+
+    /* ════════════════════════════════════════
+       S1 — Choose Your Challenge
+    ════════════════════════════════════════ */
+    function S1({ problem, setProblem, currentProcess, setCurrentProcess, timeToday, setTimeToday, timeTarget, setTimeTarget }) {
+      const savings = (() => {
+        const t = parseFloat(timeToday);
+        const g = parseFloat(timeTarget);
+        if (!isNaN(t) && !isNaN(g) && t > 0 && g >= 0 && g < t) return Math.round(((t - g) / t) * 100);
+        return null;
+      })();
+
+      return (
+        <>
+          <h2 className="stage-header">Choose Your Challenge</h2>
+          <div className="explanation">
+            Every great AI solution starts with a real problem. Describe the one you're going to solve — in plain language, no jargon required.
+          </div>
+
+          <div className={'cap-card' + (problem.trim() ? ' filled' : '')}>
+            <div className="cap-card-title">
+              <span className="card-icon" aria-hidden="true">🎯</span>
+              Problem Statement
+              {problem.trim() && <span className="filled-dot" aria-label="Complete" />}
+            </div>
+            <textarea
+              className="cap-textarea"
+              rows={3}
+              placeholder="What problem are you solving? Who has it? Why does it matter?"
+              value={problem}
+              onChange={e => setProblem(e.target.value)}
+              aria-label="Problem statement"
+            />
+          </div>
+
+          <div className={'cap-card' + (currentProcess.trim() ? ' filled' : '')}>
+            <div className="cap-card-title">
+              <span className="card-icon" aria-hidden="true">🔄</span>
+              Current Process
+              {currentProcess.trim() && <span className="filled-dot" aria-label="Complete" />}
+            </div>
+            <textarea
+              className="cap-textarea"
+              rows={3}
+              placeholder="How is this done today — manually, with spreadsheets, with another tool?"
+              value={currentProcess}
+              onChange={e => setCurrentProcess(e.target.value)}
+              aria-label="Current process description"
+            />
+          </div>
+
+          <div className={'cap-card' + ((timeToday || timeTarget) ? ' filled' : '')}>
+            <div className="cap-card-title">
+              <span className="card-icon" aria-hidden="true">⏱</span>
+              Time Estimate
+              {(timeToday || timeTarget) && <span className="filled-dot" aria-label="Complete" />}
+            </div>
+            <div className="time-row">
+              <div className="time-input-group">
+                <label className="time-label" htmlFor="time-today">Minutes today</label>
+                <input
+                  id="time-today"
+                  type="number"
+                  className="time-input"
+                  min="0"
+                  placeholder="60"
+                  value={timeToday}
+                  onChange={e => setTimeToday(e.target.value)}
+                />
+              </div>
+              <div className="time-input-group">
+                <label className="time-label" htmlFor="time-target">Target minutes</label>
+                <input
+                  id="time-target"
+                  type="number"
+                  className="time-input"
+                  min="0"
+                  placeholder="5"
+                  value={timeTarget}
+                  onChange={e => setTimeTarget(e.target.value)}
+                />
+              </div>
+              <div className={'savings-badge' + (savings !== null ? '' : ' inactive')} aria-live="polite" aria-atomic="true">
+                {savings !== null ? savings + '% saved' : '—% saved'}
+              </div>
+            </div>
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label"><IconInsight /> INSIGHT</div>
+            {INSIGHTS[0]}
+          </div>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       S2 — Pick Your Pattern (decision tree)
+    ════════════════════════════════════════ */
+    function S2({ architecturePath, setArchitecturePath, setArchitecture }) {
+      const handleAnswer = (answer) => {
+        const newPath = [...architecturePath, answer];
+        setArchitecturePath(newPath);
+        const result = deriveArchitecture(newPath);
+        setArchitecture(result ? result.name : null);
+      };
+
+      const handleReset = () => {
+        setArchitecturePath([]);
+        setArchitecture(null);
+      };
+
+      const result = deriveArchitecture(architecturePath);
+      // Show all answered questions + next unanswered (unless result is ready)
+      const showUpTo = result ? architecturePath.length : Math.min(architecturePath.length + 1, DECISION_QUESTIONS.length);
+
+      return (
+        <>
+          <h2 className="stage-header">Pick Your Pattern</h2>
+          <div className="explanation">
+            Answer each question to find the architecture that fits your problem best. Click Yes or No to reveal the next decision.
+          </div>
+
+          <div className="scene-card">
+            <div className="decision-tree" role="group" aria-label="Architecture decision tree">
+              {DECISION_QUESTIONS.slice(0, showUpTo).map((item, idx) => {
+                const answered = idx < architecturePath.length;
+                const isCurrent = idx === architecturePath.length && !result;
+                const answer = answered ? architecturePath[idx] : null;
+                return (
+                  <div key={item.id} className="decision-step">
+                    {idx > 0 && (
+                      <div className={'decision-connector' + (answered || isCurrent ? ' active' : '')} aria-hidden="true" />
+                    )}
+                    <div className={'decision-node' + (answered ? ' answered' : '')}>
+                      <div className="decision-q">{idx + 1}. {item.q}</div>
+                      {!answered ? (
+                        <div className="decision-btns">
+                          <button
+                            type="button"
+                            className="decision-btn"
+                            onClick={() => handleAnswer('yes')}
+                            aria-label="Answer yes"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            type="button"
+                            className="decision-btn"
+                            onClick={() => handleAnswer('no')}
+                            aria-label="Answer no"
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <div className={'decision-answer-chip ' + answer} aria-label={'Answered: ' + answer}>
+                          {answer === 'yes' ? 'Yes' : 'No'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {result && (
+                <div className="decision-step">
+                  <div className="decision-connector active" aria-hidden="true" />
+                  <div className="decision-node result-node" role="status" aria-live="polite">
+                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.6px', textTransform: 'uppercase', color: '#1a9456', marginBottom: 6 }}>
+                      Recommended Architecture
+                    </div>
+                    <div className="decision-result-name">{result.name}</div>
+                    <div className="decision-result-rationale">{result.rationale}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {architecturePath.length > 0 && (
+              <button type="button" className="reset-tree-btn" onClick={handleReset}>
+                ↩ Start over
+              </button>
+            )}
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label"><IconInsight /> INSIGHT</div>
+            {INSIGHTS[1]}
+          </div>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       S3 — Design Your Components
+    ════════════════════════════════════════ */
+    function S3({ dataSources, setDataSources, tools, setTools, prompts, setPrompts }) {
+      const toggleTool = (id) => {
+        const next = new Set(tools);
+        if (next.has(id)) { next.delete(id); } else { next.add(id); }
+        setTools(next);
+      };
+
+      const updatePrompt = (idx, field, value) => {
+        setPrompts(prompts.map((p, i) => i === idx ? { ...p, [field]: value } : p));
+      };
+
+      const toolsFilled   = tools.size > 0;
+      const promptsFilled = prompts.some(p => p.name.trim() || p.desc.trim());
+
+      const PROMPT_PLACEHOLDERS = [
+        'Extract key info',
+        'Draft response',
+        'Validate output',
+      ];
+
+      return (
+        <>
+          <h2 className="stage-header">Design Your Components</h2>
+          <div className="explanation">
+            Now spec out what your solution actually needs: where the data lives, what tools it uses, and what each AI prompt will do.
+          </div>
+
+          {/* Data Sources */}
+          <div className={'cap-card' + (dataSources.trim() ? ' filled' : '')}>
+            <div className="cap-card-title">
+              <span className="card-icon" aria-hidden="true">🗄</span>
+              Data Sources
+              {dataSources.trim() && <span className="filled-dot" aria-label="Complete" />}
+            </div>
+            <textarea
+              className="cap-textarea"
+              rows={2}
+              placeholder="Where does the data come from? e.g., Notion docs, CRM, PDFs, live web, internal database..."
+              value={dataSources}
+              onChange={e => setDataSources(e.target.value)}
+              aria-label="Data sources"
+            />
+          </div>
+
+          {/* Tools & Integrations */}
+          <div className={'cap-card' + (toolsFilled ? ' filled' : '')}>
+            <div className="cap-card-title">
+              <span className="card-icon" aria-hidden="true">🔧</span>
+              Tools &amp; Integrations
+              {toolsFilled && <span className="filled-dot" aria-label="Complete" />}
+            </div>
+            <div className="tool-toggles" role="group" aria-label="Select tools your solution will use">
+              {TOOL_OPTIONS.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={'tool-toggle' + (tools.has(t.id) ? ' active' : '')}
+                  aria-pressed={tools.has(t.id)}
+                  onClick={() => toggleTool(t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Prompts */}
+          <div className={'cap-card' + (promptsFilled ? ' filled' : '')}>
+            <div className="cap-card-title">
+              <span className="card-icon" aria-hidden="true">💬</span>
+              AI Prompts (3 max)
+              {promptsFilled && <span className="filled-dot" aria-label="Complete" />}
+            </div>
+            {prompts.map((p, idx) => (
+              <div className="prompt-field" key={idx}>
+                <div className="prompt-num">Prompt {idx + 1}</div>
+                <input
+                  type="text"
+                  className="prompt-name-input"
+                  placeholder={'Name (e.g., "' + PROMPT_PLACEHOLDERS[idx] + '")'}
+                  value={p.name}
+                  onChange={e => updatePrompt(idx, 'name', e.target.value)}
+                  aria-label={'Prompt ' + (idx + 1) + ' name'}
+                />
+                <textarea
+                  className="cap-textarea"
+                  rows={2}
+                  style={{ minHeight: 56 }}
+                  placeholder="What does this prompt do? What goes in, what comes out?"
+                  value={p.desc}
+                  onChange={e => updatePrompt(idx, 'desc', e.target.value)}
+                  aria-label={'Prompt ' + (idx + 1) + ' description'}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label"><IconInsight /> INSIGHT</div>
+            {INSIGHTS[2]}
+          </div>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       S4 — Map Your Implementation
+    ════════════════════════════════════════ */
+    function S4({ weeks, setWeeks, metrics, setMetrics }) {
+      const updateWeek = (idx, val) => setWeeks(weeks.map((w, i) => i === idx ? val : w));
+
+      const WEEK_META = [
+        { title: 'Week 1',   sub: 'Build the core'       },
+        { title: 'Week 2',   sub: 'Test and refine'      },
+        { title: 'Week 3–4', sub: 'Deploy and measure'   },
+      ];
+
+      return (
+        <>
+          <h2 className="stage-header">Map Your Implementation</h2>
+          <div className="explanation">
+            Break your build into three sprints. What will you ship each week? Keep it concrete — tasks, not intentions.
+          </div>
+
+          <div className="week-cards">
+            {WEEK_META.map((wk, idx) => (
+              <div key={idx} className={'week-card' + (weeks[idx].trim() ? ' filled' : '')}>
+                <div className="week-label">{wk.title}</div>
+                <div className="week-sublabel">{wk.sub}</div>
+                <textarea
+                  className="cap-textarea"
+                  rows={2}
+                  style={{ minHeight: 60 }}
+                  placeholder={'What will you build in ' + wk.title.toLowerCase() + '?'}
+                  value={weeks[idx]}
+                  onChange={e => updateWeek(idx, e.target.value)}
+                  aria-label={wk.title + ': ' + wk.sub}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className={'cap-card' + (metrics.trim() ? ' filled' : '')}>
+            <div className="cap-card-title">
+              <span className="card-icon" aria-hidden="true">📊</span>
+              Success Metrics
+              {metrics.trim() && <span className="filled-dot" aria-label="Complete" />}
+            </div>
+            <textarea
+              className="cap-textarea"
+              rows={2}
+              placeholder="How will you know it worked? e.g., time saved, accuracy rate, user adoption..."
+              value={metrics}
+              onChange={e => setMetrics(e.target.value)}
+              aria-label="Success metrics"
+            />
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label"><IconInsight /> INSIGHT</div>
+            {INSIGHTS[3]}
+          </div>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       S5 — Your 3-Minute Summary (Pitch)
+    ════════════════════════════════════════ */
+    function S5({ problem, currentProcess, timeToday, timeTarget, architecture, dataSources, tools, prompts, weeks, metrics }) {
+      const savings = (() => {
+        const t = parseFloat(timeToday);
+        const g = parseFloat(timeTarget);
+        if (!isNaN(t) && !isNaN(g) && t > 0 && g >= 0 && g < t) return Math.round(((t - g) / t) * 100);
+        return null;
+      })();
+
+      const toolList    = TOOL_OPTIONS.filter(o => tools.has(o.id)).map(o => o.label).join(', ');
+      const promptNames = prompts.filter(p => p.name.trim()).map(p => p.name).join(', ');
+      const weeksFilled = weeks.filter(w => w.trim()).length;
+
+      const empty = (v) => !v || !String(v).trim();
+
+      const PitchValue = ({ val, fallback }) => (
+        <div className={'pitch-field-value' + (empty(val) ? ' empty' : '')}>
+          {empty(val) ? fallback : String(val).slice(0, 90) + (String(val).length > 90 ? '…' : '')}
+        </div>
+      );
+
+      return (
+        <>
+          <h2 className="stage-header">Your 3-Minute Summary</h2>
+          <div className="explanation">
+            Everything you've designed, assembled into a pitch. This is what you'd say to a stakeholder, manager, or potential collaborator.
+          </div>
+
+          <div className="pitch-slide" role="region" aria-label="Auto-assembled pitch slide">
+            <div className="pitch-slide-badge">AI Solution Pitch</div>
+            <div className="pitch-slide-title">
+              {empty(problem)
+                ? <span style={{ opacity: 0.5, fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif', fontSize: 18 }}>Fill in the previous stages — your pitch assembles here automatically</span>
+                : (problem.length > 120 ? problem.slice(0, 120) + '…' : problem)
+              }
+            </div>
+
+            <div className="pitch-row">
+              <div className="pitch-field">
+                <div className="pitch-field-label">Architecture</div>
+                <PitchValue val={architecture} fallback="Not selected yet" />
+              </div>
+              <div className="pitch-field">
+                <div className="pitch-field-label">Current Process</div>
+                <PitchValue val={currentProcess} fallback="Not described yet" />
+              </div>
+            </div>
+
+            <div className="pitch-row">
+              <div className="pitch-field">
+                <div className="pitch-field-label">Data Sources</div>
+                <PitchValue val={dataSources} fallback="Not specified yet" />
+              </div>
+              <div className="pitch-field">
+                <div className="pitch-field-label">Tools</div>
+                <div className={'pitch-field-value' + (!toolList ? ' empty' : '')}>
+                  {toolList || 'None selected yet'}
+                </div>
+              </div>
+            </div>
+
+            <div className="pitch-row">
+              <div className="pitch-field">
+                <div className="pitch-field-label">AI Prompts</div>
+                <div className={'pitch-field-value' + (!promptNames ? ' empty' : '')}>
+                  {promptNames || 'Not named yet'}
+                </div>
+              </div>
+              <div className="pitch-field">
+                <div className="pitch-field-label">Timeline</div>
+                <div className={'pitch-field-value' + (weeksFilled === 0 ? ' empty' : '')}>
+                  {weeksFilled === 0 ? 'Not planned yet' : weeksFilled + ' of 3 weeks planned'}
+                </div>
+              </div>
+            </div>
+
+            {metrics.trim() && (
+              <div className="pitch-field" style={{ marginBottom: 12 }}>
+                <div className="pitch-field-label">Success Metrics</div>
+                <PitchValue val={metrics} fallback="" />
+              </div>
+            )}
+
+            {savings !== null && (
+              <div className="pitch-savings-chip" aria-label={savings + '% time saved'}>
+                ⚡ {savings}% time saved
+              </div>
+            )}
+          </div>
+
+          <div className="coaching-bullets" aria-label="Pitch coaching tips">
+            {[
+              { num: '1', title: 'Hook (30 sec)',  text: 'Open with the problem, not the tech. "Right now, this task takes 60 minutes. With AI, it\'ll take 5." Make them feel the pain before you show the solution.' },
+              { num: '2', title: 'Demo (90 sec)',  text: 'Walk through one concrete example end-to-end: the input, each step, the output. Don\'t explain the architecture — show it working on a real case.' },
+              { num: '3', title: 'Ask (60 sec)',   text: 'End with a specific next step: "I need two weeks and access to the CRM. Can we greenlight a pilot?" Vague pitches get vague answers.' },
+            ].map(b => (
+              <div key={b.num} className="coaching-bullet">
+                <div className="coaching-bullet-num" aria-hidden="true">{b.num}</div>
+                <div>
+                  <div className="coaching-bullet-title">{b.title}</div>
+                  <div className="coaching-bullet-text">{b.text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="insight-box" style={{ marginTop: 20 }}>
+            <div className="insight-label"><IconInsight /> INSIGHT</div>
+            {INSIGHTS[4]}
+          </div>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Guide — lifted state + shell
+    ════════════════════════════════════════ */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      // S1 state
+      const [problem,        setProblem]        = useState('');
+      const [currentProcess, setCurrentProcess] = useState('');
+      const [timeToday,      setTimeToday]      = useState('');
+      const [timeTarget,     setTimeTarget]     = useState('');
+
+      // S2 state
+      const [architecture,     setArchitecture]     = useState(null);
+      const [architecturePath, setArchitecturePath] = useState([]);
+
+      // S3 state
+      const [dataSources, setDataSources] = useState('');
+      const [tools,        setTools]       = useState(new Set());
+      const [prompts,      setPrompts]     = useState([
+        { name: '', desc: '' },
+        { name: '', desc: '' },
+        { name: '', desc: '' },
+      ]);
+
+      // S4 state
+      const [weeks,   setWeeks]   = useState(['', '', '']);
+      const [metrics, setMetrics] = useState('');
+
+      const handleNext = () => { if (currentStage < STAGES.length - 1) setCurrentStage(s => s + 1); };
+      const handlePrev = () => { if (currentStage > 0)                  setCurrentStage(s => s - 1); };
+
+      const sharedProps = {
+        problem, setProblem,
+        currentProcess, setCurrentProcess,
+        timeToday, setTimeToday,
+        timeTarget, setTimeTarget,
+        architecture, setArchitecture,
+        architecturePath, setArchitecturePath,
+        dataSources, setDataSources,
+        tools, setTools,
+        prompts, setPrompts,
+        weeks, setWeeks,
+        metrics, setMetrics,
+      };
+
+      const renderStage = () => {
+        if (currentStage === 0) return <S1 {...sharedProps} />;
+        if (currentStage === 1) return <S2 {...sharedProps} />;
+        if (currentStage === 2) return <S3 {...sharedProps} />;
+        if (currentStage === 3) return <S4 {...sharedProps} />;
+        return <S5 {...sharedProps} />;
+      };
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar" aria-label="Guide sections">
+              {STAGES.map((stage, idx) => {
+                const { Icon } = stage;
+                return (
+                  <React.Fragment key={idx}>
+                    <div className={'step-wrapper' + (currentStage === idx ? ' active' : '')}>
+                      <button
+                        type="button"
+                        className={'step-btn' + (currentStage === idx ? ' active' : '')}
+                        aria-label={'Step ' + (idx + 1) + ': ' + stage.label}
+                        aria-current={currentStage === idx ? 'step' : undefined}
+                        onClick={() => setCurrentStage(idx)}
+                      >
+                        <Icon />
+                      </button>
+                      <div className="step-btn-label">{stage.label}</div>
+                    </div>
+                    {idx < STAGES.length - 1 && (
+                      <div className={'step-connector' + (currentStage > idx ? ' active' : '')} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">7.5</span>
+                    <h1 className="title">Capstone</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">USE CASE</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of {STAGES.length}</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      aria-label="Previous section"
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handleNext}
+                      disabled={currentStage === STAGES.length - 1}
+                      aria-label="Next section"
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area scrollbar-hide">
+                {renderStage()}
+
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&#8594;</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>

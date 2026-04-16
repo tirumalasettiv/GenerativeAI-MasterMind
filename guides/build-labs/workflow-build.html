@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hands-on lab: build a multi-step AI workflow. Map your process, connect triggers and AI nodes, test end-to-end, and debug common failures.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="Workflow Build — Build Labs">
+  <meta property="og:description" content="Hands-on lab: build a multi-step AI workflow. Map your process, connect triggers and AI nodes, test end-to-end, and debug common failures.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Workflow Build — Build Labs">
+  <meta name="twitter:description" content="Hands-on lab: build a multi-step AI workflow. Map your process, connect triggers and AI nodes, test end-to-end, and debug common failures.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Workflow Build - Build Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── Disclosure badge (shared across all click-to-expand cards) ── */
+    .disclosure-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
+
+    /* ── S1: Workflow pipeline SVG wrapper ── */
+    .wf-flow-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .wf-flow-wrap svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 720px;
+      width: 100%;
+      height: auto;
+    }
+
+    /* ── S1: Tool cards ── */
+    .tool-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .tool-card {
+      position: relative;
+      padding: 18px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .tool-card:hover { border-color: #6c5ce7; transform: translateX(3px); }
+    .tool-card.expanded { border-color: #6c5ce7; background: #f5f3ff; }
+    .tool-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .tool-card-emoji { font-size: 26px; flex-shrink: 0; }
+    .tool-card-name { font-weight: 700; font-size: 16px; color: #1a1a1a; flex: 1; }
+    .tool-card-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6c5ce7;
+      background: #ece9fd;
+      border: 1px solid #c9c2f5;
+      border-radius: 20px;
+      padding: 3px 10px;
+      white-space: nowrap;
+    }
+    .tool-card-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.65;
+    }
+    .tool-card.expanded .tool-card-detail {
+      max-height: 220px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #ddd;
+    }
+    .tool-detail-row { margin-bottom: 6px; }
+    .tool-detail-label {
+      font-weight: 700;
+      color: #6c5ce7;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    /* ── S2: Example workflow step cards ── */
+    .workflow-example {
+      margin-bottom: 28px;
+    }
+    .workflow-example-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .workflow-example-persona {
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+      background: #6c5ce7;
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+    .step-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .step-card-item {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 10px 14px;
+      align-items: start;
+      padding: 12px 14px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .step-card-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 2px solid #c9c2f5;
+      color: #6c5ce7;
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-card-body { min-width: 0; }
+    .step-card-name { font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+    .step-card-io { color: #555; line-height: 1.5; }
+    .step-card-io span { color: #888; font-size: 12px; }
+    .step-type-badge {
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 20px;
+      padding: 3px 9px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-type-trigger { background: #fef9ec; color: #c77d0a; border: 1px solid #f8d278; }
+    .step-type-ai      { background: #f5f3ff; color: #6c5ce7; border: 1px solid #c9c2f5; }
+    .step-type-code    { background: #edf7ff; color: #2980b9; border: 1px solid #b0d8f5; }
+    .step-type-output  { background: #f0fbf4; color: #1a9456; border: 1px solid #a3e4bc; }
+    .step-type-filter  { background: #fff5f5; color: #c0392b; border: 1px solid #f5b7b1; }
+
+    /* ── S2: Flow template builder ── */
+    .flow-template {
+      margin-top: 24px;
+    }
+    .flow-template-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .flow-template-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .flow-template-input {
+      flex: 1;
+      padding: 7px 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .flow-template-input:focus { border-color: #6c5ce7; outline: none; }
+    .flow-template-select {
+      padding: 7px 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: #555;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+    .flow-template-select:focus { border-color: #6c5ce7; outline: none; }
+    .flow-connector-down {
+      width: 2px;
+      height: 12px;
+      background: #ddd;
+      margin: 0 auto 0 21px;
+    }
+
+    /* ── S3: Tabs ── */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      color: #555;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .tab-btn[aria-selected="true"] {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+    }
+    .tab-btn:hover:not([aria-selected="true"]) {
+      border-color: #6c5ce7;
+      color: #6c5ce7;
+    }
+
+    /* ── S3: Walkthrough steps ── */
+    .walkthrough {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .wt-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .wt-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .wt-body { flex: 1; }
+    .wt-title { font-weight: 700; font-size: 15px; color: #1a1a1a; margin-bottom: 4px; }
+    .wt-desc { font-size: 14px; color: #444; line-height: 1.6; }
+
+    /* ── S3: Prompt template card ── */
+    .prompt-template-card {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-top: 20px;
+    }
+    .prompt-template-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #a29bfe;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .prompt-template-line {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #e0d9ff;
+      line-height: 1.9;
+    }
+    .prompt-template-line em {
+      font-style: normal;
+      color: #a29bfe;
+    }
+    .prompt-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .prompt-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .prompt-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+    .prompt-field-input {
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .prompt-field-input:focus { border-color: #6c5ce7; outline: none; }
+    .prompt-preview-section {
+      margin-top: 20px;
+    }
+    .prompt-preview-assembled {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .prompt-preview-assembled pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #e0d9ff;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    /* ── S4: Failure disclosure cards ── */
+    .failure-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .failure-card {
+      position: relative;
+      padding: 16px 18px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .failure-card:hover { border-color: #e74c3c; }
+    .failure-card.expanded { border-color: #e74c3c; background: #fff9f9; }
+    .failure-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      padding-right: 36px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .failure-card-title .failure-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .failure-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.65;
+    }
+    .failure-card.expanded .failure-detail {
+      max-height: 300px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #f5c6c6;
+    }
+    .failure-detail-row { margin-bottom: 8px; }
+    .failure-detail-label {
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .failure-detail-label.symptoms { color: #e74c3c; }
+    .failure-detail-label.diagnosis { color: #f39c12; }
+    .failure-detail-label.fix { color: #2ecc71; }
+    /* Override disclosure badge color for failure cards */
+    .failure-card.disclosure-card-host:hover .disclosure-badge,
+    .failure-card.disclosure-card-host.expanded .disclosure-badge {
+      background: #e74c3c;
+    }
+    .failure-card.disclosure-card-host:hover .disclosure-badge svg,
+    .failure-card.disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+
+    /* ── S4: Scorecard ── */
+    .scorecard-wrap { width: 100%; overflow-x: auto; margin-top: 24px; }
+    .scorecard-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      min-width: 440px;
+    }
+    .scorecard-table th {
+      background: #6c5ce7;
+      color: white;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+    }
+    .scorecard-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+      font-size: 13px;
+      color: #333;
+    }
+    .scorecard-table tr:last-child td { border-bottom: none; }
+    .scorecard-table tr:nth-child(even) td { background: #fafafe; }
+    .sc-check-name { font-weight: 700; color: #1a1a1a; font-size: 13px; }
+    .sc-toggle-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+    }
+    .sc-toggle-btn:hover { transform: translateY(-1px); }
+    .sc-toggle-btn.pass { background: #2ecc71; border-color: #2ecc71; color: white; }
+    .sc-toggle-btn.fail { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .sc-summary {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .sc-stat {
+      flex: 1;
+      min-width: 80px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      background: white;
+    }
+    .sc-stat.pass-stat { border-color: #2ecc71; background: #f0fbf4; }
+    .sc-stat.fail-stat { border-color: #e74c3c; background: #fef5f5; }
+    .sc-stat-num { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .sc-stat.pass-stat .sc-stat-num { color: #1a9456; }
+    .sc-stat.fail-stat .sc-stat-num { color: #c0392b; }
+    .sc-stat-label { font-size: 12px; color: #888; font-weight: 600; }
+
+    /* ── S5: Reflect / document cards ── */
+    .reflect-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .reflect-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .reflect-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reflect-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .reflect-input:focus { border-color: #6c5ce7; outline: none; }
+    .reflect-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a1a;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .reflect-textarea:focus { border-color: #6c5ce7; outline: none; }
+    .improve-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .improve-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .improve-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .improve-input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .improve-input:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S5: Deep-dive link ── */
+    .deepdive-link-card {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ece9fd 100%);
+      border: 2px solid #c9c2f5;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s ease;
+      margin-top: 8px;
+    }
+    .deepdive-link-card:hover {
+      border-color: #6c5ce7;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.15);
+    }
+    .deepdive-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #6c5ce7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .deepdive-body { flex: 1; }
+    .deepdive-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .deepdive-title { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+    .deepdive-arrow { font-size: 20px; color: #6c5ce7; font-weight: 700; }
+
+    /* ── Section mini-title helper ── */
+    .section-mini-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+    .section-mini-title:first-child { margin-top: 0; }
+
+    /* ── Sidebar icon SVGs ── */
+    .step-btn svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* ── Shared: InsightBlock ── */
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2">
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
+              <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+            </svg>
+            {' '}INSIGHT
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    /* ── Shared: ChevronSvg ── */
+    function ChevronSvg() {
+      return (
+        <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      );
+    }
+
+    /* ── Sidebar step icons ── */
+    function IconOverview() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+      );
+    }
+    function IconMap() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+          <line x1="9" y1="3" x2="9" y2="18" />
+          <line x1="15" y1="6" x2="15" y2="21" />
+        </svg>
+      );
+    }
+    function IconBuild() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    }
+    function IconTest() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <polyline points="9 11 12 14 22 4" />
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+      );
+    }
+    function IconResults() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 1 – Overview: What You'll Build
+    ════════════════════════════════════════ */
+
+    const WF_TOOLS = [
+      {
+        id: 'n8n',
+        emoji: '⚙️',
+        name: 'n8n',
+        tag: 'Self-hosted / Cloud',
+        type: 'Low-code visual builder',
+        hosting: 'Self-hosted (free) or n8n Cloud',
+        aiSupport: 'Native AI nodes: OpenAI, Anthropic, Hugging Face, Ollama, LangChain integrations',
+        bestFor: 'Teams wanting full control; integrates with 400+ apps; open-source core',
+      },
+      {
+        id: 'make',
+        emoji: '🔗',
+        name: 'Make (Integromat)',
+        tag: 'Cloud',
+        type: 'Visual scenario builder',
+        hosting: 'Cloud-only (SaaS)',
+        aiSupport: 'OpenAI module, HTTP requests to any AI API, built-in data transformation',
+        bestFor: 'Marketing and ops teams; generous free tier; great for complex data routing',
+      },
+      {
+        id: 'zapier',
+        emoji: '⚡',
+        name: 'Zapier',
+        tag: 'Cloud',
+        type: 'Trigger-action automation',
+        hosting: 'Cloud-only (SaaS)',
+        aiSupport: 'Zapier AI actions, ChatGPT action, OpenAI integration, AI by Zapier',
+        bestFor: 'Non-technical users; largest app library (6,000+); fastest setup for simple flows',
+      },
+      {
+        id: 'powerautomate',
+        emoji: '🏢',
+        name: 'Power Automate',
+        tag: 'Enterprise',
+        type: 'Enterprise workflow platform',
+        hosting: 'Microsoft Cloud (Azure)',
+        aiSupport: 'AI Builder (document processing, text analysis), Azure OpenAI connector, Copilot Studio',
+        bestFor: 'Microsoft 365 shops; deep Office/SharePoint/Teams integration; enterprise governance',
+      },
+    ];
+
+    function WorkflowPipelineSVG() {
+      const nodes = [
+        { x: 20,  label: 'Trigger',  sub: 'Start',    color: '#c77d0a', fill: '#fef9ec', isAI: false },
+        { x: 175, label: 'Step 1',   sub: 'Transform', color: '#6c5ce7', fill: '#f5f3ff', isAI: true  },
+        { x: 330, label: 'Step 2',   sub: 'AI Node',   color: '#6c5ce7', fill: '#f5f3ff', isAI: true  },
+        { x: 485, label: 'Step 3',   sub: 'Route',     color: '#2980b9', fill: '#edf7ff', isAI: false },
+        { x: 640, label: 'Output',   sub: 'Deliver',   color: '#1a9456', fill: '#f0fbf4', isAI: false },
+      ];
+      const NW = 120, NH = 60, cy = 55;
+      const W = 780, H = 120;
+      const arrows = [
+        { x1: nodes[0].x + NW, y1: cy, x2: nodes[1].x, y2: cy },
+        { x1: nodes[1].x + NW, y1: cy, x2: nodes[2].x, y2: cy },
+        { x1: nodes[2].x + NW, y1: cy, x2: nodes[3].x, y2: cy },
+        { x1: nodes[3].x + NW, y1: cy, x2: nodes[4].x, y2: cy },
+      ];
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg"
+          aria-label="Workflow pipeline: Trigger starts the flow, passes to Step 1, Step 2 (AI node), Step 3, then Output">
+          <defs>
+            <marker id="wf-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {arrows.map((a, i) => (
+            <line key={i}
+              x1={a.x1 + 4} y1={a.y1} x2={a.x2 - 4} y2={a.y2}
+              stroke="#b0a6e8" strokeWidth="2"
+              strokeDasharray="5 3"
+              markerEnd="url(#wf-arrowhead)" />
+          ))}
+          {nodes.map((n, i) => (
+            <g key={i}>
+              <rect x={n.x} y={cy - NH / 2} width={NW} height={NH} rx={10}
+                    fill={n.fill} stroke={n.color} strokeWidth={2} />
+              <text x={n.x + NW / 2} y={cy - 8} textAnchor="middle"
+                    fontSize="12" fontWeight="700" fontFamily="DM Sans" fill={n.color}>
+                {n.label}
+              </text>
+              <text x={n.x + NW / 2} y={cy + 8} textAnchor="middle"
+                    fontSize="10" fontFamily="DM Sans" fill="#666">
+                {n.sub}
+              </text>
+              {n.isAI && (
+                <text x={n.x + NW / 2} y={cy + 22} textAnchor="middle"
+                      fontSize="9" fontFamily="DM Sans" fill="#a29bfe">
+                  ✦ LLM
+                </text>
+              )}
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
+    function S1() {
+      const [expanded, setExpanded] = useState(null);
+      return (
+        <>
+          <div><h2 className="stage-header">What You&rsquo;ll Build</h2></div>
+          <div className="explanation">
+            By the end of this lab you&rsquo;ll have a running multi-step AI workflow &mdash; a sequence of automated nodes that triggers on an event, processes data through one or more AI steps, and delivers a structured output. Pick a tool, map your steps, wire them up, and run it.
+          </div>
+          <div className="scene-card">
+            <div className="section-mini-title">Workflow Pipeline Pattern</div>
+            <div className="wf-flow-wrap">
+              <WorkflowPipelineSVG />
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>Choose Your Tool</div>
+            <div className="tool-cards">
+              {WF_TOOLS.map((t) => {
+                const isOpen = expanded === t.id;
+                const toggle = () => setExpanded(isOpen ? null : t.id);
+                return (
+                  <div
+                    key={t.id}
+                    className={'tool-card disclosure-card-host' + (isOpen ? ' expanded' : '')}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={'tool-detail-' + t.id}
+                  >
+                    <span className="disclosure-badge" aria-hidden="true"><ChevronSvg /></span>
+                    <div className="tool-card-header">
+                      <span className="tool-card-emoji">{t.emoji}</span>
+                      <span className="tool-card-name">{t.name}</span>
+                      <span className="tool-card-tag">{t.tag}</span>
+                    </div>
+                    <div className="tool-card-detail" id={'tool-detail-' + t.id}>
+                      <div className="tool-detail-row">
+                        <div className="tool-detail-label">Type</div>
+                        <div>{t.type}</div>
+                      </div>
+                      <div className="tool-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="tool-detail-label">Hosting</div>
+                        <div>{t.hosting}</div>
+                      </div>
+                      <div className="tool-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="tool-detail-label">AI Support</div>
+                        <div>{t.aiSupport}</div>
+                      </div>
+                      <div className="tool-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="tool-detail-label">Best For</div>
+                        <div>{t.bestFor}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <InsightBlock>
+            Workflows turn &ldquo;I do this manually every week&rdquo; into &ldquo;this runs automatically every week.&rdquo; The first workflow you automate will save you more time than you expect.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 2 – Map: Design Your Flow
+    ════════════════════════════════════════ */
+
+    const STEP_TYPE_CLASSES = {
+      trigger: 'step-type-trigger',
+      ai:      'step-type-ai',
+      code:    'step-type-code',
+      output:  'step-type-output',
+      filter:  'step-type-filter',
+    };
+
+    const EXAMPLE_WORKFLOWS = [
+      {
+        persona: 'PM',
+        name: 'Weekly Competitor Monitor',
+        steps: [
+          { name: 'Schedule Trigger',        type: 'trigger', input: 'Every Monday 8 am',           output: 'Timestamp + run context' },
+          { name: 'Fetch Competitor Pages',  type: 'code',    input: 'URL list (env var)',            output: 'Raw HTML / JSON responses' },
+          { name: 'Extract Key Changes',     type: 'ai',      input: 'Raw page content',             output: 'Bullet list of changes' },
+          { name: 'Score Relevance',         type: 'ai',      input: 'Change bullets',               output: 'Ranked list with scores' },
+          { name: 'Filter High-Priority',    type: 'filter',  input: 'Ranked list',                  output: 'Items with score ≥ 7' },
+          { name: 'Send Slack Digest',       type: 'output',  input: 'Filtered high-priority items', output: 'Slack message in #intel channel' },
+        ],
+      },
+      {
+        persona: 'Coder',
+        name: 'Lead Enrichment Pipeline',
+        steps: [
+          { name: 'New CRM Lead Trigger',    type: 'trigger', input: 'CRM webhook on new lead',      output: 'Lead record (name, email, company)' },
+          { name: 'Fetch LinkedIn Data',     type: 'code',    input: 'Company name',                 output: 'Company size, industry, funding' },
+          { name: 'Enrich with AI Summary',  type: 'ai',      input: 'Company + lead data',          output: 'One-para prospect summary' },
+          { name: 'Score Lead Fit',          type: 'ai',      input: 'Prospect summary + ICP',       output: 'Fit score 1-10 + reason' },
+          { name: 'Route by Score',          type: 'filter',  input: 'Fit score',                    output: 'Hot (≥8) / Warm (5-7) / Cold (<5)' },
+          { name: 'Update CRM + Notify',     type: 'output',  input: 'Enriched record + score',      output: 'CRM updated; rep notified if Hot' },
+        ],
+      },
+    ];
+
+    const TYPE_LABELS = { trigger: 'Trigger', ai: 'AI', code: 'Code', output: 'Output', filter: 'Filter' };
+
+    const TEMPLATE_STEP_COUNT = 5;
+
+    function S2() {
+      const [templateSteps, setTemplateSteps] = useState(
+        Array.from({ length: TEMPLATE_STEP_COUNT }, () => ({ name: '', type: 'ai' }))
+      );
+
+      const updateStep = (i, field, val) => {
+        setTemplateSteps(prev => {
+          const next = [...prev];
+          next[i] = { ...next[i], [field]: val };
+          return next;
+        });
+      };
+
+      return (
+        <>
+          <div><h2 className="stage-header">Design Your Flow</h2></div>
+          <div className="explanation">
+            Map before you build. Study the two example workflows below, then sketch your own 5-step flow using the template &mdash; name each step and pick its type. Catching logic errors at this stage is far cheaper than debugging wired nodes.
+          </div>
+
+          <div className="scene-card">
+            <div className="section-mini-title">Example Workflows</div>
+
+            {EXAMPLE_WORKFLOWS.map((wf) => (
+              <div className="workflow-example" key={wf.persona}>
+                <div className="workflow-example-title">
+                  <span className="workflow-example-persona">{wf.persona}</span>
+                  {wf.name}
+                </div>
+                <div className="step-cards">
+                  {wf.steps.map((step, idx) => (
+                    <div className="step-card-item" key={idx}>
+                      <div className="step-card-num">{idx + 1}</div>
+                      <div className="step-card-body">
+                        <div className="step-card-name">{step.name}</div>
+                        <div className="step-card-io">
+                          <span>In: </span>{step.input}
+                        </div>
+                        <div className="step-card-io">
+                          <span>Out: </span>{step.output}
+                        </div>
+                      </div>
+                      <span className={'step-type-badge ' + (STEP_TYPE_CLASSES[step.type] || '')}>
+                        {TYPE_LABELS[step.type] || step.type}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div className="section-mini-title">Design Your Flow (Template)</div>
+            <div className="flow-template" role="group" aria-label="5-step workflow template">
+              {templateSteps.map((step, i) => (
+                <React.Fragment key={i}>
+                  <div className="flow-template-row">
+                    <div className="flow-template-num" aria-hidden="true">{i + 1}</div>
+                    <input
+                      type="text"
+                      className="flow-template-input"
+                      placeholder={'Step ' + (i + 1) + ' name...'}
+                      value={step.name}
+                      onChange={(e) => updateStep(i, 'name', e.target.value)}
+                      aria-label={'Step ' + (i + 1) + ' name'}
+                    />
+                    <select
+                      className="flow-template-select"
+                      value={step.type}
+                      onChange={(e) => updateStep(i, 'type', e.target.value)}
+                      aria-label={'Step ' + (i + 1) + ' type'}
+                    >
+                      <option value="trigger">Trigger</option>
+                      <option value="ai">AI</option>
+                      <option value="code">Code</option>
+                      <option value="filter">Filter</option>
+                      <option value="output">Output</option>
+                    </select>
+                  </div>
+                  {i < TEMPLATE_STEP_COUNT - 1 && (
+                    <div className="flow-connector-down" aria-hidden="true" />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+
+          <InsightBlock>
+            Map before you build. Drawing your 5&ndash;7 steps on paper (or in a card layout) catches logic errors before you wire up nodes and wonder why nothing works.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 3 – Build: Wire Up Your Nodes
+    ════════════════════════════════════════ */
+
+    const BUILD_TAB_DATA = {
+      n8n: {
+        label: 'n8n',
+        steps: [
+          { title: 'Create a New Workflow', desc: 'Open n8n → click "+ New Workflow". Add a trigger node first: choose Schedule (for cron), Webhook (for real-time), or an app trigger (e.g. "Gmail" → "New Email"). Give your workflow a name.' },
+          { title: 'Add and Connect Nodes', desc: 'Click the "+" on the trigger to add your next node. For AI steps, search for "OpenAI" or "Anthropic Claude" nodes. Drag the output handle of each node to the input of the next. Use the "Set" node between AI nodes to reshape data.' },
+          { title: 'Configure the AI Node', desc: 'Open your AI node. Set the model (e.g. gpt-4o-mini). In the "Prompt" field use expressions like {{$json.body}} to reference upstream data. Fill in your prompt template (see below). Set max tokens + temperature.' },
+          { title: 'Test and Activate', desc: 'Click "Test Workflow" to run once with live data. Inspect each node output in the panel. Fix any data-shape mismatches. When all nodes show green, click the "Active" toggle to enable real-time execution.' },
+        ],
+      },
+      make: {
+        label: 'Make',
+        steps: [
+          { title: 'Create a New Scenario', desc: 'Log into Make → "Create a new scenario". Add your trigger module (e.g. "Watch emails" in Gmail, "Watch rows" in Google Sheets, or "Custom Webhook" for push events). Set the scheduling interval.' },
+          { title: 'Add Modules', desc: 'Click the "+" after the trigger to add modules. For AI, select "OpenAI" → "Create a Completion" or use "HTTP" → "Make a Request" to call any AI API. Connect modules by mapping output fields to input fields in each module panel.' },
+          { title: 'Write Your AI Prompt', desc: 'In the OpenAI module, build your prompt using dynamic values: type {{ then click the field from the previous module. Use your prompt template (see below). Set model, max tokens, and temperature.' },
+          { title: 'Run Once and Schedule', desc: 'Click "Run once" to test. Use the execution log to inspect every module output. Fix mapping errors. Then set your scheduling interval (e.g. every 1 week) and click "ON" to activate.' },
+        ],
+      },
+      zapier: {
+        label: 'Zapier',
+        steps: [
+          { title: 'Create a New Zap', desc: 'Click "Create Zap" → choose your Trigger app (e.g. Gmail, Google Sheets, Schedule by Zapier for cron). Select the trigger event ("New Email", "New Row", "Every Week") and connect your account. Test the trigger to pull sample data.' },
+          { title: 'Add Action Steps', desc: 'Click "+" to add actions. For AI, choose "ChatGPT" or "AI by Zapier" → "Ask AI". Each action sees all fields from previous steps via the field picker. Keep actions linear — Zapier does not support branching without premium filters.' },
+          { title: 'Configure AI Prompt', desc: 'In the ChatGPT / AI step, build your prompt by clicking into the prompt field and inserting previous step data with the field picker. Use your prompt template (see below). Choose a model and set the user message.' },
+          { title: 'Test and Turn On', desc: 'Click "Test" on each step to verify data flows correctly. Review the output of each step in the test panel. Fix any empty or malformed fields. Click "Publish" then toggle the Zap ON to activate.' },
+        ],
+      },
+    };
+
+    function S3({ promptFields, setPromptFields }) {
+      const [activeTab, setActiveTab] = useState('n8n');
+      const tabOrder = ['n8n', 'make', 'zapier'];
+      const current = BUILD_TAB_DATA[activeTab];
+
+      const role   = promptFields.role   || '[role]';
+      const task   = promptFields.task   || '[task]';
+      const format = promptFields.format || '[format]';
+
+      const assembled =
+        'You are a ' + role + '.\n\n' +
+        'Given this input: {{previous_step_output}}\n\n' +
+        task + '\n\n' +
+        'Output format: ' + format;
+
+      const update = (k, v) => setPromptFields(prev => ({ ...prev, [k]: v }));
+
+      return (
+        <>
+          <div><h2 className="stage-header">Wire Up Your Nodes</h2></div>
+          <div className="explanation">
+            Pick your tool and follow the 4-step walkthrough. Fill in the AI node prompt template below &mdash; it assembles a ready-to-paste prompt using your workflow context.
+          </div>
+          <div className="scene-card">
+            <div className="tab-bar" role="tablist" aria-label="Workflow tool walkthroughs">
+              {tabOrder.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  className="tab-btn"
+                  aria-selected={activeTab === key}
+                  onClick={() => setActiveTab(key)}
+                >
+                  {BUILD_TAB_DATA[key].label}
+                </button>
+              ))}
+            </div>
+
+            <div role="tabpanel" aria-label={current.label + ' walkthrough'}>
+              <div className="walkthrough">
+                {current.steps.map((step, i) => (
+                  <div className="wt-step" key={i}>
+                    <div className="wt-num" aria-hidden="true">{i + 1}</div>
+                    <div className="wt-body">
+                      <div className="wt-title">{step.title}</div>
+                      <div className="wt-desc">{step.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>AI Node Prompt Template</div>
+            <div className="prompt-template-card" aria-label="Prompt template structure">
+              <div className="prompt-template-label">Template structure</div>
+              <div className="prompt-template-line">You are a <em>[role]</em>.</div>
+              <div className="prompt-template-line">Given this input: <em>&#123;&#123;previous_step_output&#125;&#125;</em></div>
+              <div className="prompt-template-line"><em>[task]</em></div>
+              <div className="prompt-template-line">Output format: <em>[format]</em></div>
+            </div>
+
+            <div className="prompt-fields">
+              <div className="prompt-field">
+                <label className="prompt-field-label" htmlFor="pf-role">Role</label>
+                <input
+                  id="pf-role"
+                  type="text"
+                  className="prompt-field-input"
+                  placeholder="e.g. competitive intelligence analyst"
+                  value={promptFields.role}
+                  onChange={(e) => update('role', e.target.value)}
+                  aria-label="AI node role"
+                />
+              </div>
+              <div className="prompt-field">
+                <label className="prompt-field-label" htmlFor="pf-format">Output Format</label>
+                <input
+                  id="pf-format"
+                  type="text"
+                  className="prompt-field-input"
+                  placeholder="e.g. 3 bullet points, max 50 words each"
+                  value={promptFields.format}
+                  onChange={(e) => update('format', e.target.value)}
+                  aria-label="AI node output format"
+                />
+              </div>
+              <div className="prompt-field" style={{ gridColumn: '1 / -1' }}>
+                <label className="prompt-field-label" htmlFor="pf-task">Task</label>
+                <input
+                  id="pf-task"
+                  type="text"
+                  className="prompt-field-input"
+                  placeholder="e.g. Identify the top 3 changes from the competitor page and score each 1-10 for relevance to a B2B SaaS company"
+                  value={promptFields.task}
+                  onChange={(e) => update('task', e.target.value)}
+                  aria-label="AI node task instruction"
+                />
+              </div>
+            </div>
+
+            <div className="prompt-preview-section">
+              <div className="section-mini-title" style={{ marginTop: '20px' }}>Assembled Prompt Preview</div>
+              <div className="prompt-preview-assembled">
+                <div className="prompt-template-label">Ready to paste into your AI node</div>
+                <pre>{assembled}</pre>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            The AI node prompt is the most important part of your workflow. A vague prompt produces vague output &mdash; and every downstream step inherits that vagueness.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 4 – Test: End-to-End Debugging
+    ════════════════════════════════════════ */
+
+    const FAILURES = [
+      {
+        id: 'trigger',
+        icon: '🔔',
+        title: 'Trigger Doesn\'t Fire',
+        symptoms: 'Workflow never starts; no execution history; no errors shown.',
+        diagnosis: 'Webhook URL not saved in source app; schedule set to wrong timezone; trigger event condition not met (e.g., email filter too narrow).',
+        fix: 'Test the trigger manually in the tool UI. For webhooks, send a test payload from the source app. For schedules, temporarily change interval to "every 5 minutes" to confirm it fires, then restore.',
+      },
+      {
+        id: 'dataformat',
+        icon: '📐',
+        title: 'Wrong Data Format Between Nodes',
+        symptoms: 'Step 2 fails with "cannot read property X of undefined"; empty fields downstream; AI node receives blank input.',
+        diagnosis: 'Step 1 outputs JSON but Step 2 expects plain text, or nested object path is wrong. Field names change between steps (e.g., "email" vs "Email" vs "email_address").',
+        fix: 'Inspect the exact output shape of Step 1 in the execution log. Update downstream references to match. Use a "Set" or "Parse JSON" node to normalize shape before AI steps.',
+      },
+      {
+        id: 'vagueprompt',
+        icon: '💬',
+        title: 'AI Prompt Too Vague',
+        symptoms: 'AI output is inconsistent across runs; downstream parsing fails because output format varies; results are too long or too short.',
+        diagnosis: 'The prompt lacks explicit output format instructions. "Summarize this" yields different structures every run. No role or scope constraint.',
+        fix: 'Add strict format instructions: "Respond with exactly 3 bullet points. Each bullet: max 20 words. No preamble." Use the assembled prompt template from Stage 3 and test 5 different inputs.',
+      },
+      {
+        id: 'ratelimit',
+        icon: '🚦',
+        title: 'Rate Limit Hit',
+        symptoms: 'Workflow fails mid-run on large batches; error: "429 Too Many Requests" or "rate limit exceeded"; some items processed, others skipped.',
+        diagnosis: 'Sending too many API calls per minute. Common when iterating over a list (e.g., 50 leads) and calling AI for each without throttling.',
+        fix: 'Add a "Wait" node between loop iterations (500ms–2s). Use batch processing where possible. Switch to a higher-tier API plan or use a model with higher rate limits (e.g., gpt-4o-mini vs gpt-4).',
+      },
+      {
+        id: 'malformedoutput',
+        icon: '🔧',
+        title: 'Output Malformed or Missing Fields',
+        symptoms: 'Final output (Slack message, email, spreadsheet row) is incomplete; template variables show as blank or "undefined"; HTML/JSON in output where plain text expected.',
+        diagnosis: 'AI node returned unexpected structure. Downstream template references a field that the AI did not include. Output contains markdown formatting that breaks the destination app.',
+        fix: 'Add "Output format: valid JSON with keys: title, score, reason" to AI prompt. Use a code node to validate and sanitize the AI output before the final step. Log raw AI response for debugging.',
+      },
+      {
+        id: 'errorhandling',
+        icon: '🛡️',
+        title: 'Missing Error Handling',
+        symptoms: 'One bad input crashes the whole workflow run; no alert when a failure occurs; partial outputs silently discarded.',
+        diagnosis: 'No error branches defined. Workflow has no fallback for null inputs, API timeouts, or empty AI responses. No notification when execution fails.',
+        fix: 'Add error handlers in n8n (right-click node → "Add Error Workflow") or Make (use "Error Handler" module). Send a Slack/email alert on failure. Add a null-check: if input is empty, skip and log rather than crash.',
+      },
+    ];
+
+    const SCORECARD_CHECKS = [
+      'Trigger fires on schedule / event',
+      'Data passes correctly from Step 1 to Step 2',
+      'AI node receives non-empty input',
+      'AI output matches expected format',
+      'Final output delivered to destination',
+      'Error handling triggers on bad input',
+    ];
+
+    function S4() {
+      const [openId, setOpenId]     = useState(null);
+      const [scores, setScores]     = useState(Array(SCORECARD_CHECKS.length).fill(null));
+
+      const toggleFailure = (id) => setOpenId(prev => (prev === id ? null : id));
+
+      const toggleScore = (idx, val) => {
+        setScores(prev => {
+          const next = [...prev];
+          next[idx] = prev[idx] === val ? null : val;
+          return next;
+        });
+      };
+
+      const passCount    = scores.filter(s => s === 'pass').length;
+      const failCount    = scores.filter(s => s === 'fail').length;
+      const pendingCount = scores.filter(s => s === null).length;
+
+      return (
+        <>
+          <div><h2 className="stage-header">End-to-End Debugging</h2></div>
+          <div className="explanation">
+            Run your workflow end-to-end. Use the failure cards to diagnose common problems, then score each checkpoint in the scorecard &mdash; your workflow is ready when all 6 rows show Pass.
+          </div>
+          <div className="scene-card">
+            <div className="section-mini-title">Common Failures</div>
+            <div className="failure-cards">
+              {FAILURES.map((f) => {
+                const isOpen = openId === f.id;
+                const toggle = () => toggleFailure(f.id);
+                return (
+                  <div
+                    key={f.id}
+                    className={'failure-card disclosure-card-host' + (isOpen ? ' expanded' : '')}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                    aria-expanded={isOpen}
+                    aria-controls={'failure-detail-' + f.id}
+                  >
+                    <span className="disclosure-badge" aria-hidden="true"><ChevronSvg /></span>
+                    <div className="failure-card-title">
+                      <span className="failure-icon" aria-hidden="true">{f.icon}</span>
+                      {f.title}
+                    </div>
+                    <div className="failure-detail" id={'failure-detail-' + f.id}>
+                      <div className="failure-detail-row">
+                        <div className="failure-detail-label symptoms">Symptoms</div>
+                        <div>{f.symptoms}</div>
+                      </div>
+                      <div className="failure-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="failure-detail-label diagnosis">Diagnosis</div>
+                        <div>{f.diagnosis}</div>
+                      </div>
+                      <div className="failure-detail-row" style={{ marginTop: '8px' }}>
+                        <div className="failure-detail-label fix">Fix</div>
+                        <div>{f.fix}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>End-to-End Scorecard</div>
+            <div className="scorecard-wrap">
+              <table className="scorecard-table" aria-label="Workflow end-to-end test scorecard">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Checkpoint</th>
+                    <th style={{ width: '140px' }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {SCORECARD_CHECKS.map((check, idx) => (
+                    <tr key={idx}>
+                      <td style={{ color: '#888', fontWeight: 700, width: '32px' }}>{idx + 1}</td>
+                      <td><span className="sc-check-name">{check}</span></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '6px' }} role="group" aria-label={'Status for: ' + check}>
+                          <button
+                            type="button"
+                            className={'sc-toggle-btn' + (scores[idx] === 'pass' ? ' pass' : '')}
+                            onClick={() => toggleScore(idx, 'pass')}
+                            aria-pressed={scores[idx] === 'pass'}
+                            aria-label="Mark pass"
+                          >
+                            &#10003; Pass
+                          </button>
+                          <button
+                            type="button"
+                            className={'sc-toggle-btn' + (scores[idx] === 'fail' ? ' fail' : '')}
+                            onClick={() => toggleScore(idx, 'fail')}
+                            aria-pressed={scores[idx] === 'fail'}
+                            aria-label="Mark fail"
+                          >
+                            &#10007; Fail
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="sc-summary" aria-live="polite" aria-label="Scorecard summary">
+              <div className="sc-stat pass-stat">
+                <div className="sc-stat-num">{passCount}</div>
+                <div className="sc-stat-label">Passing</div>
+              </div>
+              <div className="sc-stat fail-stat">
+                <div className="sc-stat-num">{failCount}</div>
+                <div className="sc-stat-label">Failing</div>
+              </div>
+              <div className="sc-stat" style={{ borderColor: '#ccc' }}>
+                <div className="sc-stat-num" style={{ color: '#999' }}>{pendingCount}</div>
+                <div className="sc-stat-label">Pending</div>
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Most workflow failures aren&rsquo;t AI failures &mdash; they&rsquo;re data format mismatches. Step 2 outputs JSON but Step 3 expects plain text. Always check the data shape between nodes.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 5 – Results: Document Your Flow
+    ════════════════════════════════════════ */
+
+    function S5() {
+      const [wfName,    setWfName]    = useState('');
+      const [stepCount, setStepCount] = useState('');
+      const [toolUsed,  setToolUsed]  = useState('');
+      const [worked,    setWorked]    = useState('');
+      const [broke,     setBroke]     = useState('');
+      const [imps,      setImps]      = useState(['', '', '']);
+
+      const setImp = (i, v) => setImps(prev => { const next = [...prev]; next[i] = v; return next; });
+
+      return (
+        <>
+          <div><h2 className="stage-header">Document Your Flow</h2></div>
+          <div className="explanation">
+            Record what you built and what you learned. A workflow that isn&rsquo;t documented is one that only you can maintain &mdash; and only while you remember it.
+          </div>
+          <div className="scene-card">
+            <div className="reflect-cards">
+
+              <div className="reflect-card">
+                <div className="reflect-card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  Workflow Summary
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div>
+                    <label className="prompt-field-label" htmlFor="s5-name" style={{ display: 'block', marginBottom: '5px' }}>Workflow Name</label>
+                    <input
+                      id="s5-name"
+                      type="text"
+                      className="reflect-input"
+                      placeholder="e.g. Weekly Competitor Monitor"
+                      value={wfName}
+                      onChange={(e) => setWfName(e.target.value)}
+                      aria-label="Workflow name"
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label className="prompt-field-label" htmlFor="s5-steps" style={{ display: 'block', marginBottom: '5px' }}>Step Count</label>
+                      <input
+                        id="s5-steps"
+                        type="text"
+                        className="reflect-input"
+                        placeholder="e.g. 6"
+                        value={stepCount}
+                        onChange={(e) => setStepCount(e.target.value)}
+                        aria-label="Step count"
+                      />
+                    </div>
+                    <div>
+                      <label className="prompt-field-label" htmlFor="s5-tool" style={{ display: 'block', marginBottom: '5px' }}>Tool Used</label>
+                      <input
+                        id="s5-tool"
+                        type="text"
+                        className="reflect-input"
+                        placeholder="e.g. n8n, Make, Zapier"
+                        value={toolUsed}
+                        onChange={(e) => setToolUsed(e.target.value)}
+                        aria-label="Tool used"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="reflect-card">
+                <div className="reflect-card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  What Worked
+                </div>
+                <textarea
+                  className="reflect-textarea"
+                  placeholder="Which steps ran cleanly? What did the AI node do well? What surprised you positively?"
+                  value={worked}
+                  onChange={(e) => setWorked(e.target.value)}
+                  aria-label="What worked in your workflow"
+                  rows={3}
+                />
+              </div>
+
+              <div className="reflect-card">
+                <div className="reflect-card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                  What Broke
+                </div>
+                <textarea
+                  className="reflect-textarea"
+                  placeholder="Which failures did you hit? Data format issues? AI prompt problems? Trigger misfires? Rate limits?"
+                  value={broke}
+                  onChange={(e) => setBroke(e.target.value)}
+                  aria-label="What broke in your workflow"
+                  rows={3}
+                />
+              </div>
+
+              <div className="reflect-card">
+                <div className="reflect-card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+                  </svg>
+                  3 Improvements to Make
+                </div>
+                <div className="improve-inputs">
+                  {imps.map((v, i) => (
+                    <div className="improve-row" key={i}>
+                      <div className="improve-num" aria-hidden="true">{i + 1}</div>
+                      <input
+                        type="text"
+                        className="improve-input"
+                        placeholder={[
+                          'e.g. Tighten AI prompt output format to fix downstream parsing',
+                          'e.g. Add error handler node to Slack-notify on failure',
+                          'e.g. Add 1s delay between loop iterations to avoid rate limits',
+                        ][i]}
+                        value={v}
+                        onChange={(e) => setImp(i, e.target.value)}
+                        aria-label={'Improvement ' + (i + 1)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>Go Deeper</div>
+            <a
+              href="../architectures/workflows.html"
+              className="deepdive-link-card"
+              aria-label="Deep dive: AI Workflows — Architecture guide"
+            >
+              <div className="deepdive-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="9" height="9" rx="2" />
+                  <rect x="13" y="2" width="9" height="9" rx="2" />
+                  <rect x="13" y="13" width="9" height="9" rx="2" />
+                  <path d="M6 13v3a2 2 0 002 2h3" />
+                </svg>
+              </div>
+              <div className="deepdive-body">
+                <div className="deepdive-label">Architecture Deep Dive</div>
+                <div className="deepdive-title">AI Workflows &mdash; Module 5 Guide</div>
+              </div>
+              <div className="deepdive-arrow" aria-hidden="true">&rarr;</div>
+            </a>
+          </div>
+          <InsightBlock>
+            Your first workflow will be ugly. That&rsquo;s fine. Ship it, run it for a week, then improve based on real failures &mdash; not hypothetical ones.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stages configuration + NEXT_GUIDE
+    ════════════════════════════════════════ */
+
+    const NEXT_GUIDE = { id: '7.3', title: 'Agent Build', module: 'Module 7', href: './agent-build.html' };
+
+    const STAGES = [
+      { label: 'Overview', Icon: IconOverview },
+      { label: 'Map',      Icon: IconMap      },
+      { label: 'Build',    Icon: IconBuild    },
+      { label: 'Test',     Icon: IconTest     },
+      { label: 'Results',  Icon: IconResults  },
+    ];
+
+    /* ════════════════════════════════════════
+       Main Guide Shell
+    ════════════════════════════════════════ */
+
+    function Guide() {
+      const [currentStage, setCurrentStage]     = useState(0);
+      const [promptFields, setPromptFields]     = useState({ role: '', task: '', format: '' });
+
+      const handleNext = () => { if (currentStage < STAGES.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
+
+      const renderStage = () => {
+        switch (currentStage) {
+          case 0: return <S1 />;
+          case 1: return <S2 />;
+          case 2: return <S3 promptFields={promptFields} setPromptFields={setPromptFields} />;
+          case 3: return <S4 />;
+          case 4: return <S5 />;
+          default: return null;
+        }
+      };
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar" aria-label="Guide sections">
+              {STAGES.map((stage, idx) => {
+                const { Icon } = stage;
+                return (
+                  <React.Fragment key={idx}>
+                    <div className={'step-wrapper' + (currentStage === idx ? ' active' : '')}>
+                      <button
+                        type="button"
+                        className={'step-btn' + (currentStage === idx ? ' active' : '')}
+                        aria-label={'Step ' + (idx + 1) + ': ' + stage.label}
+                        aria-current={currentStage === idx ? 'step' : undefined}
+                        onClick={() => setCurrentStage(idx)}
+                      >
+                        <Icon />
+                      </button>
+                      <div className="step-btn-label">{stage.label}</div>
+                    </div>
+                    {idx < STAGES.length - 1 && (
+                      <div className={'step-connector' + (currentStage > idx ? ' active' : '')} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">7.2</span>
+                    <h1 className="title">Workflow Build</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">USE CASE</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of {STAGES.length}</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      aria-label="Previous section"
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handleNext}
+                      disabled={currentStage === STAGES.length - 1}
+                      aria-label="Next section"
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area">
+                {renderStage()}
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>
