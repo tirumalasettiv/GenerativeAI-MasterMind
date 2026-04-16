@@ -719,15 +719,18 @@ Output: Implementation plan with code snippets
 
 ## Key Frameworks Summary
 
-### CRAFT (Prompting)
+### COSTAR (Prompting)
 
 | Letter | Meaning |
 |--------|---------|
 | C | Context |
-| R | Role |
-| A | Ask |
-| F | Format |
+| O | Objective |
+| S | Style |
 | T | Tone |
+| A | Audience |
+| R | Response |
+
+> Note: CRAFT (Context, Role, Ask, Format, Tone) is a similar 5-letter variant you may encounter elsewhere; COSTAR covers the same ground plus Audience + Response.
 
 ### VERIFY (Responsible Use)
 
