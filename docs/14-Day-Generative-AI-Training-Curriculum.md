@@ -676,7 +676,7 @@ Output: Implementation plan with code snippets
 |-----|-------|------|
 | 1 | What is Generative AI? | Theory |
 | 2 | Limitations & Responsible Use | Theory |
-| 3 | CRAFT Prompting Framework | Theory + Practice |
+| 3 | COSTAR Prompting Framework | Theory + Practice |
 | 4 | Prompting Techniques Toolkit | Practice |
 | 5 | Role Lab – Product Managers | Practice |
 | 6 | Role Lab – Citizen Coders | Practice |
@@ -708,7 +708,7 @@ Output: Implementation plan with code snippets
 
 ### Facilitator Resources
 
-- [ ] CRAFT Framework card (printable)
+- [ ] COSTAR Framework card (printable)
 - [ ] VERIFY Framework card (printable)
 - [ ] Architecture Decision Flowchart (printable)
 - [ ] Tool Comparison Guide
