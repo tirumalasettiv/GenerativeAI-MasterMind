@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn how text becomes numbers in meaning-space. Interactive guide to embeddings, vector similarity, vector databases, and how they power RAG and semantic search.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="Embeddings — Interactive Deep Dive">
+  <meta property="og:description" content="Learn how text becomes numbers in meaning-space. Interactive guide to embeddings, vector similarity, vector databases, and how they power RAG and semantic search.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Embeddings — Interactive Deep Dive">
+  <meta name="twitter:description" content="Learn how text becomes numbers in meaning-space. Interactive guide to embeddings, vector similarity, vector databases, and how they power RAG and semantic search.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Embeddings - Interactive Deep Dive</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* Stage 1: One-hot grid */
+    .onehot-grid {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .onehot-word {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .onehot-label {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+    }
+    .onehot-vector {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .onehot-cell {
+      width: 36px;
+      height: 20px;
+      border-radius: 4px;
+      background: #f0edfa;
+      border: 1.5px solid #d5cff5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #b0a6e8;
+    }
+    .onehot-cell.hot {
+      background: #6c5ce7;
+      border-color: #6c5ce7;
+      color: white;
+    }
+    .onehot-size {
+      font-size: 11px;
+      color: #999;
+      font-style: italic;
+    }
+    .onehot-problem {
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: #fff5f5;
+      border: 1.5px solid #f5c6cb;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #c0392b;
+      text-align: center;
+    }
+
+    /* Stage 2: 2D scatter */
+    .scatter-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .scatter-svg-wrap {
+      flex: 1;
+      min-width: 260px;
+    }
+    .scatter-legend {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 16px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+    }
+    .scatter-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .scatter-legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .scatter-hint {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* Stage 3: Similarity gauge */
+    .pair-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .pair-pill {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1.5px solid var(--color-border);
+      background: white;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .pair-pill:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .pair-pill.selected {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+    }
+    .gauge-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .gauge-explanation {
+      font-size: 14px;
+      color: #555;
+      text-align: center;
+      max-width: 360px;
+      line-height: 1.6;
+      min-height: 42px;
+    }
+
+    /* Stage 4: Vector DB disclosure cards */
+    .vdb-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      width: 100%;
+    }
+    .vdb-card {
+      padding: 18px;
+      background: white;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      position: relative;
+    }
+    .vdb-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-3px);
+    }
+    .vdb-card.expanded {
+      border-color: var(--color-primary);
+      background: #f5f3ff;
+    }
+    .vdb-emoji { font-size: 26px; margin-bottom: 6px; }
+    .vdb-name { font-weight: 700; font-size: 15px; color: #1a1a1a; margin-bottom: 4px; }
+    .vdb-tagline { font-size: 13px; color: var(--color-primary); font-style: italic; }
+    .vdb-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+    }
+    .vdb-card.expanded .vdb-detail {
+      max-height: 160px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #d5cff5;
+    }
+
+    /* Disclosure badge (matches overview.html pattern) */
+    .disclosure-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
+
+    /* Stage 5: Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--color-border);
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      border: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover { color: var(--color-primary); }
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+    .tab-panel {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #333;
+    }
+    .tab-panel ul { margin: 10px 0 0 18px; padding: 0; }
+    .tab-panel li { margin-bottom: 6px; }
+    .tab-panel strong { color: #1a1a1a; }
+
+    /* Flow diagram */
+    .flow-wrap {
+      margin-top: 24px;
+      padding: 16px;
+      background: white;
+      border: 1px solid #e8e3f8;
+      border-radius: var(--radius-lg);
+    }
+    .flow-caption {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Module callout pill */
+    .module-callout {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: #f5f3ff;
+      border: 1px solid #d5cff5;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-top: 8px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* ── Shared bulb SVG for InsightBlock ─────────────────────── */
+    const BULB_SVG = (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="#2ecc71" strokeWidth="2" aria-hidden="true">
+        <path d="M9 18h6"/><path d="M10 22h4"/>
+        <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/>
+      </svg>
+    );
+
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">{BULB_SVG} INSIGHT</div>
+          {children}
+        </div>
+      );
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Stage 1 — Why Computers Can't Read Words
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    function S1() {
+      const words = [
+        { label: 'cat', hot: 0 },
+        { label: 'dog', hot: 1 },
+        { label: 'car', hot: 2 },
+      ];
+
+      return (
+        <>
+          <div><h2 className="stage-header">Why Computers Can't Read Words</h2></div>
+          <div className="explanation">
+            Before embeddings, the standard approach was <strong>one-hot encoding</strong>: give each word a unique position in a giant vector and set that slot to 1; everything else is 0. The result is sparse, wasteful, and completely blind to meaning.
+          </div>
+          <div className="scene-card">
+            <div className="onehot-grid">
+              {words.map(w => (
+                <div key={w.label} className="onehot-word">
+                  <div className="onehot-label">"{w.label}"</div>
+                  <div className="onehot-vector">
+                    {words.map((_, ci) => (
+                      <div key={ci} className={`onehot-cell${ci === w.hot ? ' hot' : ''}`}>
+                        {ci === w.hot ? '1' : '0'}
+                      </div>
+                    ))}
+                    <div className="onehot-cell" style={{ opacity: 0.4, fontSize: '9px', height: '14px' }}>
+                      &hellip;
+                    </div>
+                  </div>
+                  <div className="onehot-size">50,000+ slots in practice</div>
+                </div>
+              ))}
+            </div>
+            <div className="onehot-problem">
+              Distance("cat",&nbsp;"dog") = Distance("cat",&nbsp;"submarine") &mdash; one-hot has no concept of similarity.
+            </div>
+          </div>
+          <InsightBlock>
+            If every word is equally different from every other word, the computer has no way to understand that "vacation" and "holiday" mean the same thing.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Stage 2 — Words as Points in Meaning-Space
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    const WORDS_2D = [
+      { id: 'king',     x: 70,  y: 52,  cluster: 'royalty',  label: 'king'     },
+      { id: 'queen',    x: 92,  y: 66,  cluster: 'royalty',  label: 'queen'    },
+      { id: 'prince',   x: 54,  y: 72,  cluster: 'royalty',  label: 'prince'   },
+      { id: 'princess', x: 112, y: 80,  cluster: 'royalty',  label: 'princess' },
+      { id: 'cat',      x: 198, y: 60,  cluster: 'animals',  label: 'cat'      },
+      { id: 'dog',      x: 222, y: 76,  cluster: 'animals',  label: 'dog'      },
+      { id: 'horse',    x: 208, y: 96,  cluster: 'animals',  label: 'horse'    },
+      { id: 'fish',     x: 178, y: 84,  cluster: 'animals',  label: 'fish'     },
+      { id: 'happy',    x: 332, y: 58,  cluster: 'emotions', label: 'happy'    },
+      { id: 'joyful',   x: 358, y: 44,  cluster: 'emotions', label: 'joyful'   },
+      { id: 'sad',      x: 372, y: 78,  cluster: 'emotions', label: 'sad'      },
+      { id: 'angry',    x: 312, y: 82,  cluster: 'emotions', label: 'angry'    },
+    ];
+
+    const CLUSTER_COLORS = {
+      royalty:  { fill: '#a29bfe', border: '#6c5ce7' },
+      animals:  { fill: '#00b894', border: '#00856a' },
+      emotions: { fill: '#74b9ff', border: '#0984e3' },
+    };
+
+    const CLUSTER_META = [
+      { key: 'royalty',  label: 'Royalty',  cx: 78,  cy: 35  },
+      { key: 'animals',  label: 'Animals',  cx: 200, cy: 42  },
+      { key: 'emotions', label: 'Emotions', cx: 338, cy: 32  },
+    ];
+
+    function euclidDist(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function nearestNeighbors(id, n) {
+      const src = WORDS_2D.find(w => w.id === id);
+      return WORDS_2D
+        .filter(w => w.id !== id)
+        .map(w => ({ ...w, dist: euclidDist(src, w) }))
+        .sort((a, b) => a.dist - b.dist)
+        .slice(0, n);
+    }
+
+    function simFromDist(dist) {
+      return Math.max(0, 1 - dist / 180).toFixed(2);
+    }
+
+    function ScatterPlot({ selected, onSelect }) {
+      const W = 440, H = 142;
+      const nbrs = selected ? nearestNeighbors(selected, 2) : [];
+      const src  = selected ? WORDS_2D.find(w => w.id === selected) : null;
+
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg"
+             aria-label="Interactive 2D word embedding scatter plot"
+             style={{ width: '100%', height: 'auto', display: 'block' }}>
+          {/* Axis guides */}
+          <line x1="22" y1={H - 14} x2={W - 8} y2={H - 14}
+                stroke="#e8e3f8" strokeWidth="1" />
+          <line x1="22" y1="12" x2="22" y2={H - 14}
+                stroke="#e8e3f8" strokeWidth="1" />
+          <text x={W / 2} y={H - 2} textAnchor="middle"
+                fontSize="8" fill="#c8c0f0" fontFamily="DM Sans">semantic dimension</text>
+
+          {/* Cluster region labels */}
+          {CLUSTER_META.map(cm => (
+            <text key={cm.key} x={cm.cx} y={cm.cy} textAnchor="middle"
+                  fontSize="9.5" fontWeight="700" fontFamily="DM Sans"
+                  fill={CLUSTER_COLORS[cm.key].border} opacity="0.65">
+              {cm.label}
+            </text>
+          ))}
+
+          {/* Nearest-neighbor dashed lines */}
+          {src && nbrs.map(nb => {
+            const score = simFromDist(nb.dist);
+            const mx = (src.x + nb.x) / 2;
+            const my = (src.y + nb.y) / 2 - 7;
+            return (
+              <g key={`ln-${nb.id}`}>
+                <line x1={src.x} y1={src.y} x2={nb.x} y2={nb.y}
+                      stroke="#6c5ce7" strokeWidth="1.5"
+                      strokeDasharray="4 3" opacity="0.7" />
+                <text x={mx} y={my} textAnchor="middle"
+                      fontSize="9" fontWeight="700" fontFamily="DM Sans"
+                      fill="#6c5ce7">{score}</text>
+              </g>
+            );
+          })}
+
+          {/* Word dots */}
+          {WORDS_2D.map(w => {
+            const col   = CLUSTER_COLORS[w.cluster];
+            const isSel = w.id === selected;
+            const isNbr = nbrs.some(n => n.id === w.id);
+            const r     = isSel ? 8 : isNbr ? 6 : 5;
+            const fade  = selected && !isSel && !isNbr ? 0.3 : 1;
+            return (
+              <g key={w.id} style={{ cursor: 'pointer' }}
+                 onClick={() => onSelect(w.id === selected ? null : w.id)}
+                 role="button" tabIndex={0} aria-label={`Select word: ${w.label}`}
+                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(w.id === selected ? null : w.id); } }}>
+                <circle cx={w.x} cy={w.y} r={r + 5} fill="transparent" />
+                <circle cx={w.x} cy={w.y} r={r}
+                        fill={isSel ? col.border : col.fill}
+                        stroke={col.border}
+                        strokeWidth={isSel ? 2.5 : 1.5}
+                        opacity={fade} />
+                <text x={w.x} y={w.y - r - 3} textAnchor="middle"
+                      fontSize={isSel ? '10' : '9'}
+                      fontWeight={isSel ? '700' : '500'}
+                      fill={isSel ? col.border : '#444'}
+                      fontFamily="DM Sans" opacity={fade}>
+                  {w.label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+
+    function S2() {
+      const [selected, setSelected] = useState(null);
+      const nbrs = selected ? nearestNeighbors(selected, 2) : [];
+
+      return (
+        <>
+          <div><h2 className="stage-header">Words as Points in Meaning-Space</h2></div>
+          <div className="explanation">
+            Embeddings replace sparse one-hot vectors with <strong>dense, low-dimensional coordinates</strong> where meaning determines position. Similar words cluster nearby. The classic example: <em>king &minus; man + woman &asymp; queen</em>.
+          </div>
+          <div className="scene-card">
+            <div className="scatter-container">
+              <div className="scatter-svg-wrap">
+                <ScatterPlot selected={selected} onSelect={setSelected} />
+                <div className="scatter-hint">
+                  {selected
+                    ? `Nearest neighbors of \u201c${selected}\u201d with similarity scores`
+                    : 'Click any word to reveal its 2 nearest neighbors'}
+                </div>
+              </div>
+              <div className="scatter-legend">
+                {Object.entries(CLUSTER_COLORS).map(([key, col]) => (
+                  <div key={key} className="scatter-legend-item">
+                    <div className="scatter-legend-dot"
+                         style={{ background: col.fill, border: `2px solid ${col.border}` }} />
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </div>
+                ))}
+                {selected && (
+                  <div style={{ marginTop: '8px', borderTop: '1px solid #e0e0e0',
+                                paddingTop: '8px', fontSize: '12px', color: '#555' }}>
+                    <strong style={{ color: '#6c5ce7' }}>{selected}</strong>
+                    {nbrs.map(nb => (
+                      <div key={nb.id} style={{ marginTop: '4px' }}>
+                        &rarr; {nb.label}:{' '}
+                        <strong style={{ color: '#6c5ce7' }}>{simFromDist(nb.dist)}</strong>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            In embedding space, meaning IS proximity. Words used in similar contexts end up at similar coordinates &mdash; even across languages.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Stage 3 — Measuring Meaning with Math
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    const PAIRS = [
+      { a: 'cat',   b: 'kitten',     score: 0.93,
+        note: 'Near-synonyms cluster extremely close in embedding space.' },
+      { a: 'king',  b: 'queen',      score: 0.87,
+        note: 'Same semantic role, different gender \u2014 close but not identical.' },
+      { a: 'happy', b: 'joyful',     score: 0.95,
+        note: 'Synonyms used in almost identical contexts land side by side.' },
+      { a: 'hot',   b: 'cold',       score: 0.42,
+        note: 'Antonyms share context (weather, temperature) but point away from each other.' },
+      { a: 'bank',  b: 'river',      score: 0.35,
+        note: '\u201cBank\u201d is polysemous; nearest neighbors depend on context window.' },
+      { a: 'cat',   b: 'democracy',  score: 0.08,
+        note: 'Completely unrelated \u2014 almost perpendicular vectors, near-zero cosine.' },
+    ];
+
+    function CosineGauge({ score }) {
+      const R = 68, cx = 88, cy = 84;
+      // score 0 → leftmost (angle π), score 1 → rightmost (angle 0)
+      const angle  = Math.PI * (1 - score);
+      const nx     = cx + R * Math.cos(angle);
+      const ny     = cy - R * Math.sin(angle);
+      const sweepBig = score > 0.5 ? 1 : 0;
+      const needleR  = R - 8;
+      const nnx = cx + needleR * Math.cos(angle);
+      const nny = cy - needleR * Math.sin(angle);
+      const ticks = [0, 0.25, 0.5, 0.75, 1.0];
+
+      return (
+        <svg viewBox="0 0 176 98" xmlns="http://www.w3.org/2000/svg"
+             aria-label={`Cosine similarity gauge: ${score}`}
+             style={{ width: '176px', height: 'auto' }}>
+          {/* Background track */}
+          <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 1 1 ${cx + R} ${cy}`}
+                fill="none" stroke="#f0edfa" strokeWidth="11" strokeLinecap="round" />
+          {/* Filled arc */}
+          {score > 0.005 && (
+            <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 ${sweepBig} 1 ${nx} ${ny}`}
+                  fill="none" stroke="#6c5ce7" strokeWidth="11" strokeLinecap="round" />
+          )}
+          {/* Tick labels */}
+          {ticks.map(t => {
+            const ta = Math.PI * (1 - t);
+            const tx = cx + (R + 10) * Math.cos(ta);
+            const ty = cy - (R + 10) * Math.sin(ta);
+            return (
+              <text key={t} x={tx} y={ty + 4} textAnchor="middle"
+                    fontSize="7.5" fill="#aaa" fontFamily="DM Sans">
+                {t.toFixed(2)}
+              </text>
+            );
+          })}
+          {/* Needle */}
+          <line x1={cx} y1={cy} x2={nnx} y2={nny}
+                stroke="#6c5ce7" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx={cx} cy={cy} r="4.5" fill="#6c5ce7" />
+          {/* Score readout */}
+          <text x={cx} y={cy + 18} textAnchor="middle"
+                fontSize="17" fontWeight="700" fill="#6c5ce7" fontFamily="DM Sans">
+            {score.toFixed(2)}
+          </text>
+        </svg>
+      );
+    }
+
+    function S3() {
+      const [sel, setSel] = useState(0);
+      const pair = PAIRS[sel];
+
+      return (
+        <>
+          <div><h2 className="stage-header">Measuring Meaning with Math</h2></div>
+          <div className="explanation">
+            <strong>Cosine similarity</strong> measures the angle between two embedding vectors. Score near 1.0 means the vectors point the same direction (highly related). Score near 0 means they are perpendicular (unrelated). Select a word pair to see its score:
+          </div>
+          <div className="scene-card">
+            <div className="pair-pills">
+              {PAIRS.map((p, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`pair-pill${sel === i ? ' selected' : ''}`}
+                  onClick={() => setSel(i)}
+                  aria-pressed={sel === i}
+                >
+                  {p.a} / {p.b}
+                </button>
+              ))}
+            </div>
+            <div className="gauge-area">
+              <CosineGauge score={pair.score} />
+              <div className="gauge-explanation">{pair.note}</div>
+            </div>
+          </div>
+          <InsightBlock>
+            This is why "vacation" matches "annual leave" in a RAG system &mdash; their embeddings point nearly the same direction, even though they share zero words.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Stage 4 — Storing and Searching Millions of Meanings
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    const VDBS = [
+      {
+        id: 'pinecone',
+        emoji: '\uD83C\uDF32',
+        name: 'Pinecone',
+        tagline: 'Fully managed cloud vector DB',
+        detail: 'Best for: teams that want zero infrastructure. Pinecone handles indexing, scaling, and replication automatically. Pay-as-you-go pricing and a serverless tier make it easy to start without any ops overhead.',
+      },
+      {
+        id: 'chroma',
+        emoji: '\uD83C\uDFA8',
+        name: 'Chroma',
+        tagline: 'Open-source, embeds in your app',
+        detail: 'Best for: prototyping and local development. Chroma runs in-process with Python or JavaScript \u2014 no separate server needed. Ideal for building and testing RAG pipelines before choosing a production store.',
+      },
+      {
+        id: 'faiss',
+        emoji: '\u26A1',
+        name: 'FAISS',
+        tagline: "Meta\u2019s high-performance library",
+        detail: 'Best for: research workloads at scale. FAISS (Facebook AI Similarity Search) is a C++ library with Python bindings. It supports billion-scale indexes and GPU acceleration, but requires you to manage persistence yourself.',
+      },
+      {
+        id: 'weaviate',
+        emoji: '\uD83D\uDD37',
+        name: 'Weaviate',
+        tagline: 'Open-source with hybrid search',
+        detail: 'Best for: combining keyword + vector search. Weaviate supports BM25 + vector hybrid queries out of the box, making it strong for enterprise search where some queries are keyword-based and others are semantic.',
+      },
+    ];
+
+    const ChevronSVG = () => (
+      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round"
+           strokeLinejoin="round" strokeWidth="2.25" aria-hidden="true">
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    );
+
+    function S4() {
+      const [expanded, setExpanded] = useState(null);
+
+      return (
+        <>
+          <div><h2 className="stage-header">Storing and Searching Millions of Meanings</h2></div>
+          <div className="explanation">
+            A <strong>vector database</strong> indexes embeddings for fast <em>approximate nearest-neighbor</em> (ANN) search. Rather than comparing every vector, it uses smart indexing structures to trade tiny accuracy losses for massive speed gains. Click any database to learn more:
+          </div>
+          <div className="scene-card">
+            <div className="vdb-grid">
+              {VDBS.map(db => {
+                const isOpen  = expanded === db.id;
+                const toggle  = () => setExpanded(isOpen ? null : db.id);
+                const panelId = `vdb-panel-${db.id}`;
+                return (
+                  <div
+                    key={db.id}
+                    className={`vdb-card disclosure-card-host${isOpen ? ' expanded' : ''}`}
+                    onClick={toggle}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+                  >
+                    <span className="disclosure-badge"><ChevronSVG /></span>
+                    <div className="vdb-emoji">{db.emoji}</div>
+                    <div className="vdb-name">{db.name}</div>
+                    <div className="vdb-tagline">{db.tagline}</div>
+                    <div id={panelId} className="vdb-detail">{db.detail}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <InsightBlock>
+            A vector database is like a library organized by meaning instead of author name. Ask for "vacation policy" and it finds documents about "PTO," "annual leave," and "time-off guidelines."
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Stage 5 — Where Embeddings Power Real Systems
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    function InfoIcon() {
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      );
+    }
+
+    const TAB_DATA = [
+      {
+        id: 'rag',
+        label: 'RAG Retrieval',
+        render: () => (
+          <>
+            <p>
+              <strong>Retrieval-Augmented Generation</strong> embeds your question, searches a vector database for the closest document chunks, and injects those chunks as context into the LLM prompt. The model answers using real, current information &mdash; not just training-time memorization.
+            </p>
+            <ul>
+              <li>Your question &rarr; embedding vector &rarr; ANN search &rarr; top-K chunks</li>
+              <li>Chunks appended to system prompt as grounded context</li>
+              <li>LLM answers with citations, not hallucinations</li>
+            </ul>
+            <div className="module-callout">
+              <InfoIcon /> Covered in depth in Module 5.3: RAG
+            </div>
+          </>
+        ),
+      },
+      {
+        id: 'search',
+        label: 'Semantic Search',
+        render: () => (
+          <>
+            <p>
+              <strong>Semantic search</strong> matches intent rather than keywords. A user types "laptop won't start" and the system surfaces articles tagged "power failure" and "boot sequence error" &mdash; zero keyword overlap, maximum relevance.
+            </p>
+            <ul>
+              <li><strong>Support ticket routing</strong> &mdash; classify issues by meaning, not category keywords</li>
+              <li><strong>Code search</strong> &mdash; find functions by describing what they do</li>
+              <li><strong>Legal discovery</strong> &mdash; surface contracts by clause meaning</li>
+            </ul>
+          </>
+        ),
+      },
+      {
+        id: 'cluster',
+        label: 'Clustering',
+        render: () => (
+          <>
+            <p>
+              Embeddings enable <strong>unsupervised grouping</strong> of items by semantic similarity without labeled training data. The model finds natural structure in meaning-space.
+            </p>
+            <ul>
+              <li><strong>Recommendations</strong> &mdash; embed purchase history, find similar products nearby</li>
+              <li><strong>Anomaly detection</strong> &mdash; flag transactions far from any cluster centroid</li>
+              <li><strong>Topic discovery</strong> &mdash; automatically theme-label support conversations</li>
+            </ul>
+          </>
+        ),
+      },
+    ];
+
+    function RagFlowDiagram() {
+      const steps = [
+        { label: 'Document', hi: false },
+        { label: 'Embed',    hi: true  },
+        { label: 'Store',    hi: true  },
+        { label: 'Query',    hi: false },
+        { label: 'Retrieve', hi: true  },
+        { label: 'Augment',  hi: false },
+        { label: 'Generate', hi: false },
+      ];
+      const NW = 74, NH = 36, GAP = 14;
+      const totalW = steps.length * NW + (steps.length - 1) * GAP;
+      const W = 660;
+      const sx = (W - totalW) / 2;
+
+      return (
+        <svg viewBox={`0 0 ${W} 68`} xmlns="http://www.w3.org/2000/svg"
+             aria-label="RAG pipeline flow: Document, Embed, Store, Query, Retrieve, Augment, Generate"
+             style={{ width: '100%', height: 'auto', display: 'block' }}>
+          <defs>
+            <marker id="rag-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {steps.map((step, i) => {
+            const x = sx + i * (NW + GAP);
+            const y = 16;
+            return (
+              <g key={step.label}>
+                {i < steps.length - 1 && (
+                  <path d={`M ${x + NW + 2} ${y + NH / 2} L ${x + NW + GAP - 2} ${y + NH / 2}`}
+                        stroke="#b0a6e8" strokeWidth="1.5" fill="none"
+                        markerEnd="url(#rag-arrow)" />
+                )}
+                <rect x={x} y={y} width={NW} height={NH} rx="7"
+                      fill={step.hi ? '#6c5ce7' : 'white'}
+                      stroke={step.hi ? '#6c5ce7' : '#d5cff5'}
+                      strokeWidth="1.5" />
+                <text x={x + NW / 2} y={y + NH / 2 + 5}
+                      textAnchor="middle" fontSize="10.5" fontWeight="600"
+                      fill={step.hi ? 'white' : '#555'}
+                      fontFamily="DM Sans">
+                  {step.label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+
+    function S5() {
+      const [activeTab, setActiveTab] = useState('rag');
+      const tab = TAB_DATA.find(t => t.id === activeTab);
+
+      return (
+        <>
+          <div><h2 className="stage-header">Where Embeddings Power Real Systems</h2></div>
+          <div className="explanation">
+            Embeddings underpin three of the most important AI capabilities in production. Each use case relies on the same core mechanic: map text to a vector, measure proximity, act on results.
+          </div>
+          <div className="scene-card">
+            <div className="tab-bar" role="tablist" aria-label="Embedding use cases">
+              {TAB_DATA.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`tab-btn${activeTab === t.id ? ' active' : ''}`}
+                  role="tab"
+                  aria-selected={activeTab === t.id}
+                  aria-controls={`emb-tabpanel-${t.id}`}
+                  onClick={() => setActiveTab(t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <div
+              id={`emb-tabpanel-${tab.id}`}
+              className="tab-panel"
+              role="tabpanel"
+              aria-label={tab.label}
+            >
+              {tab.render()}
+            </div>
+            <div className="flow-wrap">
+              <RagFlowDiagram />
+              <div className="flow-caption">
+                Purple steps (Embed, Store, Retrieve) are where embeddings do the heavy lifting in a RAG pipeline.
+              </div>
+            </div>
+          </div>
+          <InsightBlock>
+            Embeddings are the invisible bridge between human language and machine computation. Every time an AI "understands" your question, embeddings are doing the heavy lifting.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Guide shell
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    const NEXT_GUIDE = {
+      id: '1.8',
+      title: 'Safety & Alignment',
+      module: 'Module 1',
+      href: './safety-alignment.html',
+    };
+
+    const STAGES = [
+      {
+        label: 'Problem',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        component: S1,
+      },
+      {
+        label: 'Vectors',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="5" y1="19" x2="19" y2="5"/></svg>',
+        component: S2,
+      },
+      {
+        label: 'Similarity',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>',
+        component: S3,
+      },
+      {
+        label: 'Vector DBs',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+        component: S4,
+      },
+      {
+        label: 'In Action',
+        icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+        component: S5,
+      },
+    ];
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+      const CurrentComponent = STAGES[currentStage].component;
+
+      const handleNext = () => { if (currentStage < STAGES.length - 1) setCurrentStage(s => s + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(s => s - 1); };
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar" aria-label="Guide sections">
+              {STAGES.map((stage, idx) => (
+                <React.Fragment key={idx}>
+                  <div className={`step-wrapper ${currentStage === idx ? 'active' : ''}`}>
+                    <button
+                      type="button"
+                      className={`step-btn ${currentStage === idx ? 'active' : ''}`}
+                      aria-label={`Step ${idx + 1}: ${stage.label}`}
+                      aria-current={currentStage === idx ? 'step' : undefined}
+                      onClick={() => setCurrentStage(idx)}
+                      dangerouslySetInnerHTML={{ __html: stage.icon }}
+                    />
+                    <div className="step-btn-label">{stage.label}</div>
+                  </div>
+                  {idx < STAGES.length - 1 && (
+                    <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                  )}
+                </React.Fragment>
+              ))}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">1.7</span>
+                    <h1 className="title">Embeddings</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">DEEP DIVE</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">
+                    Page {currentStage + 1} of {STAGES.length}
+                  </span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      aria-label="Previous section"
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handleNext}
+                      disabled={currentStage === STAGES.length - 1}
+                      aria-label="Next section"
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area scrollbar-hide">
+                <CurrentComponent />
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>
