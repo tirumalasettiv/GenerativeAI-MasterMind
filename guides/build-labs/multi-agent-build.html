@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hands-on lab: design a multi-agent AI system. Choose collaboration patterns, define agent roles, write prompts, design handoff protocols, and plan testing.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="Multi-Agent Design — Build Labs">
+  <meta property="og:description" content="Hands-on lab: design a multi-agent AI system. Choose collaboration patterns, define agent roles, write prompts, design handoff protocols, and plan testing.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-default.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Multi-Agent Design — Build Labs">
+  <meta name="twitter:description" content="Hands-on lab: design a multi-agent AI system. Choose collaboration patterns, define agent roles, write prompts, design handoff protocols, and plan testing.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Multi-Agent Design - Build Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── Disclosure badge (shared across all click-to-expand cards) ── */
+    .disclosure-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      border: 1.5px solid rgba(108, 92, 231, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .disclosure-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: #6c5ce7;
+      transition: transform 0.3s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+    .disclosure-card-host:hover .disclosure-badge,
+    .disclosure-card-host.expanded .disclosure-badge {
+      background: #6c5ce7;
+      border-color: transparent;
+    }
+    .disclosure-card-host:hover .disclosure-badge { transform: scale(1.08); }
+    .disclosure-card-host:hover .disclosure-badge svg,
+    .disclosure-card-host.expanded .disclosure-badge svg { stroke: white; }
+    .disclosure-card-host.expanded .disclosure-badge svg { transform: rotate(180deg); }
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-badge svg { transition: none; }
+    }
+
+    /* ── S1: Pattern cards ── */
+    .pattern-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .pattern-card {
+      position: relative;
+      padding: 20px 52px 20px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+      user-select: none;
+    }
+    .pattern-card:hover { border-color: #6c5ce7; transform: translateX(3px); }
+    .pattern-card.expanded { border-color: #6c5ce7; background: #f5f3ff; }
+    .pattern-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .pattern-card-emoji { font-size: 28px; flex-shrink: 0; }
+    .pattern-card-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      flex: 1;
+    }
+    .pattern-card-subtitle {
+      font-size: 13px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .pattern-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding-top 0.25s ease;
+    }
+    .pattern-card.expanded .pattern-body {
+      max-height: 600px;
+      padding-top: 16px;
+    }
+    .pattern-svg-wrap {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 14px;
+    }
+    .pattern-svg-wrap svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 560px;
+      width: 100%;
+      height: auto;
+    }
+    .pattern-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .pattern-meta-item {}
+    .pattern-meta-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .pattern-meta-value {
+      font-size: 13px;
+      color: #333;
+      line-height: 1.55;
+    }
+
+    /* ── S2: Agent builder grid ── */
+    .agent-builder-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .agent-builder-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .agent-builder-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .agent-builder-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .agent-builder-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+    }
+    .agent-field-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .agent-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 140px;
+    }
+    .agent-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .agent-field-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .agent-field-input:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S2: Tool toggles ── */
+    .tool-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 4px;
+    }
+    .tool-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border: 2px solid #e0e0e0;
+      border-radius: 24px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .tool-toggle:hover { border-color: #6c5ce7; color: #6c5ce7; }
+    .tool-toggle.active { border-color: #6c5ce7; background: #6c5ce7; color: white; }
+    .tool-toggle-emoji { font-size: 14px; }
+
+    /* ── S2: Example toggle ── */
+    .example-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 0;
+      padding: 8px 16px;
+      border: 2px solid #6c5ce7;
+      border-radius: 8px;
+      background: white;
+      color: #6c5ce7;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .example-toggle-btn:hover { background: #f5f3ff; }
+    .example-toggle-btn.active { background: #6c5ce7; color: white; }
+    .example-box {
+      margin-top: 14px;
+      background: #f5f3ff;
+      border: 2px solid #c9c2f5;
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .example-box-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #6c5ce7;
+      margin-bottom: 10px;
+    }
+    .example-agent-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .example-agent-chip {
+      padding: 6px 12px;
+      background: white;
+      border: 2px solid #c9c2f5;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6c5ce7;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .example-agent-arrow {
+      font-size: 16px;
+      color: #b0a6e8;
+      align-self: center;
+    }
+
+    /* ── S3: Prompt builder columns ── */
+    .prompt-builder-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .prompt-tab-btn {
+      padding: 8px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .prompt-tab-btn:hover { border-color: #6c5ce7; color: #6c5ce7; }
+    .prompt-tab-btn.active { border-color: #6c5ce7; background: #6c5ce7; color: white; }
+    .prompt-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .prompt-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .prompt-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+    .prompt-field-prefix {
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+    }
+    .prompt-field-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+      min-height: 56px;
+    }
+    .prompt-field-textarea:focus { border-color: #6c5ce7; outline: none; }
+    .prompt-preview {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    .prompt-preview pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      color: #e0d9ff;
+      line-height: 1.75;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    .prompt-preview-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #a29bfe;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── S4: Handoff cards ── */
+    .handoff-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .handoff-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .handoff-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .handoff-card-label {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1a1a1a;
+    }
+    .handoff-arrow-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: #f5f3ff;
+      border: 1.5px solid #c9c2f5;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #6c5ce7;
+      font-weight: 600;
+    }
+    .handoff-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+    .handoff-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .handoff-textarea {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    .handoff-textarea:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S4: Format radio buttons ── */
+    .format-radios {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .format-radio-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .format-radio-label:hover { border-color: #6c5ce7; color: #6c5ce7; }
+    .format-radio-label.selected { border-color: #6c5ce7; background: #f5f3ff; color: #6c5ce7; }
+    .format-radio-input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .format-radio-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #d0c8f5;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .format-radio-label.selected .format-radio-dot {
+      border-color: #6c5ce7;
+      background: #6c5ce7;
+    }
+    .format-radio-label.selected .format-radio-dot::after {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: white;
+    }
+
+    /* ── S4: Feedback loop toggle ── */
+    .feedback-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #fafafe;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: #d0d0d0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .toggle-switch input:checked + .toggle-track { background: #6c5ce7; }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s ease;
+      pointer-events: none;
+    }
+    .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(20px); }
+    .toggle-label-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    .toggle-label-hint { font-size: 12px; color: #888; margin-left: 4px; }
+    .feedback-criteria-wrap {
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      max-height: 0;
+    }
+    .feedback-criteria-wrap.open { max-height: 200px; }
+
+    /* ── S5: Test scenario rows ── */
+    .test-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .test-row {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .test-row-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .test-row-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #6c5ce7;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .test-row-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #6c5ce7;
+    }
+    .test-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+    .test-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .test-field-textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+      min-height: 60px;
+    }
+    .test-field-textarea:focus { border-color: #6c5ce7; outline: none; }
+
+    /* ── S5: Tips / Failure disclosure cards ── */
+    .failure-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .failure-card {
+      position: relative;
+      padding: 16px 18px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .failure-card:hover { border-color: #e74c3c; transform: translateX(3px); }
+    .failure-card.selected { border-color: #e74c3c; background: #fef5f5; }
+    .failure-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .failure-card-emoji { font-size: 24px; flex-shrink: 0; }
+    .failure-card-title { font-weight: 700; font-size: 15px; color: #1a1a1a; flex: 1; }
+    .failure-card-desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      margin-left: 36px;
+      line-height: 1.5;
+    }
+    .failure-fix {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.65;
+      margin-left: 36px;
+    }
+    .failure-card.selected .failure-fix {
+      max-height: 200px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f5c6c6;
+    }
+    .failure-fix-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e74c3c;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    /* ── Section-title helper ── */
+    .section-mini-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c5ce7;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+    .section-mini-title:first-child { margin-top: 0; }
+
+    /* ── Testing instruction box ── */
+    .testing-instructions {
+      background: #fafafe;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .testing-instructions p {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.7;
+      margin: 0 0 8px 0;
+    }
+    .testing-instructions p:last-child { margin-bottom: 0; }
+
+    /* ── Deep-dive link ── */
+    .deep-dive-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+      padding: 10px 18px;
+      background: white;
+      border: 2px solid #6c5ce7;
+      border-radius: 10px;
+      color: #6c5ce7;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .deep-dive-link:hover { background: #6c5ce7; color: white; }
+
+    /* ── Sidebar icon SVGs ── */
+    .step-btn svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    /* ── Shared: InsightBlock ── */
+    function InsightBlock({ children }) {
+      return (
+        <div className="insight-box">
+          <div className="insight-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2">
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
+              <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+            </svg>
+            {' '}INSIGHT
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    /* ── Shared: DisclosureBadge ── */
+    function DisclosureBadge() {
+      return (
+        <div className="disclosure-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+      );
+    }
+
+    /* ── Sidebar step icons ── */
+    function IconPatterns() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="3" width="7" height="7" rx="1" />
+          <rect x="15" y="3" width="7" height="7" rx="1" />
+          <rect x="8.5" y="14" width="7" height="7" rx="1" />
+          <line x1="5.5" y1="10" x2="12" y2="14" />
+          <line x1="18.5" y1="10" x2="12" y2="14" />
+        </svg>
+      );
+    }
+    function IconRoles() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <circle cx="9" cy="7" r="4" />
+          <path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" />
+          <path d="M16 3.13a4 4 0 010 7.75" />
+          <path d="M21 21v-2a4 4 0 00-3-3.87" />
+        </svg>
+      );
+    }
+    function IconPrompts() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+          <line x1="9" y1="10" x2="15" y2="10" />
+          <line x1="9" y1="14" x2="12" y2="14" />
+        </svg>
+      );
+    }
+    function IconHandoffs() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <path d="M5 12h14" />
+          <path d="M12 5l7 7-7 7" />
+          <circle cx="5" cy="12" r="2" />
+        </svg>
+      );
+    }
+    function IconTest() {
+      return (
+        <svg viewBox="0 0 24 24">
+          <polyline points="9 11 12 14 22 4" />
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+        </svg>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 1 – Patterns: Four Ways Agents Collaborate
+    ════════════════════════════════════════ */
+
+    /* ── SVG: Supervisor (org-chart style) ── */
+    function SupervisorSVG() {
+      return (
+        <svg viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg"
+             aria-label="Supervisor pattern: a central supervisor agent directs three worker agents below it">
+          <defs>
+            <marker id="sv-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {/* Supervisor node */}
+          <rect x="175" y="8" width="170" height="48" rx="10"
+                fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="260" y="28" textAnchor="middle" fontSize="12" fontWeight="700"
+                fontFamily="DM Sans" fill="#6c5ce7">Supervisor</text>
+          <text x="260" y="46" textAnchor="middle" fontSize="10"
+                fontFamily="DM Sans" fill="#888">orchestrates workers</text>
+
+          {/* Lines from supervisor to workers */}
+          <line x1="260" y1="56" x2="80"  y2="88" stroke="#b0a6e8" strokeWidth="1.8" strokeDasharray="5 3" markerEnd="url(#sv-arrow)" />
+          <line x1="260" y1="56" x2="260" y2="88" stroke="#b0a6e8" strokeWidth="1.8" strokeDasharray="5 3" markerEnd="url(#sv-arrow)" />
+          <line x1="260" y1="56" x2="440" y2="88" stroke="#b0a6e8" strokeWidth="1.8" strokeDasharray="5 3" markerEnd="url(#sv-arrow)" />
+
+          {/* Worker nodes */}
+          {[
+            { x: 20,  label: 'Researcher', sub: 'finds info' },
+            { x: 200, label: 'Writer',     sub: 'drafts content' },
+            { x: 380, label: 'Reviewer',   sub: 'checks output' },
+          ].map((n, i) => (
+            <g key={i}>
+              <rect x={n.x} y={88} width={130} height={44} rx="8"
+                    fill="white" stroke="#c9c2f5" strokeWidth="1.8" />
+              <text x={n.x + 65} y={106} textAnchor="middle" fontSize="12" fontWeight="700"
+                    fontFamily="DM Sans" fill="#444">{n.label}</text>
+              <text x={n.x + 65} y={122} textAnchor="middle" fontSize="10"
+                    fontFamily="DM Sans" fill="#999">{n.sub}</text>
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
+    /* ── SVG: Debate (back-and-forth between two agents) ── */
+    function DebateSVG() {
+      return (
+        <svg viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg"
+             aria-label="Debate pattern: Agent A and Agent B exchange messages back and forth with a judge agent deciding">
+          <defs>
+            <marker id="deb-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+            <marker id="deb-arrow-r" viewBox="0 0 10 10" refX="1" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 10 0 L 0 5 L 10 10 z" fill="#f39c12" />
+            </marker>
+          </defs>
+          {/* Agent A */}
+          <rect x="10" y="36" width="130" height="48" rx="10"
+                fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x="75" y="57" textAnchor="middle" fontSize="12" fontWeight="700"
+                fontFamily="DM Sans" fill="#6c5ce7">Agent A</text>
+          <text x="75" y="74" textAnchor="middle" fontSize="10"
+                fontFamily="DM Sans" fill="#888">argues position</text>
+
+          {/* Arrows: A→B then B→A */}
+          <path d="M 142 52 Q 260 20 378 52" fill="none" stroke="#b0a6e8"
+                strokeWidth="1.8" strokeDasharray="5 3" markerEnd="url(#deb-arrow)" />
+          <path d="M 378 68 Q 260 100 142 68" fill="none" stroke="#f39c12"
+                strokeWidth="1.8" strokeDasharray="5 3" markerStart="url(#deb-arrow-r)" />
+          <text x="260" y="14" textAnchor="middle" fontSize="10" fill="#999" fontFamily="DM Sans">argues →</text>
+          <text x="260" y="110" textAnchor="middle" fontSize="10" fill="#f39c12" fontFamily="DM Sans">← counter-argues</text>
+
+          {/* Agent B */}
+          <rect x="380" y="36" width="130" height="48" rx="10"
+                fill="#fef9ec" stroke="#f39c12" strokeWidth="2" />
+          <text x="445" y="57" textAnchor="middle" fontSize="12" fontWeight="700"
+                fontFamily="DM Sans" fill="#e67e22">Agent B</text>
+          <text x="445" y="74" textAnchor="middle" fontSize="10"
+                fontFamily="DM Sans" fill="#888">challenges position</text>
+        </svg>
+      );
+    }
+
+    /* ── SVG: Pipeline (assembly line left→right) ── */
+    function PipelineSVG() {
+      const nodes = [
+        { label: 'Agent 1', sub: 'ingests input', color: '#6c5ce7', fill: '#f5f3ff' },
+        { label: 'Agent 2', sub: 'processes data', color: '#6c5ce7', fill: '#f5f3ff' },
+        { label: 'Agent 3', sub: 'refines output', color: '#6c5ce7', fill: '#f5f3ff' },
+        { label: 'Output',  sub: 'final result',   color: '#2ecc71', fill: '#f0fbf4' },
+      ];
+      const NW = 110, NH = 48, cy = 55, gap = 20;
+      const totalW = nodes.length * NW + (nodes.length - 1) * gap + 20;
+      return (
+        <svg viewBox={`0 0 ${totalW} 100`} xmlns="http://www.w3.org/2000/svg"
+             aria-label="Pipeline pattern: Agent 1 passes output to Agent 2, then Agent 3, producing a final result">
+          <defs>
+            <marker id="pipe-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {nodes.map((n, i) => {
+            const x = 10 + i * (NW + gap);
+            return (
+              <g key={i}>
+                {i < nodes.length - 1 && (
+                  <g>
+                    <line x1={x + NW + 2} y1={cy} x2={x + NW + gap - 2} y2={cy}
+                          stroke="#b0a6e8" strokeWidth="2" strokeDasharray="4 3"
+                          markerEnd="url(#pipe-arrow)" />
+                    <text x={x + NW + gap / 2} y={cy - 10} textAnchor="middle"
+                          fontSize="9" fill="#999" fontFamily="DM Sans">pass</text>
+                  </g>
+                )}
+                <rect x={x} y={cy - NH / 2} width={NW} height={NH} rx="8"
+                      fill={n.fill} stroke={n.color} strokeWidth="2" />
+                <text x={x + NW / 2} y={cy - 5} textAnchor="middle" fontSize="12"
+                      fontWeight="700" fontFamily="DM Sans" fill={n.color}>{n.label}</text>
+                <text x={x + NW / 2} y={cy + 12} textAnchor="middle" fontSize="10"
+                      fontFamily="DM Sans" fill="#666">{n.sub}</text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+
+    /* ── SVG: Swarm (hub-and-spoke) ── */
+    function SwarmSVG() {
+      const cx = 260, cy = 65, r = 70;
+      const spokes = [
+        { angle: -90,  label: 'Agent A', sub: 'data gather' },
+        { angle: -10,  label: 'Agent B', sub: 'analysis'    },
+        { angle: 70,   label: 'Agent C', sub: 'synthesis'   },
+        { angle: 150,  label: 'Agent D', sub: 'validation'  },
+        { angle: 230,  label: 'Agent E', sub: 'formatting'  },
+      ];
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const NW = 96, NH = 40;
+      return (
+        <svg viewBox="0 0 520 130" xmlns="http://www.w3.org/2000/svg"
+             aria-label="Swarm pattern: a central coordinator agent connects to five specialized spoke agents">
+          <defs>
+            <marker id="sw-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0a6e8" />
+            </marker>
+          </defs>
+          {/* Hub */}
+          <ellipse cx={cx} cy={cy} rx="48" ry="28" fill="#f5f3ff" stroke="#6c5ce7" strokeWidth="2" />
+          <text x={cx} y={cy - 4} textAnchor="middle" fontSize="12" fontWeight="700"
+                fontFamily="DM Sans" fill="#6c5ce7">Coordinator</text>
+          <text x={cx} y={cy + 12} textAnchor="middle" fontSize="9"
+                fontFamily="DM Sans" fill="#888">routes tasks</text>
+
+          {/* Spokes */}
+          {spokes.map((s, i) => {
+            const nx = cx + r * Math.cos(toRad(s.angle));
+            const ny = cy + r * Math.sin(toRad(s.angle));
+            const bx = nx - NW / 2;
+            const by = ny - NH / 2;
+            const edgeX = cx + 50 * Math.cos(toRad(s.angle));
+            const edgeY = cy + 28 * Math.sin(toRad(s.angle));
+            const spokeX = nx - (NW / 2 - 6) * Math.cos(toRad(s.angle));
+            const spokeY = ny - (NH / 2 - 4) * Math.sin(toRad(s.angle));
+            return (
+              <g key={i}>
+                <line x1={edgeX} y1={edgeY} x2={spokeX} y2={spokeY}
+                      stroke="#b0a6e8" strokeWidth="1.6" strokeDasharray="4 3"
+                      markerEnd="url(#sw-arrow)" />
+                <rect x={bx} y={by} width={NW} height={NH} rx="8"
+                      fill="white" stroke="#c9c2f5" strokeWidth="1.8" />
+                <text x={nx} y={ny - 4} textAnchor="middle" fontSize="11"
+                      fontWeight="700" fontFamily="DM Sans" fill="#444">{s.label}</text>
+                <text x={nx} y={ny + 11} textAnchor="middle" fontSize="9"
+                      fontFamily="DM Sans" fill="#999">{s.sub}</text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+
+    const PATTERNS = [
+      {
+        id: 'supervisor',
+        emoji: '🏛️',
+        name: 'Supervisor',
+        subtitle: 'One agent directs all others',
+        Diagram: SupervisorSVG,
+        whenToUse: 'When tasks require coordination and quality control — one agent routes work to specialists and collects results.',
+        example: 'A content pipeline where a Supervisor delegates research to a Researcher, drafting to a Writer, and review to an Editor.',
+        tradeoff: 'The supervisor is a single point of failure. If it gives poor routing instructions, every downstream agent suffers.',
+      },
+      {
+        id: 'debate',
+        emoji: '⚖️',
+        name: 'Debate',
+        subtitle: 'Agents argue both sides; a judge decides',
+        Diagram: DebateSVG,
+        whenToUse: 'When decisions benefit from adversarial review — one agent proposes, another challenges, a judge synthesizes.',
+        example: 'A risk assessment system where one agent argues "approve" and another argues "reject" on every loan application.',
+        tradeoff: 'Higher cost and latency — you\'re running 2-3 agents per decision. Worth it only for high-stakes choices.',
+      },
+      {
+        id: 'pipeline',
+        emoji: '🏭',
+        name: 'Pipeline',
+        subtitle: 'Output of one agent is input of the next',
+        Diagram: PipelineSVG,
+        whenToUse: 'When your task has clear sequential stages and each stage needs focused, specialized output.',
+        example: 'A document processing system: Agent 1 extracts raw text → Agent 2 structures it → Agent 3 generates a summary.',
+        tradeoff: 'Errors compound — a bad output from Agent 1 degrades everything downstream. Each handoff must be well-defined.',
+      },
+      {
+        id: 'swarm',
+        emoji: '🐝',
+        name: 'Swarm',
+        subtitle: 'Many independent agents work in parallel',
+        Diagram: SwarmSVG,
+        whenToUse: 'When work can be parallelized — a coordinator splits a task into independent subtasks and agents tackle them simultaneously.',
+        example: 'A market research system: one agent per competitor, all running in parallel, with results aggregated at the end.',
+        tradeoff: 'Coordination complexity grows fast. Collecting and reconciling parallel outputs requires careful aggregation logic.',
+      },
+    ];
+
+    function S1({ expandedPattern, setExpandedPattern }) {
+      const toggle = (id) => setExpandedPattern(prev => prev === id ? null : id);
+
+      return (
+        <>
+          <div><h2 className="stage-header">Four Ways Agents Collaborate</h2></div>
+          <div className="explanation">
+            Multi-agent systems use different collaboration patterns depending on the task. Pick a pattern that matches how the work naturally flows &mdash; don&rsquo;t force a complex pattern onto a simple task.
+          </div>
+
+          <div className="pattern-cards">
+            {PATTERNS.map((p) => {
+              const isOpen = expandedPattern === p.id;
+              const { Diagram } = p;
+              return (
+                <div
+                  key={p.id}
+                  className={'pattern-card disclosure-card-host' + (isOpen ? ' expanded' : '')}
+                  onClick={() => toggle(p.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(p.id); } }}
+                  aria-expanded={isOpen}
+                  aria-controls={'pattern-body-' + p.id}
+                >
+                  <DisclosureBadge />
+                  <div className="pattern-card-header">
+                    <span className="pattern-card-emoji" aria-hidden="true">{p.emoji}</span>
+                    <div>
+                      <div className="pattern-card-name">{p.name}</div>
+                      <div className="pattern-card-subtitle">{p.subtitle}</div>
+                    </div>
+                  </div>
+                  <div className="pattern-body" id={'pattern-body-' + p.id}>
+                    <div className="pattern-svg-wrap">
+                      <Diagram />
+                    </div>
+                    <div className="pattern-meta-grid">
+                      <div className="pattern-meta-item">
+                        <div className="pattern-meta-label">When to Use</div>
+                        <div className="pattern-meta-value">{p.whenToUse}</div>
+                      </div>
+                      <div className="pattern-meta-item">
+                        <div className="pattern-meta-label">Example</div>
+                        <div className="pattern-meta-value">{p.example}</div>
+                      </div>
+                      <div className="pattern-meta-item">
+                        <div className="pattern-meta-label">Tradeoff</div>
+                        <div className="pattern-meta-value">{p.tradeoff}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <InsightBlock>
+            Multi-agent systems aren&rsquo;t about having more agents &mdash; they&rsquo;re about having the RIGHT agents. Three focused specialists beat ten generalists.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 2 – Roles: Define Your Agent Team
+    ════════════════════════════════════════ */
+
+    const TOOL_OPTIONS = [
+      { id: 'web-search',       emoji: '🔍', label: 'Web Search'       },
+      { id: 'calculator',       emoji: '🧮', label: 'Calculator'       },
+      { id: 'database',         emoji: '🗄️', label: 'Database'         },
+      { id: 'file-reader',      emoji: '📄', label: 'File Reader'      },
+      { id: 'apis',             emoji: '🔗', label: 'APIs'             },
+      { id: 'code-interpreter', emoji: '💻', label: 'Code Interpreter' },
+    ];
+
+    const EXAMPLE_TEAM = [
+      {
+        name: 'Strategist',
+        specialty: 'Market analysis and positioning',
+        tools: new Set(['web-search', 'database']),
+        input: 'Product brief and target market',
+        output: 'Go-to-market strategy doc with 3 positioning angles',
+      },
+      {
+        name: 'Copywriter',
+        specialty: 'Persuasive product messaging',
+        tools: new Set(['file-reader']),
+        input: 'Go-to-market strategy doc from Strategist',
+        output: 'Launch copy: headline, tagline, 3 feature bullets, CTA',
+      },
+      {
+        name: 'Reviewer',
+        specialty: 'Brand and quality assurance',
+        tools: new Set(['file-reader']),
+        input: 'Launch copy from Copywriter',
+        output: 'Revised copy with tracked changes and rationale',
+      },
+    ];
+
+    function AgentBuilderCard({ agentIdx, agent, onChange }) {
+      const toggleTool = (id) => {
+        const next = new Set(agent.tools);
+        if (next.has(id)) { next.delete(id); } else { next.add(id); }
+        onChange({ ...agent, tools: next });
+      };
+      const labels = ['1st Agent', '2nd Agent', '3rd Agent'];
+      return (
+        <div className="agent-builder-card">
+          <div className="agent-builder-header">
+            <div className="agent-builder-num" aria-hidden="true">{agentIdx + 1}</div>
+            <div className="agent-builder-title">{labels[agentIdx]}</div>
+          </div>
+
+          <div className="agent-field-row">
+            <div className="agent-field">
+              <label className="agent-field-label" htmlFor={'agent-name-' + agentIdx}>Name</label>
+              <input
+                id={'agent-name-' + agentIdx}
+                className="agent-field-input"
+                type="text"
+                placeholder="e.g. Strategist"
+                value={agent.name}
+                onChange={(e) => onChange({ ...agent, name: e.target.value })}
+              />
+            </div>
+            <div className="agent-field">
+              <label className="agent-field-label" htmlFor={'agent-specialty-' + agentIdx}>Specialty</label>
+              <input
+                id={'agent-specialty-' + agentIdx}
+                className="agent-field-input"
+                type="text"
+                placeholder="e.g. Market analysis and positioning"
+                value={agent.specialty}
+                onChange={(e) => onChange({ ...agent, specialty: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="agent-field" style={{ marginBottom: '12px' }}>
+            <div className="agent-field-label">Tools</div>
+            <div className="tool-toggles" role="group" aria-label={'Tools for agent ' + (agentIdx + 1)}>
+              {TOOL_OPTIONS.map((t) => {
+                const isActive = agent.tools.has(t.id);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className={'tool-toggle' + (isActive ? ' active' : '')}
+                    aria-pressed={isActive}
+                    onClick={() => toggleTool(t.id)}
+                  >
+                    <span className="tool-toggle-emoji" aria-hidden="true">{t.emoji}</span>
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="agent-field-row">
+            <div className="agent-field">
+              <label className="agent-field-label" htmlFor={'agent-input-' + agentIdx}>Input</label>
+              <input
+                id={'agent-input-' + agentIdx}
+                className="agent-field-input"
+                type="text"
+                placeholder="What does this agent receive?"
+                value={agent.input}
+                onChange={(e) => onChange({ ...agent, input: e.target.value })}
+              />
+            </div>
+            <div className="agent-field">
+              <label className="agent-field-label" htmlFor={'agent-output-' + agentIdx}>Output</label>
+              <input
+                id={'agent-output-' + agentIdx}
+                className="agent-field-input"
+                type="text"
+                placeholder="What does this agent produce?"
+                value={agent.output}
+                onChange={(e) => onChange({ ...agent, output: e.target.value })}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function S2({ agents, setAgents, showExample, setShowExample }) {
+      const applyExample = () => {
+        if (!showExample) {
+          setAgents(EXAMPLE_TEAM.map(a => ({ ...a, tools: new Set(a.tools) })));
+        }
+        setShowExample(v => !v);
+      };
+
+      const updateAgent = (idx, updated) => {
+        setAgents(prev => {
+          const next = [...prev];
+          next[idx] = updated;
+          return next;
+        });
+      };
+
+      return (
+        <>
+          <div><h2 className="stage-header">Define Your Agent Team</h2></div>
+          <div className="explanation">
+            Design three agents that each own a distinct part of your pipeline. A good team has no overlap — if you can&rsquo;t describe Agent 2&rsquo;s unique role in one sentence, merge it with another agent.
+          </div>
+
+          <button
+            type="button"
+            className={'example-toggle-btn' + (showExample ? ' active' : '')}
+            onClick={applyExample}
+            aria-pressed={showExample}
+          >
+            {showExample ? '✓ Example loaded' : '💡 Show Example: Product Launch Team'}
+          </button>
+
+          {showExample && (
+            <div className="example-box" aria-live="polite">
+              <div className="example-box-title">Product Launch Team — pre-filled below</div>
+              <div className="example-agent-row">
+                <div className="example-agent-chip">🎯 Strategist</div>
+                <div className="example-agent-arrow">→</div>
+                <div className="example-agent-chip">✍️ Copywriter</div>
+                <div className="example-agent-arrow">→</div>
+                <div className="example-agent-chip">🔍 Reviewer</div>
+              </div>
+              <p style={{ fontSize: '13px', color: '#555', margin: '8px 0 0 0', lineHeight: '1.6' }}>
+                Each agent owns one stage of the launch pipeline. Strategist sets direction → Copywriter executes messaging → Reviewer ensures quality. Clear handoffs, no overlap.
+              </p>
+            </div>
+          )}
+
+          <div className="agent-builder-grid" style={{ marginTop: '20px' }}>
+            {agents.map((agent, idx) => (
+              <AgentBuilderCard
+                key={idx}
+                agentIdx={idx}
+                agent={agent}
+                onChange={(updated) => updateAgent(idx, updated)}
+              />
+            ))}
+          </div>
+
+          <InsightBlock>
+            Agent roles should be as distinct as job titles. If you can&rsquo;t explain what makes Agent 2 different from Agent 1 in one sentence, they should be the same agent.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 3 – Prompts: Write Each Agent's Instructions
+    ════════════════════════════════════════ */
+
+    const PROMPT_FIELDS_CONFIG = [
+      { id: 'role',         label: 'Role',           prefix: 'You are a…',            placeholder: 'e.g. market strategist who analyzes competitive positioning' },
+      { id: 'specialty',    label: 'Specialty Context', prefix: 'Your expertise is…', placeholder: 'e.g. translating product features into business-level positioning statements' },
+      { id: 'inputFormat',  label: 'Input Format',   prefix: 'You will receive…',      placeholder: 'e.g. a product brief (title, target audience, 3 key features)' },
+      { id: 'task',         label: 'Task',            prefix: 'Your task is to…',       placeholder: 'e.g. produce a go-to-market strategy with 3 distinct positioning angles' },
+      { id: 'outputFormat', label: 'Output Format',  prefix: 'Respond with…',          placeholder: 'e.g. a structured doc: (1) Positioning Angle, (2) Key Message, (3) Target Segment' },
+      { id: 'constraints',  label: 'Constraints',    prefix: 'Never… Always…',         placeholder: 'e.g. Never fabricate competitor data. Always cite evidence for each positioning claim.' },
+    ];
+
+    function assemblePrompt(fields, agentName) {
+      const name        = agentName        || '[Agent Name]';
+      const role        = fields.role        || '[role]';
+      const specialty   = fields.specialty   || '[specialty context]';
+      const inputFmt    = fields.inputFormat || '[input format]';
+      const task        = fields.task        || '[task]';
+      const outputFmt   = fields.outputFormat || '[output format]';
+      const constraints = fields.constraints || '[constraints]';
+      return (
+        `You are a ${role}.\n` +
+        `\nYour expertise is ${specialty}.\n` +
+        `\nYou will receive ${inputFmt}.\n` +
+        `\nYour task is to ${task}.\n` +
+        `\nOutput Format:\nRespond with ${outputFmt}\n` +
+        `\nConstraints:\n${constraints}`
+      );
+    }
+
+    function S3({ agents, promptFields, setPromptFields }) {
+      const [activeTab, setActiveTab] = useState(0);
+
+      const updateField = (agentIdx, fieldId, val) => {
+        setPromptFields(prev => {
+          const next = [...prev];
+          next[agentIdx] = { ...next[agentIdx], [fieldId]: val };
+          return next;
+        });
+      };
+
+      const agentName = agents[activeTab] && agents[activeTab].name
+        ? agents[activeTab].name
+        : `Agent ${activeTab + 1}`;
+
+      return (
+        <>
+          <div><h2 className="stage-header">Write Each Agent&rsquo;s Instructions</h2></div>
+          <div className="explanation">
+            Fill in the sections below to build each agent&rsquo;s system prompt. Switch between agents using the tabs. The assembled preview updates as you type &mdash; copy it directly into your AI tool&rsquo;s system prompt field.
+          </div>
+
+          <div className="prompt-builder-tabs" role="tablist" aria-label="Select agent to edit prompt">
+            {agents.map((agent, idx) => {
+              const label = (agent && agent.name) ? agent.name : `Agent ${idx + 1}`;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  role="tab"
+                  className={'prompt-tab-btn' + (activeTab === idx ? ' active' : '')}
+                  aria-selected={activeTab === idx}
+                  onClick={() => setActiveTab(idx)}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="scene-card">
+            <div className="prompt-fields" role="tabpanel" aria-label={'Prompt editor for ' + agentName}>
+              {PROMPT_FIELDS_CONFIG.map((sec) => (
+                <div className="prompt-field" key={sec.id}>
+                  <label className="prompt-field-label" htmlFor={'pf-' + activeTab + '-' + sec.id}>
+                    {sec.label}
+                  </label>
+                  <div className="prompt-field-prefix">{sec.prefix}</div>
+                  <textarea
+                    id={'pf-' + activeTab + '-' + sec.id}
+                    className="prompt-field-textarea"
+                    placeholder={sec.placeholder}
+                    value={(promptFields[activeTab] && promptFields[activeTab][sec.id]) || ''}
+                    onChange={(e) => updateField(activeTab, sec.id, e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="section-mini-title" style={{ marginTop: '28px' }}>
+              Assembled System Prompt — {agentName}
+            </div>
+            <div className="prompt-preview">
+              <div className="prompt-preview-label">Auto-assembled · paste into system prompt field</div>
+              <pre>{assemblePrompt(promptFields[activeTab] || {}, agentName)}</pre>
+            </div>
+          </div>
+
+          <InsightBlock>
+            The system prompt is the agent&rsquo;s job description. Write it like you&rsquo;re onboarding a contractor: clear scope, explicit deliverables, defined handoff points.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 4 – Handoffs: Design the Communication Protocol
+    ════════════════════════════════════════ */
+
+    const FORMAT_OPTIONS = [
+      { id: 'plain-text',        label: 'Plain Text' },
+      { id: 'json',              label: 'JSON' },
+      { id: 'structured-report', label: 'Structured Report' },
+    ];
+
+    function HandoffCard({ idx, agents, handoff, onChange }) {
+      const fromAgent = (agents[idx] && agents[idx].name) ? agents[idx].name : `Agent ${idx + 1}`;
+      const toAgent   = (agents[idx + 1] && agents[idx + 1].name) ? agents[idx + 1].name : `Agent ${idx + 2}`;
+
+      return (
+        <div className="handoff-card">
+          <div className="handoff-card-header">
+            <div className="handoff-card-label">Handoff {idx + 1}</div>
+            <div className="handoff-arrow-chip">
+              <span>{fromAgent}</span>
+              <span aria-hidden="true">→</span>
+              <span>{toAgent}</span>
+            </div>
+          </div>
+
+          <div className="handoff-field">
+            <label className="handoff-field-label" htmlFor={'h-passes-' + idx}>What Passes</label>
+            <textarea
+              id={'h-passes-' + idx}
+              className="handoff-textarea"
+              placeholder={`e.g. The structured strategy doc from ${fromAgent}: 3 positioning angles with evidence, target segment, and key message per angle.`}
+              value={handoff.passes}
+              onChange={(e) => onChange({ ...handoff, passes: e.target.value })}
+              aria-label={'What passes from ' + fromAgent + ' to ' + toAgent}
+              rows={3}
+            />
+          </div>
+
+          <div className="handoff-field">
+            <div className="handoff-field-label" id={'h-format-label-' + idx}>Format</div>
+            <div className="format-radios" role="radiogroup" aria-labelledby={'h-format-label-' + idx}>
+              {FORMAT_OPTIONS.map((opt) => {
+                const isSelected = handoff.format === opt.id;
+                return (
+                  <label
+                    key={opt.id}
+                    className={'format-radio-label' + (isSelected ? ' selected' : '')}
+                  >
+                    <input
+                      type="radio"
+                      className="format-radio-input"
+                      name={'handoff-format-' + idx}
+                      value={opt.id}
+                      checked={isSelected}
+                      onChange={() => onChange({ ...handoff, format: opt.id })}
+                    />
+                    <span className="format-radio-dot" aria-hidden="true"></span>
+                    {opt.label}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="handoff-field">
+            <label className="handoff-field-label" htmlFor={'h-decision-' + idx}>Decision Point</label>
+            <textarea
+              id={'h-decision-' + idx}
+              className="handoff-textarea"
+              placeholder={`e.g. ${toAgent} should reject and request revision if any positioning angle lacks evidence or if the target segment is not specified.`}
+              value={handoff.decision}
+              onChange={(e) => onChange({ ...handoff, decision: e.target.value })}
+              aria-label={'Decision point for handoff from ' + fromAgent + ' to ' + toAgent}
+              rows={2}
+            />
+          </div>
+
+          {/* Feedback loop toggle */}
+          <div className="feedback-toggle-row">
+            <label className="toggle-switch" htmlFor={'fb-toggle-' + idx}>
+              <input
+                id={'fb-toggle-' + idx}
+                type="checkbox"
+                checked={handoff.feedbackLoop}
+                onChange={(e) => onChange({ ...handoff, feedbackLoop: e.target.checked })}
+                aria-label={'Enable feedback loop for handoff ' + (idx + 1)}
+              />
+              <div className="toggle-track"></div>
+              <div className="toggle-thumb"></div>
+            </label>
+            <div>
+              <span className="toggle-label-text">Feedback Loop</span>
+              <span className="toggle-label-hint">{handoff.feedbackLoop ? 'enabled' : 'off'}</span>
+            </div>
+          </div>
+          <div className={'feedback-criteria-wrap' + (handoff.feedbackLoop ? ' open' : '')}>
+            <div className="handoff-field" style={{ marginTop: '10px' }}>
+              <label className="handoff-field-label" htmlFor={'h-revision-' + idx}>Revision Criteria</label>
+              <textarea
+                id={'h-revision-' + idx}
+                className="handoff-textarea"
+                placeholder={`e.g. If ${toAgent} finds missing evidence, it sends the output back to ${fromAgent} with specific gaps noted.`}
+                value={handoff.revisionCriteria}
+                onChange={(e) => onChange({ ...handoff, revisionCriteria: e.target.value })}
+                rows={2}
+                aria-label={'Revision criteria for feedback loop ' + (idx + 1)}
+                tabIndex={handoff.feedbackLoop ? 0 : -1}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function S4({ agents, handoffs, setHandoffs }) {
+      const updateHandoff = (idx, updated) => {
+        setHandoffs(prev => {
+          const next = [...prev];
+          next[idx] = updated;
+          return next;
+        });
+      };
+
+      return (
+        <>
+          <div><h2 className="stage-header">Design the Communication Protocol</h2></div>
+          <div className="explanation">
+            Each handoff between agents is a contract. Define exactly what data passes, in what format, and what triggers a re-request. Poorly defined handoffs are the #1 cause of multi-agent system failures.
+          </div>
+
+          <div className="handoff-cards">
+            {handoffs.map((handoff, idx) => (
+              <HandoffCard
+                key={idx}
+                idx={idx}
+                agents={agents}
+                handoff={handoff}
+                onChange={(updated) => updateHandoff(idx, updated)}
+              />
+            ))}
+          </div>
+
+          <InsightBlock>
+            The handoff protocol IS the architecture. Poorly defined handoffs create agents that talk past each other &mdash; like a relay race where nobody knows when to pass the baton.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       Stage 5 – Test Plan: How to Validate Your Design
+    ════════════════════════════════════════ */
+
+    const FAILURE_CARDS_DATA = [
+      {
+        id: 'lost-context',
+        emoji: '🕳️',
+        title: 'Context Gets Lost Between Agents',
+        desc: 'Agent 2 ignores or misunderstands the output from Agent 1 because the format wasn\'t explicit.',
+        fix: 'Make the handoff format a named, structured format (JSON or a template). Never pass raw paragraphs between agents — structure everything. Add a "confirm receipt" instruction: the receiving agent must acknowledge and restate what it received before acting.',
+      },
+      {
+        id: 'infinite-loop',
+        emoji: '🔁',
+        title: 'Feedback Loop That Never Converges',
+        desc: 'With feedback loops enabled, Agent 2 keeps sending back to Agent 1 and the revision criteria are never met.',
+        fix: 'Add a hard revision limit (e.g., max 2 retries). Define "good enough" explicitly in the revision criteria — don\'t use vague language like "improve quality." Specify what passing looks like in measurable terms.',
+      },
+      {
+        id: 'role-overlap',
+        emoji: '👥',
+        title: 'Role Overlap — Agents Duplicating Work',
+        desc: 'Agent 2 restates or re-does what Agent 1 already produced instead of building on it.',
+        fix: 'Return to Stage 2 and sharpen each agent\'s specialty. Add explicit instructions: "Do not repeat or summarize what Agent 1 produced — begin from where it left off." Make each agent\'s input description reference the exact output field from the previous agent.',
+      },
+    ];
+
+    function S5({ testRows, setTestRows }) {
+      const [openFailures, setOpenFailures] = useState(new Set());
+
+      const toggleFailure = (id) => {
+        setOpenFailures(prev => {
+          const next = new Set(prev);
+          if (next.has(id)) { next.delete(id); } else { next.add(id); }
+          return next;
+        });
+      };
+
+      const updateTestRow = (idx, field, val) => {
+        setTestRows(prev => {
+          const next = [...prev];
+          next[idx] = { ...next[idx], [field]: val };
+          return next;
+        });
+      };
+
+      return (
+        <>
+          <div><h2 className="stage-header">How to Validate Your Design</h2></div>
+
+          <div className="testing-instructions">
+            <p><strong>Manual testing method:</strong> open three separate chat windows (one per agent). Copy the system prompt from Stage 3 into each one. Run a real scenario by pasting Agent 1&rsquo;s input, then copying its output into Agent 2, and so on.</p>
+            <p>This is low-tech but it reveals handoff failures, format mismatches, and role confusion before you automate anything. If it doesn&rsquo;t work manually, don&rsquo;t build the automation.</p>
+          </div>
+
+          <div className="section-mini-title">Test Scenarios</div>
+          <div className="test-rows">
+            {testRows.map((row, idx) => (
+              <div className="test-row" key={idx}>
+                <div className="test-row-header">
+                  <div className="test-row-num" aria-hidden="true">{idx + 1}</div>
+                  <div className="test-row-title">Scenario {idx + 1}</div>
+                </div>
+                <div className="test-field">
+                  <label className="test-field-label" htmlFor={'ts-scenario-' + idx}>Scenario</label>
+                  <textarea
+                    id={'ts-scenario-' + idx}
+                    className="test-field-textarea"
+                    placeholder="Describe the input you'll feed to Agent 1. Be specific — use a real example, not a hypothetical."
+                    value={row.scenario}
+                    onChange={(e) => updateTestRow(idx, 'scenario', e.target.value)}
+                    rows={3}
+                  />
+                </div>
+                <div className="test-field">
+                  <label className="test-field-label" htmlFor={'ts-expected-' + idx}>Expected Behavior</label>
+                  <textarea
+                    id={'ts-expected-' + idx}
+                    className="test-field-textarea"
+                    placeholder="What should the final output look like? What should each agent produce along the way?"
+                    value={row.expected}
+                    onChange={(e) => updateTestRow(idx, 'expected', e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="section-mini-title" style={{ marginTop: '28px' }}>Common Failure Modes</div>
+          <div className="failure-cards">
+            {FAILURE_CARDS_DATA.map((f) => {
+              const isOpen = openFailures.has(f.id);
+              return (
+                <div
+                  key={f.id}
+                  className={'failure-card' + (isOpen ? ' selected' : '')}
+                  onClick={() => toggleFailure(f.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFailure(f.id); } }}
+                  aria-pressed={isOpen}
+                  aria-expanded={isOpen}
+                  aria-controls={'failure-fix-' + f.id}
+                >
+                  <div className="failure-card-header">
+                    <span className="failure-card-emoji" aria-hidden="true">{f.emoji}</span>
+                    <span className="failure-card-title">{f.title}</span>
+                  </div>
+                  <div className="failure-card-desc">{f.desc}</div>
+                  <div className="failure-fix" id={'failure-fix-' + f.id}>
+                    <div className="failure-fix-label">Fix Strategy</div>
+                    {f.fix}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <a href="../architectures/agentic-ai.html" className="deep-dive-link" aria-label="Deep dive into agentic AI architectures">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            Deep Dive: Agentic AI Architectures
+          </a>
+
+          <InsightBlock>
+            Manual testing with copy-paste between chat windows is crude but effective. If your design doesn&rsquo;t work manually, automation won&rsquo;t fix it &mdash; it&rsquo;ll just fail faster.
+          </InsightBlock>
+        </>
+      );
+    }
+
+    /* ════════════════════════════════════════
+       NEXT_GUIDE + STAGES
+    ════════════════════════════════════════ */
+
+    const NEXT_GUIDE = { id: '7.5', title: 'Capstone', module: 'Module 7', href: './capstone.html' };
+
+    const STAGES = [
+      { label: 'Patterns',  Icon: IconPatterns  },
+      { label: 'Roles',     Icon: IconRoles     },
+      { label: 'Prompts',   Icon: IconPrompts   },
+      { label: 'Handoffs',  Icon: IconHandoffs  },
+      { label: 'Test Plan', Icon: IconTest      },
+    ];
+
+    /* ════════════════════════════════════════
+       Main Guide Shell
+    ════════════════════════════════════════ */
+
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+      const [expandedPattern, setExpandedPattern] = useState(null);
+
+      // Stage 2: agent team builder state
+      const [agents, setAgents] = useState([
+        { name: '', specialty: '', tools: new Set(), input: '', output: '' },
+        { name: '', specialty: '', tools: new Set(), input: '', output: '' },
+        { name: '', specialty: '', tools: new Set(), input: '', output: '' },
+      ]);
+      const [showExample, setShowExample] = useState(false);
+
+      // Stage 3: per-agent prompt fields
+      const [promptFields, setPromptFields] = useState([
+        { role: '', specialty: '', inputFormat: '', task: '', outputFormat: '', constraints: '' },
+        { role: '', specialty: '', inputFormat: '', task: '', outputFormat: '', constraints: '' },
+        { role: '', specialty: '', inputFormat: '', task: '', outputFormat: '', constraints: '' },
+      ]);
+
+      // Stage 4: handoff state (2 handoffs for 3 agents)
+      const [handoffs, setHandoffs] = useState([
+        { passes: '', format: 'plain-text', decision: '', feedbackLoop: false, revisionCriteria: '' },
+        { passes: '', format: 'plain-text', decision: '', feedbackLoop: false, revisionCriteria: '' },
+      ]);
+
+      // Stage 5: test scenarios
+      const [testRows, setTestRows] = useState([
+        { scenario: '', expected: '' },
+        { scenario: '', expected: '' },
+        { scenario: '', expected: '' },
+      ]);
+
+      const handleNext = () => { if (currentStage < STAGES.length - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
+
+      const renderStage = () => {
+        if (currentStage === 0) return <S1 expandedPattern={expandedPattern} setExpandedPattern={setExpandedPattern} />;
+        if (currentStage === 1) return <S2 agents={agents} setAgents={setAgents} showExample={showExample} setShowExample={setShowExample} />;
+        if (currentStage === 2) return <S3 agents={agents} promptFields={promptFields} setPromptFields={setPromptFields} />;
+        if (currentStage === 3) return <S4 agents={agents} handoffs={handoffs} setHandoffs={setHandoffs} />;
+        return <S5 testRows={testRows} setTestRows={setTestRows} />;
+      };
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar" aria-label="Guide sections">
+              {STAGES.map((stage, idx) => {
+                const { Icon } = stage;
+                return (
+                  <React.Fragment key={idx}>
+                    <div className={'step-wrapper' + (currentStage === idx ? ' active' : '')}>
+                      <button
+                        type="button"
+                        className={'step-btn' + (currentStage === idx ? ' active' : '')}
+                        aria-label={'Step ' + (idx + 1) + ': ' + stage.label}
+                        aria-current={currentStage === idx ? 'step' : undefined}
+                        onClick={() => setCurrentStage(idx)}
+                      >
+                        <Icon />
+                      </button>
+                      <div className="step-btn-label">{stage.label}</div>
+                    </div>
+                    {idx < STAGES.length - 1 && (
+                      <div className={'step-connector' + (currentStage > idx ? ' active' : '')} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">7.4</span>
+                    <h1 className="title">Multi-Agent Design</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">USE CASE</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of {STAGES.length}</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handlePrev}
+                      disabled={currentStage === 0}
+                      aria-label="Previous section"
+                      title="Previous stage"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      type="button"
+                      className="arrow-btn"
+                      onClick={handleNext}
+                      disabled={currentStage === STAGES.length - 1}
+                      aria-label="Next section"
+                      title="Next stage"
+                    >
+                      &#8594;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area">
+                {renderStage()}
+                {currentStage === STAGES.length - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>
