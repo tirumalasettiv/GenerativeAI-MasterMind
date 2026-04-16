@@ -44,6 +44,26 @@
     .result-card:hover { border-color: #6c5ce7; box-shadow: 0 4px 16px rgba(108, 92, 231, 0.08); }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     .scale-in { animation: scaleIn 0.5s ease forwards; }
+
+    @media (max-width: 768px) {
+      .option-card { padding: 14px 16px; font-size: 15px; gap: 12px; }
+      .option-letter { width: 32px; height: 32px; font-size: 13px; }
+      .submit-btn { padding: 12px 32px; font-size: 15px; }
+      .score-ring { width: 140px; height: 140px; }
+      .score-ring svg { width: 140px; height: 140px; }
+      .score-number { font-size: 36px; }
+      .result-card { padding: 14px 16px; gap: 12px; }
+    }
+    @media (max-width: 480px) {
+      .option-card { padding: 12px 14px; font-size: 14px; gap: 10px; }
+      .option-letter { width: 28px; height: 28px; font-size: 12px; }
+      .submit-btn { padding: 10px 24px; font-size: 14px; }
+      .section-tag { font-size: 10px; padding: 3px 10px; }
+      .score-ring { width: 120px; height: 120px; }
+      .score-ring svg { width: 120px; height: 120px; }
+      .score-number { font-size: 30px; }
+      .result-card { padding: 12px; gap: 10px; flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>
