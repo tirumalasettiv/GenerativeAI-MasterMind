@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="GenerativeAI MasterMind — Interactive Learning">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="50%" stop-color="#2d1b69"/>
+      <stop offset="100%" stop-color="#6c5ce7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="600" y="220" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="120">🧠</text>
+  <text x="600" y="340" text-anchor="middle" font-family="'DM Sans', sans-serif" font-weight="700" font-size="48" fill="#ffffff">GenerativeAI MasterMind</text>
+  <text x="600" y="400" text-anchor="middle" font-family="'DM Sans', sans-serif" font-weight="500" font-size="24" fill="rgba(255,255,255,0.6)">7 Modules · 40 Guides · Interactive Learning</text>
+  <rect y="622" width="1200" height="8" fill="#6c5ce7"/>
+</svg>
