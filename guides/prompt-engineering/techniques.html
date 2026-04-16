@@ -21,11 +21,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
   <style>
     /* ---------- Overview Cards ---------- */
-    .overview-intro {
-      font-size: 16px; line-height: 1.7; color: #555;
-      max-width: 760px;
-    }
-
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -62,7 +57,6 @@
     .card-top-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 10px;
     }
 
@@ -744,7 +738,7 @@
       return (
         <>
           <div><h2 className="stage-header">The Top 10 Prompt Engineering Techniques</h2></div>
-          <div className="overview-intro">
+          <div className="explanation">
             Every technique below is a tool — not a winner. Pick by the shape of the problem, not by how sophisticated it sounds. Click any card to see what it is best used for, then open the detailed page from the sidebar or the card.
           </div>
 

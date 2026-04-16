@@ -541,38 +541,6 @@
       );
     }
 
-    function S1Diagram() {
-  const nodes = [
-    { label: 'LLM Chat',   analogy: 'Bicycle', color: '#6c5ce7', x: 60  },
-    { label: 'RAG',        analogy: 'Car',     color: '#3498db', x: 165 },
-    { label: 'Workflow',   analogy: 'Bus',     color: '#f39c12', x: 270 },
-    { label: 'Agent',      analogy: 'Taxi',    color: '#e74c3c', x: 375 },
-    { label: 'Agentic AI', analogy: 'Fleet',   color: '#e056a0', x: 480 },
-  ];
-  return (
-    <svg width="540" height="110" viewBox="0 0 540 110"
-      style={{ maxWidth: '100%', overflow: 'visible' }}
-      aria-label="Architecture spectrum from simple to complex">
-      <defs>
-        <linearGradient id="specGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#6c5ce7" />
-          <stop offset="100%" stopColor="#e056a0" />
-        </linearGradient>
-      </defs>
-      <text x="60" y="14" textAnchor="middle" fontSize="10" fontWeight="600" fill="#aaa" fontFamily="DM Sans">SIMPLE</text>
-      <text x="480" y="14" textAnchor="middle" fontSize="10" fontWeight="600" fill="#aaa" fontFamily="DM Sans">COMPLEX</text>
-      <line x1="60" y1="50" x2="480" y2="50" stroke="url(#specGrad)" strokeWidth="3" />
-      {nodes.map(n => (
-        <g key={n.label}>
-          <circle cx={n.x} cy="50" r="20" fill={n.color} />
-          <text x={n.x} y="82" textAnchor="middle" fontSize="11" fontWeight="600" fill="#1a1a1a" fontFamily="DM Sans">{n.label}</text>
-          <text x={n.x} y="96" textAnchor="middle" fontSize="10" fill="#888" fontFamily="DM Sans">{n.analogy}</text>
-        </g>
-      ))}
-    </svg>
-  );
-}
-
     /* Stage 1: The Spectrum */
     function S1() {
       const [selected, setSelected] = useState(null);
@@ -609,7 +577,6 @@
             There are 5 ways to build AI-powered solutions, ranging from simple to complex. Each architecture adds capabilities &mdash; and cost. Click any card to explore.
           </div>
           <div className="scene-card">
-            <S1Diagram />
             <div style={{ width: '100%' }}>
               <div style={{ fontSize: '14px', fontWeight: 700, color: '#6c5ce7', marginBottom: '16px', textAlign: 'center', letterSpacing: '0.5px' }}>
                 SIMPLE &rarr; COMPLEX

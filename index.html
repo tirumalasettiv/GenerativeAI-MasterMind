@@ -17,9 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/guide-shared.css">
   <style>
-    @media (max-width: 768px) {
-      #root { height: auto !important; overflow: visible !important; }
-    }
+    #root { height: auto !important; overflow: visible !important; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -141,7 +139,10 @@
       "1.4": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="#eee9fd"/></svg>',
       "1.5": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e17055" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="16.5" r="0.5" fill="#e17055"/></svg>',
       "1.6": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-      "1.7": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4" stroke="#2ecc71"/></svg>',
+      "1.7": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e17055" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="4" height="4" rx="0.5" fill="#fde8e0"/><rect x="9" y="3" width="4" height="4" rx="0.5" fill="#e17055" opacity="0.5"/><rect x="15" y="3" width="4" height="4" rx="0.5" fill="#fde8e0"/><rect x="3" y="9" width="4" height="4" rx="0.5" fill="#e17055" opacity="0.5"/><rect x="9" y="9" width="4" height="4" rx="0.5" fill="#e17055"/><rect x="15" y="9" width="4" height="4" rx="0.5" fill="#fde8e0"/><rect x="3" y="15" width="4" height="4" rx="0.5" fill="#fde8e0"/><rect x="9" y="15" width="4" height="4" rx="0.5" fill="#fde8e0"/><rect x="15" y="15" width="4" height="4" rx="0.5" fill="#e17055" opacity="0.5"/></svg>',
+      "1.8": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v7c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V5l8-3z" fill="#eefaf2"/><path d="M8 12l3 3 5-5"/></svg>',
+      "1.9": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round"><line x1="3" y1="21" x2="21" y2="21"/><rect x="5" y="13" width="3" height="8" rx="0.5" fill="#eefaf2"/><rect x="10.5" y="8" width="3" height="13" rx="0.5" fill="#2ecc71" opacity="0.5"/><rect x="16" y="4" width="3" height="17" rx="0.5" fill="#2ecc71"/></svg>',
+      "1.10": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4" stroke="#2ecc71"/></svg>',
       "2.1": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#eee9fd"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" opacity="0.5"/><path d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" opacity="0.3"/></svg>',
       "2.2": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
       "2.3": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4" stroke="#2ecc71"/></svg>',
@@ -158,6 +159,15 @@
       "5.5": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="5"/><path d="M12 13v4"/><circle cx="7" cy="20" r="2"/><circle cx="17" cy="20" r="2"/><path d="M7 18l5-5 5 5" stroke-dasharray="2 2" opacity="0.5"/></svg>',
       "5.6": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="12" cy="16" r="3"/><path d="M10.5 9.5l1.5 4M13.5 9.5l-1.5 4" stroke-dasharray="2 2" opacity="0.5"/></svg>',
       "5.7": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4" stroke="#2ecc71"/></svg>',
+      "6.1": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round"><rect x="5" y="4" width="14" height="18" rx="2" fill="#fef9f3"/><rect x="9" y="2" width="6" height="4" rx="1" fill="#f39c12"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
+      "6.2": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/><line x1="14" y1="4" x2="10" y2="20" opacity="0.5"/></svg>',
+      "6.3": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4" stroke="#2ecc71"/></svg>',
+      "7.1": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#fef9f3"/><polyline points="14 2 14 8 20 8"/><circle cx="10" cy="14" r="3"/><line x1="12.5" y1="16.5" x2="15" y2="19"/></svg>',
+      "7.2": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="6" height="5" rx="1.5" fill="#fef9f3"/><rect x="9" y="10" width="6" height="5" rx="1.5" fill="#f39c12" opacity="0.3"/><rect x="16" y="16" width="6" height="5" rx="1.5" fill="#fef9f3"/><path d="M5 9v2h4.5M12 15v2h4.5" stroke-dasharray="2 2"/></svg>',
+      "7.3": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="14" height="12" rx="3" fill="#fef9f3"/><circle cx="9.5" cy="13" r="1" fill="#f39c12" stroke="none"/><circle cx="14.5" cy="13" r="1" fill="#f39c12" stroke="none"/><path d="M12 2v5M9 5h6"/><line x1="5" y1="14" x2="2" y2="14"/><line x1="19" y1="14" x2="22" y2="14"/></svg>',
+      "7.4": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="3" fill="#fef9f3"/><circle cx="16" cy="8" r="3" fill="#fef9f3"/><circle cx="12" cy="17" r="3" fill="#f39c12" opacity="0.3"/><line x1="10" y1="10" x2="12" y2="14" stroke-dasharray="2 2"/><line x1="14" y1="10" x2="12" y2="14" stroke-dasharray="2 2"/><line x1="11" y1="8" x2="13" y2="8" stroke-dasharray="2 2"/></svg>',
+      "7.5": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-4 10 4-10 4-10-4z" fill="#fef9f3"/><path d="M6 10v4c0 1.5 3 3 6 3s6-1.5 6-3v-4"/><line x1="22" y1="8" x2="22" y2="14"/></svg>',
+      "7.6": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4" stroke="#2ecc71"/></svg>',
     };
 
     function GuideIcon({ guideId }) {
@@ -349,39 +359,9 @@
       );
     }
 
-    function ProgressBar({ total, available }) {
-      const percentage = (available / total) * 100;
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div
-            style={{
-              flex: 1,
-              height: 8,
-              background: "#e8e8f0",
-              borderRadius: 4,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${percentage}%`,
-                background: "linear-gradient(90deg, #6c5ce7, #2ecc71)",
-                borderRadius: 4,
-                transition: "width 0.6s cubic-bezier(0.22, 0.68, 0, 1.2)",
-              }}
-            />
-          </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#3d3d4d", minWidth: 70 }}>
-            {available} of {total}
-          </span>
-        </div>
-      );
-    }
-
     function GenAIMasterMind() {
       const [activeFilter, setActiveFilter] = useState("All");
-      const filters = ["All", ...MODULES.map((m) => m.category)];
+      const filters = ["All", ...MODULES.map((m) => m.category), "final-exam"];
       const filterLabels = {
         All: "All Modules",
         fundamentals: "Fundamentals",
@@ -389,18 +369,21 @@
         "context-engineering": "Context Engineering",
         mcp: "Model Context Protocol",
         architectures: "Five Architectures",
+        "role-labs": "Role Labs",
+        "build-labs": "Build Labs",
+        "final-exam": "Final Exam",
       };
 
-      const filteredModules =
-        activeFilter === "All"
-          ? MODULES
-          : MODULES.filter((m) => m.category === activeFilter);
-
-      const totalGuides = MODULES.reduce((sum, m) => sum + m.guides.length, 0);
-      const availableGuides = MODULES.reduce(
-        (sum, m) => sum + m.guides.filter((g) => g.available).length,
-        0
-      );
+      const scrollToFilter = (filter) => {
+        setActiveFilter(filter);
+        const targetId =
+          filter === "All"
+            ? "main"
+            : filter === "final-exam"
+            ? "final-exam"
+            : `module-${MODULES.find((m) => m.category === filter)?.id}`;
+        document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
 
       return (
         <React.Fragment>
@@ -506,33 +489,6 @@
 
           {/* Main Content */}
           <main id="main" style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 20px" }}>
-            {/* Progress Section */}
-            <div
-              style={{
-                background: "#fff",
-                borderRadius: 14,
-                padding: "16px 20px",
-                marginBottom: 40,
-                border: "1px solid #e8e8f0",
-                animation: "slideDown 0.6s",
-              }}
-            >
-              <div style={{ marginBottom: 12 }}>
-                <p
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: "#6a6a7a",
-                    margin: 0,
-                    letterSpacing: 1,
-                  }}
-                >
-                  LEARNING PROGRESS
-                </p>
-              </div>
-              <ProgressBar total={totalGuides} available={availableGuides} />
-            </div>
-
             {/* Filter Tabs */}
             <div
               style={{
@@ -546,7 +502,7 @@
               {filters.map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setActiveFilter(filter)}
+                  onClick={() => scrollToFilter(filter)}
                   style={{
                     padding: "8px 16px",
                     borderRadius: 20,
@@ -567,17 +523,17 @@
 
             {/* Modules Grid */}
             <div style={{ animation: "fadeIn 0.6s 0.2s both" }}>
-              {filteredModules.map((module) => (
+              {MODULES.map((module) => (
                 <ModuleSection key={module.id} module={module} moduleNumber={module.id} />
               ))}
             </div>
 
             {/* Final Exam Section */}
-            {activeFilter === "All" && (
-              <div style={{
+            <div id="final-exam" style={{
                 animation: "fadeIn 0.6s 0.3s both", marginTop: 20,
                 background: "linear-gradient(135deg, #6c5ce7, #a78bfa, #2ecc71)",
                 borderRadius: 16, padding: 2,
+                scrollMarginTop: 80,
               }}>
                 <a
                   href="guides/final-exam/quiz.html"
@@ -639,7 +595,6 @@
                   </div>
                 </a>
               </div>
-            )}
           </main>
 
           {/* Footer */}
