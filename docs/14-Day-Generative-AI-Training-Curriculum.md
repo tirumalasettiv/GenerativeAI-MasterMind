@@ -58,29 +58,32 @@ Each session follows a consistent format:
 
 ---
 
-## Day 3: The CRAFT Prompting Framework
+## Day 3: The COSTAR Prompting Framework
 
 **Objective:** Write structured prompts that get better results.
+
+**Interactive guide:** `guides/prompt-engineering/costar-meta.html`
 
 | Time | Activity |
 |------|----------|
 | 0-5 min | Recap + share hallucination examples |
-| 5-25 min | Theory: CRAFT framework (Context, Role, Ask, Format, Tone) |
-| 25-40 min | Demo: Transform vague prompt → CRAFT prompt (live) |
-| 40-55 min | Hands-on: Rewrite 3 vague prompts using CRAFT |
+| 5-25 min | Theory: COSTAR framework (Context, Objective, Style, Tone, Audience, Response) |
+| 25-40 min | Demo: Transform vague prompt → COSTAR prompt (live) |
+| 40-55 min | Hands-on: Rewrite 3 vague prompts using COSTAR |
 | 55-60 min | Share best transformations + Preview Day 4 |
 
-### CRAFT Framework
+### COSTAR Framework
 
 | Component | Description | Example |
 |-----------|-------------|---------|
 | **C**ontext | Background information | "We're launching a B2B SaaS product next quarter..." |
-| **R**ole | Who should AI act as | "Act as a senior product marketing manager..." |
-| **A**sk | Specific task | "Write 5 email subject lines for..." |
-| **F**ormat | Desired output structure | "Present as a numbered list with explanations..." |
-| **T**one | Communication style | "Use a professional but approachable tone..." |
+| **O**bjective | The specific goal | "Generate 5 email subject lines that drive clicks..." |
+| **S**tyle | Writing style | "Concise, punchy, modern marketing voice..." |
+| **T**one | Communication tone | "Professional but approachable..." |
+| **A**udience | Who will read the output | "Mid-market IT decision-makers..." |
+| **R**esponse | Desired output structure | "Numbered list, each ≤10 words, with a one-line rationale..." |
 
-**Homework:** Write one CRAFT prompt for a real work task.
+**Homework:** Write one COSTAR prompt for a real work task.
 
 ---
 
