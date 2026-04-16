@@ -924,19 +924,19 @@
       const collabs = [
         {
           id: 'pipeline', emoji: '\u27A1\uFE0F', title: 'Pipeline', sub: 'Sequential handoff',
-          detail: 'Agent A finishes its work and hands results to Agent B, who hands to Agent C. Like an assembly line where each specialist adds their expertise in order. Example: Researcher gathers data, Analyst interprets it, Writer creates the report.'
+          detail: 'Agent A hands results to Agent B to Agent C \u2014 like an assembly line of specialists.'
         },
         {
           id: 'supervisor', emoji: '\uD83D\uDC51', title: 'Supervisor', sub: 'Boss delegates tasks',
-          detail: 'A manager agent breaks down work and assigns tasks to specialized worker agents, then synthesizes their outputs. Example: A lead agent assigns code review, testing, and documentation to three separate agents and combines results.'
+          detail: 'A manager agent breaks work apart and assigns tasks to specialized worker agents.'
         },
         {
           id: 'debate', emoji: '\uD83E\uDD3C', title: 'Debate', sub: 'Adversarial refinement',
-          detail: 'Multiple agents argue different perspectives, and a judge agent selects the best answer or synthesizes a consensus. Example: A legal analysis where one agent argues for and another against, and a judge writes the balanced opinion.'
+          detail: 'Agents argue opposing perspectives and a judge agent synthesizes the final answer.'
         },
         {
           id: 'swarm', emoji: '\uD83D\uDC1D', title: 'Swarm', sub: 'Self-organizing team',
-          detail: 'Agents dynamically claim tasks and coordinate without a central controller, like a bee colony. Example: A customer service swarm where available agents pick up tickets based on their expertise and current load.'
+          detail: 'Agents dynamically claim tasks without a central controller \u2014 like a self-organizing bee colony.'
         }
       ];
 
@@ -1017,6 +1017,9 @@
                     {fw}
                   </span>
                 ))}
+              </div>
+              <div className="deep-dive-link">
+                Deep dive into single-agent and multi-agent patterns in <a href="agents.html">Guide 5.5: AI Agents &rarr;</a>
               </div>
             </div>
           </div>
