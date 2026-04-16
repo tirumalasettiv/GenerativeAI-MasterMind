@@ -449,6 +449,45 @@
         correct: 2,
         explanation: "Y stands for Your Judgment \u2014 you are always the final decision-maker. AI is a powerful assistant, but you are responsible for the final output. Like a newspaper fact-checker, never publish the first thing a source tells you."
       },
+      {
+        id: 19,
+        section: "Embeddings",
+        question: "What does cosine similarity measure between two embedding vectors?",
+        options: [
+          "The physical distance between the vectors",
+          "The number of shared words",
+          "The directional similarity of their meaning",
+          "The length of each vector"
+        ],
+        correct: 2,
+        explanation: "Cosine similarity measures the angle between two vectors \u2014 vectors pointing in similar directions have similar meaning, regardless of their magnitude. This is how RAG systems find semantically similar documents even when they share no keywords."
+      },
+      {
+        id: 20,
+        section: "Safety & Alignment",
+        question: "Which type of attack tricks an AI by embedding malicious instructions in documents the AI retrieves and processes?",
+        options: [
+          "Jailbreaking",
+          "Social engineering",
+          "Direct prompt injection",
+          "Indirect prompt injection"
+        ],
+        correct: 3,
+        explanation: "Indirect prompt injection hides malicious instructions in external content (documents, emails, web pages) that the AI processes. Unlike direct injection where the user types the attack, indirect injection comes through the data the AI is told to trust \u2014 making it harder to detect."
+      },
+      {
+        id: 21,
+        section: "Evaluation & Benchmarks",
+        question: "What is the main limitation of using public benchmarks like MMLU to evaluate an LLM for your specific use case?",
+        options: [
+          "Benchmarks are too easy for modern models",
+          "Benchmarks test general knowledge, not your domain-specific needs",
+          "Benchmarks are always outdated",
+          "Benchmarks only measure response speed"
+        ],
+        correct: 1,
+        explanation: "Public benchmarks test broad capabilities across standardized tasks. A model scoring 90% on MMLU might score 40% on your company\u2019s domain-specific questions. Custom evaluation sets aligned with your actual use case are essential for reliable deployment decisions."
+      },
     ];
 
     const SECTION_ICONS = {
@@ -816,7 +855,7 @@
                   <a href="../../index.html" className="back-link">&larr; Back to All Guides</a>
                   <span style={{ marginLeft: 20, fontSize: 14, color: '#999' }}>|</span>
                   <div style={{ marginLeft: 12, display: 'flex', alignItems: 'center' }}>
-                    <span className="guide-number">1.7</span>
+                    <span className="guide-number">1.10</span>
                     <h1 className="title">Module 1 Quiz</h1>
                   </div>
                   <div style={{ marginLeft: 16 }}>
