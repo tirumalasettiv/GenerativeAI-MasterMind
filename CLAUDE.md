@@ -43,7 +43,7 @@ All design tokens, layout shell (`.container`, `.sidebar`, `.main-content`), and
 Guides keep only guide-specific component styles in their inline `<style>` block. Token values are defined as CSS custom properties on `:root` — see the file for the full list. The shared CSS also provides the accessibility baseline: focus rings (`:focus-visible`), skip-link styling, and `prefers-reduced-motion` handling.
 
 ### Five Modules
-1. **Fundamentals** (`guides/fundamentals/`) — 7 guides: what-is-genai, regular-vs-genai, how-genai-works, ai-model-types, limitations, verify-framework, quiz
+1. **Fundamentals** (`guides/fundamentals/`) — 10 guides: what-is-genai, regular-vs-genai, how-genai-works, ai-model-types, limitations, verify-framework, embeddings, safety-alignment, evaluation, quiz
 2. **Prompt Engineering** (`guides/prompt-engineering/`) — 3 guides: costar-meta, techniques, quiz
 3. **Context Engineering** (`guides/context-engineering/`) — 3 guides: foundations, mastering-context, quiz
 4. **MCP** (`guides/mcp/`) — 3 guides: fundamentals, advanced, quiz
