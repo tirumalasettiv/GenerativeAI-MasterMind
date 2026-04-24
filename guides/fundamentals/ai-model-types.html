@@ -280,12 +280,12 @@
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: '18px',
-        padding: '24px 36px',
+        gap: '12px',
+        padding: '20px 32px',
         scrollBehavior: 'smooth',
       },
       explainRow: {
-        marginBottom: '28px',
+        marginBottom: '16px',
         animation: 'fadeIn 0.3s ease-in',
       },
       explain: {
@@ -295,20 +295,18 @@
         marginBottom: '8px',
       },
       scene: {
-        flex: 1,
         background: 'linear-gradient(135deg, #fafafe 0%, #f5f3ff 50%, #f0f8ff 100%)',
         borderRadius: '16px',
         border: '1px solid #e0e0e0',
         boxShadow: '0 4px 16px rgba(108, 92, 231, 0.06), 0 2px 8px rgba(0,0,0,0.04)',
-        padding: '28px',
+        padding: '20px 24px',
         marginBottom: '0',
-        overflow: 'auto',
+        overflow: 'visible',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
         animation: 'fadeIn 0.3s ease-in',
-        minHeight: '0',
       },
       insight: {
         padding: '16px 20px',
@@ -412,52 +410,23 @@
 
     // Stage 1: Foundational Models
     const S1 = () => {
-      const [expandedModel, setExpandedModel] = useState(null);
-
-      const models = [
-        { name: 'GPT-4', company: 'OpenAI', stat: 'Multimodal' },
-        { name: 'Claude 3.5', company: 'Anthropic', stat: 'Constitutional AI' },
-        { name: 'Llama 3.1', company: 'Meta', stat: 'Open Source' },
-        { name: 'Gemini', company: 'Google', stat: 'Multi-modal' },
-      ];
-
       return (
         <div style={P.scene}>
           <div><h2 className="stage-header">The AI Model Landscape</h2></div>
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '20px', marginTop: '8px' }}>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '12px', marginTop: '4px' }}>
             <ModelScatterPlot />
-          </div>
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '32px',
-            animation: 'slideIn 0.4s ease-out',
-          }}>
-            <div style={{
-              marginBottom: '16px',
-              animation: 'pulse 2s infinite',
-            }}>
-              <SvgIcon svg={SVG.factory48} />
-            </div>
-            <div style={{
-              fontSize: '22px',
-              fontWeight: 600,
-              color: '#1a1a1a',
-              marginBottom: '8px',
-            }}>
-              The AI Engine
-            </div>
           </div>
 
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '24px',
+            gap: '16px',
             width: '100%',
             maxWidth: '600px',
-            marginBottom: '28px',
+            marginBottom: '16px',
           }}>
             <div style={{
-              padding: '16px',
+              padding: '14px 16px',
               backgroundColor: '#f0f0f0',
               borderRadius: '8px',
               textAlign: 'center',
@@ -467,7 +436,7 @@
               <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>$10M-$100M+</div>
             </div>
             <div style={{
-              padding: '16px',
+              padding: '14px 16px',
               backgroundColor: '#f0f0f0',
               borderRadius: '8px',
               textAlign: 'center',
@@ -477,7 +446,7 @@
               <div style={{ fontSize: '16px', fontWeight: 700, color: '#6c5ce7' }}>Trillions of Tokens</div>
             </div>
             <div style={{
-              padding: '16px',
+              padding: '14px 16px',
               backgroundColor: '#f0f0f0',
               borderRadius: '8px',
               textAlign: 'center',
@@ -488,56 +457,6 @@
             </div>
           </div>
 
-          <div style={{ width: '100%', maxWidth: '600px', marginTop: '24px' }}>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>Examples:</div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '16px',
-            }}>
-              {models.map((model, i) => {
-                const isExpanded = expandedModel === i;
-                const panelId = `s1-model-panel-${i}`;
-                const toggle = () => setExpandedModel(expandedModel === i ? null : i);
-                return (
-                  <div
-                    key={i}
-                    className={`disclosure-card-host ${isExpanded ? 'expanded' : ''}`}
-                    onClick={toggle}
-                    role="button"
-                    tabIndex={0}
-                    aria-expanded={isExpanded}
-                    aria-controls={panelId}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
-                    style={{
-                      position: 'relative',
-                      padding: '14px',
-                      backgroundColor: isExpanded ? '#6c5ce7' : '#f5f5f5',
-                      color: isExpanded ? '#fff' : '#1a1a1a',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      transition: 'all 0.2s',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <span className="disclosure-badge" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25">
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </span>
-                    <div>{model.name}</div>
-                    {isExpanded && (
-                      <div id={panelId} style={{ fontSize: '12px', marginTop: '4px', opacity: 0.9 }}>
-                        {model.company} - {model.stat}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       );
     };
@@ -558,32 +477,14 @@
       return (
         <div style={P.scene}>
           <div><h2 className="stage-header">Foundational Models</h2></div>
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '24px',
-            animation: 'slideIn 0.4s ease-out',
-          }}>
-            <div style={{
-              marginBottom: '12px',
-            }}>
-              <SvgIcon svg={SVG.lock48} />
-            </div>
-            <div style={{
-              fontSize: '16px',
-              color: '#666',
-              maxWidth: '400px',
-            }}>
-              Access via API - Weights & Training Data Hidden
-            </div>
-          </div>
 
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '24px',
+            gap: '16px',
             width: '100%',
             maxWidth: '600px',
-            marginBottom: '28px',
+            marginBottom: '16px',
           }}>
             {models.map((model, i) => (
               <div
@@ -612,12 +513,12 @@
           <div style={{
             width: '100%',
             maxWidth: '600px',
-            padding: '20px',
+            padding: '14px 16px',
             backgroundColor: '#f0f7ff',
             borderRadius: '8px',
-            marginBottom: '20px',
+            marginBottom: '12px',
           }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#2c5aa0', marginBottom: '8px' }}>PROS</div>
                 <ul style={{ fontSize: '14px', color: '#444', lineHeight: '1.6', paddingLeft: '16px' }}>
@@ -636,19 +537,24 @@
           <div style={{
             width: '100%',
             maxWidth: '600px',
-            padding: '16px',
+            padding: '12px 16px',
             backgroundColor: '#f5f5f5',
             borderRadius: '8px',
             fontSize: '14px',
             color: '#666',
             textAlign: 'center',
             lineHeight: '1.5',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            flexWrap: 'wrap',
           }}>
-            <div style={{ marginBottom: '8px', fontWeight: 600 }}>Your App</div>
-            <div style={{ fontSize: '14px', color: '#999' }}>{"API Request"}</div>
-            <div style={{ marginTop: '8px', marginBottom: '8px', fontWeight: 600 }}>Cloud (Provider's Infrastructure)</div>
-            <div style={{ fontSize: '14px', color: '#999' }}>{"Response"}</div>
-            <div style={{ marginTop: '8px', fontWeight: 600 }}>Your App</div>
+            <span style={{ fontWeight: 600 }}>Your App</span>
+            <span style={{ color: '#999' }}>→ API Request →</span>
+            <span style={{ fontWeight: 600 }}>Cloud (Provider)</span>
+            <span style={{ color: '#999' }}>→ Response →</span>
+            <span style={{ fontWeight: 600 }}>Your App</span>
           </div>
         </div>
       );
@@ -657,7 +563,6 @@
     // Stage 3: Open Source Models
     const S3 = () => {
       const [expandedModel, setExpandedModel] = useState(null);
-      const [showPros, setShowPros] = useState(true);
 
       const models = [
         { name: 'Llama 3.1', company: 'Meta', range: '8B-405B', color: '#6c5ce7' },
@@ -672,32 +577,14 @@
       return (
         <div style={P.scene}>
           <div><h2 className="stage-header">Proprietary vs Open Source</h2></div>
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '24px',
-            animation: 'slideIn 0.4s ease-out',
-          }}>
-            <div style={{
-              marginBottom: '12px',
-            }}>
-              <SvgIcon svg={SVG.unlock48} />
-            </div>
-            <div style={{
-              fontSize: '16px',
-              color: '#666',
-              maxWidth: '400px',
-            }}>
-              Weights & Code Available - Run on Your Hardware
-            </div>
-          </div>
 
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '24px',
+            gap: '16px',
             width: '100%',
             maxWidth: '600px',
-            marginBottom: '24px',
+            marginBottom: '16px',
           }}>
             {models.map((model, i) => {
               const isExpanded = expandedModel === i;
@@ -755,55 +642,40 @@
 
           <div style={{
             width: '100%',
-            maxWidth: '600px',
-            marginBottom: '20px',
+            maxWidth: '640px',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '12px',
+            marginBottom: '12px',
           }}>
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
-              <button
-                onClick={() => setShowPros(true)}
-                style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  backgroundColor: showPros ? '#2ecc71' : '#f0f0f0',
-                  color: showPros ? '#fff' : '#666',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
-                }}
-              >
-                Advantages
-              </button>
-              <button
-                onClick={() => setShowPros(false)}
-                style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  backgroundColor: !showPros ? '#e74c3c' : '#f0f0f0',
-                  color: !showPros ? '#fff' : '#666',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
-                }}
-              >
-                Challenges
-              </button>
-            </div>
             <div style={{
-              padding: '16px',
-              backgroundColor: showPros ? '#f0f8f4' : '#fef4f3',
+              padding: '14px 16px',
+              backgroundColor: '#f0f8f4',
+              border: '1px solid #c7e9d3',
               borderRadius: '6px',
               fontSize: '14px',
               color: '#444',
               lineHeight: '1.6',
             }}>
-              <ul style={{ paddingLeft: '16px' }}>
-                {(showPros ? pros : cons).map((item, i) => (
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a7a43', marginBottom: '8px', letterSpacing: '0.3px' }}>Advantages</div>
+              <ul style={{ paddingLeft: '16px', margin: 0 }}>
+                {pros.map((item, i) => (
+                  <li key={i} style={{ marginBottom: '6px' }}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div style={{
+              padding: '14px 16px',
+              backgroundColor: '#fef4f3',
+              border: '1px solid #f5c6c0',
+              borderRadius: '6px',
+              fontSize: '14px',
+              color: '#444',
+              lineHeight: '1.6',
+            }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#c0392b', marginBottom: '8px', letterSpacing: '0.3px' }}>Challenges</div>
+              <ul style={{ paddingLeft: '16px', margin: 0 }}>
+                {cons.map((item, i) => (
                   <li key={i} style={{ marginBottom: '6px' }}>{item}</li>
                 ))}
               </ul>
@@ -813,16 +685,15 @@
           <div style={{
             width: '100%',
             maxWidth: '600px',
-            padding: '16px',
+            padding: '12px 16px',
             backgroundColor: '#f5f5f5',
             borderRadius: '8px',
             fontSize: '14px',
             color: '#666',
             textAlign: 'center',
-            lineHeight: '1.6',
+            lineHeight: '1.5',
           }}>
-            <div style={{ fontWeight: 600, marginBottom: '8px' }}>Deployment Flow</div>
-            <div>Download Model > Upload to Your Hardware > Full Control</div>
+            <span style={{ fontWeight: 600 }}>Deployment Flow:</span> Download Model → Upload to Your Hardware → Full Control
           </div>
         </div>
       );
@@ -904,145 +775,134 @@
       return (
         <div style={P.scene}>
           <div><h2 className="stage-header">The App Layer</h2></div>
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '16px', marginTop: '8px' }}>
-            <AppLayerStack />
-          </div>
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '28px',
-            animation: 'slideIn 0.4s ease-out',
-          }}>
-            <div style={{
-              marginBottom: '12px',
-            }}>
-              <SvgIcon svg={SVG.phone48} />
-            </div>
-            <div style={{
-              fontSize: '16px',
-              color: '#666',
-              maxWidth: '400px',
-            }}>
-              Products built ON TOP of foundational models
-            </div>
-          </div>
 
           <div style={{
             width: '100%',
-            maxWidth: '600px',
-            marginBottom: '28px',
+            maxWidth: '900px',
+            display: 'grid',
+            gridTemplateColumns: '1fr 36px 1fr 36px auto',
+            gap: '12px',
+            alignItems: 'stretch',
+            marginBottom: '16px',
           }}>
-            <div style={{
-              padding: '16px',
-              backgroundColor: '#f8f8f8',
-              borderRadius: '8px',
-              marginBottom: '16px',
-              textAlign: 'center',
-              fontSize: '14px',
-              fontWeight: 600,
-              color: '#666',
-            }}>
-              FOUNDATIONAL MODELS
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '16px',
-              marginBottom: '16px',
-            }}>
-              {['GPT-4', 'Claude', 'Llama', 'Gemini'].map((model, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: '14px',
-                    backgroundColor: '#6c5ce7',
-                    color: '#fff',
-                    borderRadius: '6px',
-                    textAlign: 'center',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                  }}
-                >
-                  {model}
-                </div>
-              ))}
-            </div>
-
-            <div style={{
-              fontSize: '14px',
-              textAlign: 'center',
-              color: '#999',
-              margin: '12px 0',
-            }}>
-              POWERS
-            </div>
-
-            <div style={{
-              padding: '16px',
-              backgroundColor: '#f8f8f8',
-              borderRadius: '8px',
-              marginBottom: '16px',
-              textAlign: 'center',
-              fontSize: '14px',
-              fontWeight: 600,
-              color: '#666',
-            }}>
-              APPLICATION LAYER
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '16px',
-              marginBottom: '16px',
-            }}>
-              {apps.map((app, i) => (
-                <div
-                  key={i}
-                  onClick={() => setSelectedApp(selectedApp === i ? null : i)}
-                  style={{
-                    padding: '14px',
-                    backgroundColor: selectedApp === i ? '#2ecc71' : '#f5f5f5',
-                    color: selectedApp === i ? '#fff' : '#1a1a1a',
-                    borderRadius: '6px',
-                    textAlign: 'center',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  <div style={{ marginBottom: '4px' }}>
-                    <SvgIcon svg={appIcons[i]} style={{ color: selectedApp === i ? '#fff' : '#6c5ce7' }} />
+            {/* Foundational models column */}
+            <div>
+              <div style={{
+                padding: '10px 12px',
+                backgroundColor: '#f8f8f8',
+                borderRadius: '6px',
+                marginBottom: '12px',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: 700,
+                letterSpacing: '0.5px',
+                color: '#666',
+              }}>
+                FOUNDATIONAL MODELS
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '10px',
+              }}>
+                {['GPT-4', 'Claude', 'Llama', 'Gemini'].map((model, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      padding: '14px 10px',
+                      backgroundColor: '#6c5ce7',
+                      color: '#fff',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {model}
                   </div>
-                  {app.name}
-                  {selectedApp === i && (
-                    <div style={{ fontSize: '12px', marginTop: '6px', opacity: 0.9, fontWeight: 400 }}>
-                      Uses: {app.models.join(', ')}
+                ))}
+              </div>
+            </div>
+
+            {/* POWERS connector */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#999', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '24px', color: '#b0a6e8', lineHeight: 1 }}>→</div>
+              <div style={{ marginTop: '4px' }}>POWERS</div>
+            </div>
+
+            {/* Application layer column */}
+            <div>
+              <div style={{
+                padding: '10px 12px',
+                backgroundColor: '#f8f8f8',
+                borderRadius: '6px',
+                marginBottom: '12px',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: 700,
+                letterSpacing: '0.5px',
+                color: '#666',
+              }}>
+                APPLICATION LAYER
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '10px',
+              }}>
+                {apps.map((app, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setSelectedApp(selectedApp === i ? null : i)}
+                    style={{
+                      padding: '12px 10px',
+                      backgroundColor: selectedApp === i ? '#2ecc71' : '#f5f5f5',
+                      color: selectedApp === i ? '#fff' : '#1a1a1a',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ marginBottom: '4px' }}>
+                      <SvgIcon svg={appIcons[i]} style={{ color: selectedApp === i ? '#fff' : '#6c5ce7' }} />
                     </div>
-                  )}
-                </div>
-              ))}
+                    {app.name}
+                    {selectedApp === i && (
+                      <div style={{ fontSize: '12px', marginTop: '4px', opacity: 0.9, fontWeight: 400 }}>
+                        {app.models.join(', ')}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div style={{
-              fontSize: '14px',
-              textAlign: 'center',
-              color: '#999',
-              margin: '12px 0',
-            }}>
-              SERVES
+            {/* SERVES connector */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#999', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '24px', color: '#b0a6e8', lineHeight: 1 }}>→</div>
+              <div style={{ marginTop: '4px' }}>SERVES</div>
             </div>
 
+            {/* End users column */}
             <div style={{
-              padding: '16px',
+              padding: '14px 18px',
               backgroundColor: '#f8f8f8',
-              borderRadius: '8px',
+              borderRadius: '6px',
               textAlign: 'center',
               fontSize: '14px',
-              fontWeight: 600,
+              fontWeight: 700,
+              letterSpacing: '0.5px',
               color: '#666',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '130px',
             }}>
+              <div style={{ fontSize: '28px', marginBottom: '4px' }}>👥</div>
               END USERS
             </div>
           </div>
@@ -1050,27 +910,27 @@
           <div style={{
             width: '100%',
             maxWidth: '600px',
-            padding: '16px',
+            padding: '14px 18px',
             backgroundColor: '#f0f7ff',
             borderRadius: '8px',
             fontSize: '14px',
             color: '#444',
             lineHeight: '1.6',
           }}>
-            <div style={{ fontWeight: 600, marginBottom: '8px', color: '#2c5aa0' }}>THE CAR ANALOGY</div>
+            <div style={{ fontWeight: 700, marginBottom: '8px', color: '#2c5aa0', fontSize: '13px', letterSpacing: '0.5px' }}>THE CAR ANALOGY</div>
             <table style={{ width: '100%', fontSize: '14px' }}>
               <tbody>
                 <tr style={{ borderBottom: '1px solid #d0d9e8' }}>
-                  <td style={{ padding: '6px 0', fontWeight: 600 }}>Engine</td>
-                  <td style={{ padding: '6px 0' }}>Toyota, Ford, BMW</td>
+                  <td style={{ padding: '5px 0', fontWeight: 600 }}>Engine</td>
+                  <td style={{ padding: '5px 0' }}>Toyota, Ford, BMW</td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid #d0d9e8' }}>
-                  <td style={{ padding: '6px 0', fontWeight: 600 }}>Car Service</td>
-                  <td style={{ padding: '6px 0' }}>Uber, Lyft, Grab</td>
+                  <td style={{ padding: '5px 0', fontWeight: 600 }}>Car Service</td>
+                  <td style={{ padding: '5px 0' }}>Uber, Lyft, Grab</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '6px 0', fontWeight: 600 }}>Passenger</td>
-                  <td style={{ padding: '6px 0' }}>You</td>
+                  <td style={{ padding: '5px 0', fontWeight: 600 }}>Passenger</td>
+                  <td style={{ padding: '5px 0' }}>You</td>
                 </tr>
               </tbody>
             </table>
@@ -1102,66 +962,81 @@
       return (
         <div style={P.scene}>
           <div><h2 className="stage-header">Choosing the Right Model</h2></div>
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '24px',
-            animation: 'slideIn 0.4s ease-out',
-          }}>
-            <div style={{
-              marginBottom: '12px',
-            }}>
-              <SvgIcon svg={SVG.chart48} />
-            </div>
-            <div style={{
-              fontSize: '16px',
-              color: '#666',
-              maxWidth: '400px',
-            }}>
-              Match your priorities to the right model type
-            </div>
-          </div>
 
           <div style={{
             width: '100%',
-            maxWidth: '600px',
-            marginBottom: '24px',
+            maxWidth: '820px',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '16px',
+            marginBottom: '16px',
+            alignItems: 'start',
           }}>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: '#666', marginBottom: '12px' }}>What's your priority?</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-              {priorities.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPriority(priority === i ? null : i)}
-                  style={{
-                    padding: '14px',
-                    backgroundColor: priority === i ? '#6c5ce7' : '#f0f0f0',
-                    color: priority === i ? '#fff' : '#1a1a1a',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  <div style={{ marginBottom: '4px' }}>
-                    <SvgIcon svg={priorityIcons[i]} style={{ color: priority === i ? '#fff' : '#6c5ce7' }} />
-                  </div>
-                  {p.name}
-                  {priority === i && (
-                    <div style={{ fontSize: '12px', marginTop: '6px', opacity: 0.9 }}>
-                      > {p.rec}
+            {/* Left: priority buttons */}
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#666', marginBottom: '10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>What's your priority?</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                {priorities.map((p, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPriority(priority === i ? null : i)}
+                    style={{
+                      padding: '14px 10px',
+                      backgroundColor: priority === i ? '#6c5ce7' : '#f0f0f0',
+                      color: priority === i ? '#fff' : '#1a1a1a',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ marginBottom: '4px' }}>
+                      <SvgIcon svg={priorityIcons[i]} style={{ color: priority === i ? '#fff' : '#6c5ce7' }} />
                     </div>
-                  )}
-                </button>
-              ))}
+                    {p.name}
+                    {priority === i && (
+                      <div style={{ fontSize: '12px', marginTop: '6px', opacity: 0.9 }}>
+                        → {p.rec}
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: decision tree */}
+            <div style={{
+              padding: '14px 18px',
+              backgroundColor: '#f0f7ff',
+              borderRadius: '8px',
+              fontSize: '14px',
+              color: '#444',
+              lineHeight: '1.6',
+            }}>
+              <div style={{ fontWeight: 700, marginBottom: '8px', color: '#2c5aa0', fontSize: '13px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Decision Tree</div>
+              <div style={{ marginBottom: '8px' }}>
+                <strong>Need full control?</strong>
+                <div style={{ marginLeft: '12px', marginTop: '4px' }}>
+                  YES → <span style={{ color: '#2ecc71', fontWeight: 600 }}>Open Source</span>
+                </div>
+              </div>
+              <div>
+                <strong>Ease of use priority?</strong>
+                <div style={{ marginLeft: '12px', marginTop: '4px' }}>
+                  YES → <span style={{ color: '#3498db', fontWeight: 600 }}>App Layer</span>
+                </div>
+                <div style={{ marginLeft: '12px', marginTop: '4px' }}>
+                  NO → <span style={{ color: '#6c5ce7', fontWeight: 600 }}>Proprietary</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div style={{
             width: '100%',
-            maxWidth: '620px',
-            marginBottom: '20px',
+            maxWidth: '820px',
             overflowX: 'auto',
           }}>
             <table style={{
@@ -1183,42 +1058,14 @@
               <tbody>
                 {comparison.map((row, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '10px', fontWeight: 500 }}>{row.label}</td>
-                    <td style={{ padding: '10px', textAlign: 'center', color: '#666' }}>{row.prop}</td>
-                    <td style={{ padding: '10px', textAlign: 'center', color: '#666' }}>{row.os}</td>
-                    <td style={{ padding: '10px', textAlign: 'center', color: '#666' }}>{row.app}</td>
+                    <td style={{ padding: '8px 10px', fontWeight: 500 }}>{row.label}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'center', color: '#666' }}>{row.prop}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'center', color: '#666' }}>{row.os}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'center', color: '#666' }}>{row.app}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-
-          <div style={{
-            width: '100%',
-            maxWidth: '600px',
-            padding: '16px',
-            backgroundColor: '#f0f7ff',
-            borderRadius: '8px',
-            fontSize: '14px',
-            color: '#444',
-            lineHeight: '1.6',
-          }}>
-            <div style={{ fontWeight: 600, marginBottom: '8px', color: '#2c5aa0' }}>Decision Tree</div>
-            <div style={{ marginBottom: '8px' }}>
-              <strong>Do you need full control?</strong>
-              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '14px' }}>
-                YES > <span style={{ color: '#2ecc71', fontWeight: 600 }}>Open Source</span>
-              </div>
-            </div>
-            <div>
-              <strong>No. Is ease of use priority?</strong>
-              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '14px' }}>
-                YES > <span style={{ color: '#3498db', fontWeight: 600 }}>App Layer</span>
-              </div>
-              <div style={{ marginLeft: '12px', marginTop: '4px', fontSize: '14px' }}>
-                NO > <span style={{ color: '#6c5ce7', fontWeight: 600 }}>Proprietary</span>
-              </div>
-            </div>
           </div>
         </div>
       );
