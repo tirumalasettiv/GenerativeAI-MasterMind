@@ -532,7 +532,7 @@
         <>
           <div><h2 className="stage-header">Using AI to Evaluate AI</h2></div>
           <div className="explanation">
-            Running human evaluations at scale is expensive. LLM-as-judge uses a capable model to score outputs against a rubric, achieving ~80\u201385% agreement with humans. Watch for three biases: <strong>position bias</strong> (favoring the first answer), <strong>verbosity bias</strong> (longer = better), and <strong>self-preference</strong> (GPT-4 prefers GPT-4 outputs). Try scoring the response below, then compare with an AI judge.
+            Running human evaluations at scale is expensive. LLM-as-judge uses a capable model to score outputs against a rubric, achieving ~80&ndash;85% agreement with humans. Watch for three biases: <strong>position bias</strong> (favoring the first answer), <strong>verbosity bias</strong> (longer = better), and <strong>self-preference</strong> (GPT-4 prefers GPT-4 outputs). Try scoring the response below, then compare with an AI judge.
           </div>
           <div className="scene-card" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
             <div style={{ marginBottom: 16, padding: '14px 18px', background: '#f5f3ff', borderRadius: 10, borderLeft: '4px solid #6c5ce7' }}>
@@ -627,7 +627,7 @@
             )}
           </div>
           <InsightBox>
-            LLM-as-judge scales evaluation from hundreds to millions of test cases. The tradeoff: ~15\u201320% disagreement with human raters. For most applications, that&rsquo;s good enough to catch regressions.
+            LLM-as-judge scales evaluation from hundreds to millions of test cases. The tradeoff: ~15&ndash;20% disagreement with human raters. For most applications, that&rsquo;s good enough to catch regressions.
           </InsightBox>
         </>
       );
@@ -691,7 +691,7 @@
         <>
           <div><h2 className="stage-header">Building Your Own Evaluation</h2></div>
           <div className="explanation">
-            Off-the-shelf benchmarks measure generic capability. Your production system needs a <strong>golden dataset</strong> \u2014 50 to 200 hand-curated examples that reflect <em>your</em> real users. Build it incrementally using the eval flywheel: every failure in production becomes a future test case. A/B testing between model versions lets you measure improvements statistically rather than by gut feeling.
+            Off-the-shelf benchmarks measure generic capability. Your production system needs a <strong>golden dataset</strong> &mdash; 50 to 200 hand-curated examples that reflect <em>your</em> real users. Build it incrementally using the eval flywheel: every failure in production becomes a future test case. A/B testing between model versions lets you measure improvements statistically rather than by gut feeling.
           </div>
           <div className="scene-card">
             <div className="flywheel-wrap">
@@ -699,7 +699,7 @@
             </div>
           </div>
           <InsightBox>
-            The best eval sets aren&rsquo;t designed \u2014 they&rsquo;re grown. Start with 50 examples. After a month in production, your users will have found the failures you never imagined.
+            The best eval sets aren&rsquo;t designed &mdash; they&rsquo;re grown. Start with 50 examples. After a month in production, your users will have found the failures you never imagined.
           </InsightBox>
         </>
       );
@@ -833,12 +833,12 @@
             </div>
             {selected.length === MAX_SEL && (
               <div style={{ marginTop: 14, padding: '12px 16px', background: '#f0faf5', borderRadius: 10, border: '1px solid #2ecc71', fontSize: 14, color: '#1a9456', animation: 'fadeIn 0.3s ease' }}>
-                <strong>Good choices!</strong> A strong red-team plan covers multiple risk vectors. In practice, run all 6 categories \u2014 but start with the highest-stakes ones for your use case.
+                <strong>Good choices!</strong> A strong red-team plan covers multiple risk vectors. In practice, run all 6 categories &mdash; but start with the highest-stakes ones for your use case.
               </div>
             )}
           </div>
           <InsightBox>
-            The goal of red teaming isn&rsquo;t to prove the AI works \u2014 it&rsquo;s to find where it breaks. A red team that finds nothing hasn&rsquo;t done its job.
+            The goal of red teaming isn&rsquo;t to prove the AI works &mdash; it&rsquo;s to find where it breaks. A red team that finds nothing hasn&rsquo;t done its job.
           </InsightBox>
         </>
       );
