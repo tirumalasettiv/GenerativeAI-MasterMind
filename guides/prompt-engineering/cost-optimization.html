@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cut your LLM bill 90%+ with prompt caching, batch processing, and model routing — interactive walkthrough with live savings calculator.">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta property="og:title" content="LLM Cost Optimization Trio — Interactive Guide">
+  <meta property="og:description" content="Cut your LLM bill 90%+ with prompt caching, batch processing, and model routing — interactive walkthrough with live savings calculator.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="../../assets/og-module-2.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LLM Cost Optimization Trio — Interactive Guide">
+  <meta name="twitter:description" content="Cut your LLM bill 90%+ with prompt caching, batch processing, and model routing — interactive walkthrough with live savings calculator.">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>LLM Cost Optimization Trio — Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/guide-shared.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <style>
+    /* ---------- Hero / Intro ---------- */
+    .cost-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .cost-hero { grid-template-columns: 1fr; }
+    }
+
+    .hero-stat-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+      border: 1px solid #e8e3f8;
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #6c5ce7;
+      text-transform: uppercase;
+    }
+
+    .hero-stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.1;
+    }
+
+    .hero-stat-detail {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.55;
+    }
+
+    /* ---------- Savings Stack Bars ---------- */
+    .stack-wrap {
+      background: white;
+      border: 1px solid #e8e8f0;
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-top: 8px;
+    }
+
+    .stack-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stack-row {
+      display: grid;
+      grid-template-columns: 200px 1fr 110px;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 720px) {
+      .stack-row {
+        grid-template-columns: 140px 1fr 90px;
+        gap: 8px;
+      }
+    }
+
+    .stack-label {
+      font-size: 13px;
+      color: #444;
+      font-weight: 500;
+    }
+
+    .stack-bar-track {
+      height: 22px;
+      background: #f4f4f8;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .stack-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.9s cubic-bezier(0.22, 0.68, 0, 1.2);
+    }
+
+    .stack-cost {
+      font-family: 'Fraunces', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: right;
+    }
+
+    .stack-cost.muted { color: #8a8a8a; font-weight: 500; }
+
+    /* ---------- Tabs / Toggle ---------- */
+    .toggle-row {
+      display: inline-flex;
+      background: #f4f4f8;
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .toggle-btn {
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .toggle-btn.active {
+      background: #6c5ce7;
+      color: white;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25);
+    }
+
+    .toggle-btn:focus-visible {
+      outline: 2px solid #6c5ce7;
+      outline-offset: 2px;
+    }
+
+    /* ---------- Calculator panel ---------- */
+    .calc-panel {
+      background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 100%);
+      border: 1px solid #e8e3f8;
+      border-radius: 16px;
+      padding: 22px 26px;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 24px;
+    }
+
+    @media (max-width: 720px) {
+      .calc-grid { grid-template-columns: 1fr; }
+    }
+
+    .calc-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .calc-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: #6c5ce7;
+      text-transform: uppercase;
+    }
+
+    .calc-input {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      padding: 9px 12px;
+      border: 1.5px solid #d8d4ec;
+      border-radius: 8px;
+      background: white;
+      color: #1a1a1a;
+    }
+
+    .calc-input:focus-visible {
+      outline: 2px solid #6c5ce7;
+      outline-offset: 1px;
+      border-color: #6c5ce7;
+    }
+
+    .calc-output-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .calc-output-row { grid-template-columns: 1fr; }
+    }
+
+    .calc-output-card {
+      background: white;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .calc-output-card.savings {
+      background: linear-gradient(135deg, #f0faf3 0%, #e7f7ec 100%);
+      border-color: #b9e6c5;
+    }
+
+    .calc-out-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: #6c5ce7;
+      text-transform: uppercase;
+    }
+
+    .calc-output-card.savings .calc-out-label { color: #1a5e3a; }
+
+    .calc-out-value {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-top: 4px;
+    }
+
+    .calc-output-card.savings .calc-out-value { color: #15693a; }
+
+    .calc-out-sub {
+      font-size: 12px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    /* ---------- Code blocks ---------- */
+    .code-block {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 18px 20px;
+      border-radius: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* ---------- Gotcha / pro tip / decision callouts ---------- */
+    .gotcha-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .gotcha-card {
+      background: #fef7e6;
+      border-left: 4px solid #f39c12;
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+
+    .gotcha-num {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      text-align: center;
+      background: #f39c12;
+      color: white;
+      font-weight: 700;
+      border-radius: 50%;
+      font-size: 12px;
+      margin-right: 8px;
+    }
+
+    .gotcha-title {
+      font-family: 'Fraunces', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #6b4a05;
+      display: inline;
+    }
+
+    .gotcha-body {
+      font-size: 13px;
+      color: #5a4205;
+      line-height: 1.55;
+      margin-top: 6px;
+    }
+
+    /* ---------- When-to-use vs not ---------- */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .usage-card {
+      padding: 18px 20px;
+      border-radius: 14px;
+      border: 1px solid;
+    }
+
+    .usage-card.good { background: #f0faf3; border-color: #c5ebd1; }
+    .usage-card.bad  { background: #fef5f5; border-color: #f0c4c4; }
+
+    .usage-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .usage-card.good .usage-header { color: #1a5e3a; }
+    .usage-card.bad  .usage-header { color: #8b2020; }
+
+    .usage-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+    .usage-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    .usage-card.good .usage-list li { color: #2d5016; }
+    .usage-card.bad  .usage-list li { color: #5a2020; }
+
+    .bullet-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .bullet-icon.good { background: #2ecc71; }
+    .bullet-icon.bad  { background: #e74c3c; }
+
+    /* ---------- Tier cards (routing) ---------- */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .tier-grid { grid-template-columns: 1fr; }
+    }
+
+    .tier-card {
+      padding: 18px 20px;
+      border-radius: 14px;
+      border: 2px solid #e8e8f0;
+      background: white;
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      cursor: default;
+    }
+
+    .tier-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 22px rgba(108, 92, 231, 0.1);
+    }
+
+    .tier-name {
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .tier-model {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .tier-price {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .tier-share-bar {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .tier-share-fill {
+      height: 100%;
+      transition: width 0.8s ease;
+    }
+
+    .tier-share-label {
+      font-size: 11px;
+      color: #777;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+
+    .tier-tasks {
+      font-size: 12.5px;
+      color: #555;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    /* ---------- Insight variants ---------- */
+    .protip-box {
+      background: #fef7e6;
+      border-left: 4px solid #f39c12;
+      padding: 14px 18px;
+      border-radius: 8px;
+      color: #6b4a05;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .protip-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+      color: #b37a08;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    /* ---------- Final stack visualization ---------- */
+    .final-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .final-row {
+      display: grid;
+      grid-template-columns: 240px 1fr 130px;
+      gap: 14px;
+      align-items: center;
+    }
+
+    @media (max-width: 720px) {
+      .final-row {
+        grid-template-columns: 150px 1fr 100px;
+      }
+    }
+
+    .final-label {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .final-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .final-bar-track {
+      height: 26px;
+      background: #f4f4f8;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .final-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.9s cubic-bezier(0.22, 0.68, 0, 1.2);
+      display: flex;
+      align-items: center;
+      padding-right: 8px;
+      justify-content: flex-end;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .final-cost {
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .final-savings {
+      font-size: 11px;
+      color: #1a5e3a;
+      font-weight: 600;
+      margin-top: 2px;
+      display: block;
+      text-align: right;
+    }
+
+    /* ---------- Section divider & misc ---------- */
+    .section-divider {
+      height: 1px;
+      background: #ececf0;
+      margin: 18px 0;
+    }
+
+    .sub-heading {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      color: #1a1a1a;
+      margin-top: 8px;
+    }
+
+    code.inline {
+      font-family: 'Courier New', monospace;
+      font-size: 12.5px;
+      background: #f0eefe;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #4836b8;
+    }
+  </style>
+  <script src="../../assets/analytics.js" defer></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    /* SVG icon components — pure JSX, no innerHTML */
+    const I = {
+      Grid: ({size = 18, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+        </svg>
+      ),
+      Cache: ({size = 18, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5v6c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+          <path d="M3 11v6c0 1.66 4 3 9 3s9-1.34 9-3v-6" />
+        </svg>
+      ),
+      Batch: ({size = 18, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      ),
+      Route: ({size = 18, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="6" cy="19" r="3" /><circle cx="18" cy="5" r="3" />
+          <path d="M6 16V8a3 3 0 013-3h6" /><path d="M9 11h6a3 3 0 013 3v2" />
+        </svg>
+      ),
+      Stack: ({size = 18, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" />
+        </svg>
+      ),
+      Bulb: ({size = 14, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 18h6" /><path d="M10 22h4" />
+          <path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z" />
+        </svg>
+      ),
+      Check: ({size = 20}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ),
+      Cross: ({size = 20}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      ),
+      Dollar: ({size = 18, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+        </svg>
+      ),
+      Warn: ({size = 14, color = 'currentColor'}) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      )
+    };
+
+    const NEXT_GUIDE = { id: "2.4", title: "Prompt Engineering Quiz", module: "Module 2", href: "./quiz.html", isQuiz: true };
+
+    const fmt = (n) => {
+      if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
+      if (n >= 1_000)     return '$' + (n / 1_000).toFixed(1) + 'K';
+      return '$' + n.toFixed(0);
+    };
+
+    /* ===================== STAGE 0: Overview ===================== */
+    function OverviewStage() {
+      const stack = [
+        { label: 'Naive — all on Opus 4.7',         cost: 27500, color: '#e74c3c', savings: 0 },
+        { label: 'Routing only',                    cost:  9900, color: '#f39c12', savings: 64 },
+        { label: 'Routing + caching',               cost:  3500, color: '#3498db', savings: 87 },
+        { label: 'Routing + caching + batch',       cost:  1800, color: '#2ecc71', savings: 93 }
+      ];
+      const max = Math.max(...stack.map(s => s.cost));
+
+      return (
+        <>
+          <div><h2 className="stage-header">The Three Levers That Cut Your LLM Bill 90%+</h2></div>
+          <div className="explanation">
+            Most beginner tutorials teach you to call <code className="inline">client.messages.create()</code> and stop there. Production LLM teams use three architectural levers — <strong>prompt caching</strong>, <strong>batch processing</strong>, and <strong>model routing</strong> — that compound to cut bills by 90% or more on the same workload, with zero quality loss. None of these are exotic. All three live in the docs. Few beginners turn them on.
+          </div>
+
+          <div className="cost-hero">
+            <div className="hero-stat-card">
+              <span className="hero-stat-label">Prompt caching</span>
+              <span className="hero-stat-value">~90% off</span>
+              <span className="hero-stat-detail">Cached input tokens cost roughly 10% of the standard rate. One <code className="inline">cache_control</code> flag, two-call break-even.</span>
+            </div>
+            <div className="hero-stat-card">
+              <span className="hero-stat-label">Batch processing</span>
+              <span className="hero-stat-value">50% off</span>
+              <span className="hero-stat-detail">Async submission, results within 24 hours. Both input and output tokens. Stacks with caching.</span>
+            </div>
+            <div className="hero-stat-card">
+              <span className="hero-stat-label">Model routing</span>
+              <span className="hero-stat-value">50–80% off</span>
+              <span className="hero-stat-detail">Send the easy 70% of work to Haiku, keep Opus for the hard 10%. Match the tier to the task.</span>
+            </div>
+            <div className="hero-stat-card">
+              <span className="hero-stat-label">All three combined</span>
+              <span className="hero-stat-value">~93% off</span>
+              <span className="hero-stat-detail">Caching + batch + routing on a 1M-request workload: $27,500/mo → $1,800/mo. Same outputs.</span>
+            </div>
+          </div>
+
+          <div className="stack-wrap">
+            <div className="stack-title">
+              <I.Dollar color="#6c5ce7" />
+              Compounding savings — 1M requests / month, 3K input + 500 output tokens each
+            </div>
+            {stack.map((row, i) => (
+              <div className="stack-row" key={i}>
+                <div className="stack-label">{row.label}</div>
+                <div className="stack-bar-track">
+                  <div className="stack-bar-fill" style={{ width: `${(row.cost / max) * 100}%`, background: row.color }} />
+                </div>
+                <div className="stack-cost">
+                  {fmt(row.cost)}
+                  {row.savings > 0 && <div style={{ fontSize: 11, color: '#1a5e3a', fontWeight: 600 }}>−{row.savings}%</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label">
+              <I.Bulb color="#2ecc71" />
+              THE MENTAL MODEL
+            </div>
+            LLM cost optimization is mostly architectural — <em>where</em> you call the API, <em>which</em> model you call, <em>which</em> parts you cache. Once you internalize that, "saving money" stops feeling like a chore and starts feeling like designing the system correctly.
+          </div>
+        </>
+      );
+    }
+
+    /* ===================== STAGE 1: Caching ===================== */
+    function CachingStage() {
+      const [tokens, setTokens] = useState(8000);
+      const [callsPerHour, setCallsPerHour] = useState(100);
+      const [hoursPerMonth, setHoursPerMonth] = useState(720);
+
+      const base = 3.0;       // Sonnet 4.6 base $/MTok input
+      const writeMul = 1.25;
+      const readMul = 0.10;
+
+      const totals = useMemo(() => {
+        const callsTotal = callsPerHour * hoursPerMonth;
+        const writes = hoursPerMonth;
+        const reads  = Math.max(0, callsTotal - writes);
+
+        const noCache = (callsTotal * tokens / 1_000_000) * base;
+        const withCache =
+          (writes * tokens / 1_000_000) * base * writeMul +
+          (reads  * tokens / 1_000_000) * base * readMul;
+        const savings = noCache - withCache;
+        const pct = noCache > 0 ? (savings / noCache) * 100 : 0;
+        return { noCache, withCache, savings, pct };
+      }, [tokens, callsPerHour, hoursPerMonth]);
+
+      return (
+        <>
+          <div><h2 className="stage-header">1. Prompt Caching: Memorize the Static Parts</h2></div>
+          <div className="explanation">
+            Every LLM call sends a payload of repeating boilerplate — system prompt, tool definitions, few-shot examples — usually 80–95% of total input tokens. Prompt caching tells the API "memorize this prefix" so subsequent calls within a short window pay roughly <strong>10% of the normal input price</strong> for that block. <em>One parameter change.</em> Two-call break-even. Up to 90% off your input bill.
+          </div>
+
+          <div className="protip-box">
+            <div className="protip-label">
+              <I.Bulb color="#b37a08" />
+              Analogy
+            </div>
+            Imagine calling customer support and being forced to re-read the company's 50-page policy manual every time before asking your question. The agent already knows the manual. You should just say "I'm calling about <em>my</em> question" and pick up from there. Prompt caching is exactly that.
+          </div>
+
+          <h3 className="sub-heading">The simplest possible example</h3>
+          <div className="code-block">{`import anthropic
+client = anthropic.Anthropic()
+
+LARGE_SYSTEM_PROMPT = """You are an expert support agent for AcmeCorp.
+[ ... 5,000 more tokens of instructions, product docs, escalation rules ... ]
+"""
+
+response = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    system=[
+        {
+            "type": "text",
+            "text": LARGE_SYSTEM_PROMPT,
+            "cache_control": {"type": "ephemeral"}   # 👈 cache this block
+        }
+    ],
+    messages=[{"role": "user", "content": "How do I reset my password?"}]
+)
+
+print("Tokens written:", response.usage.cache_creation_input_tokens)
+print("Tokens read   :", response.usage.cache_read_input_tokens)`}</div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">Try it — live savings calculator</h3>
+          <div className="explanation" style={{ marginTop: 0 }}>
+            Adjust the inputs to match your workload. Costs are computed against Claude Sonnet 4.6 input pricing ($3.00 / MTok base, 1.25× write, 0.1× read).
+          </div>
+
+          <div className="calc-panel">
+            <div className="calc-grid">
+              <div className="calc-field">
+                <span className="calc-label">Cached prefix size (tokens)</span>
+                <input
+                  type="number"
+                  className="calc-input"
+                  value={tokens}
+                  min={2048}
+                  step={1000}
+                  onChange={(e) => setTokens(Math.max(0, parseInt(e.target.value) || 0))}
+                />
+              </div>
+              <div className="calc-field">
+                <span className="calc-label">Calls per hour</span>
+                <input
+                  type="number"
+                  className="calc-input"
+                  value={callsPerHour}
+                  min={1}
+                  onChange={(e) => setCallsPerHour(Math.max(1, parseInt(e.target.value) || 1))}
+                />
+              </div>
+              <div className="calc-field">
+                <span className="calc-label">Hours per month with active traffic</span>
+                <input
+                  type="number"
+                  className="calc-input"
+                  value={hoursPerMonth}
+                  min={1}
+                  max={744}
+                  onChange={(e) => setHoursPerMonth(Math.max(1, Math.min(744, parseInt(e.target.value) || 1)))}
+                />
+              </div>
+              <div className="calc-field">
+                <span className="calc-label">Total monthly calls (computed)</span>
+                <div className="calc-input" style={{ background: '#f4f4f8', color: '#555' }}>
+                  {(callsPerHour * hoursPerMonth).toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div className="calc-output-row">
+              <div className="calc-output-card">
+                <span className="calc-out-label">Without caching</span>
+                <div className="calc-out-value">{fmt(totals.noCache)}</div>
+                <div className="calc-out-sub">paying full input price every call</div>
+              </div>
+              <div className="calc-output-card savings">
+                <span className="calc-out-label">With caching</span>
+                <div className="calc-out-value">{fmt(totals.withCache)}</div>
+                <div className="calc-out-sub">save {fmt(totals.savings)} ({totals.pct.toFixed(0)}% off)</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">The five gotchas nobody warns you about</h3>
+          <div className="gotcha-list">
+            <div className="gotcha-card">
+              <span className="gotcha-num">1</span>
+              <span className="gotcha-title">Minimum token threshold</span>
+              <div className="gotcha-body">Below the per-model minimum, caching silently does nothing. <strong>Sonnet 4.6: 2,048</strong>. <strong>Opus 4.7 / Haiku 4.5: 4,096</strong>. Older models: 1,024. If <code className="inline">cache_creation_input_tokens</code> comes back zero, you're below the floor.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">2</span>
+              <span className="gotcha-title">Exact-match-or-nothing</span>
+              <div className="gotcha-body">Cache hits require <strong>byte-for-byte</strong> match. Timestamps, request IDs, templating whitespace — anything dynamic in the cached block silently breaks the cache and creates a fresh entry. <em>Make the cached block 100% deterministic.</em></div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">3</span>
+              <span className="gotcha-title">5-minute TTL by default</span>
+              <div className="gotcha-body">Cache lifetime is 5 minutes, not an hour. Each read refreshes the timer, so high-traffic systems naturally stay warm. For sparse access patterns, use the 1-hour TTL: <code className="inline">{`{"type":"ephemeral","ttl":"1h"}`}</code> — but the write costs 2× base instead of 1.25× base, so you need at least two reads inside the hour.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">4</span>
+              <span className="gotcha-title">Order matters</span>
+              <div className="gotcha-body">Anthropic caches in this order: <code className="inline">tools → system → messages</code>. If your tools change between calls, the system prompt won't cache because the prefix changed. Static content goes early; dynamic goes late.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">5</span>
+              <span className="gotcha-title">Up to 4 cache breakpoints</span>
+              <div className="gotcha-body">You can mark up to four blocks with <code className="inline">cache_control</code>. Useful when sections change at different rates. For most beginners, <strong>one breakpoint on the system prompt is enough</strong>. Don't over-engineer.</div>
+            </div>
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label">
+              <I.Bulb color="#2ecc71" />
+              KEY TAKEAWAY
+            </div>
+            The static-vs-dynamic split in your prompt is an <strong>architectural decision, not a styling choice</strong>. Static first, marked for caching, never changes byte-for-byte. Dynamic last, varies freely.
+          </div>
+        </>
+      );
+    }
+
+    /* ===================== STAGE 2: Batch ===================== */
+    function BatchStage() {
+      const [volume, setVolume] = useState(100000);
+      const [inputTokens, setInputTokens] = useState(5000);
+      const [outputTokens, setOutputTokens] = useState(500);
+      const [withCaching, setWithCaching] = useState(true);
+
+      const inBase  = 3.0;     // Sonnet 4.6
+      const outBase = 15.0;
+      const cachedShare = 0.8;
+
+      const totals = useMemo(() => {
+        const inMTok  = (volume * inputTokens) / 1_000_000;
+        const outMTok = (volume * outputTokens) / 1_000_000;
+
+        const sync = inMTok * inBase + outMTok * outBase;
+        const batchOnly = sync * 0.5;
+
+        const cachedIn = inMTok * cachedShare * inBase * 0.5 * 0.1;
+        const freshIn  = inMTok * (1 - cachedShare) * inBase * 0.5;
+        const batchCached = cachedIn + freshIn + outMTok * outBase * 0.5;
+
+        const result = withCaching ? batchCached : batchOnly;
+        const savings = sync - result;
+        const pct = sync > 0 ? (savings / sync) * 100 : 0;
+        return { sync, result, savings, pct };
+      }, [volume, inputTokens, outputTokens, withCaching]);
+
+      return (
+        <>
+          <div><h2 className="stage-header">2. Batch Processing: 50% Off Async Workloads</h2></div>
+          <div className="explanation">
+            Most beginners learn the API as a sync request-response thing — call, wait two seconds, show answer. That works for chat. It's wasteful for everything else: nightly summarization jobs, evaluation harnesses, document classification pipelines, content generation. <strong>If the user isn't watching the screen, you're paying real-time prices for no reason.</strong> The Message Batches API gives 50% off both input and output tokens in exchange for accepting up to 24 hours of latency.
+          </div>
+
+          <h3 className="sub-heading">Submit, poll, download</h3>
+          <div className="code-block">{`from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
+from anthropic.types.messages.batch_create_params import Request
+
+# 1. Submit up to 100,000 requests in one batch
+batch = client.messages.batches.create(
+    requests=[
+        Request(
+            custom_id="ticket-001",
+            params=MessageCreateParamsNonStreaming(
+                model="claude-sonnet-4-6",
+                max_tokens=512,
+                messages=[{"role": "user",
+                           "content": "Classify: 'Cannot login, password reset broken'"}]
+            )
+        ),
+        # ... thousands more, each with its own custom_id ...
+    ]
+)
+
+# 2. Poll until done (or use webhooks in production)
+while True:
+    batch = client.messages.batches.retrieve(batch.id)
+    if batch.processing_status == "ended":
+        break
+    time.sleep(60)
+
+# 3. Stream results — match outputs to source records via custom_id
+for result in client.messages.batches.results(batch.id):
+    if result.result.type == "succeeded":
+        save_to_database(result.custom_id, result.result.message)
+    elif result.result.type == "errored":
+        log_error(result.custom_id, result.result.error)
+    elif result.result.type == "expired":
+        retry_in_next_batch(result.custom_id)`}</div>
+
+          <div className="protip-box">
+            <div className="protip-label">
+              <I.Bulb color="#b37a08" />
+              Plan for partial success
+            </div>
+            A batch returns a <em>mix</em> of outcomes: <code className="inline">succeeded</code>, <code className="inline">errored</code>, <code className="inline">canceled</code>, <code className="inline">expired</code>. The most common rookie mistake is treating the batch as atomic and crashing when one of 50,000 requests had malformed input. Iterate over each result and handle the type explicitly.
+          </div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">Try it — batch (and stack with caching)</h3>
+          <div className="explanation" style={{ marginTop: 0 }}>
+            Costs use Claude Sonnet 4.6 ($3/MTok input, $15/MTok output). Batch is 50% off both. Caching assumes 80% of input is a stable system prompt — typical for production workloads.
+          </div>
+
+          <div className="calc-panel">
+            <div className="calc-grid">
+              <div className="calc-field">
+                <span className="calc-label">Monthly request volume</span>
+                <input
+                  type="number"
+                  className="calc-input"
+                  value={volume}
+                  min={1}
+                  step={1000}
+                  onChange={(e) => setVolume(Math.max(1, parseInt(e.target.value) || 1))}
+                />
+              </div>
+              <div className="calc-field">
+                <span className="calc-label">Avg input tokens per request</span>
+                <input
+                  type="number"
+                  className="calc-input"
+                  value={inputTokens}
+                  min={100}
+                  step={100}
+                  onChange={(e) => setInputTokens(Math.max(100, parseInt(e.target.value) || 100))}
+                />
+              </div>
+              <div className="calc-field">
+                <span className="calc-label">Avg output tokens per request</span>
+                <input
+                  type="number"
+                  className="calc-input"
+                  value={outputTokens}
+                  min={50}
+                  step={50}
+                  onChange={(e) => setOutputTokens(Math.max(50, parseInt(e.target.value) || 50))}
+                />
+              </div>
+              <div className="calc-field">
+                <span className="calc-label">Stack with caching?</span>
+                <div className="toggle-row" role="tablist" aria-label="Caching toggle">
+                  <button type="button" className={`toggle-btn ${!withCaching ? 'active' : ''}`} onClick={() => setWithCaching(false)} role="tab" aria-selected={!withCaching}>Batch only</button>
+                  <button type="button" className={`toggle-btn ${ withCaching ? 'active' : ''}`} onClick={() => setWithCaching(true)}  role="tab" aria-selected={ withCaching}>Batch + caching</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="calc-output-row">
+              <div className="calc-output-card">
+                <span className="calc-out-label">Sync API baseline</span>
+                <div className="calc-out-value">{fmt(totals.sync)}</div>
+                <div className="calc-out-sub">paying real-time prices</div>
+              </div>
+              <div className="calc-output-card savings">
+                <span className="calc-out-label">{withCaching ? 'Batch + caching' : 'Batch only'}</span>
+                <div className="calc-out-value">{fmt(totals.result)}</div>
+                <div className="calc-out-sub">save {fmt(totals.savings)} ({totals.pct.toFixed(0)}% off)</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-divider" />
+
+          <div className="two-col">
+            <div className="usage-card good">
+              <div className="usage-header">
+                <I.Check />
+                Use Batch when
+              </div>
+              <ul className="usage-list">
+                <li><span className="bullet-icon good">✓</span>The user isn't waiting for the response in real time.</li>
+                <li><span className="bullet-icon good">✓</span>Work runs on a schedule — nightly, hourly — not on demand.</li>
+                <li><span className="bullet-icon good">✓</span>Many similar requests as a job: extraction, classification, scoring.</li>
+                <li><span className="bullet-icon good">✓</span>You're running an evaluation suite or generating synthetic data.</li>
+                <li><span className="bullet-icon good">✓</span>You need very long outputs (300K-token outputs are batch-only).</li>
+              </ul>
+            </div>
+            <div className="usage-card bad">
+              <div className="usage-header">
+                <I.Cross />
+                Don't use Batch when
+              </div>
+              <ul className="usage-list">
+                <li><span className="bullet-icon bad">✗</span>The user is staring at chat waiting for a reply.</li>
+                <li><span className="bullet-icon bad">✗</span>The response feeds a downstream user-facing flow within seconds.</li>
+                <li><span className="bullet-icon bad">✗</span>You only have a handful of requests — submission overhead isn't worth it.</li>
+                <li><span className="bullet-icon bad">✗</span>You need streaming output — Batch is non-streaming by definition.</li>
+                <li><span className="bullet-icon bad">✗</span>You require Zero Data Retention (ZDR) — Batch isn't ZDR-eligible.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label">
+              <I.Bulb color="#2ecc71" />
+              KEY TAKEAWAY
+            </div>
+            <strong>Synchronous calls are reserved for user-facing interactions; everything else is batch by default.</strong> Background jobs, enrichment, evaluation, classification, content generation — all of it goes through Batch unless there's a specific reason it can't.
+          </div>
+        </>
+      );
+    }
+
+    /* ===================== STAGE 3: Routing ===================== */
+    function RoutingStage() {
+      const [haikuPct, setHaikuPct] = useState(70);
+      const [sonnetPct, setSonnetPct] = useState(20);
+      const opusPct = Math.max(0, 100 - haikuPct - sonnetPct);
+
+      const setHaiku = (v) => {
+        const newH = Math.max(0, Math.min(100, v));
+        const newS = Math.min(sonnetPct, 100 - newH);
+        setHaikuPct(newH);
+        setSonnetPct(newS);
+      };
+      const setSonnet = (v) => {
+        const newS = Math.max(0, Math.min(100 - haikuPct, v));
+        setSonnetPct(newS);
+      };
+
+      const volume = 1_000_000;
+      const inTok  = 3000;
+      const outTok = 500;
+
+      const tiers = [
+        { name: 'Haiku 4.5',  pct: haikuPct,  inP: 1.0, outP: 5.0,  color: '#2ecc71' },
+        { name: 'Sonnet 4.6', pct: sonnetPct, inP: 3.0, outP: 15.0, color: '#3498db' },
+        { name: 'Opus 4.7',   pct: opusPct,   inP: 5.0, outP: 25.0, color: '#9b59b6' }
+      ];
+
+      const totals = useMemo(() => {
+        let total = 0;
+        tiers.forEach(t => {
+          const vol = volume * (t.pct / 100);
+          total += (vol * inTok / 1_000_000) * t.inP + (vol * outTok / 1_000_000) * t.outP;
+        });
+        const naive = (volume * inTok / 1_000_000) * 5.0 + (volume * outTok / 1_000_000) * 25.0;
+        const savings = naive - total;
+        const pct = naive > 0 ? (savings / naive) * 100 : 0;
+        return { total, naive, savings, pct };
+      }, [haikuPct, sonnetPct, opusPct]);
+
+      return (
+        <>
+          <div><h2 className="stage-header">3. Model Routing: Use the Right Tier for Each Task</h2></div>
+          <div className="explanation">
+            The dirty secret of production LLM workloads: <strong>most requests are easy</strong>. Roughly 60–70% are simple — classification, extraction, format conversion, lookup. Running everything through your most expensive model is paying premium prices to do work a 1/5-cost model would handle equally well. Model routing is the discipline of sending each request to the cheapest model that can handle it well.
+          </div>
+
+          <div className="protip-box">
+            <div className="protip-label">
+              <I.Bulb color="#b37a08" />
+              Analogy
+            </div>
+            A hospital triage nurse isn't the most expensive specialist in the building, but they're the most important person for <em>throughput</em>. They decide who needs the cardiologist, who needs the GP, and who can be sent home with paracetamol. <strong>Every patient does not need to see the cardiologist.</strong> Every LLM request does not need to hit Opus.
+          </div>
+
+          <h3 className="sub-heading">The three-tier pattern</h3>
+          <div className="tier-grid">
+            <div className="tier-card" style={{ borderColor: '#b9e6c5' }}>
+              <div className="tier-name" style={{ color: '#1a5e3a' }}>Light</div>
+              <div className="tier-model">Claude Haiku 4.5</div>
+              <div className="tier-price" style={{ color: '#1a5e3a' }}>$1.00 / $5.00</div>
+              <div className="tier-share-bar"><div className="tier-share-fill" style={{ width: `${haikuPct}%`, background: '#2ecc71' }} /></div>
+              <div className="tier-share-label">{haikuPct}% of traffic</div>
+              <div className="tier-tasks">Classification, extraction, routing decisions, format conversion, simple lookups.</div>
+            </div>
+            <div className="tier-card" style={{ borderColor: '#b8d4f0' }}>
+              <div className="tier-name" style={{ color: '#1c4e80' }}>Standard</div>
+              <div className="tier-model">Claude Sonnet 4.6</div>
+              <div className="tier-price" style={{ color: '#1c4e80' }}>$3.00 / $15.00</div>
+              <div className="tier-share-bar"><div className="tier-share-fill" style={{ width: `${sonnetPct}%`, background: '#3498db' }} /></div>
+              <div className="tier-share-label">{sonnetPct}% of traffic</div>
+              <div className="tier-tasks">Code generation, multi-step reasoning, document synthesis, most production work.</div>
+            </div>
+            <div className="tier-card" style={{ borderColor: '#dabbe7' }}>
+              <div className="tier-name" style={{ color: '#5e2a86' }}>Heavy</div>
+              <div className="tier-model">Claude Opus 4.7</div>
+              <div className="tier-price" style={{ color: '#5e2a86' }}>$5.00 / $25.00</div>
+              <div className="tier-share-bar"><div className="tier-share-fill" style={{ width: `${opusPct}%`, background: '#9b59b6' }} /></div>
+              <div className="tier-share-label">{opusPct}% of traffic</div>
+              <div className="tier-tasks">Complex agents, novel problems, deep reasoning, high-stakes decisions.</div>
+            </div>
+          </div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">Try it — adjust the traffic split</h3>
+          <div className="explanation" style={{ marginTop: 0 }}>
+            1M requests/month, 3K input + 500 output tokens each. Drag the sliders to see how the bill changes.
+          </div>
+
+          <div className="calc-panel">
+            <div className="calc-grid">
+              <div className="calc-field">
+                <span className="calc-label">Haiku share — {haikuPct}%</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={haikuPct}
+                  onChange={(e) => setHaiku(parseInt(e.target.value))}
+                  aria-label="Haiku traffic share"
+                />
+              </div>
+              <div className="calc-field">
+                <span className="calc-label">Sonnet share — {sonnetPct}%</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100 - haikuPct}
+                  value={sonnetPct}
+                  onChange={(e) => setSonnet(parseInt(e.target.value))}
+                  aria-label="Sonnet traffic share"
+                />
+              </div>
+              <div className="calc-field" style={{ gridColumn: '1 / -1' }}>
+                <span className="calc-label">Opus share (auto-balanced) — {opusPct}%</span>
+                <div className="stack-bar-track" style={{ height: 14 }}>
+                  <div style={{ width: `${haikuPct}%`,  background: '#2ecc71', height: '100%', float: 'left', transition: 'width 0.4s ease' }} />
+                  <div style={{ width: `${sonnetPct}%`, background: '#3498db', height: '100%', float: 'left', transition: 'width 0.4s ease' }} />
+                  <div style={{ width: `${opusPct}%`,   background: '#9b59b6', height: '100%', float: 'left', transition: 'width 0.4s ease' }} />
+                </div>
+              </div>
+            </div>
+
+            <div className="calc-output-row">
+              <div className="calc-output-card">
+                <span className="calc-out-label">Naive — all on Opus 4.7</span>
+                <div className="calc-out-value">{fmt(totals.naive)}</div>
+                <div className="calc-out-sub">monthly cost, no routing</div>
+              </div>
+              <div className="calc-output-card savings">
+                <span className="calc-out-label">With your tier split</span>
+                <div className="calc-out-value">{fmt(totals.total)}</div>
+                <div className="calc-out-sub">save {fmt(totals.savings)} ({totals.pct.toFixed(0)}% off)</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">Static vs dynamic routing</h3>
+          <div className="explanation" style={{ marginTop: 0 }}>
+            Two implementation approaches. Most teams should start with static; dynamic only when you genuinely can't tell at design time how hard a request will be.
+          </div>
+
+          <div className="code-block">{`# STATIC routing — decide upfront, by task type. Right starting point.
+
+def classify_ticket(text: str) -> str:
+    """Simple classification — Haiku is fine."""
+    return _call(model="claude-haiku-4-5", prompt=text)
+
+def generate_code_review(diff: str) -> str:
+    """Code reasoning — Sonnet is the right tier."""
+    return _call(model="claude-sonnet-4-6", prompt=diff)
+
+def architect_solution(requirements: str) -> str:
+    """Multi-step reasoning — Opus earns its price here."""
+    return _call(model="claude-opus-4-7", prompt=requirements)`}</div>
+
+          <div className="code-block" style={{ marginTop: 12 }}>{`# DYNAMIC routing — Haiku classifier picks the tier at runtime.
+
+def route_request(user_prompt: str) -> str:
+    decision = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=10,
+        system="""Output exactly one word: SIMPLE, STANDARD, or COMPLEX.""",
+        messages=[{"role": "user", "content": user_prompt}]
+    )
+    tier = decision.content[0].text.strip().upper()
+
+    model_map = {
+        "SIMPLE":   "claude-haiku-4-5",
+        "STANDARD": "claude-sonnet-4-6",
+        "COMPLEX":  "claude-opus-4-7",
+    }
+    chosen = model_map.get(tier, "claude-sonnet-4-6")  # safe default
+    return _call(model=chosen, prompt=user_prompt)`}</div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">The five gotchas</h3>
+          <div className="gotcha-list">
+            <div className="gotcha-card">
+              <span className="gotcha-num">1</span>
+              <span className="gotcha-title">Quality drift in the tail</span>
+              <div className="gotcha-body">The 70% on Haiku mostly works. The problem is the 5–10% of edge cases — Haiku will misclassify the one ticket where the customer is sarcastic in three languages. <strong>Fix:</strong> confidence check; if Haiku's response looks degenerate, retry on Sonnet.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">2</span>
+              <span className="gotcha-title">The router itself is a single point of failure</span>
+              <div className="gotcha-body">A bug in dynamic routing sends <em>everything</em> to the wrong tier. <strong>Fix:</strong> log every routing decision, alert on anomalous distributions ("Opus traffic exceeded 25%"), keep a kill switch that pins everything to a specific model.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">3</span>
+              <span className="gotcha-title">Output cost dominates at the heavy tier</span>
+              <div className="gotcha-body">Output is 5× input across all Claude models. A 4,000-token Opus response costs $0.10 — multiply by 100K and you're at $10,000/month from output alone. <strong>Fix:</strong> tight <code className="inline">max_tokens</code> per tier — Haiku 512, Sonnet 1,024–2,048, Opus 4,096+ only when needed.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">4</span>
+              <span className="gotcha-title">Cache breakage across tiers</span>
+              <div className="gotcha-body">Caches are per-model. Routing the same system prompt across Haiku and Sonnet maintains two caches with worse hit rates. <strong>Fix:</strong> for static routing, accept duplicate caches — savings still exceed the cost. Monitor <code className="inline">cache_read_input_tokens</code> per model.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">5</span>
+              <span className="gotcha-title">The classifier itself can hallucinate</span>
+              <div className="gotcha-body">Dynamic routers occasionally output garbage — neither SIMPLE nor STANDARD nor COMPLEX. <strong>Fix:</strong> always have a sane fallback (<code className="inline">{`model_map.get(tier, "claude-sonnet-4-6")`}</code>). Sonnet is almost always the right default.</div>
+            </div>
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label">
+              <I.Warn color="#e67e22" />
+              THE SINGLE BIGGEST MISTAKE
+            </div>
+            <strong>Routing too aggressively too early.</strong> Better to ship with everything on Sonnet, validate it works, then carve out specific task types to push down to Haiku. Going the other way — starting on Haiku and discovering quality problems in production — is much harder to recover from.
+          </div>
+        </>
+      );
+    }
+
+    /* ===================== STAGE 4: Stack ===================== */
+    function StackStage() {
+      const baseline = 27500;
+      const rows = [
+        { label: 'Naive baseline',                    tag: 'BAD',   color: '#e74c3c', cost: baseline, pct: 0,  caption: 'Everything on Opus, sync, no caching' },
+        { label: '+ Routing',                         tag: 'GOOD',  color: '#f39c12', cost:  9900,    pct: 64, caption: '70% Haiku / 20% Sonnet / 10% Opus' },
+        { label: '+ Routing + Caching',               tag: 'GREAT', color: '#3498db', cost:  3500,    pct: 87, caption: 'Cached system prompts on each tier' },
+        { label: '+ Routing + Caching + Batch',       tag: 'BEST',  color: '#2ecc71', cost:  1800,    pct: 93, caption: 'Async pipeline with all three' }
+      ];
+      const max = baseline;
+
+      return (
+        <>
+          <div><h2 className="stage-header">4. Stack All Three: The Canonical Production Pattern</h2></div>
+          <div className="explanation">
+            None of these techniques is exotic on its own. The real win is the <strong>multiplicative effect</strong> when you compose them. The canonical shape of a cost-optimized production pipeline in 2026: <em>route by task type, cache the stable prefix, submit async work as a batch.</em> Same workload, ~5–7% of the cost.
+          </div>
+
+          <div className="stack-wrap">
+            <div className="stack-title">
+              <I.Stack color="#6c5ce7" />
+              The compounding effect — 1M requests / month
+            </div>
+            <div className="final-stack">
+              {rows.map((r, i) => {
+                const tagColor = { BAD: '#e74c3c', GOOD: '#f39c12', GREAT: '#3498db', BEST: '#2ecc71' }[r.tag];
+                return (
+                  <div className="final-row" key={i}>
+                    <div>
+                      <span className="final-label">{r.label}</span>
+                      <span className="final-tag" style={{ background: tagColor, color: 'white' }}>{r.tag}</span>
+                      <div style={{ fontSize: 11, color: '#777', marginTop: 2 }}>{r.caption}</div>
+                    </div>
+                    <div className="final-bar-track">
+                      <div className="final-bar-fill" style={{ width: `${(r.cost / max) * 100}%`, background: r.color }}>
+                        {((r.cost / max) * 100).toFixed(0)}% of baseline
+                      </div>
+                    </div>
+                    <div>
+                      <div className="final-cost">{fmt(r.cost)}</div>
+                      {r.pct > 0 && <span className="final-savings">−{r.pct}%</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">All three in one pipeline</h3>
+          <div className="explanation" style={{ marginTop: 0 }}>
+            Production-shaped example: a service that classifies incoming support emails, extracts structured data, and drafts replies. Each step is routed to the right tier, every system prompt is cached, and the whole job is submitted as a batch.
+          </div>
+
+          <div className="code-block">{`def build_classify_request(email_id: str, email: str) -> Request:
+    """Step 1: simple classification → Haiku, cached prompt."""
+    return Request(
+        custom_id=f"classify-{email_id}",
+        params=MessageCreateParamsNonStreaming(
+            model="claude-haiku-4-5",                      # routing: light tier
+            max_tokens=128,
+            system=[{"type": "text", "text": CLASSIFY_PROMPT,
+                     "cache_control": {"type": "ephemeral"}}],   # caching
+            messages=[{"role": "user", "content": email}]
+        )
+    )
+
+def build_extract_request(email_id: str, email: str) -> Request:
+    """Step 2: structured extraction → Sonnet, cached."""
+    return Request(
+        custom_id=f"extract-{email_id}",
+        params=MessageCreateParamsNonStreaming(
+            model="claude-sonnet-4-6",                     # routing: standard tier
+            max_tokens=512,
+            system=[{"type": "text", "text": EXTRACT_PROMPT,
+                     "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": email}]
+        )
+    )
+
+def build_draft_request(email_id: str, email: str, urgency: str) -> Request:
+    """Step 3: reply draft → Sonnet routine, Opus high-urgency."""
+    model = "claude-opus-4-7" if urgency == "high" else "claude-sonnet-4-6"
+    return Request(
+        custom_id=f"draft-{email_id}",
+        params=MessageCreateParamsNonStreaming(
+            model=model,                                   # routing: dynamic
+            max_tokens=1024,
+            system=[{"type": "text", "text": DRAFT_REPLY_PROMPT,
+                     "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": email}]
+        )
+    )
+
+def process_email_batch(emails: list[dict]) -> str:
+    requests = []
+    for e in emails:
+        requests.append(build_classify_request(e["id"], e["text"]))
+        requests.append(build_extract_request(e["id"], e["text"]))
+        requests.append(build_draft_request(e["id"], e["text"], e["urgency"]))
+    batch = client.messages.batches.create(requests=requests)   # batch
+    return batch.id`}</div>
+
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">Five-step action plan</h3>
+          <div className="gotcha-list">
+            <div className="gotcha-card">
+              <span className="gotcha-num">1</span>
+              <span className="gotcha-title">Add caching first</span>
+              <div className="gotcha-body">Identify your largest static prefix (usually the system prompt), pad it above the model minimum if needed, mark it with one <code className="inline">cache_control</code> block, log <code className="inline">cache_read_input_tokens</code> to confirm. 5 minutes of work, often 70–90% off your input bill.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">2</span>
+              <span className="gotcha-title">Audit which workloads are async</span>
+              <div className="gotcha-body">List every place your code calls the LLM API. For each, ask: <em>"Could this tolerate up to 24 hours of latency?"</em> Most teams discover the majority can. Migrate the highest-volume async workload to Batch first.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">3</span>
+              <span className="gotcha-title">Migrate obvious wins to Haiku</span>
+              <div className="gotcha-body">Classification, simple extraction, format conversion, routing decisions. Run side-by-side on real traffic. If Haiku matches Sonnet on the metrics that matter, switch.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">4</span>
+              <span className="gotcha-title">Keep Sonnet as your default</span>
+              <div className="gotcha-body">For everything in the gray zone. Don't agonize over whether something might run on Haiku unless you have data. Reserve Opus only for proven needs — <em>"it might benefit from Opus"</em> is not enough justification.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">5</span>
+              <span className="gotcha-title">Build a quality dashboard before you start</span>
+              <div className="gotcha-body">You cannot do model routing safely without measurement. Track quality per tier per task type. <em>Routing without measurement is gambling, not optimization.</em></div>
+            </div>
+          </div>
+
+          <div className="insight-box">
+            <div className="insight-label">
+              <I.Bulb color="#2ecc71" />
+              THE COMPOUND EFFECT
+            </div>
+            Production LLM costs in 2026 can be <strong>5–15× lower</strong> than they were in 2024 for the same workloads. None of these techniques requires a research team or custom infrastructure — just the discipline to recognize that <em>where</em> you call the API, <em>which</em> model you call, and <em>which</em> parts you cache are architectural decisions, not optimizations.
+          </div>
+        </>
+      );
+    }
+
+    /* ===================== Guide shell ===================== */
+    function Guide() {
+      const [currentStage, setCurrentStage] = useState(0);
+
+      const stages = [
+        { id: 'overview', label: 'Overview', Icon: I.Grid,  render: () => <OverviewStage /> },
+        { id: 'caching',  label: 'Caching',  Icon: I.Cache, render: () => <CachingStage /> },
+        { id: 'batch',    label: 'Batch',    Icon: I.Batch, render: () => <BatchStage /> },
+        { id: 'routing',  label: 'Routing',  Icon: I.Route, render: () => <RoutingStage /> },
+        { id: 'stack',    label: 'Stack',    Icon: I.Stack, render: () => <StackStage /> }
+      ];
+
+      const totalStages = stages.length;
+      const handleNext = () => { if (currentStage < totalStages - 1) setCurrentStage(currentStage + 1); };
+      const handlePrev = () => { if (currentStage > 0) setCurrentStage(currentStage - 1); };
+
+      return (
+        <React.Fragment>
+          <a href="#main" className="skip-link">Skip to main content</a>
+          <div className="container">
+            <aside className="sidebar scrollbar-hide" aria-label="Guide sections">
+              {stages.map((step, idx) => {
+                const StepIcon = step.Icon;
+                const isActive = currentStage === idx;
+                return (
+                  <React.Fragment key={step.id}>
+                    <div className={`step-wrapper ${isActive ? 'active' : ''}`}>
+                      <button
+                        type="button"
+                        className={`step-btn ${isActive ? 'active' : ''}`}
+                        aria-label={`Step ${idx + 1}: ${step.label}`}
+                        aria-current={isActive ? "step" : undefined}
+                        onClick={() => setCurrentStage(idx)}
+                      >
+                        <StepIcon size={22} color={isActive ? 'white' : '#6c5ce7'} />
+                      </button>
+                      <div className="step-btn-label">{step.label}</div>
+                    </div>
+                    {idx < stages.length - 1 && (
+                      <div className={`step-connector ${currentStage > idx ? 'active' : ''}`} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </aside>
+
+            <div className="main-content">
+              <div className="top-bar">
+                <div className="left-section">
+                  <a href="../../index.html" className="back-link">← Back to All Guides</a>
+                  <span style={{ marginLeft: '20px', fontSize: '14px', color: '#999' }}>|</span>
+                  <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span className="guide-number">2.3</span>
+                    <h1 className="title">Cost Optimization Trio</h1>
+                  </div>
+                  <div style={{ marginLeft: '16px' }}>
+                    <div className="badge">USE CASE</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="progress-indicator">Page {currentStage + 1} of {totalStages}</span>
+                  <nav className="nav-arrows" aria-label="Section navigation">
+                    <button type="button" className="arrow-btn" aria-label="Previous section" onClick={handlePrev} disabled={currentStage === 0} title="Previous">&#8592;</button>
+                    <button type="button" className="arrow-btn" aria-label="Next section" onClick={handleNext} disabled={currentStage === totalStages - 1} title="Next">&#8594;</button>
+                  </nav>
+                </div>
+              </div>
+
+              <main id="main" className="content-area scrollbar-hide" key={currentStage}>
+                {stages[currentStage].render()}
+                {currentStage === totalStages - 1 && (
+                  <div className="up-next-card" role="complementary" aria-label="Up next">
+                    <span className="up-next-label">UP NEXT</span>
+                    <a href={NEXT_GUIDE.href} className="up-next-link">
+                      <div className="up-next-meta">
+                        <span className="up-next-id">{NEXT_GUIDE.id}</span>
+                        <span className="up-next-module">{NEXT_GUIDE.module}</span>
+                      </div>
+                      <div className="up-next-title">{NEXT_GUIDE.title}</div>
+                      <span className="up-next-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Guide />);
+  </script>
+</body>
+</html>

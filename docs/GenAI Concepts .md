@@ -1099,6 +1099,545 @@ Return ONLY this JSON:
 
 ---
 
+## 2.3 Prompt Caching: Cutting LLM Bills by 90%
+
+**One-sentence definition:** Prompt caching tells the API to memorize the static parts of your prompt for a short window so subsequent calls pay roughly 10% of the normal input price for the cached portion.
+
+### The Problem It Solves
+
+Every LLM call typically sends the same large preamble:
+
+1. A **system prompt** with instructions, role, output format — often 2,000 to 20,000 tokens
+2. **Tool definitions** if you're using function calling — another 1,000 to 5,000 tokens
+3. A few **examples** for few-shot learning
+4. **Conversation history** from prior turns
+5. The **new user message** — usually only a few hundred tokens
+
+Items 1 through 4 are identical on every single call. You're paying full input price to re-send the same 15,000 tokens of instructions over and over, while only #5 actually changes.
+
+**Analogy: the customer support call.** Imagine you had to re-read a company's 50-page policy manual to the agent every time you called. The agent already knows the manual — you should just say "I'm calling about *my* question" and pick up from there. Prompt caching is that.
+
+### How Claude's Prompt Caching Works
+
+Claude's caching is **explicit** — *you* tell the API which blocks of your prompt to cache by adding a `cache_control` flag to a content block. Anthropic then caches everything from the start of the prompt up to and including that block.
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+LARGE_SYSTEM_PROMPT = """You are an expert technical support agent for AcmeCorp.
+[... 5,000 more tokens of detailed instructions, product docs, escalation rules ...]
+"""
+
+response = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    system=[
+        {
+            "type": "text",
+            "text": LARGE_SYSTEM_PROMPT,
+            "cache_control": {"type": "ephemeral"}  # cache this block
+        }
+    ],
+    messages=[
+        {"role": "user", "content": "How do I reset my password?"}
+    ]
+)
+
+# Verify it worked
+print("Tokens written to cache:", response.usage.cache_creation_input_tokens)
+print("Tokens read from cache:", response.usage.cache_read_input_tokens)
+```
+
+The first call pays slightly more — the one-time write cost. Every subsequent call within the cache window pays only ~10% of the normal input price for the cached portion. The break-even point is **two calls**.
+
+### The Pricing Math
+
+| Token type | Multiplier | What it means |
+|---|---|---|
+| **Standard input** | 1.0× base | First time the model sees these tokens, no caching |
+| **Cache write (5-min TTL)** | 1.25× base | One-time cost to store the cached block, lasts 5 minutes |
+| **Cache write (1-hour TTL)** | 2.0× base | One-time cost, lasts 1 hour |
+| **Cache read** | 0.1× base | Every subsequent call that hits the cache |
+
+On Claude Sonnet 4.6 (input base $3.00 per million tokens):
+- Standard input: **$3.00 / MTok**
+- Cache write (5-min): **$3.75 / MTok** (paid once)
+- Cache read: **$0.30 / MTok** (paid every subsequent call)
+
+For an 8,000-token system prompt used across 100 calls per hour:
+
+| Scenario | Monthly cost |
+|---|---|
+| **Without caching** (8K × 100 × 24 × 30 × $3/M) | **$1,728** |
+| **With caching** (1 write + 99 reads per hour) | **~$176** |
+
+**~90% reduction** on that portion of the bill.
+
+### When Caching Makes Sense
+
+**Cache when you have:**
+- A system prompt over the minimum threshold
+- Tool/function definitions you reuse across calls
+- Few-shot examples that don't change between requests
+- Long reference documents queried many times (RAG, document analysis)
+- Multi-turn conversations where prior messages stay in context
+
+**Don't bother caching when:**
+- Your prompt is shorter than the minimum threshold
+- Each request has completely different content with no repeated prefix
+- You only call the API once per session and stop for hours
+- Your "static" content actually varies (timestamps, request IDs, dynamic values mixed in)
+
+### The Five Gotchas
+
+**1. The minimum token threshold.** Below this, caching silently does nothing (`cache_creation_input_tokens` returns zero, you pay full price).
+
+| Model | Minimum tokens to cache |
+|---|---|
+| Claude Opus 4.7 | 4,096 |
+| Claude Sonnet 4.6 | 2,048 |
+| Claude Haiku 4.5 | 4,096 |
+| Older Sonnet 4.5, Opus 4.1, Sonnet 3.7 | 1,024 |
+
+**2. Exact-match-or-nothing.** Cache hits require byte-for-byte match. One character of drift creates a fresh entry. Common silent killers: timestamps in the system prompt, request IDs near the top, templating engines that vary whitespace, reordered tool definitions. Anything in the cached block must be 100% deterministic.
+
+**3. The 5-minute TTL surprise.** Default cache lifetime is **5 minutes**, not an hour. Each read refreshes the timer, so high-traffic systems naturally stay warm. For sparse access patterns, use the 1-hour TTL: `"cache_control": {"type": "ephemeral", "ttl": "1h"}`. The 1-hour write costs 2× base instead of 1.25× base, so you need at least two reads within the hour for the math to work.
+
+**4. Order matters.** Anthropic caches in this order: `tools` → `system` → `messages`, up to and including the block you mark. If your tools change between calls but your system prompt doesn't, **the system prompt won't cache** — the prefix changed. Static content goes early; dynamic content goes late.
+
+**5. You get up to 4 cache breakpoints.** Lets you cache different sections that change at different rates. For most use cases, **one breakpoint on the system prompt is enough**. Don't over-engineer it.
+
+### Claude vs OpenAI
+
+| Aspect | Anthropic Claude | OpenAI |
+|---|---|---|
+| **Activation** | Explicit — mark blocks with `cache_control` | Automatic — happens when prompts share a prefix |
+| **Cost reduction** | ~90% off cached portions | ~50% off cached portions |
+| **Minimum size** | 2,048–4,096 tokens (model-dependent) | 1,024 tokens |
+| **Match requirement** | Exact byte match from start of prompt | Exact byte match of prompt prefix |
+| **Configuration** | You control TTL (5 min or 1 hr) | No user-facing TTL control |
+
+With OpenAI, you don't add code — just structure prompts consistently with static first and dynamic last. With Claude, you get more control and bigger savings, at the cost of marking what to cache.
+
+### Five-Minute Action Plan
+
+1. **Identify your largest static prefix.** Usually the system prompt. Count its tokens. If under the model's minimum, pad with useful content (canonical examples, output format spec).
+2. **Add one `cache_control` breakpoint** at the end of that block.
+3. **Log `cache_creation_input_tokens` and `cache_read_input_tokens`** on every response. If you can't see it, you can't optimize it.
+4. **Make a second call within 5 minutes** and confirm the cache read is non-zero. If zero, something "static" is varying — find and fix it.
+5. **Compare the bill at the end of the week.**
+
+### Key Takeaway
+
+The static-vs-dynamic split in your prompt is an **architectural decision, not a styling choice**. Static content goes first, gets marked for caching, and never changes byte-for-byte between calls. Dynamic content goes last and varies freely.
+
+---
+
+## 2.4 Batch Processing: Another 50% Off for Async Workloads
+
+**One-sentence definition:** The Message Batches API gives 50% off both input and output tokens in exchange for accepting up to 24 hours of latency — and it stacks with prompt caching.
+
+### The Mental Shift: Sync vs Async
+
+Most beginners learn the LLM API as a synchronous request-response thing — call, wait two seconds, show answer. That works for chat. It's wasteful for everything else:
+
+- A nightly job summarizing 50,000 support tickets
+- A pipeline generating SEO descriptions for every product in a catalog
+- An evaluation harness running 10,000 test prompts
+- A document-processing service that classifies PDFs every few minutes
+- A content engine generating tomorrow's social posts overnight
+
+None of these need a 2-second response. The user isn't watching. Paying real-time prices for them is throwing money away.
+
+### How Claude's Batch API Works
+
+The lifecycle:
+
+1. **Submit** a JSON file with up to 100,000 individual requests, each with its own `custom_id`
+2. Anthropic processes them **asynchronously** — most batches finish in under an hour, occasionally up to 24
+3. **Poll** for status, or wait for the batch to enter the `ended` state
+4. **Download** the results — a JSONL file with one response per request, matched by `custom_id`
+
+```python
+import anthropic
+from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
+from anthropic.types.messages.batch_create_params import Request
+
+client = anthropic.Anthropic()
+
+batch = client.messages.batches.create(
+    requests=[
+        Request(
+            custom_id="ticket-001",
+            params=MessageCreateParamsNonStreaming(
+                model="claude-sonnet-4-6",
+                max_tokens=512,
+                messages=[{"role": "user",
+                          "content": "Classify: 'Cannot login, password reset broken'"}]
+            )
+        ),
+        # ... thousands more ...
+    ]
+)
+
+# Poll until done
+import time
+while True:
+    batch = client.messages.batches.retrieve(batch.id)
+    if batch.processing_status == "ended":
+        break
+    time.sleep(60)
+
+# Stream results
+for result in client.messages.batches.results(batch.id):
+    if result.result.type == "succeeded":
+        print(f"{result.custom_id}: {result.result.message.content[0].text}")
+```
+
+Same model, same quality, half the price. The `custom_id` flows through to the result so you can match outputs back to source records.
+
+### The Pricing Math
+
+50% off both input and output tokens, every Claude model, no exceptions:
+
+| Model | Standard rate (input/output) | Batch rate (input/output) |
+|---|---|---|
+| Claude Haiku 4.5 | $1.00 / $5.00 per MTok | **$0.50 / $2.50 per MTok** |
+| Claude Sonnet 4.6 | $3.00 / $15.00 per MTok | **$1.50 / $7.50 per MTok** |
+| Claude Opus 4.7 | $5.00 / $25.00 per MTok | **$2.50 / $12.50 per MTok** |
+
+**Real scenario:** Document-processing pipeline running nightly — 100,000 docs/month, ~5,000 input tokens each, 500 output tokens, on Sonnet 4.6.
+
+| Approach | Monthly input | Monthly output | **Total** |
+|---|---|---|---|
+| Standard sync API | $1,500 | $750 | **$2,250** |
+| Batch API alone | $750 | $375 | **$1,125** |
+| Batch + prompt caching | ~$83 | $375 | **~$458** |
+
+That last row is the punchline. **Batch and caching stack.** The cached input now costs 10% of the batch rate — so 5% of the standard rate. Output stays at the batch rate (50% off) since each response is unique. **From $2,250/month to $458/month for the same work.**
+
+### When Batch Is the Right Call
+
+**Use the Batch API when:**
+- The user isn't waiting for the response in real time
+- The work runs on a schedule (nightly, hourly) rather than on demand
+- You're processing many similar requests as a job — extraction, classification, summarization, scoring
+- You're running an eval suite or generating synthetic data for fine-tuning
+- You need very long outputs (300K-token outputs are batch-only)
+- Volume is high enough that savings matter (below ~$50/month, not worth the engineering)
+
+**Don't use the Batch API when:**
+- The user is staring at chat waiting for a reply
+- The response feeds a downstream user-facing flow within seconds
+- You only have a handful of requests
+- You need streaming output (batch is non-streaming by definition)
+- You require Zero Data Retention (ZDR) — Batch API isn't ZDR-eligible
+
+Most production systems end up with a **hybrid pattern**: sync for user-facing chat, batch for analytics/enrichment/eval that runs in the background.
+
+### The Five Gotchas
+
+**1. The 24-hour deadline is a deadline.** Most batches finish in under an hour, but you cannot count on it. Unfinished requests after 24 hours are marked `expired`. Submit before any downstream deadline; treat `expired` as a real outcome to handle in code; split truly large batches.
+
+**2. Batches don't fail — individual requests do.** A batch returns a mix: `succeeded`, `errored`, `canceled`, `expired`. Iterate over results and handle each `result.type` explicitly. Plan for partial success.
+
+```python
+for result in client.messages.batches.results(batch.id):
+    if result.result.type == "succeeded":
+        save_to_database(result.custom_id, result.result.message)
+    elif result.result.type == "errored":
+        log_error(result.custom_id, result.result.error)
+    elif result.result.type == "expired":
+        retry_in_next_batch(result.custom_id)
+```
+
+**3. The 100,000-request and 256MB limits.** Per-batch cap whichever comes first. For most workloads request count is binding; for long prompts it's bytes. Split into multiple batches and submit in parallel — Anthropic allows several batches in flight simultaneously.
+
+**4. Polling vs webhooks.** Polling is fine for one-off jobs but wasteful for production pipelines. Anthropic supports webhooks — register an endpoint and get notified when the batch ends. For scheduled jobs, webhooks are the right pattern.
+
+**5. The 300K-token output trick.** Sync API caps outputs at 64K-128K tokens depending on the model. The Batch API supports outputs up to **300,000 tokens** on Opus 4.7, Opus 4.6, and Sonnet 4.6 with the `output-300k-2026-03-24` beta header. Standard batch pricing applies. For long-form generation, batch is strictly more capable than sync.
+
+### Realistic Pattern: Batch + Caching Together
+
+```python
+CLASSIFICATION_PROMPT = """You are a support ticket classifier for AcmeCorp.
+[... 4,000 tokens of categories, examples, edge cases, output format ...]
+Output a JSON object with: category, severity, suggested_team, summary."""
+
+
+def build_request(ticket_id: str, ticket_text: str) -> Request:
+    return Request(
+        custom_id=ticket_id,
+        params=MessageCreateParamsNonStreaming(
+            model="claude-sonnet-4-6",
+            max_tokens=512,
+            system=[
+                {
+                    "type": "text",
+                    "text": CLASSIFICATION_PROMPT,
+                    "cache_control": {"type": "ephemeral"}  # cache once across batch
+                }
+            ],
+            messages=[{"role": "user", "content": ticket_text}]
+        )
+    )
+
+
+def classify_tickets(tickets: list[dict]) -> str:
+    batch = client.messages.batches.create(
+        requests=[build_request(t["id"], t["text"]) for t in tickets]
+    )
+    return batch.id
+```
+
+The 4,000-token classification prompt is processed once, reused for every ticket. Combined with batch's 50% discount, you're paying roughly **5% of the equivalent sync-API cost** for the same work.
+
+### Claude vs OpenAI
+
+| Aspect | Anthropic Claude Batch API | OpenAI Batch API |
+|---|---|---|
+| **Discount** | 50% off input and output | 50% off input and output |
+| **Turnaround** | Most under 1 hour, 24-hour ceiling | Same |
+| **Submission format** | JSON via SDK request objects | JSONL file upload |
+| **Per-batch limit** | 100,000 requests / 256MB | 50,000 requests / 200MB |
+| **Stacks with caching** | Yes — explicit cache breakpoints | Caching is automatic |
+| **Long-output beta** | 300K tokens on Sonnet 4.6 / Opus 4.6 / 4.7 | Standard limits |
+
+### Key Takeaway
+
+**Synchronous API calls are reserved for user-facing interactions; everything else is batch by default.** Background jobs, enrichment, evaluation, classification, content generation, document processing — all of it goes through Batch unless there's a specific reason it can't.
+
+---
+
+## 2.5 Model Routing: Use the Right Tier for Each Task
+
+**One-sentence definition:** Model routing is the discipline of sending each request to the cheapest model that can handle it well — Haiku for the easy 70%, Sonnet for the middle 20%, Opus for the hard 10% — instead of running everything through your most expensive model.
+
+### The Fallacy of "One Model for Everything"
+
+Most beginners pick one model — usually the strongest — and route everything through it. The reasoning sounds reasonable: *"I want the best quality. Why would I use a weaker model?"*
+
+Frontier models cost roughly **5× more per token** than entry-level models in the same family. Claude Haiku 4.5 is $1.00/$5.00 per million tokens. Claude Opus 4.7 is $5.00/$25.00. The dirty secret of production LLM workloads is that the difficulty distribution is **wildly skewed**:
+
+- 60-70% of requests are genuinely simple — classification, extraction, lookup, formatting
+- 20-30% require real reasoning — multi-step analysis, code generation, document synthesis
+- 5-10% are genuinely hard — complex agents, novel problems, high-stakes decisions
+
+Running all of them through your most expensive model means paying premium prices for work a 1/5-cost model would handle equally well.
+
+### The Three-Tier Pattern
+
+| Tier | Model | Cost (input/output per MTok) | Best For |
+|---|---|---|---|
+| **Light** | Claude Haiku 4.5 | $1.00 / $5.00 | Classification, extraction, routing decisions, format conversion, simple lookups |
+| **Standard** | Claude Sonnet 4.6 | $3.00 / $15.00 | Code generation, multi-step reasoning, document synthesis, most production work |
+| **Heavy** | Claude Opus 4.7 | $5.00 / $25.00 | Complex agents, novel problems, deep reasoning, high-stakes decisions |
+
+Most production teams converge on the **70/20/10 split** — 70% Haiku, 20% Sonnet, 10% Opus. Exact ratios vary by application; the shape is consistent.
+
+**Analogy: hospital triage.** The triage nurse isn't the most expensive specialist in the building, but they're the most important person for *throughput* — they decide who needs the cardiologist, who needs the GP, and who can be sent home. Every patient does not need to see the cardiologist. Every LLM request does not need to hit Opus.
+
+### Two Implementation Approaches
+
+**Approach 1: Static Routing (Rules-Based)** — decide upfront, by code path or task type, which model handles which kind of request. Right starting point for most teams.
+
+```python
+def classify_ticket(text: str) -> str:
+    """Simple classification — Haiku is fine."""
+    return _call(model="claude-haiku-4-5", prompt=text)
+
+def generate_code_review(diff: str) -> str:
+    """Code reasoning — Sonnet is the right tier."""
+    return _call(model="claude-sonnet-4-6", prompt=diff)
+
+def architect_solution(requirements: str) -> str:
+    """Complex multi-step reasoning — Opus earns its price here."""
+    return _call(model="claude-opus-4-7", prompt=requirements)
+```
+
+Different functions, different models, decision made at design time. Forces you to think clearly about which tasks actually need the expensive model. Most teams discover the answer is *"fewer than I assumed."*
+
+**Approach 2: Dynamic Routing (Complexity-Based)** — when you can't tell at design time how hard a request will be (general-purpose chatbots, mixed-difficulty queues), use a fast classifier to decide at runtime.
+
+```python
+def route_request(user_prompt: str) -> str:
+    routing_decision = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=10,
+        system="""Classify this request's complexity. Output exactly one word:
+SIMPLE — basic Q&A, lookup, classification, extraction
+STANDARD — code, multi-step reasoning, analysis
+COMPLEX — novel problems, deep architecture, multi-agent coordination""",
+        messages=[{"role": "user", "content": user_prompt}]
+    )
+
+    tier = routing_decision.content[0].text.strip().upper()
+    model_map = {
+        "SIMPLE":   "claude-haiku-4-5",
+        "STANDARD": "claude-sonnet-4-6",
+        "COMPLEX":  "claude-opus-4-7",
+    }
+    chosen_model = model_map.get(tier, "claude-sonnet-4-6")  # safe default
+
+    response = client.messages.create(
+        model=chosen_model,
+        max_tokens=2048,
+        messages=[{"role": "user", "content": user_prompt}]
+    )
+    return response.content[0].text
+```
+
+The classifier call costs almost nothing. Savings come from the *next* call hitting the right tier. **RouteLLM** is an open-source library that does the same with more sophisticated complexity scoring.
+
+### The Pricing Math (Real Workload)
+
+Internal assistant handling 1M requests/month, average 3,000 input tokens and 500 output tokens.
+
+**Naive approach — everything on Opus 4.7:**
+- Input: 3B tokens × $5/M = $15,000
+- Output: 500M tokens × $25/M = $12,500
+- **Monthly total: $27,500**
+
+**Tiered routing — 70% Haiku / 20% Sonnet / 10% Opus:**
+
+| Tier | Volume | Input cost | Output cost | Total |
+|---|---|---|---|---|
+| Haiku (70%) | 700K req | $2,100 | $1,750 | $3,850 |
+| Sonnet (20%) | 200K req | $1,800 | $1,500 | $3,300 |
+| Opus (10%) | 100K req | $1,500 | $1,250 | $2,750 |
+| | | | | **$9,900** |
+
+**Bill drops from $27,500 to $9,900 — a 64% reduction.** Same outputs to the user, because workloads were correctly matched to model tier.
+
+Stack this with caching and batch:
+
+| Stack | Monthly cost | Reduction vs naive |
+|---|---|---|
+| Naive (all Opus) | $27,500 | — |
+| Routing only | $9,900 | 64% off |
+| Routing + caching | ~$3,500 | 87% off |
+| Routing + caching + batch (where applicable) | ~$1,800 | 93% off |
+
+That progression — from $27,500 down to $1,800 for the *same workload* — is the actual reason production LLM systems can be economical at scale.
+
+### When Routing Pays Off
+
+**Use routing when:**
+- Traffic mixes clearly simple and clearly complex tasks
+- You're running >$200/month in LLM costs (below this, the engineering effort isn't worth it)
+- You can identify task types in code (static) or generate fast classification (dynamic)
+- You have a quality eval harness to validate the change didn't degrade anything
+
+**Don't bother with routing when:**
+- Every single request genuinely requires top-tier reasoning (rare)
+- Volume is so low that savings won't justify the engineering
+- You don't have a way to measure quality — without measurement you'll silently degrade and not know
+- You're early prototyping — premature optimization
+
+The single most common mistake: **routing too aggressively too early.** Better to ship with everything on Sonnet, validate it works, then carve out specific task types to push down to Haiku. Going the other way — starting on Haiku and discovering quality problems in production — is much harder to recover from.
+
+### The Five Gotchas
+
+**1. Quality drift in the tail.** The 70% on Haiku mostly works. The problem is the 5-10% of edge cases — Haiku will misclassify the one ticket where the customer is sarcastic in three languages. **Fix:** confidence check. If Haiku's response looks degenerate (too short, malformed, contains hedging), retry on Sonnet.
+
+**2. The router itself is a single point of failure.** A bug in dynamic-routing classifier sends *everything* to the wrong tier. **Fix:** log the routing decision on every request, alert on anomalous distributions ("Opus traffic exceeded 25%"), keep a kill switch that pins everything to a specific model if the router misbehaves.
+
+**3. Output token cost dominates at the heavy tier.** Output is 5× input across all Claude models. A single 4,000-token Opus response costs $0.10 — multiply by 100K and you're at $10,000/month from output alone. **Fix:** tight `max_tokens` per tier. Haiku rarely needs more than 512; Sonnet 1,024-2,048; Opus only 4,096+ when the task genuinely requires it.
+
+**4. Cache breakage across tiers.** Caches are per-model. Routing the same system prompt across Haiku and Sonnet maintains two caches with worse hit rates. **Fix:** for high-volume static routing, accept duplicate caches — savings still exceed the cost. For dynamic routing, monitor `cache_read_input_tokens` per model.
+
+**5. The classifier itself can hallucinate.** Dynamic routers occasionally output garbage — neither SIMPLE nor STANDARD nor COMPLEX. **Fix:** always have a sane fallback (`model_map.get(tier, "claude-sonnet-4-6")`). Sonnet is almost always the right default — handles both easy and moderately hard work without falling over.
+
+### All Three Optimizations Together
+
+```python
+# Stable instruction blocks — different prompts per task, all cacheable
+CLASSIFY_PROMPT     = "You are a support email classifier... [4,000 tokens]"
+EXTRACT_PROMPT      = "Extract structured data from this email... [3,000 tokens]"
+DRAFT_REPLY_PROMPT  = "Draft a professional reply to this customer... [5,000 tokens]"
+
+
+def build_classify_request(email_id: str, email: str) -> Request:
+    """Step 1: simple → Haiku, cached."""
+    return Request(
+        custom_id=f"classify-{email_id}",
+        params=MessageCreateParamsNonStreaming(
+            model="claude-haiku-4-5",
+            max_tokens=128,
+            system=[{"type": "text", "text": CLASSIFY_PROMPT,
+                     "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": email}]
+        )
+    )
+
+
+def build_extract_request(email_id: str, email: str) -> Request:
+    """Step 2: structured extraction → Sonnet, cached."""
+    return Request(
+        custom_id=f"extract-{email_id}",
+        params=MessageCreateParamsNonStreaming(
+            model="claude-sonnet-4-6",
+            max_tokens=512,
+            system=[{"type": "text", "text": EXTRACT_PROMPT,
+                     "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": email}]
+        )
+    )
+
+
+def build_draft_request(email_id: str, email: str, urgency: str) -> Request:
+    """Step 3: reply draft → Sonnet routine, Opus high-urgency."""
+    model = "claude-opus-4-7" if urgency == "high" else "claude-sonnet-4-6"
+    return Request(
+        custom_id=f"draft-{email_id}",
+        params=MessageCreateParamsNonStreaming(
+            model=model,
+            max_tokens=1024,
+            system=[{"type": "text", "text": DRAFT_REPLY_PROMPT,
+                     "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": email}]
+        )
+    )
+
+
+def process_email_batch(emails: list[dict]) -> str:
+    requests = []
+    for email in emails:
+        requests.append(build_classify_request(email["id"], email["text"]))
+        requests.append(build_extract_request(email["id"], email["text"]))
+        requests.append(build_draft_request(email["id"], email["text"], email["urgency"]))
+    batch = client.messages.batches.create(requests=requests)
+    return batch.id
+```
+
+This single pipeline applies all three optimizations: **Routing** (Haiku for classification, Sonnet for extraction, Sonnet/Opus for drafts), **Caching** (every system prompt cached), **Batch** (whole job runs async at 50% off). Compared to the naive "everything on Opus, sync, no caching" baseline, this pipeline runs at roughly **5-7% of the cost** for the same output.
+
+### Claude vs OpenAI
+
+| Tier | Anthropic | OpenAI |
+|---|---|---|
+| Light | Claude Haiku 4.5 | GPT-5.4 nano / GPT-5.4 mini |
+| Standard | Claude Sonnet 4.6 | GPT-5.4 |
+| Heavy | Claude Opus 4.7 | o3 / GPT-5 reasoning |
+
+Routing pattern is identical across providers — just swap model strings. Differences worth knowing: OpenAI's nano tier is cheaper than Haiku ($0.20/$1.25 vs $1.00/$5.00) for very high-volume classification; Claude's quality bar across tiers tends to hold up better, which means routing can be more aggressive on Claude. Cross-provider routing (RouteLLM and similar) is a real pattern at $5K+/month spend.
+
+### Five-Step Action Plan
+
+1. **Audit your task types.** List every distinct LLM call. For each, write down what reasoning is actually required. Be honest. Most teams discover 60-70% of their calls are doing work a smaller model could handle.
+2. **Migrate the obvious wins to Haiku first.** Classification, simple extraction, format conversion, routing decisions. Run side-by-side comparison on real traffic. If Haiku matches Sonnet on metrics, switch.
+3. **Keep Sonnet as your default** for everything in the gray zone.
+4. **Reserve Opus for proven needs.** Only route to Opus when you've tested and shown Sonnet's output is materially worse. *"It might benefit from Opus"* is not enough.
+5. **Build a quality dashboard before you start.** You cannot do model routing safely without measurement. Track quality per tier per task type. Without it, you're flying blind.
+
+### Key Takeaway
+
+The shift from *"which model is best?"* to *"which model is best for this specific task?"* is the conceptual leap that separates someone learning the API from someone shipping at scale. The compound effect of caching, batching, and routing is the reason production LLM costs in 2026 can be **5-15× lower** than they were in 2024 for the same workloads. None of these techniques is exotic — they're available to anyone reading the docs.
+
+---
+
 # 3: CONTEXT ENGINEERING
 
 ## 3.1 What is Context Engineering?
