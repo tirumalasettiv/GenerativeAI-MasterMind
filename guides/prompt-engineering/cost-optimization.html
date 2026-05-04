@@ -266,11 +266,15 @@
       color: #ecf0f1;
       padding: 18px 20px;
       border-radius: 12px;
-      font-family: 'Courier New', monospace;
+      font-family: 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
       font-size: 13px;
       line-height: 1.6;
-      white-space: pre;
+      white-space: pre-wrap;        /* preserve newlines, wrap very long lines */
+      overflow-wrap: anywhere;       /* wrap inside long tokens too */
+      word-break: normal;            /* override shared CSS break-word for code */
       overflow-x: auto;
+      flex-shrink: 0;                /* don't let flex column compress the box */
+      tab-size: 2;
     }
 
     /* ---------- Gotcha / pro tip / decision callouts ---------- */
