@@ -261,6 +261,11 @@
     }
 
     /* ---------- Code blocks ---------- */
+    .code-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
     .code-block {
       background: #2c3e50;
       color: #ecf0f1;
@@ -275,6 +280,81 @@
       overflow-x: auto;
       flex-shrink: 0;                /* don't let flex column compress the box */
       tab-size: 2;
+      transition: max-height 0.35s ease;
+    }
+
+    .code-block.collapsed {
+      max-height: 180px;
+      overflow: hidden;
+    }
+
+    .code-fade {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 90px;
+      background: linear-gradient(180deg, rgba(44,62,80,0) 0%, rgba(44,62,80,0.95) 70%, rgba(44,62,80,1) 100%);
+      border-radius: 0 0 12px 12px;
+      pointer-events: none;
+    }
+
+    .code-toggle {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 18px;
+      padding: 6px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(108, 92, 231, 0.45);
+      transition: all 0.25s cubic-bezier(0.22, 0.68, 0, 1.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .code-toggle:hover {
+      background: #5849d6;
+      transform: translateX(-50%) translateY(-1px);
+    }
+
+    .code-toggle:focus-visible {
+      outline: 2px solid #2ecc71;
+      outline-offset: 2px;
+    }
+
+    .code-toggle.expanded {
+      position: static;
+      transform: none;
+      margin-top: 10px;
+      box-shadow: none;
+      background: #f4f4f8;
+      color: #555;
+    }
+
+    .code-toggle.expanded:hover {
+      background: #e8e8f0;
+      color: #1a1a1a;
+      transform: none;
+    }
+
+    .code-meta {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(236, 240, 241, 0.55);
+      letter-spacing: 0.5px;
+      pointer-events: none;
+      font-family: 'DM Sans', sans-serif;
     }
 
     /* ---------- Gotcha / pro tip / decision callouts ---------- */
@@ -648,6 +728,32 @@
       return '$' + n.toFixed(0);
     };
 
+    /* Collapsed-by-default code block with Expand / Collapse toggle */
+    function CodeBlock({ children, language = 'python', style }) {
+      const [expanded, setExpanded] = useState(false);
+      const lineCount = (typeof children === 'string')
+        ? children.split('\n').length
+        : 0;
+
+      return (
+        <div className="code-wrap" style={style}>
+          <div className={`code-block ${expanded ? '' : 'collapsed'}`}>
+            <span className="code-meta">{language} · {lineCount} lines</span>
+            {children}
+          </div>
+          {!expanded && <div className="code-fade" aria-hidden="true" />}
+          <button
+            type="button"
+            className={`code-toggle ${expanded ? 'expanded' : ''}`}
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+          >
+            {expanded ? '▲ Collapse' : `▼ Expand (${lineCount} lines)`}
+          </button>
+        </div>
+      );
+    }
+
     /* ===================== STAGE 0: Overview ===================== */
     function OverviewStage() {
       const stack = [
@@ -758,7 +864,7 @@
           </div>
 
           <h3 className="sub-heading">A production-shaped caching example</h3>
-          <div className="code-block">{`import anthropic
+          <CodeBlock>{`import anthropic
 import logging
 from typing import Optional
 
@@ -866,7 +972,7 @@ if __name__ == "__main__":
 
     # Second call within 5 minutes: HUGE discount on the system prompt + tools.
     # Watch the log line — cache_read_input_tokens should be the bulk of input.
-    print(ask_support("My refund hasn't shown up after 14 days, what do I do?"))`}</div>
+    print(ask_support("My refund hasn't shown up after 14 days, what do I do?"))`}</CodeBlock>
 
           <div className="section-divider" />
 
@@ -1040,7 +1146,7 @@ if __name__ == "__main__":
           </div>
 
           <h3 className="sub-heading">Submit, poll, download — a complete walkthrough</h3>
-          <div className="code-block">{`import time
+          <CodeBlock>{`import time
 import logging
 import anthropic
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
@@ -1164,7 +1270,7 @@ if __name__ == "__main__":
     bid = submit_batch(tickets)
     wait_for_batch(bid)
     summary = consume_results(bid)
-    log.info("done: %s", summary)`}</div>
+    log.info("done: %s", summary)`}</CodeBlock>
 
           <div className="protip-box">
             <div className="protip-label">
@@ -1456,7 +1562,7 @@ if __name__ == "__main__":
             Two implementation approaches. Most teams should start with static; dynamic only when you genuinely can't tell at design time how hard a request will be.
           </div>
 
-          <div className="code-block">{`# =============================================================================
+          <CodeBlock>{`# =============================================================================
 # STATIC ROUTING — the decision is hardcoded by task type at design time.
 # This is where every team should start. No classifier, no surprises.
 # =============================================================================
@@ -1530,9 +1636,9 @@ def architect_distributed_system(requirements: str) -> str:
 
 def negotiate_complex_contract(context: str) -> str:
     """Adversarial multi-party reasoning — Opus territory."""
-    return _call(Tier.HEAVY, context, system="You are senior counsel. Identify risks, leverage, and counter-positions.")`}</div>
+    return _call(Tier.HEAVY, context, system="You are senior counsel. Identify risks, leverage, and counter-positions.")`}</CodeBlock>
 
-          <div className="code-block" style={{ marginTop: 12 }}>{`# =============================================================================
+          <CodeBlock style={{ marginTop: 12 }}>{`# =============================================================================
 # DYNAMIC ROUTING — a fast classifier picks the tier at request time.
 # Use this when you genuinely cannot tell at design time how hard a request is
 # (general-purpose chatbots, mixed-difficulty queues, ad-hoc developer tools).
@@ -1614,7 +1720,7 @@ def _looks_degenerate(text: str) -> bool:
         return True
     hedges = ["i'm not sure", "i cannot", "as an ai", "i don't have"]
     lowered = text.lower()
-    return any(h in lowered for h in hedges)`}</div>
+    return any(h in lowered for h in hedges)`}</CodeBlock>
 
           <div className="section-divider" />
 
@@ -1744,7 +1850,7 @@ def _looks_degenerate(text: str) -> bool:
             Production-shaped example: a service that classifies incoming support emails, extracts structured data, and drafts replies. Each step is routed to the right tier, every system prompt is cached, and the whole job is submitted as a batch.
           </div>
 
-          <div className="code-block">{`# =============================================================================
+          <CodeBlock>{`# =============================================================================
 # THE CANONICAL PRODUCTION SHAPE: routing + caching + batch in a single pipeline.
 # Workload: incoming customer support emails — classify, extract, draft a reply.
 # Each stage picks the right tier, caches its stable prompt, and submits async.
@@ -1900,7 +2006,7 @@ if __name__ == "__main__":
     records = collect_results(batch_id)
 
     for email_id, stages in records.items():
-        write_to_crm(email_id, stages)            # category + extract + draft`}</div>
+        write_to_crm(email_id, stages)            # category + extract + draft`}</CodeBlock>
 
           <div className="section-divider" />
 
