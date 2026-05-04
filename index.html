@@ -550,8 +550,8 @@
               flexWrap: "wrap",
             }}>
               {[
-                { num: "7", label: "Modules" },
-                { num: "40", label: "Interactive Guides" },
+                { num: String(MODULES.length), label: "Modules" },
+                { num: String(MODULES.reduce((sum, m) => sum + m.guides.length, 0)), label: "Interactive Guides" },
                 { num: "70", label: "Exam Questions" },
               ].map((stat, i) => (
                 <div key={i} style={{
@@ -731,7 +731,7 @@
                   Built for learning modern generative AI concepts and techniques
                 </p>
                 <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", margin: 0 }}>
-                  7 Modules &middot; 40 Guides &middot; 70-Question Final Exam
+                  {MODULES.length} Modules &middot; {MODULES.reduce((sum, m) => sum + m.guides.length, 0)} Guides &middot; 70-Question Final Exam
                 </p>
               </div>
             </div>
