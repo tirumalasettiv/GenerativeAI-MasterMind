@@ -842,6 +842,37 @@ print("Tokens read   :", response.usage.cache_read_input_tokens)`}</div>
 
           <div className="section-divider" />
 
+          <div className="two-col">
+            <div className="usage-card good">
+              <div className="usage-header">
+                <I.Check />
+                Cache when
+              </div>
+              <ul className="usage-list">
+                <li><span className="bullet-icon good">✓</span>Your system prompt is over the model's minimum threshold (2K Sonnet, 4K Opus/Haiku).</li>
+                <li><span className="bullet-icon good">✓</span>You have tool / function definitions reused across calls.</li>
+                <li><span className="bullet-icon good">✓</span>Few-shot examples that don't change between requests.</li>
+                <li><span className="bullet-icon good">✓</span>Long reference documents queried many times (RAG, document analysis).</li>
+                <li><span className="bullet-icon good">✓</span>Multi-turn conversations where prior messages stay in context.</li>
+              </ul>
+            </div>
+            <div className="usage-card bad">
+              <div className="usage-header">
+                <I.Cross />
+                Don't bother when
+              </div>
+              <ul className="usage-list">
+                <li><span className="bullet-icon bad">✗</span>Your prompt is shorter than the minimum threshold — caching silently no-ops.</li>
+                <li><span className="bullet-icon bad">✗</span>Each request has completely different content with no repeated prefix.</li>
+                <li><span className="bullet-icon bad">✗</span>You only call the API once per session and then stop for hours.</li>
+                <li><span className="bullet-icon bad">✗</span>Your "static" content actually varies (timestamps, request IDs, dynamic values).</li>
+                <li><span className="bullet-icon bad">✗</span>You're still prototyping and haven't picked a final prompt shape.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="section-divider" />
+
           <h3 className="sub-heading">The five gotchas nobody warns you about</h3>
           <div className="gotcha-list">
             <div className="gotcha-card">
@@ -1275,6 +1306,37 @@ def route_request(user_prompt: str) -> str:
     }
     chosen = model_map.get(tier, "claude-sonnet-4-6")  # safe default
     return _call(model=chosen, prompt=user_prompt)`}</div>
+
+          <div className="section-divider" />
+
+          <div className="two-col">
+            <div className="usage-card good">
+              <div className="usage-header">
+                <I.Check />
+                Route when
+              </div>
+              <ul className="usage-list">
+                <li><span className="bullet-icon good">✓</span>Traffic mixes clearly simple and clearly complex tasks.</li>
+                <li><span className="bullet-icon good">✓</span>You're spending more than ~$200/month on LLM calls.</li>
+                <li><span className="bullet-icon good">✓</span>You can identify task types in code (static) or via a fast classifier (dynamic).</li>
+                <li><span className="bullet-icon good">✓</span>You have a quality eval harness to validate the change didn't degrade anything.</li>
+                <li><span className="bullet-icon good">✓</span>Your user base tolerates some quality variance on edge cases.</li>
+              </ul>
+            </div>
+            <div className="usage-card bad">
+              <div className="usage-header">
+                <I.Cross />
+                Don't bother when
+              </div>
+              <ul className="usage-list">
+                <li><span className="bullet-icon bad">✗</span>Every single request genuinely requires top-tier reasoning (rare).</li>
+                <li><span className="bullet-icon bad">✗</span>Volume is so low that savings won't justify the engineering effort.</li>
+                <li><span className="bullet-icon bad">✗</span>You don't have a way to measure quality — you'll silently degrade and not know.</li>
+                <li><span className="bullet-icon bad">✗</span>You're still in early prototyping and haven't validated the application yet.</li>
+                <li><span className="bullet-icon bad">✗</span>Your task types are too tightly coupled to split cleanly across tiers.</li>
+              </ul>
+            </div>
+          </div>
 
           <div className="section-divider" />
 
