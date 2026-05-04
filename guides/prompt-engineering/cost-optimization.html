@@ -753,29 +753,116 @@
             Imagine calling customer support and being forced to re-read the company's 50-page policy manual every time before asking your question. The agent already knows the manual. You should just say "I'm calling about <em>my</em> question" and pick up from there. Prompt caching is exactly that.
           </div>
 
-          <h3 className="sub-heading">The simplest possible example</h3>
+          <h3 className="sub-heading">A production-shaped caching example</h3>
           <div className="code-block">{`import anthropic
-client = anthropic.Anthropic()
+import logging
+from typing import Optional
 
-LARGE_SYSTEM_PROMPT = """You are an expert support agent for AcmeCorp.
-[ ... 5,000 more tokens of instructions, product docs, escalation rules ... ]
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+log = logging.getLogger("acme.support")
+
+client = anthropic.Anthropic()  # picks up ANTHROPIC_API_KEY from the env
+
+# ---------------------------------------------------------------------------
+# 1. STATIC PREFIX — everything from here down is byte-for-byte identical on
+# every call. That's the contract: anything dynamic (timestamps, request IDs,
+# the user's question) must NOT live in this block, or the cache silently
+# misses and you pay full price for every request.
+# ---------------------------------------------------------------------------
+SYSTEM_PROMPT = """You are an expert technical support agent for AcmeCorp.
+
+ROLE
+- You answer questions about AcmeCorp's products: AcmePay, AcmeMail, AcmeDrive.
+- You are concise, calm, and never invent facts. If you do not know, you say so.
+- You always reply in the same language the user wrote in.
+
+OUTPUT FORMAT
+- Answer in 1 short paragraph followed by a numbered step list when applicable.
+- Cite product docs with [DOC: <slug>] when you reference one.
+- End with a one-line offer to escalate ("Want me to open a ticket for you?").
+
+ESCALATION RULES
+- Billing disputes over $500 -> escalate to billing@acme.example
+- Suspected security incidents -> escalate to security@acme.example IMMEDIATELY
+- Anything legal -> refuse to answer, route to legal@acme.example
+
+PRODUCT KNOWLEDGE
+[ ... ~5,000 tokens of canonical product docs, FAQs, troubleshooting trees,
+      worked examples, refund policy, SLA tiers, and tone guidelines ... ]
 """
 
-response = client.messages.create(
-    model="claude-sonnet-4-6",
-    max_tokens=1024,
-    system=[
-        {
-            "type": "text",
-            "text": LARGE_SYSTEM_PROMPT,
-            "cache_control": {"type": "ephemeral"}   # 👈 cache this block
-        }
-    ],
-    messages=[{"role": "user", "content": "How do I reset my password?"}]
-)
+# Tool definitions are also stable across calls, so they sit in front of the
+# cached system prompt and become part of the same cached prefix.
+TOOLS = [
+    {
+        "name": "lookup_order",
+        "description": "Fetch an order by ID from the AcmeCorp order DB.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"order_id": {"type": "string"}},
+            "required": ["order_id"],
+        },
+    },
+    {
+        "name": "open_ticket",
+        "description": "Create a support ticket and return its URL.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "subject":  {"type": "string"},
+                "severity": {"type": "string", "enum": ["low", "medium", "high"]},
+                "summary":  {"type": "string"},
+            },
+            "required": ["subject", "severity", "summary"],
+        },
+    },
+]
 
-print("Tokens written:", response.usage.cache_creation_input_tokens)
-print("Tokens read   :", response.usage.cache_read_input_tokens)`}</div>
+
+def ask_support(user_message: str, conversation: Optional[list] = None) -> str:
+    """Send one user turn through the cached system prompt + tools.
+
+    The first call in a 5-minute window pays a small write premium (1.25x base).
+    Every subsequent call within that window reads the cache at 0.1x base — a
+    ~90% discount on the cached portion of the prompt.
+    """
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1024,
+        system=[
+            {
+                "type": "text",
+                "text": SYSTEM_PROMPT,
+                "cache_control": {"type": "ephemeral"},   # 👈 the one line that matters
+            }
+        ],
+        tools=TOOLS,                     # tools auto-cache when system is cached
+        messages=(conversation or []) + [
+            {"role": "user", "content": user_message}
+        ],
+    )
+
+    # ALWAYS log cache stats. If you can't see it, you can't optimize it.
+    u = response.usage
+    log.info(
+        "cache write=%-7s read=%-7s fresh=%-7s | total_in=%s out=%s",
+        u.cache_creation_input_tokens,
+        u.cache_read_input_tokens,
+        u.input_tokens,
+        u.cache_creation_input_tokens + u.cache_read_input_tokens + u.input_tokens,
+        u.output_tokens,
+    )
+
+    return response.content[0].text
+
+
+if __name__ == "__main__":
+    # First call: writes the cache (slightly more expensive than uncached).
+    print(ask_support("How do I reset my AcmePay password?"))
+
+    # Second call within 5 minutes: HUGE discount on the system prompt + tools.
+    # Watch the log line — cache_read_input_tokens should be the bulk of input.
+    print(ask_support("My refund hasn't shown up after 14 days, what do I do?"))`}</div>
 
           <div className="section-divider" />
 
@@ -948,41 +1035,132 @@ print("Tokens read   :", response.usage.cache_read_input_tokens)`}</div>
             Most beginners learn the API as a sync request-response thing — call, wait two seconds, show answer. That works for chat. It's wasteful for everything else: nightly summarization jobs, evaluation harnesses, document classification pipelines, content generation. <strong>If the user isn't watching the screen, you're paying real-time prices for no reason.</strong> The Message Batches API gives 50% off both input and output tokens in exchange for accepting up to 24 hours of latency.
           </div>
 
-          <h3 className="sub-heading">Submit, poll, download</h3>
-          <div className="code-block">{`from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
+          <h3 className="sub-heading">Submit, poll, download — a complete walkthrough</h3>
+          <div className="code-block">{`import time
+import logging
+import anthropic
+from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 from anthropic.types.messages.batch_create_params import Request
 
-# 1. Submit up to 100,000 requests in one batch
-batch = client.messages.batches.create(
-    requests=[
-        Request(
-            custom_id="ticket-001",
-            params=MessageCreateParamsNonStreaming(
-                model="claude-sonnet-4-6",
-                max_tokens=512,
-                messages=[{"role": "user",
-                           "content": "Classify: 'Cannot login, password reset broken'"}]
-            )
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+log = logging.getLogger("acme.batch")
+
+client = anthropic.Anthropic()
+
+# Stable instructions — same across every ticket in the batch, perfect to cache.
+CLASSIFY_PROMPT = """You are a support ticket classifier for AcmeCorp.
+
+CATEGORIES (pick exactly one):
+- billing      : invoices, refunds, payment failures
+- auth         : login, MFA, password reset, SSO
+- bug          : product feature broken, error message, crash
+- feature      : feature request, "how do I...?" without a bug
+- abuse        : suspected fraud or policy violation
+
+SEVERITY (pick exactly one):
+- low          : informational, no business impact
+- medium       : single-user blocked
+- high         : multi-user outage or data risk
+
+OUTPUT FORMAT — STRICT JSON, no commentary:
+{"category": "...", "severity": "...", "team": "...", "summary": "<= 20 words"}
+
+[ ... ~3,500 more tokens of category disambiguation rules and edge cases ... ]
+"""
+
+
+# ---------------------------------------------------------------------------
+# 1. BUILD THE BATCH. Each request carries its own custom_id so you can match
+#    the response back to the source record (DB row, ticket number, hash, etc).
+# ---------------------------------------------------------------------------
+def build_request(ticket: dict) -> Request:
+    return Request(
+        custom_id=ticket["id"],
+        params=MessageCreateParamsNonStreaming(
+            model="claude-sonnet-4-6",
+            max_tokens=256,
+            system=[{
+                "type": "text",
+                "text": CLASSIFY_PROMPT,
+                "cache_control": {"type": "ephemeral"},   # caching INSIDE batch
+            }],
+            messages=[{"role": "user", "content": ticket["text"]}],
         ),
-        # ... thousands more, each with its own custom_id ...
-    ]
-)
+    )
 
-# 2. Poll until done (or use webhooks in production)
-while True:
-    batch = client.messages.batches.retrieve(batch.id)
-    if batch.processing_status == "ended":
-        break
-    time.sleep(60)
 
-# 3. Stream results — match outputs to source records via custom_id
-for result in client.messages.batches.results(batch.id):
-    if result.result.type == "succeeded":
-        save_to_database(result.custom_id, result.result.message)
-    elif result.result.type == "errored":
-        log_error(result.custom_id, result.result.error)
-    elif result.result.type == "expired":
-        retry_in_next_batch(result.custom_id)`}</div>
+def submit_batch(tickets: list[dict]) -> str:
+    """Submit a batch and return its ID. Cap at 100,000 requests / 256MB."""
+    if len(tickets) > 100_000:
+        raise ValueError("split this into multiple batches")
+    batch = client.messages.batches.create(
+        requests=[build_request(t) for t in tickets]
+    )
+    log.info("submitted batch %s with %s requests", batch.id, len(tickets))
+    return batch.id
+
+
+# ---------------------------------------------------------------------------
+# 2. POLL until the batch ends. In production you'd use webhooks instead — but
+#    polling is fine for one-off jobs and exploratory work.
+# ---------------------------------------------------------------------------
+def wait_for_batch(batch_id: str, poll_seconds: int = 60, timeout_hours: int = 24) -> str:
+    deadline = time.time() + (timeout_hours * 3600)
+    while time.time() < deadline:
+        batch = client.messages.batches.retrieve(batch_id)
+        counts = batch.request_counts
+        log.info(
+            "batch %s status=%s succeeded=%s errored=%s expired=%s processing=%s",
+            batch_id, batch.processing_status,
+            counts.succeeded, counts.errored, counts.expired, counts.processing,
+        )
+        if batch.processing_status == "ended":
+            return batch.processing_status
+        time.sleep(poll_seconds)
+    raise TimeoutError(f"batch {batch_id} did not finish within {timeout_hours} hours")
+
+
+# ---------------------------------------------------------------------------
+# 3. STREAM RESULTS. Batches don't fail — INDIVIDUAL REQUESTS do. Always handle
+#    every result.type explicitly. Plan for partial success.
+# ---------------------------------------------------------------------------
+def consume_results(batch_id: str) -> dict:
+    summary = {"succeeded": 0, "errored": 0, "canceled": 0, "expired": 0}
+
+    for result in client.messages.batches.results(batch_id):
+        rtype = result.result.type
+        summary[rtype] = summary.get(rtype, 0) + 1
+
+        if rtype == "succeeded":
+            text = result.result.message.content[0].text
+            save_classification(result.custom_id, text)
+
+        elif rtype == "errored":
+            err = result.result.error
+            log.error("ticket=%s errored: %s %s", result.custom_id, err.type, err.message)
+            # 4xx on YOUR input -> log and move on
+            # 5xx from API     -> queue for retry in next batch
+
+        elif rtype == "expired":
+            log.warning("ticket=%s expired (24h timeout) — requeue", result.custom_id)
+            requeue_for_next_batch(result.custom_id)
+
+        elif rtype == "canceled":
+            log.info("ticket=%s canceled", result.custom_id)
+
+    log.info("batch %s consumed: %s", batch_id, summary)
+    return summary
+
+
+# ---------------------------------------------------------------------------
+# 4. PUT IT TOGETHER. Submit at ~02:00, results land before the morning standup.
+# ---------------------------------------------------------------------------
+if __name__ == "__main__":
+    tickets = load_overnight_tickets()       # your DB query / Kafka consumer
+    bid = submit_batch(tickets)
+    wait_for_batch(bid)
+    summary = consume_results(bid)
+    log.info("done: %s", summary)`}</div>
 
           <div className="protip-box">
             <div className="protip-label">
@@ -1274,38 +1452,165 @@ for result in client.messages.batches.results(batch.id):
             Two implementation approaches. Most teams should start with static; dynamic only when you genuinely can't tell at design time how hard a request will be.
           </div>
 
-          <div className="code-block">{`# STATIC routing — decide upfront, by task type. Right starting point.
+          <div className="code-block">{`# =============================================================================
+# STATIC ROUTING — the decision is hardcoded by task type at design time.
+# This is where every team should start. No classifier, no surprises.
+# =============================================================================
+import anthropic
+from dataclasses import dataclass
+from enum import Enum
+
+client = anthropic.Anthropic()
+
+
+class Tier(str, Enum):
+    LIGHT    = "claude-haiku-4-5"
+    STANDARD = "claude-sonnet-4-6"
+    HEAVY    = "claude-opus-4-7"
+
+
+@dataclass
+class TierConfig:
+    model: str
+    max_tokens: int           # tight per-tier output caps to control cost
+    fallback: str | None      # next tier up, used on degenerate output
+
+
+TIERS: dict[Tier, TierConfig] = {
+    Tier.LIGHT:    TierConfig(Tier.LIGHT.value,     max_tokens=512,  fallback=Tier.STANDARD.value),
+    Tier.STANDARD: TierConfig(Tier.STANDARD.value,  max_tokens=2048, fallback=Tier.HEAVY.value),
+    Tier.HEAVY:    TierConfig(Tier.HEAVY.value,     max_tokens=4096, fallback=None),
+}
+
+
+def _call(tier: Tier, prompt: str, *, system: str | None = None) -> str:
+    cfg = TIERS[tier]
+    response = client.messages.create(
+        model=cfg.model,
+        max_tokens=cfg.max_tokens,
+        system=system or "",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text
+
+
+# ----------------------------- TASK FUNCTIONS --------------------------------
+# Different task types, different tiers. The decision is OBVIOUS in code.
+# A reviewer reading classify_ticket() can immediately see why Haiku is fine.
 
 def classify_ticket(text: str) -> str:
-    """Simple classification — Haiku is fine."""
-    return _call(model="claude-haiku-4-5", prompt=text)
+    """Bounded classification with 5 known categories — Haiku handles this."""
+    return _call(Tier.LIGHT, text, system="Classify the ticket into: billing | auth | bug | feature | abuse.")
+
+
+def extract_invoice_fields(invoice_text: str) -> str:
+    """Structured extraction with a fixed schema — also Haiku-fine."""
+    return _call(Tier.LIGHT, invoice_text, system="Extract: vendor, total, currency, due_date as JSON.")
+
 
 def generate_code_review(diff: str) -> str:
-    """Code reasoning — Sonnet is the right tier."""
-    return _call(model="claude-sonnet-4-6", prompt=diff)
+    """Multi-step code reasoning — Sonnet is the right floor for quality."""
+    return _call(Tier.STANDARD, diff, system="You are a senior engineer. Review correctness, security, perf.")
 
-def architect_solution(requirements: str) -> str:
-    """Multi-step reasoning — Opus earns its price here."""
-    return _call(model="claude-opus-4-7", prompt=requirements)`}</div>
 
-          <div className="code-block" style={{ marginTop: 12 }}>{`# DYNAMIC routing — Haiku classifier picks the tier at runtime.
+def synthesize_research_brief(documents: list[str]) -> str:
+    """Cross-document synthesis — Sonnet handles the bulk of production work."""
+    joined = "\\n\\n---\\n\\n".join(documents)
+    return _call(Tier.STANDARD, joined, system="Produce a 1-page brief with citations to source IDs.")
 
-def route_request(user_prompt: str) -> str:
+
+def architect_distributed_system(requirements: str) -> str:
+    """Novel design with serious tradeoff reasoning — Opus earns its price."""
+    return _call(Tier.HEAVY, requirements, system="You are a principal architect. Design and justify tradeoffs.")
+
+
+def negotiate_complex_contract(context: str) -> str:
+    """Adversarial multi-party reasoning — Opus territory."""
+    return _call(Tier.HEAVY, context, system="You are senior counsel. Identify risks, leverage, and counter-positions.")`}</div>
+
+          <div className="code-block" style={{ marginTop: 12 }}>{`# =============================================================================
+# DYNAMIC ROUTING — a fast classifier picks the tier at request time.
+# Use this when you genuinely cannot tell at design time how hard a request is
+# (general-purpose chatbots, mixed-difficulty queues, ad-hoc developer tools).
+# =============================================================================
+import logging
+
+log = logging.getLogger("acme.router")
+
+ROUTING_SYSTEM = """You classify the COMPLEXITY of a user request. Output one
+word, no commentary, no punctuation:
+
+SIMPLE    - factual lookup, classification, extraction, format conversion
+STANDARD  - code, multi-step reasoning, document synthesis, planning
+COMPLEX   - novel problems, deep architecture, multi-agent coordination,
+            high-stakes decisions, adversarial reasoning
+
+If unsure, output STANDARD."""
+
+
+# Per-tier metrics so you can ALERT when the router misbehaves. A bug in the
+# classifier sending 100% of traffic to Opus has bankrupted real teams. Don't
+# skip the observability.
+_tier_counter = {"SIMPLE": 0, "STANDARD": 0, "COMPLEX": 0, "FALLBACK": 0}
+
+
+def classify_complexity(user_prompt: str) -> Tier:
+    """Use Haiku to pick the tier. Costs ~10 tokens out + a few hundred in."""
     decision = client.messages.create(
-        model="claude-haiku-4-5",
-        max_tokens=10,
-        system="""Output exactly one word: SIMPLE, STANDARD, or COMPLEX.""",
-        messages=[{"role": "user", "content": user_prompt}]
+        model=Tier.LIGHT.value,
+        max_tokens=4,                           # tight cap — we want one word
+        system=ROUTING_SYSTEM,
+        messages=[{"role": "user", "content": user_prompt}],
     )
-    tier = decision.content[0].text.strip().upper()
+    raw = decision.content[0].text.strip().upper()
 
-    model_map = {
-        "SIMPLE":   "claude-haiku-4-5",
-        "STANDARD": "claude-sonnet-4-6",
-        "COMPLEX":  "claude-opus-4-7",
+    table = {
+        "SIMPLE":   Tier.LIGHT,
+        "STANDARD": Tier.STANDARD,
+        "COMPLEX":  Tier.HEAVY,
     }
-    chosen = model_map.get(tier, "claude-sonnet-4-6")  # safe default
-    return _call(model=chosen, prompt=user_prompt)`}</div>
+    if raw in table:
+        _tier_counter[raw] += 1
+        return table[raw]
+
+    # Classifier hallucinated something unexpected. Don't crash, don't escalate
+    # to Opus by accident — fall back to the safe middle tier.
+    _tier_counter["FALLBACK"] += 1
+    log.warning("router returned unexpected token %r — falling back to Sonnet", raw)
+    return Tier.STANDARD
+
+
+def route_request(user_prompt: str, *, kill_switch: Tier | None = None) -> str:
+    """Dynamic-route a single request. kill_switch pins everything to one tier
+    if the router is misbehaving in production (set via feature flag)."""
+    tier = kill_switch or classify_complexity(user_prompt)
+    log.info("routed to %s: %r", tier.name, user_prompt[:80])
+
+    cfg = TIERS[tier]
+    response = client.messages.create(
+        model=cfg.model,
+        max_tokens=cfg.max_tokens,
+        messages=[{"role": "user", "content": user_prompt}],
+    )
+    text = response.content[0].text
+
+    # Confidence check on the LIGHT tier — Haiku will gracefully fail on the
+    # 5-10% of inputs it can't actually handle. Detect degenerate output and
+    # retry one tier up. The cost bump is tiny vs. the quality save.
+    if tier == Tier.LIGHT and _looks_degenerate(text):
+        log.info("Haiku output looked degenerate, retrying on Sonnet")
+        return route_request(user_prompt, kill_switch=Tier.STANDARD)
+
+    return text
+
+
+def _looks_degenerate(text: str) -> bool:
+    """Cheap heuristic: too short, hedging, or refusing without reason."""
+    if len(text) < 20:
+        return True
+    hedges = ["i'm not sure", "i cannot", "as an ai", "i don't have"]
+    lowered = text.lower()
+    return any(h in lowered for h in hedges)`}</div>
 
           <div className="section-divider" />
 
@@ -1435,54 +1740,163 @@ def route_request(user_prompt: str) -> str:
             Production-shaped example: a service that classifies incoming support emails, extracts structured data, and drafts replies. Each step is routed to the right tier, every system prompt is cached, and the whole job is submitted as a batch.
           </div>
 
-          <div className="code-block">{`def build_classify_request(email_id: str, email: str) -> Request:
-    """Step 1: simple classification → Haiku, cached prompt."""
+          <div className="code-block">{`# =============================================================================
+# THE CANONICAL PRODUCTION SHAPE: routing + caching + batch in a single pipeline.
+# Workload: incoming customer support emails — classify, extract, draft a reply.
+# Each stage picks the right tier, caches its stable prompt, and submits async.
+# =============================================================================
+import logging
+import anthropic
+from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
+from anthropic.types.messages.batch_create_params import Request
+
+log = logging.getLogger("acme.email_pipeline")
+client = anthropic.Anthropic()
+
+# ---------------------------------------------------------------------------
+# Stable instruction blocks — different prompts per task, all cacheable. The
+# byte-for-byte stability of these strings is what makes caching work; do NOT
+# interpolate timestamps, request IDs, or per-email values into them.
+# ---------------------------------------------------------------------------
+CLASSIFY_PROMPT = """You are a support email classifier for AcmeCorp.
+Output strict JSON: {"category": "...", "severity": "...", "team": "..."}.
+[ ... ~4,000 tokens of categories, examples, edge cases ... ]"""
+
+EXTRACT_PROMPT = """Extract structured data from this support email.
+Output strict JSON matching the schema below — no extra fields, no commentary.
+SCHEMA: {customer_email, order_id?, product?, requested_action, deadline?}
+[ ... ~3,000 tokens of schema rules, parsing examples, ambiguity tiebreakers ... ]"""
+
+DRAFT_REPLY_PROMPT = """Draft a professional reply to this customer email.
+TONE: warm, concrete, never apologetic without cause. Cite product docs by slug.
+ESCALATION: any legal / safety / billing >$500 -> mark as 'NEEDS HUMAN' and stop.
+[ ... ~5,000 tokens of brand voice, escalation rules, refund policies, examples ... ]"""
+
+
+# ---------------------------------------------------------------------------
+# STEP 1 — CLASSIFY. Bounded categorical task. Haiku is the right floor.
+# Cached prompt + batch + Haiku = roughly 5% of standard sync-Opus pricing.
+# ---------------------------------------------------------------------------
+def build_classify_request(email_id: str, email_text: str) -> Request:
     return Request(
         custom_id=f"classify-{email_id}",
         params=MessageCreateParamsNonStreaming(
-            model="claude-haiku-4-5",                      # routing: light tier
-            max_tokens=128,
-            system=[{"type": "text", "text": CLASSIFY_PROMPT,
-                     "cache_control": {"type": "ephemeral"}}],   # caching
-            messages=[{"role": "user", "content": email}]
-        )
+            model="claude-haiku-4-5",                          # routing: LIGHT
+            max_tokens=128,                                    # tight cap on cheap tier
+            system=[{
+                "type": "text",
+                "text": CLASSIFY_PROMPT,
+                "cache_control": {"type": "ephemeral"},        # caching
+            }],
+            messages=[{"role": "user", "content": email_text}],
+        ),
     )
 
-def build_extract_request(email_id: str, email: str) -> Request:
-    """Step 2: structured extraction → Sonnet, cached."""
+
+# ---------------------------------------------------------------------------
+# STEP 2 — EXTRACT. Structured schema with disambiguation rules. Sonnet is the
+# safer default for any extraction beyond simple key-value pairs.
+# ---------------------------------------------------------------------------
+def build_extract_request(email_id: str, email_text: str) -> Request:
     return Request(
         custom_id=f"extract-{email_id}",
         params=MessageCreateParamsNonStreaming(
-            model="claude-sonnet-4-6",                     # routing: standard tier
+            model="claude-sonnet-4-6",                         # routing: STANDARD
             max_tokens=512,
-            system=[{"type": "text", "text": EXTRACT_PROMPT,
-                     "cache_control": {"type": "ephemeral"}}],
-            messages=[{"role": "user", "content": email}]
-        )
+            system=[{
+                "type": "text",
+                "text": EXTRACT_PROMPT,
+                "cache_control": {"type": "ephemeral"},
+            }],
+            messages=[{"role": "user", "content": email_text}],
+        ),
     )
 
-def build_draft_request(email_id: str, email: str, urgency: str) -> Request:
-    """Step 3: reply draft → Sonnet routine, Opus high-urgency."""
-    model = "claude-opus-4-7" if urgency == "high" else "claude-sonnet-4-6"
+
+# ---------------------------------------------------------------------------
+# STEP 3 — DRAFT REPLY. Dynamic routing within the pipeline: routine drafts
+# stay on Sonnet, high-urgency or escalated drafts get Opus. Output cap is
+# tighter on Sonnet because long outputs there are usually a sign of drift.
+# ---------------------------------------------------------------------------
+def build_draft_request(email_id: str, email_text: str, urgency: str) -> Request:
+    if urgency == "high":
+        model = "claude-opus-4-7"                              # routing: HEAVY
+        max_tokens = 1500
+    else:
+        model = "claude-sonnet-4-6"                            # routing: STANDARD
+        max_tokens = 800
     return Request(
         custom_id=f"draft-{email_id}",
         params=MessageCreateParamsNonStreaming(
-            model=model,                                   # routing: dynamic
-            max_tokens=1024,
-            system=[{"type": "text", "text": DRAFT_REPLY_PROMPT,
-                     "cache_control": {"type": "ephemeral"}}],
-            messages=[{"role": "user", "content": email}]
-        )
+            model=model,
+            max_tokens=max_tokens,
+            system=[{
+                "type": "text",
+                "text": DRAFT_REPLY_PROMPT,
+                "cache_control": {"type": "ephemeral"},
+            }],
+            messages=[{"role": "user", "content": email_text}],
+        ),
     )
 
+
+# ---------------------------------------------------------------------------
+# SUBMIT a batch with all three steps interleaved. Anthropic processes them in
+# parallel, billing is 50% off the per-tier rate, and the cached prompts cost
+# 10% of that for every cache-hit request. Most batches finish in under an hour.
+# ---------------------------------------------------------------------------
 def process_email_batch(emails: list[dict]) -> str:
-    requests = []
+    if len(emails) > 33_000:
+        # 3 requests per email * 33,000 emails = ~99,000 requests, under the
+        # 100,000 cap. Beyond this, split into multiple batches.
+        raise ValueError("split into multiple batches")
+
+    requests: list[Request] = []
     for e in emails:
         requests.append(build_classify_request(e["id"], e["text"]))
         requests.append(build_extract_request(e["id"], e["text"]))
         requests.append(build_draft_request(e["id"], e["text"], e["urgency"]))
-    batch = client.messages.batches.create(requests=requests)   # batch
-    return batch.id`}</div>
+
+    batch = client.messages.batches.create(requests=requests)
+    log.info(
+        "submitted batch %s with %s requests across 3 stages for %s emails",
+        batch.id, len(requests), len(emails),
+    )
+    return batch.id
+
+
+# ---------------------------------------------------------------------------
+# CONSUME results. custom_id encodes BOTH the stage and the email_id so we can
+# re-assemble the per-email record from the flat result stream.
+# ---------------------------------------------------------------------------
+def collect_results(batch_id: str) -> dict[str, dict]:
+    by_email: dict[str, dict] = {}
+
+    for result in client.messages.batches.results(batch_id):
+        if result.result.type != "succeeded":
+            log.warning("dropping %s -> %s", result.custom_id, result.result.type)
+            continue
+
+        stage, email_id = result.custom_id.split("-", 1)
+        text = result.result.message.content[0].text
+        by_email.setdefault(email_id, {})[stage] = text
+
+    log.info("collected %s emails from batch %s", len(by_email), batch_id)
+    return by_email
+
+
+# ---------------------------------------------------------------------------
+# PUT IT TOGETHER. Run nightly at 02:00; results land before the morning shift.
+# Cost vs. naive (all-Opus, sync, no caching): ~5-7% — same outputs to the user.
+# ---------------------------------------------------------------------------
+if __name__ == "__main__":
+    emails = load_overnight_emails()              # your DB query / queue
+    batch_id = process_email_batch(emails)
+    wait_for_batch(batch_id)                      # poll or use webhooks
+    records = collect_results(batch_id)
+
+    for email_id, stages in records.items():
+        write_to_crm(email_id, stages)            # category + extract + draft`}</div>
 
           <div className="section-divider" />
 
