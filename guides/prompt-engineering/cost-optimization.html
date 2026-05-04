@@ -1057,6 +1057,37 @@ for result in client.messages.batches.results(batch.id):
             </div>
           </div>
 
+          <div className="section-divider" />
+
+          <h3 className="sub-heading">The five gotchas nobody warns you about</h3>
+          <div className="gotcha-list">
+            <div className="gotcha-card">
+              <span className="gotcha-num">1</span>
+              <span className="gotcha-title">The 24-hour deadline is a deadline</span>
+              <div className="gotcha-body">Anthropic guarantees results within 24 hours. Most batches finish in under an hour — but you cannot count on it. Unfinished requests after 24 hours are marked <code className="inline">expired</code>; you don't pay for them, but you also don't get results. <strong>Fix:</strong> submit well before any downstream deadline, treat <code className="inline">expired</code> as a real outcome to handle in code, and split truly large jobs so a partial failure doesn't lose 24 hours of work.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">2</span>
+              <span className="gotcha-title">Batches don't fail — individual requests do</span>
+              <div className="gotcha-body">A batch returns a <em>mix</em> of outcomes: <code className="inline">succeeded</code>, <code className="inline">errored</code>, <code className="inline">canceled</code>, <code className="inline">expired</code>. Beginners often write code that treats the batch as atomic, then crash when one of 50,000 requests had malformed input. <strong>Always iterate over results and handle each <code className="inline">result.type</code> explicitly.</strong> Plan for partial success.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">3</span>
+              <span className="gotcha-title">The 100,000-request and 256MB limits</span>
+              <div className="gotcha-body">Each batch is capped at <strong>100,000 requests OR 256MB of payload, whichever comes first</strong>. For most workloads request count is binding; for long prompts (large documents, big retrieved contexts) you'll hit the byte limit first. <strong>Fix:</strong> split into multiple batches and submit them in parallel — Anthropic allows several batches in flight simultaneously.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">4</span>
+              <span className="gotcha-title">Polling vs webhooks</span>
+              <div className="gotcha-body">The basic example polls every 60 seconds — fine for one-off jobs, wasteful for production pipelines. Anthropic supports <strong>webhooks</strong>: register an endpoint and get notified when the batch ends instead of polling. For anything running on a schedule, webhooks are the right pattern. For exploratory or one-off jobs, polling is simpler.</div>
+            </div>
+            <div className="gotcha-card">
+              <span className="gotcha-num">5</span>
+              <span className="gotcha-title">The 300K-token output trick most people miss</span>
+              <div className="gotcha-body">By default Claude's sync API caps outputs at 64K–128K tokens. The Batch API supports outputs up to <strong>300,000 tokens</strong> on Opus 4.7, Opus 4.6, and Sonnet 4.6 with the <code className="inline">output-300k-2026-03-24</code> beta header. A single 300K-token generation can take over an hour — which is why it's batch-only. Standard batch pricing (50% off) still applies. For long-form generation, batch isn't just cheaper — it's strictly more capable than sync.</div>
+            </div>
+          </div>
+
           <div className="insight-box">
             <div className="insight-label">
               <I.Bulb color="#2ecc71" />
